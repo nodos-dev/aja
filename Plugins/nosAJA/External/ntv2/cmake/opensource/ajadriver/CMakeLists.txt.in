@@ -1,0 +1,14 @@
+if (AJA_BUILD_DRIVER AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_custom_target(driver_linux ALL
+					  COMMENT "Building Linux driver"
+					  COMMAND make -C linux
+					  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+					  BYPRODUCTS ${AJA_NTV2_ROOT}/bin/ajantv2.ko
+								 ${AJA_NTV2_ROOT}/bin/load_ajantv2
+								 ${AJA_NTV2_ROOT}/bin/unload_ajantv2)
+
+	set(BIN_PATH "${AJA_NTV2_ROOT}/bin")
+	set(LIN_LOAD_DRIVER_MSG
+		"         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
+	message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
+endif()

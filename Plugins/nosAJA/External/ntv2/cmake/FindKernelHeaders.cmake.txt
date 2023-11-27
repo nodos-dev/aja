@@ -1,0 +1,23 @@
+# Find the kernel release
+execute_process(
+        COMMAND uname -r
+        OUTPUT_VARIABLE KERNEL_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+set(KERNEL_MODULES_DIR "/lib/modules/${KERNEL_VERSION}/build")
+
+# Find the headers
+find_path(KERNEL_MAKEFILE_PATH
+        Makefile
+        PATHS ${KERNEL_MODULES_DIR})
+
+if (KERNEL_MAKEFILE_PATH)
+    set(KERNEL_MAKEFILE_PATH
+        ${KERNEL_MAKEFILE_PATH}/Makefile)
+    set(KERNEL_MODULES_MAKEFILE_FOUND 1 CACHE STRING "Set to 1 if kernel modules Makefile was found")
+endif()
+
+mark_as_advanced(KERNEL_MODULES_MAKEFILE_FOUND)
+
+message(STATUS "Kernel release: ${KERNEL_VERSION}")
+message(STATUS "Kernel Makefile: ${KERNEL_MAKEFILE_PATH}")
