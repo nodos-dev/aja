@@ -16,10 +16,10 @@ void yuv8(const ivec2 dst, const ivec2 src, const int YOffset)
 
 void main_yuv8()
 {
-    const int   OutInterlaced = int((InterlacedFlags & MZ_AJA_OUT_OUTPUT_INTERLACED_MASK) != 0);
-    const int   InProgressive = int((InterlacedFlags & MZ_AJA_OUT_INPUT_INTERLACED_MASK) == 0);
-    const int   OutYOffset    = int((InterlacedFlags & MZ_AJA_OUT_OUTPUT_ODD_FIELD_MASK) != 0);
-    const int   InOdd         = int((InterlacedFlags & MZ_AJA_OUT_INPUT_ODD_FIELD_MASK) != 0);
+    const int   OutInterlaced = int((InterlacedFlags & NOS_AJA_OUT_OUTPUT_INTERLACED_MASK) != 0);
+    const int   InProgressive = int((InterlacedFlags & NOS_AJA_OUT_INPUT_INTERLACED_MASK) == 0);
+    const int   OutYOffset    = int((InterlacedFlags & NOS_AJA_OUT_OUTPUT_ODD_FIELD_MASK) != 0);
+    const int   InOdd         = int((InterlacedFlags & NOS_AJA_OUT_INPUT_ODD_FIELD_MASK) != 0);
     const ivec2 D = ivec2(gl_NumWorkGroups * gl_WorkGroupSize).xy;
     const ivec2 Q = imageSize(Output);
     const ivec2 N          = Q / D;
@@ -61,10 +61,10 @@ void v210(const ivec2 dst, const ivec2 src, const int YOffset)
 
 void main_v210()
 {
-    const int   OutInterlaced = int((InterlacedFlags & MZ_AJA_OUT_OUTPUT_INTERLACED_MASK) != 0);
-    const int   InProgressive = int((InterlacedFlags & MZ_AJA_OUT_INPUT_INTERLACED_MASK) == 0);
-    const int   OutYOffset    = int((InterlacedFlags & MZ_AJA_OUT_OUTPUT_ODD_FIELD_MASK) != 0);
-    const int   InOdd         = int((InterlacedFlags & MZ_AJA_OUT_INPUT_ODD_FIELD_MASK) != 0);
+    const int   OutInterlaced = int((InterlacedFlags & NOS_AJA_OUT_OUTPUT_INTERLACED_MASK) != 0);
+    const int   InProgressive = int((InterlacedFlags & NOS_AJA_OUT_INPUT_INTERLACED_MASK) == 0);
+    const int   OutYOffset    = int((InterlacedFlags & NOS_AJA_OUT_OUTPUT_ODD_FIELD_MASK) != 0);
+    const int   InOdd         = int((InterlacedFlags & NOS_AJA_OUT_INPUT_ODD_FIELD_MASK) != 0);
     const ivec2 N          = imageSize(Output) / ivec2(4, 1) /  ivec2(gl_NumWorkGroups * gl_WorkGroupSize).xy;
     const ivec2 LocalGroupCoord = ivec2(gl_GlobalInvocationID.xy) * N;
     
@@ -81,6 +81,6 @@ void main_v210()
 
 void main()
 {
-    if((InterlacedFlags & MZ_AJA_OUT_COMP10_MASK) == 0) main_yuv8();
+    if((InterlacedFlags & NOS_AJA_OUT_COMP10_MASK) == 0) main_yuv8();
     else main_v210();
 }

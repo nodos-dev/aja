@@ -3,27 +3,27 @@
 #include "AJAClient.h"
 #include "glm/glm.hpp"
 #include "Ring.h"
-#include <mzUtil/Thread.h>
+#include <nosUtil/Thread.h>
 
-namespace mz
+namespace nos
 {
 
 using Clock = std::chrono::high_resolution_clock;
 using Milli = std::chrono::duration<double, std::milli>;
 using Micro = std::chrono::duration<double, std::micro>;
 
-inline mzTextureFieldType Flipped(mzTextureFieldType field)
+inline nosTextureFieldType Flipped(nosTextureFieldType field)
 {
-	return field == MZ_TEXTURE_FIELD_TYPE_PROGRESSIVE || field == MZ_TEXTURE_FIELD_TYPE_UNKNOWN ? field 
-		: (field == MZ_TEXTURE_FIELD_TYPE_EVEN ? MZ_TEXTURE_FIELD_TYPE_ODD : MZ_TEXTURE_FIELD_TYPE_EVEN);
+	return field == NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE || field == NOS_TEXTURE_FIELD_TYPE_UNKNOWN ? field 
+		: (field == NOS_TEXTURE_FIELD_TYPE_EVEN ? NOS_TEXTURE_FIELD_TYPE_ODD : NOS_TEXTURE_FIELD_TYPE_EVEN);
 }
 
 struct CopyThread
 {
-	mz::Name PinName;
+	nos::Name PinName;
 	u32 ConnectedPinCount = 0;
     std::atomic_bool Run = true;
-    mz::fb::ShowAs PinKind;
+    nos::fb::ShowAs PinKind;
 
 	// Ring
     rc<GPURing> GpuRing;
@@ -58,7 +58,7 @@ struct CopyThread
 
 	struct Parameters
 	{
-		mzTextureFieldType FieldType = MZ_TEXTURE_FIELD_TYPE_PROGRESSIVE;
+		nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 		u32 FrameNumber;
 		Clock::time_point T0;
 		Clock::time_point T1;
@@ -70,12 +70,12 @@ struct CopyThread
 		rc<CPURing::Resource> SSBO;
 		std::string Name;
 		uint32_t Debug = 0;
-		mzVec2u DispatchSize;
+		nosVec2u DispatchSize;
 		std::atomic_bool* TransferInProgress = 0;
 		uint64_t SubmissionEventHandle;
-		mz::fb::vec2u DeltaSeconds;
+		nos::fb::vec2u DeltaSeconds;
 
-		bool Interlaced() const { return !(FieldType == MZ_TEXTURE_FIELD_TYPE_PROGRESSIVE || FieldType == MZ_TEXTURE_FIELD_TYPE_UNKNOWN); }
+		bool Interlaced() const { return !(FieldType == NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE || FieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN); }
 	};
 
 	struct ConversionThread : ConsumerThread<Parameters>
@@ -97,24 +97,24 @@ struct CopyThread
 	};
 
 	ru<ConversionThread> Worker;
-	mzTextureFieldType FieldType = MZ_TEXTURE_FIELD_TYPE_UNKNOWN;
+	nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 
-    CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, mz::fb::ShowAs kind, NTV2Channel channel, 
+    CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 
                 NTV2VideoFormat initalFmt, 
                 AJADevice::Mode mode,
                 enum class Colorspace colorspace, enum class GammaCurve curve, bool narrowRange, const fb::Texture* tex);
 
-    mz::Name const& Name() const;
-	mzVec2u GetSuitableDispatchSize() const;
-	mzVec2u Extent() const;
+    nos::Name const& Name() const;
+	nosVec2u GetSuitableDispatchSize() const;
+	nosVec2u Extent() const;
     bool IsInput() const;
     void AJAInputProc();
     void AJAOutputProc();
     void CreateRings();
     void SendDeleteRequest();
-    void ChangePinResolution(mzVec2u res);
+    void ChangePinResolution(nosVec2u res);
     void InputUpdate(AJADevice::Mode &prevMode);
-	bool WaitForVBL(mzTextureFieldType writeField);
+	bool WaitForVBL(nosTextureFieldType writeField);
 	
 	void Refresh();
     bool IsQuad() const;
@@ -124,7 +124,7 @@ struct CopyThread
     void StartThread();
     void Orphan(bool, std::string const& msg = "");
     void Live(bool);
-    void PinUpdate(std::optional<mz::fb::TOrphanState>, Action live);
+    void PinUpdate(std::optional<nos::fb::TOrphanState>, Action live);
 
     void Stop();
 	void SetRingSize(u32 ringSize);
@@ -132,7 +132,7 @@ struct CopyThread
     void SetFrame(u32 doubleBufferIndex);
 	u32 GetFrameIndex(u32 doubleBufferIndex) const;
 
-	mz::fb::vec2u GetDeltaSeconds() const;
+	nos::fb::vec2u GetDeltaSeconds() const;
 
 	struct DMAInfo
 	{
@@ -142,7 +142,7 @@ struct CopyThread
 		u32 FrameIndex;
 	};
 
-	DMAInfo GetDMAInfo(mzResourceShareInfo& buffer, u32 doubleBufferIndex) const;
+	DMAInfo GetDMAInfo(nosResourceShareInfo& buffer, u32 doubleBufferIndex) const;
 
     ~CopyThread();
 
@@ -163,4 +163,4 @@ struct CopyThread
 	void SendRingStats();
 };
 
-} // namespace mz
+} // namespace nos

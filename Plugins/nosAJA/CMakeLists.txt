@@ -28,4 +28,4 @@ list(APPEND INCLUDE_FOLDERS ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/src/win
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/includes)
-add_folder_as_plugin_project("mzAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
+add_folder_as_plugin_project("nosAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")

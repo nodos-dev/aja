@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace mz
+namespace nos
 {
 
 template<typename T>
@@ -11,26 +11,26 @@ struct TRing
     
     struct Resource
     {
-        mzResourceShareInfo Res;
+        nosResourceShareInfo Res;
 
         Resource(T r) : Res{}
         {
-            if constexpr (std::is_same_v<T, mzBufferInfo>)
+            if constexpr (std::is_same_v<T, nosBufferInfo>)
             {
-                Res.Info.Type = MZ_RESOURCE_TYPE_BUFFER;
+                Res.Info.Type = NOS_RESOURCE_TYPE_BUFFER;
                 Res.Info.Buffer = r;
             }
             else
             {
-                Res.Info.Type = MZ_RESOURCE_TYPE_TEXTURE;
+                Res.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
                 Res.Info.Texture = r;
             }
-            mzEngine.Create(&Res);
+            nosEngine.Create(&Res);
         }
         
         ~Resource()
         {
-            mzEngine.Destroy(&Res);
+            nosEngine.Destroy(&Res);
         }
 
         std::atomic_uint32_t FrameNumber;
@@ -50,16 +50,16 @@ struct TRing
         Size = size;
     }
     
-    TRing(mzVec2u extent, u32 Size) 
-        requires(std::is_same_v<T, mzBufferInfo>)
+    TRing(nosVec2u extent, u32 Size) 
+        requires(std::is_same_v<T, nosBufferInfo>)
         : Extent(extent), Sample()
     {
         Sample.Size = Extent.x * Extent.y * 4;
         Resizex(Size);
     }
     
-    TRing(mzVec2u extent, u32 Size, mzFormat format = MZ_FORMAT_R16G16B16A16_UNORM)
-        requires(std::is_same_v<T, mzTextureInfo>)
+    TRing(nosVec2u extent, u32 Size, nosFormat format = NOS_FORMAT_R16G16B16A16_UNORM)
+        requires(std::is_same_v<T, nosTextureInfo>)
         : Extent(extent), Sample()
     {
         Sample.Width = Extent.x;
@@ -78,7 +78,7 @@ struct TRing
     std::vector<rc<Resource>> Glob;
 
     u32 Size = 0;
-    mzVec2u Extent;
+    nosVec2u Extent;
     std::atomic_bool Exit = false;
     std::atomic_bool ResetFrameCount = true;
 
@@ -214,7 +214,7 @@ struct TRing
     }
 };
 
-typedef TRing<mzBufferInfo> CPURing;
-typedef TRing<mzTextureInfo> GPURing;
+typedef TRing<nosBufferInfo> CPURing;
+typedef TRing<nosTextureInfo> GPURing;
 
-} // namespace mz
+} // namespace nos

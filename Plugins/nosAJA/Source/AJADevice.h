@@ -1,5 +1,5 @@
 /*
- * Copyright MediaZ AS. All Rights Reserved.
+ * Copyright Nodos AS. All Rights Reserved.
  */
 
 #pragma once

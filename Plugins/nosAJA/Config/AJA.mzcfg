@@ -13,7 +13,7 @@
     "custom_types" :[
       "AJA.fbs"
     ],
-    "binary_path": "../Binaries/mzAJA",
+    "binary_path": "../Binaries/nosAJA",
     "associated_nodes": [
         {
             "category": "Device",

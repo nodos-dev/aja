@@ -1,4 +1,4 @@
-// Copyright MediaZ AS. All Rights Reserved.
+// Copyright Nodos AS. All Rights Reserved.
 
 #include "AJAMain.h"
 #include "CopyThread.h"
@@ -9,29 +9,29 @@
 #include "../Shaders/YCbCr2RGB.comp.spv.dat"
 #include "../Shaders/YCbCr2RGB.frag.spv.dat"
 
-#include <MediaZ/PluginAPI.h>
+#include <Nodos/PluginAPI.h>
 
-using namespace mz;
+using namespace nos;
 
-MZ_INIT();
+NOS_INIT();
 
-namespace mz
+namespace nos
 {
 
-static mzBuffer Blob2Buf(std::vector<u8> const& v) 
+static nosBuffer Blob2Buf(std::vector<u8> const& v) 
 { 
     return { (void*)v.data(), v.size() }; 
 };
 
-static std::vector<std::pair<Name, std::tuple<mzShaderStage, const char*, std::vector<u8>>>> GShaders;
+static std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> GShaders;
 
 struct AJA
 {
-    static mzResult GetShaders(size_t* outCount, mzShaderInfo* outShaders)
+    static nosResult GetShaders(size_t* outCount, nosShaderInfo* outShaders)
     {
         *outCount = GShaders.size();
         if(!outShaders) 
-            return MZ_RESULT_SUCCESS;
+            return NOS_RESULT_SUCCESS;
 
         for (auto& [name, data] : GShaders)
         {
@@ -46,56 +46,56 @@ struct AJA
             };
         }
 
-        return MZ_RESULT_SUCCESS;
+        return NOS_RESULT_SUCCESS;
     };
 
-    static mzResult GetPasses(size_t* outCount, mzPassInfo* outMzPassInfos)
+    static nosResult GetPasses(size_t* outCount, nosPassInfo* outNosPassInfos)
     {
-        const std::vector<mzPassInfo> passes =
+        const std::vector<nosPassInfo> passes =
         {
-			{.Key = MZN_AJA_RGB2YCbCr_Compute_Pass, .Shader = MZN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
-			{.Key = MZN_AJA_YCbCr2RGB_Compute_Pass, .Shader = MZN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
-			{.Key = MZN_AJA_YCbCr2RGB_Pass, .Shader = MZN_AJA_YCbCr2RGB_Shader, .MultiSample = 1},
-			{.Key = MZN_AJA_RGB2YCbCr_Pass, .Shader = MZN_AJA_RGB2YCbCr_Shader, .MultiSample = 1}
+			{.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
+			{.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
+			{.Key = NSN_AJA_YCbCr2RGB_Pass, .Shader = NSN_AJA_YCbCr2RGB_Shader, .MultiSample = 1},
+			{.Key = NSN_AJA_RGB2YCbCr_Pass, .Shader = NSN_AJA_RGB2YCbCr_Shader, .MultiSample = 1}
         };
 
         *outCount = passes.size();
 
-        if (!outMzPassInfos)
-            return MZ_RESULT_SUCCESS;
+        if (!outNosPassInfos)
+            return NOS_RESULT_SUCCESS;
         for (auto& pass : passes)
         {
-            *outMzPassInfos++ = pass;
+            *outNosPassInfos++ = pass;
         }
 
-        return MZ_RESULT_SUCCESS;
+        return NOS_RESULT_SUCCESS;
     }
 
-    static mzResult GetShaderSource(mzShaderSource* outSpirvBuf)
+    static nosResult GetShaderSource(nosShaderSource* outSpirvBuf)
     { 
-        return MZ_RESULT_SUCCESS;
+        return NOS_RESULT_SUCCESS;
     }
 
-    static mzResult CanCreateNode(const mzFbNode * node) 
+    static nosResult CanCreateNode(const nosFbNode * node) 
     { 
         for (auto pin : *node->pins())
         {
             if (pin->name()->str() == "Device")
             {
-                if (flatbuffers::IsFieldPresent(pin, mz::fb::Pin::VT_DATA))
+                if (flatbuffers::IsFieldPresent(pin, nos::fb::Pin::VT_DATA))
                     return AJADevice::DeviceAvailable((char *)pin->data()->Data(),
-                                                      node->class_name()->str() == "AJA.AJAIn") ? MZ_RESULT_SUCCESS : MZ_RESULT_FAILED;
+                                                      node->class_name()->str() == "AJA.AJAIn") ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
                 break;
             }
         }
 		if (AJADevice::GetAvailableDevice(node->class_name()->str() == "AJA.AJAIn"))
         {
-            return MZ_RESULT_SUCCESS;
+            return NOS_RESULT_SUCCESS;
         }
-        return MZ_RESULT_FAILED;
+        return NOS_RESULT_FAILED;
     }
     
-    static void OnNodeCreated(const mzFbNode * inNode, void** ctx) 
+    static void OnNodeCreated(const nosFbNode * inNode, void** ctx) 
     { 
         auto& node = *inNode;
         AJADevice::Init();
@@ -132,7 +132,7 @@ struct AJA
             }
             
             HandleEvent(CreateAppEvent(
-                fbb, mz::app::CreateUpdateStringList(fbb, mz::fb::CreateStringList(fbb, fbb.CreateString(str), fbb.CreateVectorOfStrings(list)))));
+                fbb, nos::app::CreateUpdateStringList(fbb, nos::fb::CreateStringList(fbb, fbb.CreateString(str), fbb.CreateVectorOfStrings(list)))));
         }
 
         AJAClient *c = new AJAClient(isIn, dev);
@@ -141,24 +141,24 @@ struct AJA
         std::string refSrc = "Ref : " + NTV2ReferenceSourceToString(c->Ref, true) + " - " + NTV2FrameRateToString(c->FR, true);
         flatbuffers::FlatBufferBuilder fbb;
 
-        std::vector<flatbuffers::Offset<mz::fb::Pin>> pinsToAdd;
-        std::vector<::flatbuffers::Offset<mz::PartialPinUpdate>> pinsToUpdate;
-        using mz::fb::ShowAs;
-        using mz::fb::CanShowAs;
+        std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd;
+        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>> pinsToUpdate;
+        using nos::fb::ShowAs;
+        using nos::fb::CanShowAs;
 
         PinMapping mapping;
         auto loadedPins = mapping.Load(node);
 
-        AddIfNotFound(MZN_Device,
+        AddIfNotFound(NSN_Device,
 					  "string",
 					  StringValue(dev->GetDisplayName()),
 					  loadedPins,
 					  pinsToAdd, pinsToUpdate,
 					  fbb,
                       ShowAs::PROPERTY, CanShowAs::PROPERTY_ONLY);
-		if (auto val = AddIfNotFound(MZN_Dispatch_Size,
-									 "mz.fb.vec2u",
-									 mz::Buffer::From(mz::fb::vec2u(c->DispatchSizeX, c->DispatchSizeY)),
+		if (auto val = AddIfNotFound(NSN_Dispatch_Size,
+									 "nos.fb.vec2u",
+									 nos::Buffer::From(nos::fb::vec2u(c->DispatchSizeX, c->DispatchSizeY)),
                                      loadedPins, pinsToAdd, pinsToUpdate, fbb))
         {
             c->DispatchSizeX = ((glm::uvec2 *)val)->x;
@@ -166,22 +166,22 @@ struct AJA
         }
 
         if (auto val = AddIfNotFound(
-				MZN_Shader_Type, "AJA.Shader", mz::Buffer::From(ShaderType(c->Shader)), loadedPins,
+				NSN_Shader_Type, "AJA.Shader", nos::Buffer::From(ShaderType(c->Shader)), loadedPins,
                                      pinsToAdd, pinsToUpdate, fbb))
         {
             c->Shader = *((ShaderType *)val);
         }
 
         if (auto val =
-				AddIfNotFound(MZN_Debug, "uint", mz::Buffer::From(u32(c->Debug)), loadedPins, pinsToAdd, pinsToUpdate, fbb))
+				AddIfNotFound(NSN_Debug, "uint", nos::Buffer::From(u32(c->Debug)), loadedPins, pinsToAdd, pinsToUpdate, fbb))
         {
             c->Debug = *((u32 *)val);
         }
 
         if (!isIn)
         {
-            mz::fb::TVisualizer vis = { .type = mz::fb::VisualizerType::COMBO_BOX, .name = dev->GetDisplayName() + "-AJAOut-Reference-Source" };
-            if (auto ref = AddIfNotFound(MZN_ReferenceSource,
+            nos::fb::TVisualizer vis = { .type = nos::fb::VisualizerType::COMBO_BOX, .name = dev->GetDisplayName() + "-AJAOut-Reference-Source" };
+            if (auto ref = AddIfNotFound(NSN_ReferenceSource,
                 "string",
                 StringValue(refSrc),
                 loadedPins,
@@ -194,130 +194,130 @@ struct AJA
         }
         c->SetReference(refSrc);
 
-        std::vector<flatbuffers::Offset<mz::fb::NodeStatusMessage>> msg;
-        std::vector<mz::fb::UUID> pinsToDel;
+        std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
+        std::vector<nos::fb::UUID> pinsToDel;
         c->OnNodeUpdate(std::move(mapping), loadedPins, pinsToDel);
         c->UpdateStatus(fbb, msg);
         HandleEvent(
-            CreateAppEvent(fbb, mz::CreatePartialNodeUpdateDirect(fbb, &c->Mapping.NodeId, ClearFlags::NONE, &pinsToDel,
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &c->Mapping.NodeId, ClearFlags::NONE, &pinsToDel,
                                                                   &pinsToAdd, 0, 0, 0, 0, &msg, &pinsToUpdate)));
     }
 
 
-    static void OnNodeUpdated(void* ctx, const mzFbNode * node) 
+    static void OnNodeUpdated(void* ctx, const nosFbNode * node) 
     {
         ((AJAClient *)ctx)->OnNodeUpdate(*node);
     }
     
-    static void OnNodeDeleted(void* ctx, const mzUUID nodeId) 
+    static void OnNodeDeleted(void* ctx, const nosUUID nodeId) 
     { 
         auto c = ((AJAClient *)ctx);
         c->OnNodeRemoved();
         delete c;
     }
-    static void OnPinValueChanged(void* ctx, const mzName pinName, const mzUUID pinId, mzBuffer * value)
+    static void OnPinValueChanged(void* ctx, const nosName pinName, const nosUUID pinId, nosBuffer * value)
     { 
         return ((AJAClient *)ctx)->OnPinValueChanged(pinName, value->Data);
     }
-    static void OnPathCommand(void* ctx, const mzPathCommand* cmd)
+    static void OnPathCommand(void* ctx, const nosPathCommand* cmd)
     { 
         auto aja = ((AJAClient *)ctx);
         aja->OnPathCommand(cmd);
     }
-    static void OnPinConnected(void* ctx, const mzName pinName, mzUUID connectedPin)
+    static void OnPinConnected(void* ctx, const nosName pinName, nosUUID connectedPin)
     {
         ((AJAClient*)ctx)->OnPinConnected(pinName);
     }
-    static void OnPinDisconnected(void* ctx, const mzName pinName)
+    static void OnPinDisconnected(void* ctx, const nosName pinName)
     {
         ((AJAClient*)ctx)->OnPinDisconnected(pinName);
     }
     
-    static mzResult CanRemoveOrphanPin(void* ctx, mzName pinName, mzUUID pinId)
+    static nosResult CanRemoveOrphanPin(void* ctx, nosName pinName, nosUUID pinId)
     {
-        return ((AJAClient*)ctx)->CanRemoveOrphanPin(pinName, pinId) ? MZ_RESULT_SUCCESS : MZ_RESULT_FAILED;
+        return ((AJAClient*)ctx)->CanRemoveOrphanPin(pinName, pinId) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
     }
 
-    static mzResult OnOrphanPinRemoved(void* ctx, mzName pinName, mzUUID pinId)
+    static nosResult OnOrphanPinRemoved(void* ctx, nosName pinName, nosUUID pinId)
     {
-        return ((AJAClient*)ctx)->OnOrphanPinRemoved(pinName, pinId) ? MZ_RESULT_SUCCESS : MZ_RESULT_FAILED;
+        return ((AJAClient*)ctx)->OnOrphanPinRemoved(pinName, pinId) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
     }
 
-    static void PathRestart(void* ctx, const mzNodeExecuteArgs* nodeArgs, const mzNodeExecuteArgs* functionArgs)
+    static void PathRestart(void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
     {
         auto aja = ((AJAClient *)ctx);
         for (auto& [_,th] : aja->Pins)
             th->NotifyRestart({});
     }
 
-    static mzResult GetFunctions(size_t * outCount, mzName* outName, mzPfnNodeFunctionExecute* outFunction) 
+    static nosResult GetFunctions(size_t * outCount, nosName* outName, nosPfnNodeFunctionExecute* outFunction) 
     {
         *outCount = 1;
         if(!outName || !outFunction)
-            return MZ_RESULT_SUCCESS;
+            return NOS_RESULT_SUCCESS;
         outFunction[0] = PathRestart;
-        outName[0] = MZ_NAME_STATIC("PathRestart");
-        return MZ_RESULT_SUCCESS;
+        outName[0] = NOS_NAME_STATIC("PathRestart");
+        return NOS_RESULT_SUCCESS;
     }
-    static mzResult  ExecuteNode(void* ctx, const mzNodeExecuteArgs * args) { return MZ_RESULT_SUCCESS; }
-    static mzResult  CanCopy(void* ctx, mzCopyInfo * copyInfo)
+    static nosResult  ExecuteNode(void* ctx, const nosNodeExecuteArgs * args) { return NOS_RESULT_SUCCESS; }
+    static nosResult  CanCopy(void* ctx, nosCopyInfo * copyInfo)
     { 
-        return MZ_RESULT_SUCCESS;
+        return NOS_RESULT_SUCCESS;
     }
 
-    static mzResult  BeginCopyFrom(void* ctx, mzCopyInfo * cpy)
+    static nosResult  BeginCopyFrom(void* ctx, nosCopyInfo * cpy)
     { 
         if (((AJAClient*)ctx)->BeginCopyFrom(*cpy))
         {
-            return MZ_RESULT_SUCCESS;
+            return NOS_RESULT_SUCCESS;
         }
-        return MZ_RESULT_FAILED;
+        return NOS_RESULT_FAILED;
     }
 
-    static mzResult  BeginCopyTo(void* ctx, mzCopyInfo * cpy)
+    static nosResult  BeginCopyTo(void* ctx, nosCopyInfo * cpy)
     { 
         if (((AJAClient*)ctx)->BeginCopyTo(*cpy))
         {
-            return MZ_RESULT_SUCCESS;
+            return NOS_RESULT_SUCCESS;
         }
-        return MZ_RESULT_FAILED;
+        return NOS_RESULT_FAILED;
     }
 
-    static void  EndCopyFrom(void* ctx, mzCopyInfo * cpy)
+    static void  EndCopyFrom(void* ctx, nosCopyInfo * cpy)
     { 
         return ((AJAClient *)ctx)->EndCopyFrom(*cpy);
     }
 
-    static void  EndCopyTo(void* ctx, mzCopyInfo * cpy)
+    static void  EndCopyTo(void* ctx, nosCopyInfo * cpy)
     { 
         return ((AJAClient *)ctx)->EndCopyTo(*cpy);
     }
 
-    static void OnMenuRequested(void* ctx, const mzContextMenuRequest * request) 
+    static void OnMenuRequested(void* ctx, const nosContextMenuRequest * request) 
     { 
         ((AJAClient *)ctx)->OnMenuFired(*request);
     }
 
-    static void OnMenuCommand(void* ctx,  mzUUID itemID, uint32_t cmd) 
+    static void OnMenuCommand(void* ctx,  nosUUID itemID, uint32_t cmd) 
     { 
         ((AJAClient *)ctx)->OnCommandFired(cmd);
     }
 
-    static void OnKeyEvent(void* ctx, const mzKeyEvent * keyEvent) { }
+    static void OnKeyEvent(void* ctx, const nosKeyEvent * keyEvent) { }
 };
 
 extern "C"
 {
 
-MZAPI_ATTR mzResult MZAPI_CALL mzExportNodeFunctions(size_t* outSize, mzNodeFunctions** outList)
+NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
     *outSize = 2;
     if (!outList)
-        return MZ_RESULT_SUCCESS;
+        return NOS_RESULT_SUCCESS;
     auto* ajaIn = outList[0];
     auto* ajaOut = outList[1];
-    ajaIn->TypeName = MZN_AJA_AJAIn;
-    ajaOut->TypeName = MZN_AJA_AJAOut;
+    ajaIn->TypeName = NSN_AJA_AJAIn;
+    ajaOut->TypeName = NSN_AJA_AJAOut;
     ajaIn->CanCreateNode = ajaOut->CanCreateNode = AJA::CanCreateNode;
     ajaIn->OnNodeCreated = ajaOut->OnNodeCreated = AJA::OnNodeCreated;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
@@ -343,15 +343,15 @@ MZAPI_ATTR mzResult MZAPI_CALL mzExportNodeFunctions(size_t* outSize, mzNodeFunc
     ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
 
     GShaders = {
-		{MZN_AJA_RGB2YCbCr_Compute_Shader, { MZ_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
-        {MZN_AJA_YCbCr2RGB_Compute_Shader, { MZ_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
-        {MZN_AJA_RGB2YCbCr_Shader,         { MZ_SHADER_STAGE_FRAG, "RGB2YCbCr.frag", {std::begin(RGB2YCbCr_frag_spv), std::end(RGB2YCbCr_frag_spv)}}},
-        {MZN_AJA_YCbCr2RGB_Shader,         { MZ_SHADER_STAGE_FRAG, "YCbCr2RGB.frag", {std::begin(YCbCr2RGB_frag_spv), std::end(YCbCr2RGB_frag_spv)}}},
+		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
+        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
+        {NSN_AJA_RGB2YCbCr_Shader,         { NOS_SHADER_STAGE_FRAG, "RGB2YCbCr.frag", {std::begin(RGB2YCbCr_frag_spv), std::end(RGB2YCbCr_frag_spv)}}},
+        {NSN_AJA_YCbCr2RGB_Shader,         { NOS_SHADER_STAGE_FRAG, "YCbCr2RGB.frag", {std::begin(YCbCr2RGB_frag_spv), std::end(YCbCr2RGB_frag_spv)}}},
 	};
 
-    return MZ_RESULT_SUCCESS;
+    return NOS_RESULT_SUCCESS;
 }
 
 }
 
-} // namespace mz
+} // namespace nos

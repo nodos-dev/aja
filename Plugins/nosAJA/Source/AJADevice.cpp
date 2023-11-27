@@ -1,7 +1,7 @@
-// Copyright MediaZ AS. All Rights Reserved.
+// Copyright Nodos AS. All Rights Reserved.
 
 #include "AJADevice.h"
-#include "mzDefines.h"
+#include "nosDefines.h"
 #include "ntv2enums.h"
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"

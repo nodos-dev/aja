@@ -4,10 +4,10 @@
 #include "glm/glm.hpp"
 #include <random>
 #include <uuid.h>
-#include <MediaZ/PluginAPI.h>
-#include <MediaZ/Helpers.hpp>
+#include <Nodos/PluginAPI.h>
+#include <Nodos/Helpers.hpp>
 
-namespace mz
+namespace nos
 {
 
 fb::UUID GenerateUUID()
@@ -46,19 +46,19 @@ std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode)
 }
 
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
-                        std::unordered_map<Name, const mz::fb::Pin *> &pins,
-                        std::vector<flatbuffers::Offset<mz::fb::Pin>> &toAdd, 
-                        std::vector<::flatbuffers::Offset<mz::PartialPinUpdate>>& toUpdate,
+                        std::unordered_map<Name, const nos::fb::Pin *> &pins,
+                        std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd, 
+                        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>>& toUpdate,
                         flatbuffers::FlatBufferBuilder &fbb,
-                        mz::fb::ShowAs showAs, mz::fb::CanShowAs canShowAs, std::optional<mz::fb::TVisualizer> visualizer)
+                        nos::fb::ShowAs showAs, nos::fb::CanShowAs canShowAs, std::optional<nos::fb::TVisualizer> visualizer)
 {
     if (auto pin = pins[name])
     {
-        toUpdate.push_back(CreatePartialPinUpdateDirect(fbb, pin->id(), 0, mz::fb::CreateOrphanStateDirect(fbb, false)));
+        toUpdate.push_back(CreatePartialPinUpdateDirect(fbb, pin->id(), 0, nos::fb::CreateOrphanStateDirect(fbb, false)));
         return pin->data()->Data();
     }
     toAdd.push_back(
-		mz::fb::CreatePinDirect(fbb, generator(), name.AsCStr(), tyName.c_str(), showAs, canShowAs, 0, visualizer ? mz::fb::Visualizer::Pack(fbb, &*visualizer) : 0, &val));
+		nos::fb::CreatePinDirect(fbb, generator(), name.AsCStr(), tyName.c_str(), showAs, canShowAs, 0, visualizer ? nos::fb::Visualizer::Pack(fbb, &*visualizer) : 0, &val));
     return 0;
 }
 
@@ -162,7 +162,7 @@ fb::UUID AJAClient::GetPinId(Name pinName) const
     return *Mapping.GetPinId(pinName);
 }
 
-void AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector<mz::fb::UUID> &ids)
+void AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector<nos::fb::UUID> &ids)
 {
 	auto pinStr = pinName.AsString();
 
@@ -178,9 +178,9 @@ void AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector
         ids.push_back(GetPinId(Name(pinStr + " Mode")));
 }
 
-std::vector<mz::fb::UUID> AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode)
+std::vector<nos::fb::UUID> AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode)
 {
-    std::vector<mz::fb::UUID> ids;
+    std::vector<nos::fb::UUID> ids;
     GeneratePinIDSet(pinName, mode, ids);
     return ids;
 }
@@ -233,9 +233,9 @@ void AJAClient::UpdateDeviceStatus()
 void AJAClient::UpdateDeviceValue()
 {
     flatbuffers::FlatBufferBuilder fbb;
-    auto pinId = GetPinId(MZN_Device);
+    auto pinId = GetPinId(NSN_Device);
     std::vector<u8> value = StringValue(Device->GetDisplayName());
-	HandleEvent(CreateAppEvent(fbb, mz::CreatePinValueChangedDirect(fbb, &pinId, &value)));
+	HandleEvent(CreateAppEvent(fbb, nos::CreatePinValueChangedDirect(fbb, &pinId, &value)));
     UpdateReferenceValue();
 }
 
@@ -250,28 +250,28 @@ void AJAClient::UpdateReferenceValue()
         return;
 
     flatbuffers::FlatBufferBuilder fbb;
-    mz::fb::UUID pinId;
-    if (auto id = Mapping.GetPinId(MZN_ReferenceSource))
+    nos::fb::UUID pinId;
+    if (auto id = Mapping.GetPinId(NSN_ReferenceSource))
         pinId = *id;
     else
         return;
 
     std::vector<u8> value = StringValue(NTV2ReferenceSourceToString(Ref, true));
-    HandleEvent(CreateAppEvent(fbb, mz::CreatePinValueChangedDirect(fbb, &pinId, &value)));
+    HandleEvent(CreateAppEvent(fbb, nos::CreatePinValueChangedDirect(fbb, &pinId, &value)));
     UpdateStatus();
 }
 
 void AJAClient::UpdateStatus()
 {
-    std::vector<flatbuffers::Offset<mz::fb::NodeStatusMessage>> msg;
+    std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
     flatbuffers::FlatBufferBuilder fbb;
     UpdateStatus(fbb, msg);
     HandleEvent(CreateAppEvent(
-        fbb, mz::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
+        fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 }
 
 void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
-                             std::vector<flatbuffers::Offset<mz::fb::NodeStatusMessage>> &msg)
+                             std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> &msg)
 {
     msg.push_back(
         fb::CreateNodeStatusMessageDirect(fbb, Device->GetDisplayName().c_str(), fb::NodeStatusMessageType::INFO));
@@ -284,7 +284,7 @@ void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
             fb::NodeStatusMessageType::INFO));
     }
 
-    // services.HandleEvent(CreateAppEvent(fbb, mz::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId,
+    // services.HandleEvent(CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId,
     // ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 }
 
@@ -292,7 +292,7 @@ void AJAClient::SetReference(std::string const &val)
 {
     auto src = NTV2_REFERENCE_INVALID;
     if (val.empty()) {
-        mzEngine.LogE("Empty value received for reference pin!");
+        nosEngine.LogE("Empty value received for reference pin!");
     }
     else if (std::string::npos != val.find("Reference In"))
     {
@@ -316,36 +316,36 @@ void AJAClient::SetReference(std::string const &val)
         th->NotifyRestart({});
 }
 
-void AJAClient::OnNodeUpdate(mz::fb::Node const &event)
+void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
 {
     PinMapping mapping;
     auto pins = mapping.Load(event);
-    std::vector<mz::fb::UUID> pinsToDelete;
+    std::vector<nos::fb::UUID> pinsToDelete;
     OnNodeUpdate(std::move(mapping), pins, pinsToDelete);
     if (!pinsToDelete.empty())
     {
         flatbuffers::FlatBufferBuilder fbb;
         HandleEvent(
-            CreateAppEvent(fbb, mz::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, &pinsToDelete,
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, &pinsToDelete,
                                                                   0, 0, 0, 0, 0, 0)));
     }
 }
 
-void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const mz::fb::Pin *> &tmpPins,
-                             std::vector<mz::fb::UUID> &pinsToDelete)
+void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
+                             std::vector<nos::fb::UUID> &pinsToDelete)
 {
     Mapping = std::move(newMapping);
 
     struct StreamData
     {
-        const mz::fb::Pin *pin = 0;
-        const mz::fb::Pin *size = 0;
-        const mz::fb::Pin *spare_count = 0;
-        const mz::fb::Pin *frame_rate = 0;
-        const mz::fb::Pin *quad_mode = 0;
-        const mz::fb::Pin *colorspace = 0;
-        const mz::fb::Pin *curve = 0;
-        const mz::fb::Pin *narrow_range = 0;
+        const nos::fb::Pin *pin = 0;
+        const nos::fb::Pin *size = 0;
+        const nos::fb::Pin *spare_count = 0;
+        const nos::fb::Pin *frame_rate = 0;
+        const nos::fb::Pin *quad_mode = 0;
+        const nos::fb::Pin *colorspace = 0;
+        const nos::fb::Pin *curve = 0;
+        const nos::fb::Pin *narrow_range = 0;
     };
 
     std::map<NTV2Channel, StreamData> prs;
@@ -369,11 +369,11 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
         {
             prs[channel].spare_count = pin;
         }
-        else if (tyname == "mz.fb.Texture")
+        else if (tyname == "nos.fb.Texture")
         {
             prs[channel].pin = pin;
         }
-        else if (tyname == "mz.fb.QuadLinkMode" || tyname == "mz.fb.QuadLinkInputMode")
+        else if (tyname == "nos.fb.QuadLinkMode" || tyname == "nos.fb.QuadLinkInputMode")
         {
             prs[channel].quad_mode = pin;
         }
@@ -405,8 +405,8 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
     for (auto [channel, pr] : prs)
     {
         auto pin = pr.pin;
-        mz::Name name(pin->name()->c_str());
-        auto tex = flatbuffers::GetRoot<mz::fb::Texture>(pin->data()->Data());
+        nos::Name name(pin->name()->c_str());
+        auto tex = flatbuffers::GetRoot<nos::fb::Texture>(pin->data()->Data());
         auto id = *pin->id();
         auto it = Pins.find(name);
 
@@ -420,17 +420,17 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
             NTV2VideoFormat fmt = NTV2_FORMAT_UNKNOWN;
             switch (pin->show_as())
             {
-            case mz::fb::ShowAs::INPUT_PIN: {
-                if (pr.frame_rate && flatbuffers::IsFieldPresent(pr.frame_rate, mz::fb::Pin::VT_DATA))
+            case nos::fb::ShowAs::INPUT_PIN: {
+                if (pr.frame_rate && flatbuffers::IsFieldPresent(pr.frame_rate, nos::fb::Pin::VT_DATA))
                 {
                     fmt = AJADevice::GetMatchingFormat((const char*)(pr.frame_rate->data()->Data()), AJADevice::IsQuad(mode));
-                    mzEngine.LogI("AJA: Route output %s with framerate %s", NTV2ChannelToString(channel, true).c_str(),
+                    nosEngine.LogI("AJA: Route output %s with framerate %s", NTV2ChannelToString(channel, true).c_str(),
 								  NTV2VideoFormatToString(fmt, true).c_str());
                 }
                 break;
             }
-            case mz::fb::ShowAs::OUTPUT_PIN:
-				mzEngine.LogI("AJA: Route input %s", NTV2ChannelToString(channel, true).c_str());
+            case nos::fb::ShowAs::OUTPUT_PIN:
+				nosEngine.LogI("AJA: Route input %s", NTV2ChannelToString(channel, true).c_str());
                 break;
             }
           
@@ -452,7 +452,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
     }
 }
 
-void AJAClient::OnPinMenuFired(mzContextMenuRequest const &request)
+void AJAClient::OnPinMenuFired(nosContextMenuRequest const &request)
 {
     flatbuffers::FlatBufferBuilder fbb;
     auto name = *Mapping.GetPinName(*request.item_id());
@@ -460,8 +460,8 @@ void AJAClient::OnPinMenuFired(mzContextMenuRequest const &request)
     {
         if (pin->IsOrphan)
             return;
-        std::vector<flatbuffers::Offset<mz::ContextMenuItem>> remove = {
-            mz::CreateContextMenuItemDirect(fbb, "Remove",
+        std::vector<flatbuffers::Offset<nos::ContextMenuItem>> remove = {
+            nos::CreateContextMenuItemDirect(fbb, "Remove",
                                             AjaAction{
                                                 .Action = AjaAction::DELETE_CHANNEL,
                                                 .DeviceIndex = Device->GetIndexNumber(),
@@ -469,31 +469,31 @@ void AJAClient::OnPinMenuFired(mzContextMenuRequest const &request)
                                             })};
 
         HandleEvent(CreateAppEvent(
-            fbb, mz::CreateContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
+            fbb, nos::CreateContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
     }
 }
 
-void AJAClient::OnPinConnected(mz::Name pinName)
+void AJAClient::OnPinConnected(nos::Name pinName)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
     if (pin)
 		++pin->ConnectedPinCount;
 }
 
-void AJAClient::OnPinDisconnected(mz::Name pinName)
+void AJAClient::OnPinDisconnected(nos::Name pinName)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
 	if (pin)
         --pin->ConnectedPinCount;
 }
 
-bool AJAClient::CanRemoveOrphanPin(mz::Name pinName, mzUUID pinId)
+bool AJAClient::CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
     return pin != nullptr;
 }
 
-bool AJAClient::OnOrphanPinRemoved(mz::Name pinName, mzUUID pinId)
+bool AJAClient::OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
     if (!pin)
@@ -502,7 +502,7 @@ bool AJAClient::OnOrphanPinRemoved(mz::Name pinName, mzUUID pinId)
     return true;
 }
 
-void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
+void AJAClient::OnMenuFired(nosContextMenuRequest const&request)
 {
     if (0 != memcmp(request.item_id(), &Mapping.NodeId, 16))
     {
@@ -511,14 +511,14 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
 
     flatbuffers::FlatBufferBuilder fbb;
 
-    std::vector<flatbuffers::Offset<mz::ContextMenuItem>> items;
-    std::vector<flatbuffers::Offset<mz::ContextMenuItem>> devices;
+    std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
+    std::vector<flatbuffers::Offset<nos::ContextMenuItem>> devices;
 
     for (auto &d : AJADevice::Devices)
     {
         if (d.get() != Device && ((Input && !d->HasInput) || (!Input && !d->HasOutput)))
         {
-            devices.push_back(mz::CreateContextMenuItemDirect(fbb, d->GetDisplayName().c_str(),
+            devices.push_back(nos::CreateContextMenuItemDirect(fbb, d->GetDisplayName().c_str(),
                                                               AjaAction{
                                                                   .Action = AjaAction::SELECT_DEVICE,
                                                                   .DeviceIndex = d->GetIndexNumber(),
@@ -546,18 +546,18 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
             {
                 if (Device->ChannelIsValid(channel, Input, NTV2_FORMAT_UNKNOWN, mode))
                 {
-                    items.insert(it, mz::CreateContextMenuItemDirect(fbb, channelStr.c_str(), action));
+                    items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), action));
                 }
             }
             else
             {
-                std::vector<flatbuffers::Offset<mz::ContextMenuItem>> extents;
+                std::vector<flatbuffers::Offset<nos::ContextMenuItem>> extents;
                 for (auto &[extent, Container0] : Descriptors)
                 {
-                    std::vector<flatbuffers::Offset<mz::ContextMenuItem>> frameRates;
+                    std::vector<flatbuffers::Offset<nos::ContextMenuItem>> frameRates;
                     for (auto &[fps, Container1] : Container0)
                     {
-                        std::vector<flatbuffers::Offset<mz::ContextMenuItem>> formats;
+                        std::vector<flatbuffers::Offset<nos::ContextMenuItem>> formats;
                         for (auto &desc : Container1)
                         {
                             if (Device->ChannelIsValid(channel, false, desc.fmt, mode))
@@ -568,7 +568,7 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
                                     name += "-A";
                                 if (desc.BLevel)
                                     name += "-B";
-                                formats.push_back(mz::CreateContextMenuItemDirect(fbb, name.c_str(), action));
+                                formats.push_back(nos::CreateContextMenuItemDirect(fbb, name.c_str(), action));
                             }
                         }
 
@@ -577,7 +577,7 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
                             GetNTV2FrameRateFromNumeratorDenominator(0, 0);
                             char buf[16] = {};
                             std::sprintf(buf, "%.2f", fps);
-                            frameRates.push_back(mz::CreateContextMenuItemDirect(fbb, buf, 0, &formats));
+                            frameRates.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &formats));
                         }
                     }
 
@@ -585,13 +585,13 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
                     {
                         char buf[32] = {};
                         std::sprintf(buf, "%dx%d", extent.x, extent.y);
-                        extents.push_back(mz::CreateContextMenuItemDirect(fbb, buf, 0, &frameRates));
+                        extents.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &frameRates));
                     }
                 }
 
                 if (!extents.empty())
                 {
-                    items.insert(it, mz::CreateContextMenuItemDirect(fbb, channelStr.c_str(), 0, &extents));
+                    items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), 0, &extents));
                 }
             }
         }
@@ -599,7 +599,7 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
 
     if (!devices.empty())
     {
-        items.push_back(mz::CreateContextMenuItemDirect(fbb, "Select Device", 0, &devices));
+        items.push_back(nos::CreateContextMenuItemDirect(fbb, "Select Device", 0, &devices));
     }
 
     if (items.empty())
@@ -608,7 +608,7 @@ void AJAClient::OnMenuFired(mzContextMenuRequest const&request)
     }
 
     HandleEvent(CreateAppEvent(
-        fbb, mz::CreateContextMenuUpdateDirect(fbb, &Mapping.NodeId, request.pos(), request.instigator(), &items)));
+        fbb, nos::CreateContextMenuUpdateDirect(fbb, &Mapping.NodeId, request.pos(), request.instigator(), &items)));
 }
 
 void AJAClient::OnCommandFired(u32 cmd)
@@ -663,61 +663,61 @@ void AJAClient::OnCommandFired(u32 cmd)
         Device->GetExtent(format, mode, width, height);
         bool validates = !IsProgressiveTransport(format); // interlaced input and output both validate
 
-        mz::fb::TTexture tex;
-        tex.size = mz::fb::SizePreset::CUSTOM;
+        nos::fb::TTexture tex;
+        tex.size = nos::fb::SizePreset::CUSTOM;
         tex.width = width;
         tex.height = height;
         tex.unscaled = true;    // Prevent auto-scaling when an output pin is connected to this pin.
         tex.unmanaged = !Input; // do not create resource for this pin, do not assign test signal as well
-        tex.format = mz::fb::Format::R16G16B16A16_UNORM;
-        mz::fb::ShowAs showAs = Input ? mz::fb::ShowAs::OUTPUT_PIN : mz::fb::ShowAs::INPUT_PIN;
-        mz::fb::CanShowAs canShowAs = Input ? mz::fb::CanShowAs::OUTPUT_PIN_ONLY : mz::fb::CanShowAs::INPUT_PIN_ONLY;
+        tex.format = nos::fb::Format::R16G16B16A16_UNORM;
+        nos::fb::ShowAs showAs = Input ? nos::fb::ShowAs::OUTPUT_PIN : nos::fb::ShowAs::INPUT_PIN;
+        nos::fb::CanShowAs canShowAs = Input ? nos::fb::CanShowAs::OUTPUT_PIN_ONLY : nos::fb::CanShowAs::INPUT_PIN_ONLY;
         std::string pinName = (isQuad ? GetQuadName(channel) : ("SingleLink " + std::to_string(channel + 1)));
-        std::vector<u8> data = mz::Buffer::From(tex);
-        std::vector<u8> ringData = mz::Buffer::From(2);
-        std::vector<u8> spareCountData = mz::Buffer::From(0);
-        std::vector<u8> ringDataMin = mz::Buffer::From(1);
-        std::vector<u8> ringDataMax = mz::Buffer::From(120);
+        std::vector<u8> data = nos::Buffer::From(tex);
+        std::vector<u8> ringData = nos::Buffer::From(2);
+        std::vector<u8> spareCountData = nos::Buffer::From(0);
+        std::vector<u8> ringDataMin = nos::Buffer::From(1);
+        std::vector<u8> ringDataMax = nos::Buffer::From(120);
         flatbuffers::FlatBufferBuilder fbb;
         std::string fmtString = NTV2VideoFormatToString(format, true);
         std::vector<u8> fmtData(fmtString.data(), fmtString.data() + fmtString.size() + 1);
-        std::vector<u8> colorspaceData = mz::Buffer::From(Colorspace::REC709);
-        std::vector<u8> curveData = mz::Buffer::From(GammaCurve::REC709);
-        std::vector<u8> narrowRangeData = mz::Buffer::From(true);
+        std::vector<u8> colorspaceData = nos::Buffer::From(Colorspace::REC709);
+        std::vector<u8> curveData = nos::Buffer::From(GammaCurve::REC709);
+        std::vector<u8> narrowRangeData = nos::Buffer::From(true);
 
-        std::vector<flatbuffers::Offset<mz::fb::Pin>> pins = {
-            mz::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "mz.fb.Texture", showAs, canShowAs, 0, 0, &data,
+        std::vector<flatbuffers::Offset<nos::fb::Pin>> pins = {
+            nos::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "nos.fb.Texture", showAs, canShowAs, 0, 0, &data,
                                     0, 0, 0, 0, 0, 0, 0, 0, 0, true, fb::PinContents::NONE, 0, 0, validates),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Size").c_str(), "uint",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Size").c_str(), "uint",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
                                     &ringData, 0, &ringDataMin, &ringDataMax, nullptr, .0f, Input),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Spare Count").c_str(), "uint",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Spare Count").c_str(), "uint",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
                                     &spareCountData, 0, &spareCountData, &ringDataMax, nullptr, .0f),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Video Format").c_str(), "string",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0, &fmtData,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Video Format").c_str(), "string",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0, &fmtData,
                                     0, 0, 0, 0, 0, true),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Colorspace").c_str(), "AJA.Colorspace",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Colorspace").c_str(), "AJA.Colorspace",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
                                     &colorspaceData, 0, 0, 0, 0, 0, false),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Gamma Curve").c_str(), "AJA.GammaCurve",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Gamma Curve").c_str(), "AJA.GammaCurve",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
                                     &curveData, 0, 0, 0, 0, 0, false),
-            mz::fb::CreatePinDirect(fbb, generator(), (pinName + " Narrow Range").c_str(), "bool",
-                                    mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Narrow Range").c_str(), "bool",
+                                    nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
                                     &narrowRangeData, 0, 0, 0, 0, 0, false),
         };
 
         if (isQuad)
         {
-            std::vector<u8> data = mz::Buffer::From(mode);
-            pins.push_back(mz::fb::CreatePinDirect(
-                fbb, generator(), (pinName + " Mode").c_str(), Input ? "mz.fb.QuadLinkInputMode" : "mz.fb.QuadLinkMode",
-                mz::fb::ShowAs::PROPERTY, mz::fb::CanShowAs::PROPERTY_ONLY, 0, 0, &data));
+            std::vector<u8> data = nos::Buffer::From(mode);
+            pins.push_back(nos::fb::CreatePinDirect(
+                fbb, generator(), (pinName + " Mode").c_str(), Input ? "nos.fb.QuadLinkInputMode" : "nos.fb.QuadLinkMode",
+                nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::PROPERTY_ONLY, 0, 0, &data));
         }
 
         HandleEvent(
-            CreateAppEvent(fbb, mz::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, &pins)));
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, &pins)));
         break;
     }
     }
@@ -734,20 +734,20 @@ void AJAClient::OnNodeRemoved()
     (Input ? Device->HasInput : Device->HasOutput) = false;
 }
 
-void AJAClient::OnPathCommand(const mzPathCommand* cmd)
+void AJAClient::OnPathCommand(const nosPathCommand* cmd)
 {
     auto pinId = cmd->PinId;
     auto pinNameOpt = Mapping.GetPinName(pinId);
     if (!pinNameOpt)
     {
-        mzEngine.LogD("AJA: Path command on unknown pin: %s", UUID2STR(pinId).c_str());
+        nosEngine.LogD("AJA: Path command on unknown pin: %s", UUID2STR(pinId).c_str());
         return;
     }
     auto pinName = *pinNameOpt;
 	auto result = Pins.find(pinName);
 	if (result == Pins.end())
 	{
-        mzEngine.LogD("AJA: Path command on unknown pin: %s", pinName.AsCStr());
+        nosEngine.LogD("AJA: Path command on unknown pin: %s", pinName.AsCStr());
 		return;
 	}
     auto copyThread = result->second;
@@ -755,8 +755,8 @@ void AJAClient::OnPathCommand(const mzPathCommand* cmd)
  
     switch (cmd->Command)
     {
-    case MZ_PATH_COMMAND_TYPE_RESTART: {
-        mz::Buffer params(cmd->Args);
+    case NOS_PATH_COMMAND_TYPE_RESTART: {
+        nos::Buffer params(cmd->Args);
         auto* res = params.As<RestartParams>();
         u32 ringSize = copyThread->RingSize;
         if (res && res->UpdateFlags & RestartParams::UpdateRingSize)
@@ -764,13 +764,13 @@ void AJAClient::OnPathCommand(const mzPathCommand* cmd)
             ringSize = res->RingSize;
             if (copyThread->IsInput()) {
                 auto ringSizePinId = GetPinId(Name(pinName.AsString() + " Ring Size"));
-                mzEngine.SetPinValue(ringSizePinId, mzBuffer{.Data = &ringSize, .Size = sizeof(u32)});
+                nosEngine.SetPinValue(ringSizePinId, nosBuffer{.Data = &ringSize, .Size = sizeof(u32)});
             }
         }
         copyThread->Restart(ringSize);
         break;
     }
-    case MZ_PATH_COMMAND_TYPE_NOTIFY_NEW_CONNECTION:
+    case NOS_PATH_COMMAND_TYPE_NOTIFY_NEW_CONNECTION:
     {
         copyThread->Restart(copyThread->RingSize);
         if (copyThread->IsInput() ||
@@ -788,7 +788,7 @@ void AJAClient::OnPathCommand(const mzPathCommand* cmd)
     }
 }
 
-void AJAClient::OnPinValueChanged(mz::Name pinName, void *value)
+void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 {
     if (!value)
     {
@@ -814,8 +814,8 @@ void AJAClient::OnPinValueChanged(mz::Name pinName, void *value)
 
     if (pinNameStr == "Dispatch Size")
     {
-        DispatchSizeX = ((mz::fb::vec2u *)value)->x();
-        DispatchSizeY = ((mz::fb::vec2u *)value)->y();
+        DispatchSizeX = ((nos::fb::vec2u *)value)->x();
+        DispatchSizeY = ((nos::fb::vec2u *)value)->y();
         return;
     }
 
@@ -881,8 +881,8 @@ void AJAClient::OnPinValueChanged(mz::Name pinName, void *value)
 		{
 			uint32_t newSpareCount = pin->RingSize - 1; 
 			pin->SpareCount = newSpareCount;
-			mzEngine.LogW("Spare count must be less than ring size! Capping spare count at %u.", newSpareCount);
-			mzEngine.SetPinValueByName(Mapping.NodeId, pinName, mzBuffer{.Data = &newSpareCount, .Size = sizeof(newSpareCount)});
+			nosEngine.LogW("Spare count must be less than ring size! Capping spare count at %u.", newSpareCount);
+			nosEngine.SetPinValueByName(Mapping.NodeId, pinName, nosBuffer{.Data = &newSpareCount, .Size = sizeof(newSpareCount)});
 		}
     }
 }
@@ -891,7 +891,7 @@ void AJAClient::OnExecute()
 {
 }
 
-bool AJAClient::BeginCopyFrom(mzCopyInfo &cpy)
+bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 {
     GPURing::Resource *sourceSlot = 0;
     auto it = Pins.find(cpy.Name); 
@@ -910,7 +910,7 @@ bool AJAClient::BeginCopyFrom(mzCopyInfo &cpy)
     return cpy.ShouldCopyTexture = !!(cpy.Data = sourceSlot);
 }
 
-bool AJAClient::BeginCopyTo(mzCopyInfo &cpy)
+bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 {
     GPURing::Resource *slot = 0;
     auto it = Pins.find(cpy.Name); 
@@ -919,8 +919,8 @@ bool AJAClient::BeginCopyTo(mzCopyInfo &cpy)
 
     auto th = it->second;
 
-    if (th->FieldType == MZ_TEXTURE_FIELD_TYPE_UNKNOWN && th->Interlaced())
-        th->FieldType = MZ_TEXTURE_FIELD_TYPE_EVEN;
+    if (th->FieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN && th->Interlaced())
+        th->FieldType = NOS_TEXTURE_FIELD_TYPE_EVEN;
 
     auto wantedField = th->FieldType;
     auto outInterlaced = IsTextureFieldTypeInterlaced(wantedField);
@@ -929,7 +929,7 @@ bool AJAClient::BeginCopyTo(mzCopyInfo &cpy)
     auto inInterlaced = IsTextureFieldTypeInterlaced(incomingField);
     if ((inInterlaced && outInterlaced) && incomingField != wantedField)
     {
-        mzEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
+        nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
         cpy.Stop = false;
     }
     else if ((th->EffectiveRingSize > th->TotalFrameCount()) && (slot = th->GpuRing->TryPush()))
@@ -945,7 +945,7 @@ bool AJAClient::BeginCopyTo(mzCopyInfo &cpy)
     return cpy.ShouldCopyTexture = !!(cpy.Data = slot);
 }
 
-void AJAClient::EndCopyFrom(mzCopyInfo &cpy)
+void AJAClient::EndCopyFrom(nosCopyInfo &cpy)
 {
     if(!cpy.Data) 
         return;
@@ -958,7 +958,7 @@ void AJAClient::EndCopyFrom(mzCopyInfo &cpy)
     th->GpuRing->EndPop(res);
 }
 
-void AJAClient::EndCopyTo(mzCopyInfo& cpy)
+void AJAClient::EndCopyTo(nosCopyInfo& cpy)
 {
 	if (!cpy.Data)
 		return;
@@ -990,7 +990,7 @@ void AJAClient::EndCopyTo(mzCopyInfo& cpy)
     th->FieldType = Flipped(th->FieldType);
 }
 
-void AJAClient::AddTexturePin(const mz::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
+void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
     const fb::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode, Colorspace cs, GammaCurve gc, bool range, unsigned spareCount)
 {
     auto th = MakeShared<CopyThread>(this, ringSize, spareCount, 
@@ -1004,4 +1004,4 @@ void AJAClient::DeleteTexturePin(rc<CopyThread> const& c)
     Pins.erase(c->Name());
 }
 
-} // namespace mz
+} // namespace nos

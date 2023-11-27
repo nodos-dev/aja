@@ -3,7 +3,7 @@
 #include "AJAMain.h"
 #include "AJADevice.h"
 
-namespace mz
+namespace nos
 {
 struct UUID
 {
@@ -18,38 +18,38 @@ struct UUID
 };
 }
 
-template<> struct std::hash<mz::UUID>{ size_t operator()(mz::UUID const& val) const { return mz::UUIDHash(val); } };
-// template<> struct std::hash<mz::Name>{ size_t operator()(mz::Name const& val) const { return std::hash<std::string>()(val.AsString()); } };
+template<> struct std::hash<nos::UUID>{ size_t operator()(nos::UUID const& val) const { return nos::UUIDHash(val); } };
+// template<> struct std::hash<nos::Name>{ size_t operator()(nos::Name const& val) const { return std::hash<std::string>()(val.AsString()); } };
 
-namespace mz
+namespace nos
 {
 
 std::vector<u8> StringValue(std::string const& str);
 std::string GetQuadName(NTV2Channel channel);
 std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode);
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
-                               std::unordered_map<Name, const mz::fb::Pin *> &pins,
-                               std::vector<flatbuffers::Offset<mz::fb::Pin>> &toAdd,
-                               std::vector<::flatbuffers::Offset<mz::PartialPinUpdate>>& toUpdate,
-                               flatbuffers::FlatBufferBuilder &fbb, mz::fb::ShowAs showAs = mz::fb::ShowAs::PROPERTY,
-                               mz::fb::CanShowAs canShowAs = mz::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 
-                               std::optional<mz::fb::TVisualizer> visualizer = std::nullopt);
+                               std::unordered_map<Name, const nos::fb::Pin *> &pins,
+                               std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd,
+                               std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>>& toUpdate,
+                               flatbuffers::FlatBufferBuilder &fbb, nos::fb::ShowAs showAs = nos::fb::ShowAs::PROPERTY,
+                               nos::fb::CanShowAs canShowAs = nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 
+                               std::optional<nos::fb::TVisualizer> visualizer = std::nullopt);
 
-mz::fb::UUID GenerateUUID();
+nos::fb::UUID GenerateUUID();
 
 inline auto generator() 
 {
     struct {
-        mz::fb::UUID id; operator mz::fb::UUID *() { return &id;}
+        nos::fb::UUID id; operator nos::fb::UUID *() { return &id;}
     } re {GenerateUUID()}; 
     return re;
 }
 
-inline NTV2FieldID GetAJAFieldID(mzTextureFieldType type)
+inline NTV2FieldID GetAJAFieldID(nosTextureFieldType type)
 {
-	return (type == MZ_TEXTURE_FIELD_TYPE_PROGRESSIVE || type == MZ_TEXTURE_FIELD_TYPE_UNKNOWN)
+	return (type == NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE || type == NOS_TEXTURE_FIELD_TYPE_UNKNOWN)
 			   ? NTV2_FIELD_INVALID
-			   : (type == MZ_TEXTURE_FIELD_TYPE_EVEN ? NTV2_FIELD0 : NTV2_FIELD1);
+			   : (type == NOS_TEXTURE_FIELD_TYPE_EVEN ? NTV2_FIELD0 : NTV2_FIELD1);
 }
 
 enum class ShaderType : u32
@@ -94,7 +94,7 @@ struct AjaAction
     operator u32() const { return *(u32*)this; }
 };
 
-struct MZAPI_ATTR AJAClient
+struct NOSAPI_ATTR AJAClient
 {
     inline static struct
     {
@@ -149,7 +149,7 @@ struct MZAPI_ATTR AJAClient
     std::atomic_uint DispatchSizeX = 80, DispatchSizeY = 135;
     std::atomic_uint Debug = 0;
 
-    std::unordered_map<mz::Name, rc<struct CopyThread>> Pins;
+    std::unordered_map<nos::Name, rc<struct CopyThread>> Pins;
     AJADevice *Device = 0;
 
     NTV2ReferenceSource Ref = NTV2_REFERENCE_EXTERNAL;
@@ -163,9 +163,9 @@ struct MZAPI_ATTR AJAClient
     PinMapping *operator->();
     fb::UUID GetPinId(Name pinName) const;
 
-    void GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector<mz::fb::UUID> &ids);
+    void GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector<nos::fb::UUID> &ids);
     
-    std::vector<mz::fb::UUID> GeneratePinIDSet(Name pinName, AJADevice::Mode mode);
+    std::vector<nos::fb::UUID> GeneratePinIDSet(Name pinName, AJADevice::Mode mode);
     std::shared_ptr<CopyThread> FindChannel(NTV2Channel channel);
     NTV2FrameBufferFormat FBFmt() const;
     void StopAll();
@@ -176,36 +176,36 @@ struct MZAPI_ATTR AJAClient
     void UpdateStatus();
 
     void UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
-                      std::vector<flatbuffers::Offset<mz::fb::NodeStatusMessage>> &msg);
+                      std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> &msg);
     void SetReference(std::string const &val);
-    void OnNodeUpdate(mz::fb::Node const &event);
-    void OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const mz::fb::Pin *> &tmpPins,
-                      std::vector<mz::fb::UUID> &pinsToDelete);
-    void OnPinMenuFired(mzContextMenuRequest const &request);
-    void OnPinConnected(mz::Name pinName);
-    void OnPinDisconnected(mz::Name pinName);
+    void OnNodeUpdate(nos::fb::Node const &event);
+    void OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
+                      std::vector<nos::fb::UUID> &pinsToDelete);
+    void OnPinMenuFired(nosContextMenuRequest const &request);
+    void OnPinConnected(nos::Name pinName);
+    void OnPinDisconnected(nos::Name pinName);
     
-    bool CanRemoveOrphanPin(mz::Name pinName, mzUUID pinId);
-    bool OnOrphanPinRemoved(mz::Name pinName, mzUUID pinId);
+    bool CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId);
+    bool OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId);
 
-    void OnMenuFired(mzContextMenuRequest const &request);
+    void OnMenuFired(nosContextMenuRequest const &request);
     void OnCommandFired(u32 cmd);
 
     void OnNodeRemoved();
 
-    void OnPathCommand(const mzPathCommand* cmd);
-    void OnPinValueChanged(mz::Name pinName, void* value);
+    void OnPathCommand(const nosPathCommand* cmd);
+    void OnPinValueChanged(nos::Name pinName, void* value);
     void OnExecute();
 
-    bool BeginCopyFrom(mzCopyInfo &cpy);
-    bool BeginCopyTo(mzCopyInfo &cpy);
-    void EndCopyFrom(mzCopyInfo &cpy);
-    void EndCopyTo(mzCopyInfo &cpy);
+    bool BeginCopyFrom(nosCopyInfo &cpy);
+    bool BeginCopyTo(nosCopyInfo &cpy);
+    void EndCopyFrom(nosCopyInfo &cpy);
+    void EndCopyTo(nosCopyInfo &cpy);
 
-    void AddTexturePin(const mz::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
+    void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
                        const fb::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
                        Colorspace cs, GammaCurve gc, bool range, unsigned spareCount);
     void DeleteTexturePin(rc<CopyThread> const& c);
 };
 
-} // namespace mz
+} // namespace nos
