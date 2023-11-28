@@ -84,11 +84,11 @@ struct AJA
             {
                 if (flatbuffers::IsFieldPresent(pin, nos::fb::Pin::VT_DATA))
                     return AJADevice::DeviceAvailable((char *)pin->data()->Data(),
-                                                      node->class_name()->str() == "AJA.AJAIn") ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+                                                      node->class_name()->str() == "nos.aja.AJAIn") ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
                 break;
             }
         }
-		if (AJADevice::GetAvailableDevice(node->class_name()->str() == "AJA.AJAIn"))
+		if (AJADevice::GetAvailableDevice(node->class_name()->str() == "nos.aja.AJAIn"))
         {
             return NOS_RESULT_SUCCESS;
         }
@@ -99,7 +99,7 @@ struct AJA
     { 
         auto& node = *inNode;
         AJADevice::Init();
-        const bool isIn = node.class_name()->str() == "AJA.AJAIn";
+        const bool isIn = node.class_name()->str() == "nos.aja.AJAIn";
         AJADevice *dev = 0;
 
         if (auto devpin = std::find_if(node.pins()->begin(), node.pins()->end(),
@@ -166,7 +166,7 @@ struct AJA
         }
 
         if (auto val = AddIfNotFound(
-				NSN_Shader_Type, "AJA.Shader", nos::Buffer::From(ShaderType(c->Shader)), loadedPins,
+				NSN_Shader_Type, "nos.aja.Shader", nos::Buffer::From(ShaderType(c->Shader)), loadedPins,
                                      pinsToAdd, pinsToUpdate, fbb))
         {
             c->Shader = *((ShaderType *)val);

@@ -377,11 +377,11 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
         {
             prs[channel].quad_mode = pin;
         }
-        else if (tyname == "AJA.Colorspace")
+        else if (tyname == "nos.aja.Colorspace")
         {
             prs[channel].colorspace = pin;
         }
-        else if (tyname == "AJA.GammaCurve")
+        else if (tyname == "nos.aja.GammaCurve")
         {
             prs[channel].curve = pin;
         }
@@ -697,10 +697,10 @@ void AJAClient::OnCommandFired(u32 cmd)
             nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Video Format").c_str(), "string",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0, &fmtData,
                                     0, 0, 0, 0, 0, true),
-            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Colorspace").c_str(), "AJA.Colorspace",
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Colorspace").c_str(), "nos.aja.Colorspace",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
                                     &colorspaceData, 0, 0, 0, 0, 0, false),
-            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Gamma Curve").c_str(), "AJA.GammaCurve",
+            nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Gamma Curve").c_str(), "nos.aja.GammaCurve",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::INPUT_OUTPUT_PROPERTY, 0, 0,
                                     &curveData, 0, 0, 0, 0, 0, false),
             nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Narrow Range").c_str(), "bool",

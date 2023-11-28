@@ -1,4 +1,4 @@
-namespace AJA;
+namespace nos.aja;
 
 enum ReferenceSource : uint {
     External       = 0,
