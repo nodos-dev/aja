@@ -224,7 +224,7 @@ struct AJA
         auto aja = ((AJAClient *)ctx);
         aja->OnPathCommand(cmd);
     }
-    static void OnPinConnected(void* ctx, const nosName pinName, nosUUID connectedPin)
+    static void OnPinConnected(void* ctx, const nosName pinName, nosUUID connectedPin, nosUUID nodeid)
     {
         ((AJAClient*)ctx)->OnPinConnected(pinName);
     }
