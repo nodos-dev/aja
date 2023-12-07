@@ -763,6 +763,7 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
         if (res && res->UpdateFlags & RestartParams::UpdateRingSize)
         {
             ringSize = res->RingSize;
+			copyThread->SetRingSize(ringSize);
             if (copyThread->IsInput()) {
                 auto ringSizePinId = GetPinId(Name(pinName.AsString() + " Ring Size"));
                 nosEngine.SetPinValue(ringSizePinId, nosBuffer{.Data = &ringSize, .Size = sizeof(u32)});

@@ -182,7 +182,6 @@ void CopyThread::Stop()
 void CopyThread::SetRingSize(u32 ringSize)
 {
 	RingSize = ringSize;
-	EffectiveRingSize = ringSize * (1 + uint32_t(Interlaced()));
 }
 
 void CopyThread::Restart(u32 ringSize)
@@ -303,6 +302,7 @@ void CopyThread::Refresh()
 
 void CopyThread::CreateRings()
 {
+	EffectiveRingSize = RingSize * (1 + uint32_t(Interlaced()));
 	const auto ext = Extent();
 	GpuRing = MakeShared<GPURing>(ext, EffectiveRingSize);
 	nosVec2u compressedExt((10 == BitWidth()) ? ((ext.x + (48 - ext.x % 48) % 48) / 3) << 1 : ext.x >> 1, ext.y >> u32(Interlaced()));
