@@ -203,7 +203,7 @@ struct NOSAPI_ATTR AJAClient
     void EndCopyTo(nosCopyInfo &cpy);
 
     void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
-                       const fb::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
+                       const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
                        Colorspace cs, GammaCurve gc, bool range, unsigned spareCount);
     void DeleteTexturePin(rc<CopyThread> const& c);
 };

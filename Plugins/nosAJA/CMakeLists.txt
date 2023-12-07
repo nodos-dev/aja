@@ -23,7 +23,9 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries "${CMAKE_C
 set(CMAKE_DEBUG_POSTFIX "")
 
 list(APPEND DEPENDENCIES stb ajantv2)
-list(APPEND INCLUDE_FOLDERS ${EXTERNAL_DIR}
+list(APPEND INCLUDE_FOLDERS
+    ${EXTERNAL_DIR}
+    ${SUBSYSTEMS_SOURCE_DIR}/nosVulkanSubsystem/Include
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/src/win

@@ -5,18 +5,14 @@
 #include "Ring.h"
 #include <nosUtil/Thread.h>
 
+#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
+
 namespace nos
 {
 
 using Clock = std::chrono::high_resolution_clock;
 using Milli = std::chrono::duration<double, std::milli>;
 using Micro = std::chrono::duration<double, std::micro>;
-
-inline nosTextureFieldType Flipped(nosTextureFieldType field)
-{
-	return field == NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE || field == NOS_TEXTURE_FIELD_TYPE_UNKNOWN ? field 
-		: (field == NOS_TEXTURE_FIELD_TYPE_EVEN ? NOS_TEXTURE_FIELD_TYPE_ODD : NOS_TEXTURE_FIELD_TYPE_EVEN);
-}
 
 struct CopyThread
 {
@@ -102,7 +98,7 @@ struct CopyThread
     CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 
                 NTV2VideoFormat initalFmt, 
                 AJADevice::Mode mode,
-                enum class Colorspace colorspace, enum class GammaCurve curve, bool narrowRange, const fb::Texture* tex);
+                enum class Colorspace colorspace, enum class GammaCurve curve, bool narrowRange, const sys::vulkan::Texture* tex);
 
     nos::Name const& Name() const;
 	nosVec2u GetSuitableDispatchSize() const;

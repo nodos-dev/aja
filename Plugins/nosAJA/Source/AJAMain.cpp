@@ -13,69 +13,39 @@
 
 using namespace nos;
 
+nosVulkanSubsystem* nosVulkan = nullptr;
+
 NOS_INIT();
+
+NOS_REGISTER_NAME(Device);
+NOS_REGISTER_NAME(ReferenceSource);
+NOS_REGISTER_NAME(Debug);
+NOS_REGISTER_NAME_SPACED(Dispatch_Size, "Dispatch Size");
+NOS_REGISTER_NAME_SPACED(Shader_Type, "Shader Type");
+
+NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Shader);
+NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Shader);
+NOS_REGISTER_NAME(AJA_RGB2YCbCr_Shader);
+NOS_REGISTER_NAME(AJA_YCbCr2RGB_Shader);
+NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Pass);
+NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Pass);
+NOS_REGISTER_NAME(AJA_RGB2YCbCr_Pass);
+NOS_REGISTER_NAME(AJA_YCbCr2RGB_Pass);
+
+NOS_REGISTER_NAME(Colorspace);
+NOS_REGISTER_NAME(Source);
+NOS_REGISTER_NAME(Interlaced);
+NOS_REGISTER_NAME(ssbo);
+NOS_REGISTER_NAME(Output);
+
+NOS_REGISTER_NAME_SPACED(AJA_AJAIn, "nos.aja.AJAIn");
+NOS_REGISTER_NAME_SPACED(AJA_AJAOut, "nos.aja.AJAOut");
 
 namespace nos
 {
 
-static nosBuffer Blob2Buf(std::vector<u8> const& v) 
-{ 
-    return { (void*)v.data(), v.size() }; 
-};
-
-static std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> GShaders;
-
 struct AJA
 {
-    static nosResult GetShaders(size_t* outCount, nosShaderInfo* outShaders)
-    {
-        *outCount = GShaders.size();
-        if(!outShaders) 
-            return NOS_RESULT_SUCCESS;
-
-        for (auto& [name, data] : GShaders)
-        {
-            auto& [stage, path, spirv] = data;
-            *outShaders++ = {
-                .Key = name,
-                .Source = { 
-                    .Stage = stage,
-                    .GLSLPath = path,
-                    .SpirvBlob = { spirv.data(), spirv.size() } 
-                },
-            };
-        }
-
-        return NOS_RESULT_SUCCESS;
-    };
-
-    static nosResult GetPasses(size_t* outCount, nosPassInfo* outNosPassInfos)
-    {
-        const std::vector<nosPassInfo> passes =
-        {
-			{.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
-			{.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
-			{.Key = NSN_AJA_YCbCr2RGB_Pass, .Shader = NSN_AJA_YCbCr2RGB_Shader, .MultiSample = 1},
-			{.Key = NSN_AJA_RGB2YCbCr_Pass, .Shader = NSN_AJA_RGB2YCbCr_Shader, .MultiSample = 1}
-        };
-
-        *outCount = passes.size();
-
-        if (!outNosPassInfos)
-            return NOS_RESULT_SUCCESS;
-        for (auto& pass : passes)
-        {
-            *outNosPassInfos++ = pass;
-        }
-
-        return NOS_RESULT_SUCCESS;
-    }
-
-    static nosResult GetShaderSource(nosShaderSource* outSpirvBuf)
-    { 
-        return NOS_RESULT_SUCCESS;
-    }
-
     static nosResult CanCreateNode(const nosFbNode * node) 
     { 
         for (auto pin : *node->pins())
@@ -215,9 +185,9 @@ struct AJA
         c->OnNodeRemoved();
         delete c;
     }
-    static void OnPinValueChanged(void* ctx, const nosName pinName, const nosUUID pinId, nosBuffer * value)
+    static void OnPinValueChanged(void* ctx, const nosName pinName, const nosUUID pinId, nosBuffer value)
     { 
-        return ((AJAClient *)ctx)->OnPinValueChanged(pinName, value->Data);
+        return ((AJAClient *)ctx)->OnPinValueChanged(pinName, value.Data);
     }
     static void OnPathCommand(void* ctx, const nosPathCommand* cmd)
     { 
@@ -316,8 +286,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
         return NOS_RESULT_SUCCESS;
     auto* ajaIn = outList[0];
     auto* ajaOut = outList[1];
-    ajaIn->TypeName = NSN_AJA_AJAIn;
-    ajaOut->TypeName = NSN_AJA_AJAOut;
+    ajaIn->ClassName = NSN_AJA_AJAIn;
+    ajaOut->ClassName = NSN_AJA_AJAOut;
     ajaIn->CanCreateNode = ajaOut->CanCreateNode = AJA::CanCreateNode;
     ajaIn->OnNodeCreated = ajaOut->OnNodeCreated = AJA::OnNodeCreated;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
@@ -333,23 +303,46 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     ajaIn->BeginCopyTo = ajaOut->BeginCopyTo = AJA::BeginCopyTo;
     ajaIn->EndCopyFrom = ajaOut->EndCopyFrom = AJA::EndCopyFrom;
     ajaIn->EndCopyTo = ajaOut->EndCopyTo = AJA::EndCopyTo;
-    ajaIn->GetShaderSource = ajaOut->GetShaderSource = AJA::GetShaderSource;
-    ajaIn->GetShaders = ajaOut->GetShaders = AJA::GetShaders;
-    ajaIn->GetPasses = ajaOut->GetPasses = AJA::GetPasses;
     ajaIn->OnMenuRequested = ajaOut->OnMenuRequested = AJA::OnMenuRequested;
     ajaIn->OnMenuCommand = ajaOut->OnMenuCommand = AJA::OnMenuCommand;
     ajaIn->OnKeyEvent = ajaOut->OnKeyEvent = AJA::OnKeyEvent;
     ajaIn->CanRemoveOrphanPin = ajaOut->CanRemoveOrphanPin= AJA::CanRemoveOrphanPin;
     ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
 
-    GShaders = {
+	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), 0, 1, (void**)&nosVulkan);
+
+    const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
 		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
         {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
         {NSN_AJA_RGB2YCbCr_Shader,         { NOS_SHADER_STAGE_FRAG, "RGB2YCbCr.frag", {std::begin(RGB2YCbCr_frag_spv), std::end(RGB2YCbCr_frag_spv)}}},
         {NSN_AJA_YCbCr2RGB_Shader,         { NOS_SHADER_STAGE_FRAG, "YCbCr2RGB.frag", {std::begin(YCbCr2RGB_frag_spv), std::end(YCbCr2RGB_frag_spv)}}},
 	};
 
-    return NOS_RESULT_SUCCESS;
+	std::vector<nosShaderInfo> shaderInfos;
+	for (auto& [name, data] : shaders)
+	{
+		auto& [stage, path, spirv] = data;
+		shaderInfos.push_back(nosShaderInfo{
+			.Key = name,
+			.Source = { 
+				.Stage = stage,
+				.GLSLPath = path,
+				.SpirvBlob = { (void*)spirv.data(), spirv.size() } 
+			},
+		});
+	}
+	auto ret = nosVulkan->RegisterShaders(shaderInfos.size(), shaderInfos.data());
+	if (NOS_RESULT_SUCCESS != ret)
+		return ret;
+    std::vector<nosPassInfo> passes =
+    {
+	    {.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
+	    {.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
+	    {.Key = NSN_AJA_YCbCr2RGB_Pass, .Shader = NSN_AJA_YCbCr2RGB_Shader, .MultiSample = 1},
+	    {.Key = NSN_AJA_RGB2YCbCr_Pass, .Shader = NSN_AJA_RGB2YCbCr_Shader, .MultiSample = 1}
+    };
+	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
+    return ret;
 }
 
 }

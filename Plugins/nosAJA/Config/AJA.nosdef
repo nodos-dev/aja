@@ -4,38 +4,23 @@
             "class_name": "AJAIn",
             "allows_cyclic": true,
             "contents_type": "Job",
-            "contents": {
-              "type": "CPU"
-            },
             "description":  "Video input node for AJA cards",
             "functions": [
                 {
                     "class_name": "PathRestart",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 },
                 {
                     "class_name": "DumpInfo",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 },
                 {
                     "class_name": "StartLog",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 },
                 {
                     "class_name": "StopLog",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 }
             ]
         },
@@ -43,31 +28,19 @@
             "class_name": "AJAOut",
             "allows_cyclic": true,
             "contents_type": "Job",
-            "contents": {
-                "type": "CPU"
-            },
             "description":  "Video output node for AJA cards",
             "functions": [
                 {
                     "class_name": "PathRestart",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 },
                 {
                     "class_name": "StartLog",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 },
                 {
                     "class_name": "StopLog",
-                    "contents_type": "Job",
-                    "contents": {
-                        "type": "CPU"
-                    }
+                    "contents_type": "Job"
                 }
             ]
         }

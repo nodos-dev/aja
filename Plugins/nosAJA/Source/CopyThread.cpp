@@ -5,6 +5,8 @@
 
 #include <chrono>
 
+#include <nosVulkanSubsystem/Helpers.hpp>
+
 namespace nos
 {
 
@@ -238,7 +240,7 @@ void CopyThread::UpdateCurve(enum GammaCurve curve)
 {
 	GammaCurve = curve;
 	auto data = GetGammaLUT(IsInput(), GammaCurve, SSBO_SIZE);
-	auto ptr = nosEngine.Map(&SSBO->Res);
+	auto ptr = nosVulkan->Map(&SSBO->Res);
 	memcpy(ptr, data.data(), data.size() * sizeof(data[0]));
 }
 
@@ -326,7 +328,7 @@ void CopyThread::InputUpdate(AJADevice::Mode &prevMode)
 		nosEngine.SetPinValueByName(Client->Mapping.NodeId,  nos::Name(PinName.AsString() + " Video Format"), nosBuffer{.Data = fmtData.data(), .Size = fmtData.size()});
 	}
 
-	if (Interlaced() ^ IsTextureFieldTypeInterlaced(FieldType))
+	if (Interlaced() ^ vkss::IsTextureFieldTypeInterlaced(FieldType))
 		FieldType = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 
 	if (Mode == AJADevice::AUTO)
@@ -366,7 +368,7 @@ void CopyThread::InputUpdate(AJADevice::Mode &prevMode)
 CopyThread::DMAInfo CopyThread::GetDMAInfo(nosResourceShareInfo& buffer, u32 doubleBufferIndex) const
 {
 	return {
-		.Buffer = (u32*)nosEngine.Map(&buffer),
+		.Buffer = (u32*)nosVulkan->Map(&buffer),
 		.Pitch = CompressedTex->Res.Info.Texture.Width * 4,
 		.Segments = CompressedTex->Res.Info.Texture.Height,
 		.FrameIndex = GetFrameIndex(doubleBufferIndex)
@@ -378,7 +380,7 @@ bool CopyThread::WaitForVBL(nosTextureFieldType writeField)
 	bool ret;
 	if (Interlaced())
 	{
-		auto waitField = Flipped(writeField);
+		auto waitField = vkss::FlippedField(writeField);
 		auto fieldId = GetAJAFieldID(waitField);
 		ret = IsInput() ? Client->Device->WaitForInputFieldID(fieldId, Channel)
 						: Client->Device->WaitForOutputFieldID(fieldId, Channel);
@@ -445,11 +447,11 @@ void CopyThread::AJAInputProc()
 
 		if (!WaitForVBL(FieldType))
 		{
-			FieldType = Flipped(FieldType);
+			FieldType = vkss::FlippedField(FieldType);
 			Orphan(true, "AJA Input has no signal");
 			while (!WaitForVBL(FieldType))
 			{
-				FieldType = Flipped(FieldType);
+				FieldType = vkss::FlippedField(FieldType);
 				if (!Run || GpuRing->Exit || CpuRing->Exit)
 				{
 					goto EXIT;
@@ -516,7 +518,7 @@ void CopyThread::AJAInputProc()
 		params.DispatchSize = GetSuitableDispatchSize();
 		params.TransferInProgress = & TransferInProgress;
 		Worker->Enqueue(params);
-		FieldType = Flipped(FieldType);
+		FieldType = vkss::FlippedField(FieldType);
 	}
 EXIT:
 
@@ -560,7 +562,7 @@ void CopyThread::NotifyRestart(RestartParams const& params)
 		.PinId = id,
 		.Command = NOS_PATH_COMMAND_TYPE_RESTART,
 		.Execution = NOS_PATH_COMMAND_EXECUTION_TYPE_WALKBACK,
-		.Args = nosBuffer { args.data(), args.size() }
+		.Args = nosBuffer { args.Data(), args.Size() }
 	});
 }
 
@@ -575,7 +577,7 @@ void CopyThread::NotifyDrop()
 		.PinId = id,
 		.Command = NOS_PATH_COMMAND_TYPE_NOTIFY_DROP,
 		.Execution = NOS_PATH_COMMAND_EXECUTION_TYPE_NOTIFY_ALL_CONNECTIONS,
-		.Args = nosBuffer { args.data(), args.size() }
+		.Args = nosBuffer { args.Data(), args.Size() }
 	});
 }
 
@@ -683,14 +685,14 @@ void CopyThread::SendDeleteRequest()
 
 void CopyThread::ChangePinResolution(nosVec2u res)
 {
-	fb::TTexture tex;
+	sys::vulkan::TTexture tex;
 	tex.width = res.x;
 	tex.height = res.y;
 	tex.unscaled = true;
 	tex.unmanaged = !IsInput();
-	tex.format = nos::fb::Format::R16G16B16A16_UNORM;
+	tex.format = sys::vulkan::Format::R16G16B16A16_UNORM;
 	flatbuffers::FlatBufferBuilder fbb;
-	fbb.Finish(fb::CreateTexture(fbb, &tex));
+	fbb.Finish(sys::vulkan::CreateTexture(fbb, &tex));
 	auto val = fbb.Release();
 	nosEngine.SetPinValueByName(Client->Mapping.NodeId, PinName, {val.data(), val.size()} );
 }
@@ -713,27 +715,27 @@ void CopyThread::InputConversionThread::Consume(CopyThread::Parameters const& pa
 
 	uint32_t iflags = (params.Interlaced() ? u32(params.FieldType) : 0) | (params.Shader == ShaderType::Comp10) << 2;
 
-	inputs.emplace_back(ShaderBinding(NSN_Colorspace, params.Colorspace));
-	inputs.emplace_back(ShaderBinding(NSN_Source, params.CompressedTex->Res));
-	inputs.emplace_back(ShaderBinding(NSN_Interlaced, iflags));
-	inputs.emplace_back(ShaderBinding(NSN_ssbo, params.SSBO->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.Colorspace));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, params.CompressedTex->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iflags));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, params.SSBO->Res));
 
 	auto MsgKey = "Input " + params.Name + " DMA";
 
 	nosCmd cmd;
-	nosEngine.Begin(&cmd);
+	nosVulkan->Begin("AJA Input YUV Conversion", &cmd);
 
-	nosEngine.Copy(cmd, &sourceCPUSlot->Res, &params.CompressedTex->Res, params.Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(params.Debug)).c_str() : 0);
+	nosVulkan->Copy(cmd, &sourceCPUSlot->Res, &params.CompressedTex->Res, params.Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(params.Debug)).c_str() : 0);
 	if (params.Shader != ShaderType::Frag8)
 	{
-		inputs.emplace_back(ShaderBinding(NSN_Output, destGPURes->Res));
+		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, destGPURes->Res));
 		nosRunComputePassParams pass = {};
 		pass.Key = NSN_AJA_YCbCr2RGB_Compute_Pass;
 		pass.DispatchSize = params.DispatchSize;
 		pass.Bindings = inputs.data();
 		pass.BindingCount = inputs.size();
 		pass.Benchmark = params.Debug;
-		nosEngine.RunComputePass(cmd, &pass);
+		nosVulkan->RunComputePass(cmd, &pass);
 	}
 	else
 	{
@@ -743,9 +745,9 @@ void CopyThread::InputConversionThread::Consume(CopyThread::Parameters const& pa
 		pass.Bindings = inputs.data();
 		pass.BindingCount = inputs.size();
 		pass.Benchmark = params.Debug;
-		nosEngine.RunPass(cmd, &pass);
+		nosVulkan->RunPass(cmd, &pass);
 	}
-	nosEngine.End(cmd);
+	nosVulkan->End(cmd, NOS_FALSE);
 
 	destGPURes->FrameNumber = params.FrameNumber;
 	destGPURes->Res.Info.Texture.FieldType = (nosTextureFieldType)params.FieldType;
@@ -776,9 +778,9 @@ void CopyThread::OutputConversionThread::Consume(const Parameters& params)
 	}
 
 	auto wantedField = params.FieldType;
-	bool outInterlaced = IsTextureFieldTypeInterlaced(wantedField);
+	bool outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
 	auto incomingField = incoming->Res.Info.Texture.FieldType;
-	bool inInterlaced = IsTextureFieldTypeInterlaced(incomingField);
+	bool inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
 	if ((inInterlaced && outInterlaced) && incomingField != wantedField)
 		nosEngine.LogE("%s field mismatch!", Parent->Name().AsCStr());
 	outgoing->Res.Info.Texture.FieldType = wantedField;
@@ -795,25 +797,25 @@ void CopyThread::OutputConversionThread::Consume(const Parameters& params)
 		iflags |= (u32(incomingField) << 2);
 
 	std::vector<nosShaderBinding> inputs;
-	inputs.emplace_back(ShaderBinding(NSN_Colorspace, params.Colorspace));
-	inputs.emplace_back(ShaderBinding(NSN_Source, incoming->Res));
-	inputs.emplace_back(ShaderBinding(NSN_Interlaced, iflags));
-	inputs.emplace_back(ShaderBinding(NSN_ssbo, params.SSBO->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.Colorspace));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, incoming->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iflags));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, params.SSBO->Res));
 
 	nosCmd cmd;
-	nosEngine.Begin(&cmd);
+	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
 
 	// watch out for th members, they are not synced
 	if (params.Shader != ShaderType::Frag8)
 	{
-		inputs.emplace_back(ShaderBinding(NSN_Output, params.CompressedTex->Res));
+		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, params.CompressedTex->Res));
 		nosRunComputePassParams pass = {};
 		pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
 		pass.DispatchSize = params.DispatchSize;
 		pass.Bindings = inputs.data();
 		pass.BindingCount = inputs.size();
 		pass.Benchmark = params.Debug;
-		nosEngine.RunComputePass(cmd, &pass);
+		nosVulkan->RunComputePass(cmd, &pass);
 	}
 	else
 	{
@@ -823,12 +825,12 @@ void CopyThread::OutputConversionThread::Consume(const Parameters& params)
 		pass.Bindings = inputs.data();
 		pass.BindingCount = inputs.size();
 		pass.Benchmark = params.Debug;
-		nosEngine.RunPass(cmd, &pass);
+		nosVulkan->RunPass(cmd, &pass);
 	}
 
-	nosEngine.Copy(cmd, &params.CompressedTex->Res, &outgoing->Res, 0);
-	nosEngine.WaitEvent(params.SubmissionEventHandle);
-	nosEngine.End(cmd);
+	nosVulkan->Copy(cmd, &params.CompressedTex->Res, &outgoing->Res, 0);
+	nosVulkan->WaitEvent(params.SubmissionEventHandle);
+	nosVulkan->End(cmd, NOS_FALSE);
 	params.GR->EndPop(incoming);
 	*params.TransferInProgress = false;
 	params.CR->EndPush(outgoing);
@@ -837,7 +839,7 @@ void CopyThread::OutputConversionThread::Consume(const Parameters& params)
 CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, 
 					   NTV2Channel channel, NTV2VideoFormat initalFmt,
 					   AJADevice::Mode mode, enum class Colorspace colorspace, enum class GammaCurve curve,
-					   bool narrowRange, const fb::Texture* tex)
+					   bool narrowRange, const sys::vulkan::Texture* tex)
 	: PinName(GetChannelStr(channel, mode)), Client(client), PinKind(kind), Channel(channel), SpareCount(spareCount), Mode(mode),
 	  Colorspace(colorspace), GammaCurve(curve), NarrowRange(narrowRange), Format(initalFmt)
 {

@@ -5,7 +5,13 @@
             "version": "1.0.0"
         },
         "display_name": "AJA",
-        "description": "Video I/O plugin for AJA cards."
+        "description": "Video I/O plugin for AJA cards.",
+        "dependencies": [
+            {
+                "name": "nos.sys.vulkan",
+                "version": "0.1.0"
+            }
+        ]
     },
     "node_definitions": [
         "AJA.nosdef"

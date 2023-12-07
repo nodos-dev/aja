@@ -25,15 +25,15 @@ struct TRing
                 Res.Info.Type = NOS_RESOURCE_TYPE_TEXTURE;
                 Res.Info.Texture = r;
             }
-            nosEngine.Create(&Res);
+            nosVulkan->CreateResource(&Res);
         }
         
         ~Resource()
         {
-            nosEngine.Destroy(&Res);
+            nosVulkan->DestroyResource(&Res);
         }
 
-        std::atomic_uint32_t FrameNumber;
+        std::atomic_uint64_t FrameNumber;
         std::atomic_bool written = false;
         std::atomic_bool read = false;
     };
@@ -178,7 +178,7 @@ struct TRing
         Write.CV.notify_one();
     }
 
-    bool CanPop(u32& frameNumber, u32 spare = 0)
+    bool CanPop(u64& frameNumber, u32 spare = 0)
     {
         std::unique_lock lock(Read.Mutex);
         if (Read.Pool.size() > spare)
@@ -206,7 +206,7 @@ struct TRing
         return 0;
     }
 
-    Resource *TryPop(u32& frameNumber, u32 spare = 0)
+    Resource *TryPop(u64& frameNumber, u32 spare = 0)
     {
         if (CanPop(frameNumber, spare))
             return BeginPop();

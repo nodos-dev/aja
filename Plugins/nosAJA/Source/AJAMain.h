@@ -1,29 +1,31 @@
 #pragma once
 
 #include <Nodos/PluginAPI.h>
-#include <Nodos/Helpers.hpp>
+#include <Nodos/PluginHelpers.hpp>
+#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
+extern nosVulkanSubsystem* nosVulkan;
 
-NOS_REGISTER_NAME(Device);
-NOS_REGISTER_NAME(ReferenceSource);
-NOS_REGISTER_NAME(Debug);
-NOS_REGISTER_NAME_SPACED(Dispatch_Size, "Dispatch Size");
-NOS_REGISTER_NAME_SPACED(Shader_Type, "Shader Type");
+extern nos::Name NSN_Device;
+extern nos::Name NSN_ReferenceSource;
+extern nos::Name NSN_Debug;
+extern nos::Name NSN_Dispatch_Size;
+extern nos::Name NSN_Shader_Type;
 
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Shader);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Shader);
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Shader);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Shader);
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Pass);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Pass);
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Pass);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Pass);
+extern nos::Name NSN_AJA_RGB2YCbCr_Compute_Shader;
+extern nos::Name NSN_AJA_YCbCr2RGB_Compute_Shader;
+extern nos::Name NSN_AJA_RGB2YCbCr_Shader;
+extern nos::Name NSN_AJA_YCbCr2RGB_Shader;
+extern nos::Name NSN_AJA_RGB2YCbCr_Compute_Pass;
+extern nos::Name NSN_AJA_YCbCr2RGB_Compute_Pass;
+extern nos::Name NSN_AJA_RGB2YCbCr_Pass;
+extern nos::Name NSN_AJA_YCbCr2RGB_Pass;
 
-NOS_REGISTER_NAME(Colorspace);
-NOS_REGISTER_NAME(Source);
-NOS_REGISTER_NAME(Interlaced);
-NOS_REGISTER_NAME(ssbo);
-NOS_REGISTER_NAME(Output);
+extern nos::Name NSN_Colorspace;
+extern nos::Name NSN_Source;
+extern nos::Name NSN_Interlaced;
+extern nos::Name NSN_ssbo;
+extern nos::Name NSN_Output;
 
-NOS_REGISTER_NAME_SPACED(AJA_AJAIn, "nos.aja.AJAIn");
-NOS_REGISTER_NAME_SPACED(AJA_AJAOut, "nos.aja.AJAOut");
+extern nos::Name NSN_AJA_AJAIn;
+extern nos::Name NSN_AJA_AJAOut;

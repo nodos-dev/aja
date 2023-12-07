@@ -6,6 +6,7 @@
 #include <uuid.h>
 #include <Nodos/PluginAPI.h>
 #include <Nodos/Helpers.hpp>
+#include <nosVulkanSubsystem/Helpers.hpp>
 
 namespace nos
 {
@@ -369,7 +370,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
         {
             prs[channel].spare_count = pin;
         }
-        else if (tyname == "nos.fb.Texture")
+        else if (tyname == "nos.sys.vulkan.Texture")
         {
             prs[channel].pin = pin;
         }
@@ -406,7 +407,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
     {
         auto pin = pr.pin;
         nos::Name name(pin->name()->c_str());
-        auto tex = flatbuffers::GetRoot<nos::fb::Texture>(pin->data()->Data());
+        auto tex = flatbuffers::GetRoot<sys::vulkan::Texture>(pin->data()->Data());
         auto id = *pin->id();
         auto it = Pins.find(name);
 
@@ -663,13 +664,13 @@ void AJAClient::OnCommandFired(u32 cmd)
         Device->GetExtent(format, mode, width, height);
         bool validates = !IsProgressiveTransport(format); // interlaced input and output both validate
 
-        nos::fb::TTexture tex;
-        tex.size = nos::fb::SizePreset::CUSTOM;
+        sys::vulkan::TTexture tex;
+        tex.size = sys::vulkan::SizePreset::CUSTOM;
         tex.width = width;
         tex.height = height;
         tex.unscaled = true;    // Prevent auto-scaling when an output pin is connected to this pin.
         tex.unmanaged = !Input; // do not create resource for this pin, do not assign test signal as well
-        tex.format = nos::fb::Format::R16G16B16A16_UNORM;
+        tex.format = sys::vulkan::Format::R16G16B16A16_UNORM;
         nos::fb::ShowAs showAs = Input ? nos::fb::ShowAs::OUTPUT_PIN : nos::fb::ShowAs::INPUT_PIN;
         nos::fb::CanShowAs canShowAs = Input ? nos::fb::CanShowAs::OUTPUT_PIN_ONLY : nos::fb::CanShowAs::INPUT_PIN_ONLY;
         std::string pinName = (isQuad ? GetQuadName(channel) : ("SingleLink " + std::to_string(channel + 1)));
@@ -686,7 +687,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         std::vector<u8> narrowRangeData = nos::Buffer::From(true);
 
         std::vector<flatbuffers::Offset<nos::fb::Pin>> pins = {
-            nos::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "nos.fb.Texture", showAs, canShowAs, 0, 0, &data,
+            nos::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "nos.sys.vulkan.Texture", showAs, canShowAs, 0, 0, &data,
                                     0, 0, 0, 0, 0, 0, 0, 0, 0, true, fb::PinContents::NONE, 0, 0, validates),
             nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Size").c_str(), "uint",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
@@ -867,10 +868,11 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     if (pinNameStr.ends_with("Ring Size"))
     {
         auto pin = FindChannel(ParseChannel(pinNameStr));
-        pin->NotifyRestart(RestartParams{
-            .UpdateFlags = RestartParams::UpdateRingSize,
-            .RingSize = *(u32*)value,
-        });
+		if (pin->RingSize != *(u32*)value)
+            pin->NotifyRestart(RestartParams{
+                .UpdateFlags = RestartParams::UpdateRingSize,
+                .RingSize = *(u32*)value,
+            });
     }
 	if (pinNameStr.ends_with("Ring Spare Count"))
     {
@@ -893,7 +895,9 @@ void AJAClient::OnExecute()
 
 bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 {
-    GPURing::Resource *sourceSlot = 0;
+	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
+
+	GPURing::Resource *sourceSlot = 0;
     auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
         return false;
@@ -902,16 +906,17 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	auto effectiveSpareCount = th->SpareCount * (1 + u32(th->Interlaced()));
 	if ((sourceSlot = th->GpuRing->TryPop(cpy.FrameNumber, effectiveSpareCount)))
 	{
-        cpy.CopyTextureTo = DeserializeTextureInfo(cpy.SrcPinData.Data);
-		cpy.CopyTextureFrom = sourceSlot->Res;
-        cpy.ShouldSetSourceFrameNumber = true;
-		cpy.ShouldSubmitOnly = true;
+        texCpy.CopyTextureTo = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
+		texCpy.CopyTextureFrom = sourceSlot->Res;
+        cpy.CopyFromOptions.ShouldSetSourceFrameNumber = true;
+		texCpy.ShouldSubmitOnly = true;
     }
-    return cpy.ShouldCopyTexture = !!(cpy.Data = sourceSlot);
+    return texCpy.ShouldCopyTexture = !!(cpy.CustomData = sourceSlot);
 }
 
 bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 {
+	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
     GPURing::Resource *slot = 0;
     auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
@@ -923,54 +928,55 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
         th->FieldType = NOS_TEXTURE_FIELD_TYPE_EVEN;
 
     auto wantedField = th->FieldType;
-    auto outInterlaced = IsTextureFieldTypeInterlaced(wantedField);
-    auto incomingTextureInfo = DeserializeTextureInfo(cpy.SrcPinData.Data);
+    auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
+    auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
     auto incomingField = incomingTextureInfo.Info.Texture.FieldType;
-    auto inInterlaced = IsTextureFieldTypeInterlaced(incomingField);
+    auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
     if ((inInterlaced && outInterlaced) && incomingField != wantedField)
     {
         nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
-        cpy.Stop = false;
+        cpy.CopyToOptions.Stop = false;
     }
     else if ((th->EffectiveRingSize > th->TotalFrameCount()) && (slot = th->GpuRing->TryPush()))
 	{
 		slot->FrameNumber = cpy.FrameNumber;
-		cpy.CopyTextureFrom = DeserializeTextureInfo(cpy.SrcPinData.Data);
-		slot->Res.Info.Texture.FieldType = cpy.CopyTextureFrom.Info.Texture.FieldType;
-		cpy.CopyTextureTo = slot->Res;
-		cpy.ShouldSubmitAndSignalEvent = true;
+		texCpy.CopyTextureFrom = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
+		slot->Res.Info.Texture.FieldType = texCpy.CopyTextureFrom.Info.Texture.FieldType;
+		texCpy.CopyTextureTo = slot->Res;
+		texCpy.ShouldSubmitAndSignalEvent = true;
 	}
     else
-        cpy.Stop = true;
-    return cpy.ShouldCopyTexture = !!(cpy.Data = slot);
+        cpy.CopyToOptions.Stop = true;
+    return texCpy.ShouldCopyTexture = !!(cpy.CustomData = slot);
 }
 
 void AJAClient::EndCopyFrom(nosCopyInfo &cpy)
 {
-    if(!cpy.Data) 
+    if(!cpy.CustomData) 
         return;
     auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
         return;
 
     auto th = it->second;
-    auto res = (GPURing::Resource *)cpy.Data;
+    auto res = (GPURing::Resource *)cpy.CustomData;
     th->GpuRing->EndPop(res);
 }
 
 void AJAClient::EndCopyTo(nosCopyInfo& cpy)
 {
-	if (!cpy.Data)
+	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
+	if (!cpy.CustomData)
 		return;
 	auto it = Pins.find(cpy.Name);
 	if (it == Pins.end())
 		return;
 
 	auto th = it->second;
-	auto res = (GPURing::Resource*)cpy.Data;
+	auto res = (GPURing::Resource*)cpy.CustomData;
     th->GpuRing->EndPush(res);
 
-    cpy.Stop = th->TotalFrameCount() >= th->EffectiveRingSize;
+    cpy.CopyToOptions.Stop = th->TotalFrameCount() >= th->EffectiveRingSize;
 
     CopyThread::Parameters params = {};
     params.FieldType = th->FieldType;
@@ -984,14 +990,14 @@ void AJAClient::EndCopyTo(nosCopyInfo& cpy)
     params.Debug = Debug;
     params.DispatchSize = th->GetSuitableDispatchSize();
     params.TransferInProgress = &th->TransferInProgress;
-    params.SubmissionEventHandle = cpy.CopySubmitEvent;
+    params.SubmissionEventHandle = texCpy.CopySubmitEvent;
     params.DeltaSeconds = th->GetDeltaSeconds();
 	th->Worker->Enqueue(params);
-    th->FieldType = Flipped(th->FieldType);
+    th->FieldType = vkss::FlippedField(th->FieldType);
 }
 
 void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
-    const fb::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode, Colorspace cs, GammaCurve gc, bool range, unsigned spareCount)
+    const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode, Colorspace cs, GammaCurve gc, bool range, unsigned spareCount)
 {
     auto th = MakeShared<CopyThread>(this, ringSize, spareCount, 
                                      pin->show_as(), channel, fmt, mode, cs, gc, range, tex);
