@@ -425,13 +425,13 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
                 if (pr.frame_rate && flatbuffers::IsFieldPresent(pr.frame_rate, nos::fb::Pin::VT_DATA))
                 {
                     fmt = AJADevice::GetMatchingFormat((const char*)(pr.frame_rate->data()->Data()), AJADevice::IsQuad(mode));
-                    nosEngine.LogI("AJA: Route output %s with framerate %s", NTV2ChannelToString(channel, true).c_str(),
+                    nosEngine.LogI("Route output %s with framerate %s", NTV2ChannelToString(channel, true).c_str(),
 								  NTV2VideoFormatToString(fmt, true).c_str());
                 }
                 break;
             }
             case nos::fb::ShowAs::OUTPUT_PIN:
-				nosEngine.LogI("AJA: Route input %s", NTV2ChannelToString(channel, true).c_str());
+				nosEngine.LogI("Route input %s", NTV2ChannelToString(channel, true).c_str());
                 break;
             }
           
@@ -741,14 +741,14 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
     auto pinNameOpt = Mapping.GetPinName(pinId);
     if (!pinNameOpt)
     {
-        nosEngine.LogD("AJA: Path command on unknown pin: %s", UUID2STR(pinId).c_str());
+        nosEngine.LogD("Path command on unknown pin: %s", UUID2STR(pinId).c_str());
         return;
     }
     auto pinName = *pinNameOpt;
 	auto result = Pins.find(pinName);
 	if (result == Pins.end())
 	{
-        nosEngine.LogD("AJA: Path command on unknown pin: %s", pinName.AsCStr());
+        nosEngine.LogD("Path command on unknown pin: %s", pinName.AsCStr());
 		return;
 	}
     auto copyThread = result->second;
