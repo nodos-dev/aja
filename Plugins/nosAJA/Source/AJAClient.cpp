@@ -374,7 +374,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
         {
             prs[channel].pin = pin;
         }
-        else if (tyname == "nos.fb.QuadLinkMode" || tyname == "nos.fb.QuadLinkInputMode")
+        else if (tyname == "nos.aja.QuadLinkMode" || tyname == "nos.aja.QuadLinkInputMode")
         {
             prs[channel].quad_mode = pin;
         }
@@ -713,7 +713,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         {
             std::vector<u8> data = nos::Buffer::From(mode);
             pins.push_back(nos::fb::CreatePinDirect(
-                fbb, generator(), (pinName + " Mode").c_str(), Input ? "nos.fb.QuadLinkInputMode" : "nos.fb.QuadLinkMode",
+                fbb, generator(), (pinName + " Mode").c_str(), Input ? "nos.aja.QuadLinkInputMode" : "nos.aja.QuadLinkMode",
                 nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::PROPERTY_ONLY, 0, 0, &data));
         }
 

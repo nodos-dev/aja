@@ -30,3 +30,16 @@ enum Shader : uint {
     Comp8  = 1,
     Comp10 = 2,
 }
+
+enum QuadLinkMode : uint
+{
+    Tsi = 0,
+    Squares = 1,
+}
+
+enum QuadLinkInputMode : uint
+{
+    Tsi = 0,
+    Squares = 1,
+    Auto = 2,
+}
