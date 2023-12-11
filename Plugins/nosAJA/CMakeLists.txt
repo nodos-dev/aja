@@ -20,6 +20,9 @@ include(AJAVersionConfig)
 include(GNUInstallDirs)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
 
+get_targets(NOSAJA_EXTERNAL_TARGETS "./External/ntv2/ajalibraries")
+group_targets("${NOSAJA_EXTERNAL_TARGETS}" "External")
+
 set(CMAKE_DEBUG_POSTFIX "")
 
 list(APPEND DEPENDENCIES stb ajantv2)
