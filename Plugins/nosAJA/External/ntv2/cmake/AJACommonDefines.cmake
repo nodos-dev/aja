@@ -1,13 +1,7 @@
 # Common preprocessor defines
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    aja_message(STATUS "Build Type: Debug")
-    add_definitions(-DAJA_DEBUG -D_DEBUG)
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    aja_message(STATUS "Build Type: Release with Debug Symbols")
-else()
-    aja_message(STATUS "Build Type: Release")
-    add_definitions(-DNDEBUG)
-endif()
+add_compile_definitions(
+	$<$<CONFIG:DEBUG>:AJA_DEBUG> $<$<CONFIG:DEBUG>:_DEBUG> 
+	$<$<CONFIG:RELEASE>:NDEBUG> $<$<CONFIG:MINSIZEREL>:NDEBUG>)
 # Platform-specific preprocessor defines
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(
