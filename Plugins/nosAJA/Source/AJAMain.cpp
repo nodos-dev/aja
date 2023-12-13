@@ -230,10 +230,6 @@ struct AJA
         return NOS_RESULT_SUCCESS;
     }
     static nosResult  ExecuteNode(void* ctx, const nosNodeExecuteArgs * args) { return NOS_RESULT_SUCCESS; }
-    static nosResult  CanCopy(void* ctx, nosCopyInfo * copyInfo)
-    { 
-        return NOS_RESULT_SUCCESS;
-    }
 
     static nosResult  BeginCopyFrom(void* ctx, nosCopyInfo * cpy)
     { 
@@ -298,7 +294,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
     ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;
     ajaIn->ExecuteNode = ajaOut->ExecuteNode = AJA::ExecuteNode;
-    ajaIn->CanCopy = ajaOut->CanCopy = AJA::CanCopy;
     ajaIn->BeginCopyFrom = ajaOut->BeginCopyFrom = AJA::BeginCopyFrom;
     ajaIn->BeginCopyTo = ajaOut->BeginCopyTo = AJA::BeginCopyTo;
     ajaIn->EndCopyFrom = ajaOut->EndCopyFrom = AJA::EndCopyFrom;
