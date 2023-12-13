@@ -467,6 +467,9 @@ void CopyThread::AJAInputProc()
 			continue;
 		}
 
+		if (slot->Params.WaitEvent)
+			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+
 		slot->FrameNumber = frameCount;
 
 		util::Stopwatch swDma;
@@ -608,7 +611,7 @@ void CopyThread::AJAOutputProc()
 			Ring->EndPop(slot);
 			break;
 		}
-		nosVulkan->WaitGpuEvent(&slot->Params.OutWaitEvent);
+		nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
 		
 		ULWord vblCount;
 		Client->Device->GetOutputVerticalInterruptCount(vblCount, Channel);

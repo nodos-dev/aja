@@ -927,7 +927,11 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 
 	nosCmd cmd;
 	nosVulkan->Begin("AJA Input YUV Conversion", &cmd);
-	nosVulkan->Copy(cmd, &slot->Res, &th->CompressedTex->Res, Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(Debug)).c_str() : 0);
+	nosVulkan->Copy(cmd,
+					&slot->Res,
+					&th->CompressedTex->Res,
+					Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(Debug)).c_str() : 0);
+
 	if (Shader != ShaderType::Frag8)
 	{
 		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, outPinResource));
@@ -949,8 +953,10 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 		pass.Benchmark = Debug;
 		nosVulkan->RunPass(cmd, &pass);
 	}
-	nosVulkan->End2(cmd, NOS_FALSE, nullptr);
-	
+	nosGPUEvent event{};
+	nosVulkan->End2(cmd, NOS_FALSE, &event);
+	slot->Params.WaitEvent = event;
+
 	cpy.FrameNumber = slot->FrameNumber;
     cpy.CopyFromOptions.ShouldSetSourceFrameNumber = true;
 	cpy.CustomData = slot;
@@ -1039,7 +1045,7 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 
 	nosVulkan->Begin("AJA Output Ring Copy", &cmd);
 	nosVulkan->Copy(cmd, &th->CompressedTex->Res, &outgoing->Res, 0);
-	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.OutWaitEvent); // Wait in DMA thread.
+	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
 	
 	return true;
 }
