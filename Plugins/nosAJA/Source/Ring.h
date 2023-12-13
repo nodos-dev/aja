@@ -12,6 +12,11 @@ struct TRing
     struct Resource
     {
         nosResourceShareInfo Res;
+	    struct {
+		    nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
+        	glm::mat4 ColorspaceMatrix;
+	    	nosGPUEvent OutWaitEvent;
+	    } Params {};
 
         Resource(T r) : Res{}
         {

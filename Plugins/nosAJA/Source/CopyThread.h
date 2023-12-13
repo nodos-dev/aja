@@ -22,11 +22,9 @@ struct CopyThread
     nos::fb::ShowAs PinKind;
 
 	// Ring
-    rc<GPURing> GpuRing;
-    rc<CPURing> CpuRing;
+    rc<CPURing> Ring;
 	u32 RingSize = 0;
 	u32 EffectiveRingSize = 0;
-	std::atomic_bool TransferInProgress = false; // TODO: Combine these rings into a double ring structure
 	// The ring objects above are overwritten on path restart.
 	// TODO: Find out other synchronization issues and fix them all
     std::atomic_uint32_t SpareCount = 0;
@@ -52,47 +50,6 @@ struct CopyThread
 		u32 Counter;
 	} DebugInfo;
 
-	struct Parameters
-	{
-		nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
-		u32 FrameNumber;
-		Clock::time_point T0;
-		Clock::time_point T1;
-		rc<GPURing> GR;
-		rc<CPURing> CR;
-		glm::mat4 Colorspace;
-		ShaderType Shader;
-		rc<GPURing::Resource> CompressedTex;
-		rc<CPURing::Resource> SSBO;
-		std::string Name;
-		uint32_t Debug = 0;
-		nosVec2u DispatchSize;
-		std::atomic_bool* TransferInProgress = 0;
-		uint64_t SubmissionEventHandle;
-		nos::fb::vec2u DeltaSeconds;
-
-		bool Interlaced() const { return !(FieldType == NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE || FieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN); }
-	};
-
-	struct ConversionThread : ConsumerThread<Parameters>
-	{
-		ConversionThread(CopyThread* parent) : Parent(parent) {}
-		virtual ~ConversionThread();
-		std::thread Handle;
-		CopyThread* Parent;
-	};
-	struct InputConversionThread : ConversionThread
-	{
-		using ConversionThread::ConversionThread;
-		void Consume(const Parameters& item) override;
-	};
-	struct OutputConversionThread : ConversionThread
-	{
-		using ConversionThread::ConversionThread;
-		void Consume(const Parameters& item) override;
-	};
-
-	ru<ConversionThread> Worker;
 	nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 
     CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 

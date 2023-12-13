@@ -6,6 +6,7 @@
 #include <chrono>
 
 #include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosUtil/Stopwatch.hpp>
 
 namespace nos
 {
@@ -129,22 +130,15 @@ bool CopyThread::Interlaced() const
 
 void CopyThread::StartThread()
 {
-	if (IsInput())
-		Worker = std::make_unique<InputConversionThread>(this);
-	else
-		Worker = std::make_unique<OutputConversionThread>(this);
-	CpuRing->Exit = false;
-	GpuRing->Exit = false;
+	Ring->Exit = false;
 	Run = true;
 	std::string threadName("AJA ");
 	threadName += IsInput() ? "In" : "Out";
 	threadName += ": " + Name().AsString();
 
 	Thread = std::thread([this, threadName] {
-		Worker->Start();
 		flatbuffers::FlatBufferBuilder fbb;
 		// TODO: Add nosEngine.SetThreadName call.
-		HandleEvent(CreateAppEvent(fbb, nos::app::CreateSetThreadNameDirect(fbb, (u64)Worker->GetNativeHandle(), (threadName + " Conversion Thread").c_str())));
 		switch (this->PinKind)
 		{
 		default:
@@ -156,7 +150,6 @@ void CopyThread::StartThread()
 			this->AJAInputProc();
 			break;
 		}
-		Worker->Stop();
 	});
 
 	flatbuffers::FlatBufferBuilder fbb;
@@ -173,8 +166,7 @@ nosVec2u CopyThread::Extent() const
 void CopyThread::Stop()
 {
 	Run = false;
-	GpuRing->Stop();
-	CpuRing->Stop();
+	Ring->Stop();
 	if (Thread.joinable())
 		Thread.join();
 }
@@ -304,9 +296,8 @@ void CopyThread::CreateRings()
 {
 	EffectiveRingSize = RingSize * (1 + uint32_t(Interlaced()));
 	const auto ext = Extent();
-	GpuRing = MakeShared<GPURing>(ext, EffectiveRingSize);
 	nosVec2u compressedExt((10 == BitWidth()) ? ((ext.x + (48 - ext.x % 48) % 48) / 3) << 1 : ext.x >> 1, ext.y >> u32(Interlaced()));
-	CpuRing = MakeShared<CPURing>(compressedExt, EffectiveRingSize);
+	Ring = MakeShared<CPURing>(compressedExt, EffectiveRingSize);
 	nosTextureInfo info = {};
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
@@ -412,8 +403,6 @@ void CopyThread::AJAInputProc()
 
 	FieldType = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 
-	Parameters params = {};
-
 	WaitForVBL(FieldType);
 
 	DebugInfo.Time = std::chrono::nanoseconds(0);
@@ -424,7 +413,7 @@ void CopyThread::AJAInputProc()
 
 	u64 frameCount = 0;
 
-	while (Run && !GpuRing->Exit)
+	while (Run && !Ring->Exit)
 	{
 		SendRingStats();
 
@@ -435,7 +424,7 @@ void CopyThread::AJAInputProc()
 			Orphan(true, "Quad - Single link mismatch");
 			do
 			{
-				if (!Run || GpuRing->Exit || CpuRing->Exit)
+				if (!Run || Ring->Exit)
 				{
 					goto EXIT;
 				}
@@ -452,7 +441,7 @@ void CopyThread::AJAInputProc()
 			while (!WaitForVBL(FieldType))
 			{
 				FieldType = vkss::FlippedField(FieldType);
-				if (!Run || GpuRing->Exit || CpuRing->Exit)
+				if (!Run || Ring->Exit)
 				{
 					goto EXIT;
 				}
@@ -463,22 +452,25 @@ void CopyThread::AJAInputProc()
 			Orphan(false);
 		}
 
-		params.FrameNumber = frameCount++;
 
 		int ringSize = EffectiveRingSize;
 		int totalFrameCount = TotalFrameCount();
 
-		CPURing::Resource* targetCpuRingSlot = nullptr;
-		if (totalFrameCount >= ringSize || (!(targetCpuRingSlot = CpuRing->TryPush())))
+		frameCount++;
+
+		CPURing::Resource* slot = nullptr;
+		if (totalFrameCount >= ringSize || (!(slot = Ring->TryPush())))
 		{
 			DropCount++;
-			GpuRing->ResetFrameCount = true;
+			Ring->ResetFrameCount = true;
 			framesSinceLastDrop = 0;
 			continue;
 		}
 
-		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(targetCpuRingSlot->Res, doubleBufferIndex);
-		params.T0 = Clock::now();
+		slot->FrameNumber = frameCount;
+
+		util::Stopwatch swDma;
+		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
 		{
 			auto fieldId = (u32(FieldType) - 1);
@@ -493,8 +485,12 @@ void CopyThread::AJAInputProc()
 		}
 		else
 			Client->Device->DMAReadFrame(FrameIndex, Buf, Pitch * Segments, Channel);
+		nosEngine.WatchLog("AJA Input DMA Time", swDma.ElapsedString().c_str());
+		
+		slot->Params.FieldType = FieldType;
+		slot->Params.ColorspaceMatrix = glm::inverse(GetMatrix<f64>());
+		Ring->EndPush(slot);
 
-		CpuRing->EndPush(targetCpuRingSlot);
 		++framesSinceLastDrop;
 		if (DropCount && framesSinceLastDrop == 50)
 			NotifyDrop();
@@ -504,26 +500,12 @@ void CopyThread::AJAInputProc()
 			SetFrame(doubleBufferIndex);
 			doubleBufferIndex ^= 1;
 		}
-
-		params.FieldType = FieldType;
-		params.T1 = Clock::now();
-		params.GR = GpuRing;
-		params.CR = CpuRing;
-		params.Colorspace = glm::inverse(GetMatrix<f64>());
-		params.Shader = Client->Shader;
-		params.CompressedTex = CompressedTex;
-		params.SSBO = SSBO;
-		params.Name = Name();
-		params.Debug = Client->Debug;
-		params.DispatchSize = GetSuitableDispatchSize();
-		params.TransferInProgress = & TransferInProgress;
-		Worker->Enqueue(params);
+		
 		FieldType = vkss::FlippedField(FieldType);
 	}
 EXIT:
 
-	CpuRing->Stop();
-	GpuRing->Stop();
+	Ring->Stop();
 
 	if (Run)
 	{
@@ -572,7 +554,7 @@ void CopyThread::NotifyDrop()
 		return;
 	nosEngine.LogW("%s is notifying path about a drop event", Name().AsCStr());
 	auto id = Client->GetPinId(nos::Name(Name()));
-	auto args = Buffer::From(GpuRing->Size);
+	auto args = Buffer::From(Ring->Size);
 	nosEngine.SendPathCommand(nosPathCommand{
 		.PinId = id,
 		.Command = NOS_PATH_COMMAND_TYPE_NOTIFY_DROP,
@@ -583,8 +565,7 @@ void CopyThread::NotifyDrop()
 
 u32 CopyThread::TotalFrameCount()
 {
-	assert(CpuRing->TotalFrameCount() + GpuRing->TotalFrameCount() != 0 || !TransferInProgress);
-	return std::max(0, int(CpuRing->TotalFrameCount() + GpuRing->TotalFrameCount()) - (TransferInProgress ? 1 : 0));
+	return Ring->TotalFrameCount();
 }
 
 void CopyThread::AJAOutputProc()
@@ -597,7 +578,7 @@ void CopyThread::AJAOutputProc()
 	Orphan(false);
 	nosEngine.LogI("AJAOut (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
-	while (Run && !CpuRing->Exit && TotalFrameCount() < EffectiveRingSize)
+	while (Run && !Ring->Exit && TotalFrameCount() < EffectiveRingSize)
 		std::this_thread::yield();
 
 	//Reset interrupt event status
@@ -610,24 +591,25 @@ void CopyThread::AJAOutputProc()
 	DropCount = 0;
 	u32 framesSinceLastDrop = 0;
 
-	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
-
-	while (Run && !CpuRing->Exit)
+	while (Run && !Ring->Exit)
 	{
 		SendRingStats();
 
 		ULWord lastVBLCount;
 		Client->Device->GetOutputVerticalInterruptCount(lastVBLCount, Channel);
 
-		auto *sourceCpuRingSlot = CpuRing->BeginPop();
-		if (!sourceCpuRingSlot)
+		auto *slot = Ring->BeginPop();
+		if (!slot)
 			continue;
+		const auto field = slot->Params.FieldType;
 
-		auto field = sourceCpuRingSlot->Res.Info.Texture.FieldType;
-
-		if (!WaitForVBL(field))
+		if (!WaitForVBL(field) || Ring->Exit)
+		{
+			Ring->EndPop(slot);
 			break;
-
+		}
+		nosVulkan->WaitGpuEvent(&slot->Params.OutWaitEvent);
+		
 		ULWord vblCount;
 		Client->Device->GetOutputVerticalInterruptCount(vblCount, Channel);
 		
@@ -636,19 +618,20 @@ void CopyThread::AJAOutputProc()
 		{
 			DropCount += vblCount - lastVBLCount - 1 - Interlaced();
 			framesSinceLastDrop = 0;
-			nosEngine.LogW("AJA Out: %s dropped while waiting for a frame", Name().AsCStr());
+			nosEngine.LogW("Out: %s dropped while waiting for a frame", Name().AsCStr());
 		}
 		else
 		{
 			++framesSinceLastDrop;
 			if (DropCount && framesSinceLastDrop == 50)
 			{
-				nosEngine.LogE("AJA Out: %s dropped frames, notifying restart", Name().AsCStr());
+				nosEngine.LogE("Out: %s dropped frames, notifying restart", Name().AsCStr());
 				NotifyRestart({});
 			}
 		}
 
-		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(sourceCpuRingSlot->Res, doubleBufferIndex);
+		util::Stopwatch swDma;
+		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
 		{
 			auto fieldId = GetAJAFieldID(field);
@@ -656,17 +639,17 @@ void CopyThread::AJAOutputProc()
 		}
 		else
 			Client->Device->DMAWriteFrame(FrameIndex, Buf, Pitch * Segments, Channel);
+		nosEngine.WatchLog("AJA Output DMA Time", swDma.ElapsedString().c_str());
 		
 		if (!Interlaced())
 		{
 			SetFrame(doubleBufferIndex);
 			doubleBufferIndex ^= 1;
 		}
-		CpuRing->EndPop(sourceCpuRingSlot);
+		Ring->EndPop(slot);
 		HandleEvent(hungerSignal);
 	}
-	GpuRing->Stop();
-	CpuRing->Stop();
+	Ring->Stop();
 
 	HandleEvent(CreateAppEvent(fbb, 
 		nos::app::CreateScheduleRequest(fbb, nos::app::ScheduleRequestKind::PIN, &id, true)));
@@ -695,145 +678,6 @@ void CopyThread::ChangePinResolution(nosVec2u res)
 	fbb.Finish(sys::vulkan::CreateTexture(fbb, &tex));
 	auto val = fbb.Release();
 	nosEngine.SetPinValueByName(Client->Mapping.NodeId, PinName, {val.data(), val.size()} );
-}
-
-void CopyThread::InputConversionThread::Consume(CopyThread::Parameters const& params)
-{
-	auto* sourceCPUSlot = params.CR->BeginPop();
-	if (!sourceCPUSlot)
-		return;
-	*params.TransferInProgress = true;
-	auto* destGPURes = params.GR->BeginPush();
-	if (!destGPURes)
-	{
-		params.CR->EndPop(sourceCPUSlot);
-		*params.TransferInProgress = false;
-		return;
-	}
-
-	std::vector<nosShaderBinding> inputs;
-
-	uint32_t iflags = (params.Interlaced() ? u32(params.FieldType) : 0) | (params.Shader == ShaderType::Comp10) << 2;
-
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.Colorspace));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, params.CompressedTex->Res));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iflags));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, params.SSBO->Res));
-
-	auto MsgKey = "Input " + params.Name + " DMA";
-
-	nosCmd cmd;
-	nosVulkan->Begin("AJA Input YUV Conversion", &cmd);
-
-	nosVulkan->Copy(cmd, &sourceCPUSlot->Res, &params.CompressedTex->Res, params.Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(params.Debug)).c_str() : 0);
-	if (params.Shader != ShaderType::Frag8)
-	{
-		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, destGPURes->Res));
-		nosRunComputePassParams pass = {};
-		pass.Key = NSN_AJA_YCbCr2RGB_Compute_Pass;
-		pass.DispatchSize = params.DispatchSize;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = params.Debug;
-		nosVulkan->RunComputePass(cmd, &pass);
-	}
-	else
-	{
-		nosRunPassParams pass = {};
-		pass.Key = NSN_AJA_YCbCr2RGB_Pass;
-		pass.Output = destGPURes->Res;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = params.Debug;
-		nosVulkan->RunPass(cmd, &pass);
-	}
-	nosVulkan->End(cmd, NOS_FALSE);
-
-	destGPURes->FrameNumber = params.FrameNumber;
-	destGPURes->Res.Info.Texture.FieldType = (nosTextureFieldType)params.FieldType;
-	params.GR->EndPush(destGPURes);
-	*params.TransferInProgress = false;
-	params.CR->EndPop(sourceCPUSlot);
-}
-
-CopyThread::ConversionThread::~ConversionThread()
-{
-	Stop();
-}
-
-void CopyThread::OutputConversionThread::Consume(const Parameters& params)
-{
-	auto incoming = params.GR->BeginPop();
-	if (!incoming)
-		return;
-
-	*params.TransferInProgress = true;
-
-	auto outgoing = params.CR->BeginPush();
-	if (!outgoing)
-	{
-		params.GR->EndPop(incoming);
-		*params.TransferInProgress = false;
-		return;
-	}
-
-	auto wantedField = params.FieldType;
-	bool outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
-	auto incomingField = incoming->Res.Info.Texture.FieldType;
-	bool inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
-	if ((inInterlaced && outInterlaced) && incomingField != wantedField)
-		nosEngine.LogE("%s field mismatch!", Parent->Name().AsCStr());
-	outgoing->Res.Info.Texture.FieldType = wantedField;
-	
-	// 0th bit: is out even
-	// 1st bit: is out odd
-	// 2nd bit: is input even
-	// 3rd bit: is input odd
-	// 4th bit: comp10
-	uint32_t iflags = ((params.Shader == ShaderType::Comp10) << 4);
-	if (outInterlaced)
-		iflags |= u32(wantedField);
-	if (inInterlaced)
-		iflags |= (u32(incomingField) << 2);
-
-	std::vector<nosShaderBinding> inputs;
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.Colorspace));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, incoming->Res));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iflags));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, params.SSBO->Res));
-
-	nosCmd cmd;
-	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
-
-	// watch out for th members, they are not synced
-	if (params.Shader != ShaderType::Frag8)
-	{
-		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, params.CompressedTex->Res));
-		nosRunComputePassParams pass = {};
-		pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
-		pass.DispatchSize = params.DispatchSize;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = params.Debug;
-		nosVulkan->RunComputePass(cmd, &pass);
-	}
-	else
-	{
-		nosRunPassParams pass = {};
-		pass.Key = NSN_AJA_RGB2YCbCr_Pass;
-		pass.Output = params.CompressedTex->Res;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = params.Debug;
-		nosVulkan->RunPass(cmd, &pass);
-	}
-
-	nosVulkan->Copy(cmd, &params.CompressedTex->Res, &outgoing->Res, 0);
-	nosVulkan->WaitEvent(params.SubmissionEventHandle);
-	nosVulkan->End(cmd, NOS_FALSE);
-	params.GR->EndPop(incoming);
-	*params.TransferInProgress = false;
-	params.CR->EndPush(outgoing);
 }
 
 CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, 
@@ -894,14 +738,8 @@ u32 CopyThread::BitWidth() const
 }
 
 void CopyThread::SendRingStats() {
-	auto cpuRingReadSize = CpuRing->Read.Pool.size();
-	auto gpuRingWriteSize = GpuRing->Write.Pool.size();
-	auto cpuRingWriteSize = CpuRing->Write.Pool.size();
-	auto gpuRingReadSize = GpuRing->Read.Pool.size();
-	nosEngine.WatchLog((Name().AsString() + " CPU Ring Read Size").c_str(), std::to_string(cpuRingReadSize).c_str());
-	nosEngine.WatchLog((Name().AsString() + " CPU Ring Write Size").c_str(), std::to_string(cpuRingWriteSize).c_str());
-	nosEngine.WatchLog((Name().AsString() + " GPU Ring Read Size").c_str(), std::to_string(gpuRingReadSize).c_str());
-	nosEngine.WatchLog((Name().AsString() + " GPU Ring Write Size").c_str(), std::to_string(gpuRingWriteSize).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Ring Read Size").c_str(), std::to_string(Ring->Read.Pool.size()).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Ring Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
 	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(TotalFrameCount()).c_str());
 }
 
