@@ -933,27 +933,15 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 					&th->CompressedTex->Res,
 					Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(Debug)).c_str() : 0);
 
-	if (Shader != ShaderType::Frag8)
-	{
-		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, outPinResource));
-		nosRunComputePassParams pass = {};
-		pass.Key = NSN_AJA_YCbCr2RGB_Compute_Pass;
-		pass.DispatchSize = th->GetSuitableDispatchSize();
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = Debug;
-		nosVulkan->RunComputePass(cmd, &pass);
-	}
-	else
-	{
-		nosRunPassParams pass = {};
-		pass.Key = NSN_AJA_YCbCr2RGB_Pass;
-		pass.Output = outPinResource;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = Debug;
-		nosVulkan->RunPass(cmd, &pass);
-	}
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, outPinResource));
+	nosRunComputePassParams pass = {};
+	pass.Key = NSN_AJA_YCbCr2RGB_Compute_Pass;
+	pass.DispatchSize = th->GetSuitableDispatchSize();
+	pass.Bindings = inputs.data();
+	pass.BindingCount = inputs.size();
+	pass.Benchmark = Debug;
+	nosVulkan->RunComputePass(cmd, &pass);
+
 	nosGPUEvent event{};
 	nosVulkan->End2(cmd, NOS_FALSE, &event);
 	slot->Params.WaitEvent = event;
@@ -1018,27 +1006,14 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
 
 	// watch out for th members, they are not synced
-	if (Shader != ShaderType::Frag8)
-	{
-		inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->CompressedTex->Res));
-		nosRunComputePassParams pass = {};
-		pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
-		pass.DispatchSize = th->GetSuitableDispatchSize();
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = Debug;
-		nosVulkan->RunComputePass(cmd, &pass);
-	}
-	else
-	{
-		nosRunPassParams pass = {};
-		pass.Key = NSN_AJA_RGB2YCbCr_Pass;
-		pass.Output = th->CompressedTex->Res;
-		pass.Bindings = inputs.data();
-		pass.BindingCount = inputs.size();
-		pass.Benchmark = Debug;
-		nosVulkan->RunPass(cmd, &pass);
-	}
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->CompressedTex->Res));
+	nosRunComputePassParams pass = {};
+	pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
+	pass.DispatchSize = th->GetSuitableDispatchSize();
+	pass.Bindings = inputs.data();
+	pass.BindingCount = inputs.size();
+	pass.Benchmark = Debug;
+	nosVulkan->RunComputePass(cmd, &pass);
 	nosVulkan->End(cmd, NOS_TRUE);
 
 	nosVulkan->Begin("AJA Output Ring Copy", &cmd);

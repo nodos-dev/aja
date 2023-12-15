@@ -26,7 +26,6 @@ enum GammaCurve : uint {
 }
 
 enum Shader : uint {
-    Frag8  = 0,
     Comp8  = 1,
     Comp10 = 2,
 }

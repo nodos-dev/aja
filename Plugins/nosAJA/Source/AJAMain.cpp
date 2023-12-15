@@ -5,9 +5,9 @@
 #include "AJAClient.h"
 
 #include "../Shaders/RGB2YCbCr.comp.spv.dat"
-#include "../Shaders/RGB2YCbCr.frag.spv.dat"
 #include "../Shaders/YCbCr2RGB.comp.spv.dat"
-#include "../Shaders/YCbCr2RGB.frag.spv.dat"
+// #include "../Shaders/RGB2YCbCr.frag.spv.dat"
+// #include "../Shaders/YCbCr2RGB.frag.spv.dat"
 
 #include <Nodos/PluginAPI.h>
 
@@ -25,12 +25,8 @@ NOS_REGISTER_NAME_SPACED(Shader_Type, "Shader Type");
 
 NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Shader);
 NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Shader);
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Shader);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Shader);
 NOS_REGISTER_NAME(AJA_RGB2YCbCr_Compute_Pass);
 NOS_REGISTER_NAME(AJA_YCbCr2RGB_Compute_Pass);
-NOS_REGISTER_NAME(AJA_RGB2YCbCr_Pass);
-NOS_REGISTER_NAME(AJA_YCbCr2RGB_Pass);
 
 NOS_REGISTER_NAME(Colorspace);
 NOS_REGISTER_NAME(Source);
@@ -309,8 +305,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
 		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
         {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
-        {NSN_AJA_RGB2YCbCr_Shader,         { NOS_SHADER_STAGE_FRAG, "RGB2YCbCr.frag", {std::begin(RGB2YCbCr_frag_spv), std::end(RGB2YCbCr_frag_spv)}}},
-        {NSN_AJA_YCbCr2RGB_Shader,         { NOS_SHADER_STAGE_FRAG, "YCbCr2RGB.frag", {std::begin(YCbCr2RGB_frag_spv), std::end(YCbCr2RGB_frag_spv)}}},
 	};
 
 	std::vector<nosShaderInfo> shaderInfos;
@@ -333,8 +327,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     {
 	    {.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
 	    {.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
-	    {.Key = NSN_AJA_YCbCr2RGB_Pass, .Shader = NSN_AJA_YCbCr2RGB_Shader, .MultiSample = 1},
-	    {.Key = NSN_AJA_RGB2YCbCr_Pass, .Shader = NSN_AJA_RGB2YCbCr_Shader, .MultiSample = 1}
     };
 	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
     return ret;

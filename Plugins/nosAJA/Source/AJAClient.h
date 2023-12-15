@@ -54,7 +54,6 @@ inline NTV2FieldID GetAJAFieldID(nosTextureFieldType type)
 
 enum class ShaderType : u32
 {
-    Frag8 = 0,
     Comp8 = 1,
     Comp10 = 2,
 };
