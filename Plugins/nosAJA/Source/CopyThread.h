@@ -50,7 +50,7 @@ struct CopyThread
 		u32 Counter;
 	} DebugInfo;
 
-	nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
+	nosTextureFieldType OutFieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 
     CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 
                 NTV2VideoFormat initalFmt, 
@@ -66,7 +66,7 @@ struct CopyThread
     void CreateRings();
     void SendDeleteRequest();
     void ChangePinResolution(nosVec2u res);
-    void InputUpdate(AJADevice::Mode &prevMode);
+    void InputUpdate(AJADevice::Mode &prevMode, nosTextureFieldType& field);
 	bool WaitForVBL(nosTextureFieldType writeField);
 	
 	void Refresh();

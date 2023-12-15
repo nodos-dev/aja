@@ -136,6 +136,9 @@ void CopyThread::StartThread()
 	threadName += IsInput() ? "In" : "Out";
 	threadName += ": " + Name().AsString();
 
+	if (!IsInput())
+		OutFieldType = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
+
 	Thread = std::thread([this, threadName] {
 		flatbuffers::FlatBufferBuilder fbb;
 		// TODO: Add nosEngine.SetThreadName call.
@@ -305,7 +308,7 @@ void CopyThread::CreateRings()
 	CompressedTex = MakeShared<GPURing::Resource>(info);
 }
 
-void CopyThread::InputUpdate(AJADevice::Mode &prevMode)
+void CopyThread::InputUpdate(AJADevice::Mode& prevMode, nosTextureFieldType& field)
 {
 	auto fmt = Client->Device->GetInputVideoFormat(Channel);
 	if (fmt != Format)
@@ -319,8 +322,8 @@ void CopyThread::InputUpdate(AJADevice::Mode &prevMode)
 		nosEngine.SetPinValueByName(Client->Mapping.NodeId,  nos::Name(PinName.AsString() + " Video Format"), nosBuffer{.Data = fmtData.data(), .Size = fmtData.size()});
 	}
 
-	if (Interlaced() ^ vkss::IsTextureFieldTypeInterlaced(FieldType))
-		FieldType = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
+	if (Interlaced() ^ vkss::IsTextureFieldTypeInterlaced(field))
+		field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 
 	if (Mode == AJADevice::AUTO)
 	{
@@ -401,9 +404,8 @@ void CopyThread::AJAInputProc()
 	u32 doubleBufferIndex = 0;
 	SetFrame(doubleBufferIndex);
 
-	FieldType = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
-
-	WaitForVBL(FieldType);
+	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
+	WaitForVBL(field);
 
 	DebugInfo.Time = std::chrono::nanoseconds(0);
 	DebugInfo.Counter = 0;
@@ -417,7 +419,7 @@ void CopyThread::AJAInputProc()
 	{
 		SendRingStats();
 
-		InputUpdate(prevMode);
+		InputUpdate(prevMode, field);
 
 		if (LinkSizeMismatch())
 		{
@@ -428,27 +430,27 @@ void CopyThread::AJAInputProc()
 				{
 					goto EXIT;
 				}
-				WaitForVBL(FieldType);
-				InputUpdate(prevMode);
+				WaitForVBL(field);
+				InputUpdate(prevMode, field);
 			} while (LinkSizeMismatch());
 			Orphan(false);
 		}
 
-		if (!WaitForVBL(FieldType))
+		if (!WaitForVBL(field))
 		{
-			FieldType = vkss::FlippedField(FieldType);
+			field = vkss::FlippedField(field);
 			Orphan(true, "AJA Input has no signal");
-			while (!WaitForVBL(FieldType))
+			while (!WaitForVBL(field))
 			{
-				FieldType = vkss::FlippedField(FieldType);
+				field = vkss::FlippedField(field);
 				if (!Run || Ring->Exit)
 				{
 					goto EXIT;
 				}
 				std::this_thread::sleep_for(std::chrono::milliseconds(4));
-				InputUpdate(prevMode);
+				InputUpdate(prevMode, field);
 			}
-			InputUpdate(prevMode);
+			InputUpdate(prevMode, field);
 			Orphan(false);
 		}
 
@@ -476,7 +478,7 @@ void CopyThread::AJAInputProc()
 		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
 		{
-			auto fieldId = (u32(FieldType) - 1);
+			auto fieldId = (u32(field) - 1);
 			Client->Device->DMAReadSegments(FrameIndex,
 											Buf,									// target CPU buffer address
 											fieldId * Pitch, // source AJA buffer address
@@ -490,7 +492,7 @@ void CopyThread::AJAInputProc()
 			Client->Device->DMAReadFrame(FrameIndex, Buf, Pitch * Segments, Channel);
 		nosEngine.WatchLog("AJA Input DMA Time", swDma.ElapsedString().c_str());
 		
-		slot->Params.FieldType = FieldType;
+		slot->Params.FieldType = field;
 		slot->Params.ColorspaceMatrix = glm::inverse(GetMatrix<f64>());
 		Ring->EndPush(slot);
 
@@ -504,7 +506,7 @@ void CopyThread::AJAInputProc()
 			doubleBufferIndex ^= 1;
 		}
 		
-		FieldType = vkss::FlippedField(FieldType);
+		field = vkss::FlippedField(field);
 	}
 EXIT:
 
@@ -611,7 +613,8 @@ void CopyThread::AJAOutputProc()
 			Ring->EndPop(slot);
 			break;
 		}
-		nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+		if (slot->Params.WaitEvent)
+			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
 		
 		ULWord vblCount;
 		Client->Device->GetOutputVerticalInterruptCount(vblCount, Channel);

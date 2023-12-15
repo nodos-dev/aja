@@ -913,9 +913,10 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	}
 	auto& params = slot->Params;
 	auto outPinResource = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
+	texCpy.CopyTextureFrom = outPinResource;
+	texCpy.CopyTextureFrom.Info.Texture.FieldType = params.FieldType;
 
 	std::vector<nosShaderBinding> inputs;
-
 	uint32_t iFlags = (vkss::IsTextureFieldTypeInterlaced(params.FieldType) ? u32(params.FieldType) : 0) | (Shader == ShaderType::Comp10) << 2;
 
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.ColorspaceMatrix));
@@ -973,21 +974,6 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 
     auto th = it->second;
 
-    if (th->FieldType == NOS_TEXTURE_FIELD_TYPE_UNKNOWN && th->Interlaced())
-        th->FieldType = NOS_TEXTURE_FIELD_TYPE_EVEN;
-
-    auto wantedField = th->FieldType;
-    auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
-    auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
-    auto incomingField = incomingTextureInfo.Info.Texture.FieldType;
-    auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
-    if ((inInterlaced && outInterlaced) && incomingField != wantedField)
-    {
-        nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
-        cpy.CopyToOptions.Stop = false;
-        return false;
-    }
-
 	auto outgoing = th->Ring->TryPush();
     cpy.CustomData = outgoing;
 	if (!outgoing)
@@ -995,10 +981,22 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
         cpy.CopyToOptions.Stop = true;
 		return false;
 	}
-	outgoing->Params.FieldType = wantedField;
 	outgoing->FrameNumber = cpy.FrameNumber;
+	auto wantedField = th->OutFieldType;
+	auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
+	auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
+	auto incomingField = incomingTextureInfo.Info.Texture.FieldType;
+	auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
+	if ((inInterlaced && outInterlaced) && incomingField != wantedField)
+	{
+		nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
+		cpy.CopyToOptions.Stop = false;
+		th->Ring->EndPush(outgoing);
+		return false;
+	}
+	outgoing->Params.FieldType = wantedField;
+
     glm::mat4 colorspaceMatrix = th->GetMatrix<f64>();
-	
 	// 0th bit: is out even
 	// 1st bit: is out odd
 	// 2nd bit: is input even
@@ -1077,8 +1075,7 @@ void AJAClient::EndCopyTo(nosCopyInfo& cpy)
     th->Ring->EndPush(res);
 
     cpy.CopyToOptions.Stop = th->TotalFrameCount() >= th->EffectiveRingSize;
-
-    th->FieldType = vkss::FlippedField(th->FieldType);
+    th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 }
 
 void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
