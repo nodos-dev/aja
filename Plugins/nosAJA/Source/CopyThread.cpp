@@ -172,6 +172,9 @@ void CopyThread::Stop()
 	Ring->Stop();
 	if (Thread.joinable())
 		Thread.join();
+	for (auto& res : Ring->Glob)
+		if (res->Params.WaitEvent)
+			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent);
 }
 
 void CopyThread::SetRingSize(u32 ringSize)
@@ -305,7 +308,7 @@ void CopyThread::CreateRings()
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
 	info.Format = NOS_FORMAT_R8G8B8A8_UINT;
-	CompressedTex = MakeShared<GPURing::Resource>(info);
+	ConversionIntermediateTex = MakeShared<GPURing::Resource>(info);
 }
 
 void CopyThread::InputUpdate(AJADevice::Mode& prevMode, nosTextureFieldType& field)
@@ -363,8 +366,8 @@ CopyThread::DMAInfo CopyThread::GetDMAInfo(nosResourceShareInfo& buffer, u32 dou
 {
 	return {
 		.Buffer = (u32*)nosVulkan->Map(&buffer),
-		.Pitch = CompressedTex->Res.Info.Texture.Width * 4,
-		.Segments = CompressedTex->Res.Info.Texture.Height,
+		.Pitch = ConversionIntermediateTex->Res.Info.Texture.Width * 4,
+		.Segments = ConversionIntermediateTex->Res.Info.Texture.Height,
 		.FrameIndex = GetFrameIndex(doubleBufferIndex)
 	};
 }
@@ -401,8 +404,9 @@ void CopyThread::AJAInputProc()
 	Client->Device->UnsubscribeInputVerticalEvent(Channel);
 	Client->Device->SubscribeInputVerticalEvent(Channel);
 
-	u32 doubleBufferIndex = 0;
+	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
+	doubleBufferIndex ^= 1;
 
 	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 	WaitForVBL(field);
@@ -412,13 +416,15 @@ void CopyThread::AJAInputProc()
 
 	DropCount = 0;
 	u32 framesSinceLastDrop = 0;
-
 	u64 frameCount = 0;
+	ULWord lastVBLCount;
+	Client->Device->GetInputVerticalInterruptCount(lastVBLCount, Channel);
 
 	while (Run && !Ring->Exit)
 	{
 		SendRingStats();
 
+	#pragma region Check Input Signal
 		InputUpdate(prevMode, field);
 
 		if (LinkSizeMismatch())
@@ -435,7 +441,9 @@ void CopyThread::AJAInputProc()
 			} while (LinkSizeMismatch());
 			Orphan(false);
 		}
+	#pragma endregion
 
+	#pragma region Wait For VBL & Ring
 		if (!WaitForVBL(field))
 		{
 			field = vkss::FlippedField(field);
@@ -454,26 +462,45 @@ void CopyThread::AJAInputProc()
 			Orphan(false);
 		}
 
-
-		int ringSize = EffectiveRingSize;
-		int totalFrameCount = TotalFrameCount();
-
-		frameCount++;
-
-		CPURing::Resource* slot = nullptr;
-		if (totalFrameCount >= ringSize || (!(slot = Ring->TryPush())))
+		CPURing::Resource* slot = Ring->BeginPush();
+		if (!slot)
 		{
-			DropCount++;
-			Ring->ResetFrameCount = true;
-			framesSinceLastDrop = 0;
+			nosEngine.LogW("In: %s push failed", Name().AsCStr());
 			continue;
 		}
 
 		if (slot->Params.WaitEvent)
+		{
 			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+		}
+	#pragma endregion
 
-		slot->FrameNumber = frameCount;
+	#pragma region Drop Calculations
+		ULWord curVBLCount;
+		Client->Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
 
+		int64_t vblDiff = (int64_t) curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+
+		if (vblDiff > 0)
+		{
+			DropCount += vblDiff;
+			framesSinceLastDrop = 0;
+			nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+		}
+		else
+		{
+			++framesSinceLastDrop;
+			if (DropCount && framesSinceLastDrop == 50)
+			{
+				nosEngine.LogE(
+					"In: %s stabilized after dropping %u frames, notifying drop", Name().AsCStr(), DropCount);
+				NotifyDrop();
+			}
+		}
+		lastVBLCount = curVBLCount;
+	#pragma endregion
+
+	#pragma region DMA
 		util::Stopwatch swDma;
 		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
@@ -491,15 +518,17 @@ void CopyThread::AJAInputProc()
 		else
 			Client->Device->DMAReadFrame(FrameIndex, Buf, Pitch * Segments, Channel);
 		nosEngine.WatchLog("AJA Input DMA Time", swDma.ElapsedString().c_str());
-		
+	#pragma endregion
+
+	#pragma region Push To Ring
+		frameCount++;
+		slot->FrameNumber = frameCount;
 		slot->Params.FieldType = field;
 		slot->Params.ColorspaceMatrix = glm::inverse(GetMatrix<f64>());
 		Ring->EndPush(slot);
+	#pragma endregion
 
-		++framesSinceLastDrop;
-		if (DropCount && framesSinceLastDrop == 50)
-			NotifyDrop();
-
+	#pragma region Update Next Frame Info
 		if (!Interlaced())
 		{
 			SetFrame(doubleBufferIndex);
@@ -507,6 +536,8 @@ void CopyThread::AJAInputProc()
 		}
 		
 		field = vkss::FlippedField(field);
+	#pragma endregion	
+
 	}
 EXIT:
 
@@ -533,11 +564,11 @@ nosVec2u CopyThread::GetSuitableDispatchSize() const
 	};
 
 	const u32 q = IsQuad();
-	f32 x = glm::clamp<u32>(Client->DispatchSizeX.load(), 1, CompressedTex->Res.Info.Texture.Width) * (1 + q) * (.25 * BitWidth() - 1);
-	f32 y = glm::clamp<u32>(Client->DispatchSizeY.load(), 1, CompressedTex->Res.Info.Texture.Height) * (1. + q) * (1 + Interlaced());
+	f32 x = glm::clamp<u32>(Client->DispatchSizeX.load(), 1, ConversionIntermediateTex->Res.Info.Texture.Width) * (1 + q) * (.25 * BitWidth() - 1);
+	f32 y = glm::clamp<u32>(Client->DispatchSizeY.load(), 1, ConversionIntermediateTex->Res.Info.Texture.Height) * (1. + q) * (1 + Interlaced());
 
-	return nosVec2u(BestFit(x + .5, CompressedTex->Res.Info.Texture.Width >> (BitWidth() - 5)),
-					 BestFit(y + .5, CompressedTex->Res.Info.Texture.Height / 9));
+	return nosVec2u(BestFit(x + .5, ConversionIntermediateTex->Res.Info.Texture.Width >> (BitWidth() - 5)),
+					 BestFit(y + .5, ConversionIntermediateTex->Res.Info.Texture.Height / 9));
 }
 
 void CopyThread::NotifyRestart(RestartParams const& params)
@@ -568,11 +599,6 @@ void CopyThread::NotifyDrop()
 	});
 }
 
-u32 CopyThread::TotalFrameCount()
-{
-	return Ring->TotalFrameCount();
-}
-
 void CopyThread::AJAOutputProc()
 {
 	flatbuffers::FlatBufferBuilder fbb;
@@ -583,59 +609,77 @@ void CopyThread::AJAOutputProc()
 	Orphan(false);
 	nosEngine.LogI("AJAOut (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
-	while (Run && !Ring->Exit && TotalFrameCount() < EffectiveRingSize)
+	while (Run && !Ring->Exit && !Ring->IsFull())
 		std::this_thread::yield();
 
 	//Reset interrupt event status
 	Client->Device->UnsubscribeOutputVerticalEvent(Channel);
 	Client->Device->SubscribeOutputVerticalEvent(Channel);
 
-	u32 doubleBufferIndex = 0;
+	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
-
+	doubleBufferIndex ^= 1;
 	DropCount = 0;
 	u32 framesSinceLastDrop = 0;
+	ULWord lastVBLCount;
+	Client->Device->GetOutputVerticalInterruptCount(lastVBLCount, Channel);
+
 
 	while (Run && !Ring->Exit)
 	{
 		SendRingStats();
 
-		ULWord lastVBLCount;
-		Client->Device->GetOutputVerticalInterruptCount(lastVBLCount, Channel);
-
+	#pragma region Wait For Ring & VBL
 		auto *slot = Ring->BeginPop();
 		if (!slot)
+		{
+			nosEngine.LogW("Out: %s pop failed", Name().AsCStr());
 			continue;
+		}
 		const auto field = slot->Params.FieldType;
 
 		if (!WaitForVBL(field) || Ring->Exit)
 		{
+			if (slot->Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
 			Ring->EndPop(slot);
 			break;
 		}
-		if (slot->Params.WaitEvent)
-			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
-		
-		ULWord vblCount;
-		Client->Device->GetOutputVerticalInterruptCount(vblCount, Channel);
-		
-		// Drop calculations:
-		if (vblCount > lastVBLCount + 1 + Interlaced())
 		{
-			DropCount += vblCount - lastVBLCount - 1 - Interlaced();
+			util::Stopwatch swGPU{};
+			assert(slot->Params.WaitEvent);
+			if (slot->Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+			nosEngine.WatchLog("AJA Output GPU Wait Time", swGPU.ElapsedString().c_str());
+		}
+	#pragma endregion
+
+	#pragma region Drop Calculations
+		ULWord curVBLCount;
+		Client->Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
+
+		int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+
+		// Drop calculations:
+		if (vblDiff > 0)
+		{
+			DropCount += vblDiff;
 			framesSinceLastDrop = 0;
-			nosEngine.LogW("Out: %s dropped while waiting for a frame", Name().AsCStr());
+			nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
 		}
 		else
 		{
 			++framesSinceLastDrop;
 			if (DropCount && framesSinceLastDrop == 50)
 			{
-				nosEngine.LogE("Out: %s dropped frames, notifying restart", Name().AsCStr());
+				nosEngine.LogE("Out: %s stabilized after dropping %u frames, notifying restart", Name().AsCStr(), DropCount);
 				NotifyRestart({});
 			}
 		}
+		lastVBLCount = curVBLCount;
+	#pragma endregion
 
+	#pragma region DMA
 		util::Stopwatch swDma;
 		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
@@ -646,12 +690,16 @@ void CopyThread::AJAOutputProc()
 		else
 			Client->Device->DMAWriteFrame(FrameIndex, Buf, Pitch * Segments, Channel);
 		nosEngine.WatchLog("AJA Output DMA Time", swDma.ElapsedString().c_str());
+	#pragma endregion
 		
+	#pragma region Update Next Frame Info
 		if (!Interlaced())
 		{
 			SetFrame(doubleBufferIndex);
 			doubleBufferIndex ^= 1;
 		}
+	#pragma endregion
+	
 		Ring->EndPop(slot);
 		HandleEvent(hungerSignal);
 	}
@@ -746,7 +794,8 @@ u32 CopyThread::BitWidth() const
 void CopyThread::SendRingStats() {
 	nosEngine.WatchLog((Name().AsString() + " Ring Read Size").c_str(), std::to_string(Ring->Read.Pool.size()).c_str());
 	nosEngine.WatchLog((Name().AsString() + " Ring Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
-	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(TotalFrameCount()).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Drop Count").c_str(), std::to_string(DropCount).c_str());
 }
 
 } // namespace nos

@@ -906,11 +906,13 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	auto th = it->second;
 	CPURing::Resource* slot = nullptr;
 	auto effectiveSpareCount = th->SpareCount * (1 + u32(th->Interlaced()));
+
 	if (!(slot = th->Ring->TryPop(cpy.FrameNumber, effectiveSpareCount)))
 	{
 		cpy.CustomData = nullptr;
 		return false;
 	}
+
 	auto& params = slot->Params;
 	auto outPinResource = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
 	texCpy.CopyTextureFrom = outPinResource;
@@ -920,7 +922,7 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	uint32_t iFlags = (vkss::IsTextureFieldTypeInterlaced(params.FieldType) ? u32(params.FieldType) : 0) | (Shader == ShaderType::Comp10) << 2;
 
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.ColorspaceMatrix));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, th->CompressedTex->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, &th->ConversionIntermediateTex->Res));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iFlags));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, th->SSBO->Res));
 
@@ -930,7 +932,7 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	nosVulkan->Begin("AJA Input YUV Conversion", &cmd);
 	nosVulkan->Copy(cmd,
 					&slot->Res,
-					&th->CompressedTex->Res,
+					&th->ConversionIntermediateTex->Res,
 					Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(Debug)).c_str() : 0);
 
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, outPinResource));
@@ -944,7 +946,7 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 
 	nosGPUEvent event{};
 	nosVulkan->End2(cmd, NOS_FALSE, &event);
-	slot->Params.WaitEvent = event;
+    slot->Params.WaitEvent = event;
 
 	cpy.FrameNumber = slot->FrameNumber;
     cpy.CopyFromOptions.ShouldSetSourceFrameNumber = true;
@@ -1004,9 +1006,9 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 
 	nosCmd cmd;
 	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
-
+     
 	// watch out for th members, they are not synced
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->CompressedTex->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->ConversionIntermediateTex->Res));
 	nosRunComputePassParams pass = {};
 	pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
 	pass.DispatchSize = th->GetSuitableDispatchSize();
@@ -1017,9 +1019,9 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 	nosVulkan->End(cmd, NOS_TRUE);
 
 	nosVulkan->Begin("AJA Output Ring Copy", &cmd);
-	nosVulkan->Copy(cmd, &th->CompressedTex->Res, &outgoing->Res, 0);
+	nosVulkan->Copy(cmd, &th->ConversionIntermediateTex->Res, &outgoing->Res, 0);
 	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
-	
+	//nosVulkan->WaitGpuEvent(&outgoing->Params.WaitEvent);
 	return true;
 }
 
@@ -1049,7 +1051,7 @@ void AJAClient::EndCopyTo(nosCopyInfo& cpy)
 	auto res = (CPURing::Resource*)cpy.CustomData;
     th->Ring->EndPush(res);
 
-    cpy.CopyToOptions.Stop = th->TotalFrameCount() >= th->EffectiveRingSize;
+    cpy.CopyToOptions.Stop = th->Ring->IsFull();
     th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 }
 

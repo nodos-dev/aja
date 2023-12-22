@@ -42,7 +42,7 @@ struct CopyThread
 	std::atomic_bool IsOrphan = false;
     
 	rc<CPURing::Resource> SSBO;
-	rc<GPURing::Resource> CompressedTex;
+	rc<GPURing::Resource> ConversionIntermediateTex;
 
 	struct
 	{
@@ -110,8 +110,6 @@ struct CopyThread
 
 	void NotifyRestart(RestartParams const& params);
 	void NotifyDrop();
-
-	u32 TotalFrameCount();
 
 	void SendRingStats();
 };

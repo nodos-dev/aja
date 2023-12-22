@@ -14,8 +14,8 @@ struct TRing
         nosResourceShareInfo Res;
 	    struct {
 		    nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-        	glm::mat4 ColorspaceMatrix;
-	    	nosGPUEvent WaitEvent;
+			glm::mat4 ColorspaceMatrix = {};
+			nosGPUEvent WaitEvent = nullptr;
 	    } Params {};
 
         Resource(T r) : Res{}
@@ -34,7 +34,9 @@ struct TRing
         }
         
         ~Resource()
-        {
+        { 
+            if (Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent);
             nosVulkan->DestroyResource(&Res);
         }
 
@@ -100,8 +102,8 @@ struct TRing
             std::unique_lock l2(Read.Mutex);
             Exit = true;
         }
-        Write.CV.notify_all();
-        Read.CV.notify_all();
+		Write.CV.notify_all();
+		Read.CV.notify_all();
     }
 
     bool IsFull()
