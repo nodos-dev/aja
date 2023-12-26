@@ -170,6 +170,10 @@ void CopyThread::Stop()
 {
 	Run = false;
 	Ring->Stop();
+	nosCmd cmd;
+	nosVulkan->Begin("AJA Stop Submit", &cmd);
+	nosVulkan->End(cmd, NOS_TRUE);
+
 	if (Thread.joinable())
 		Thread.join();
 	for (auto& res : Ring->Glob)
@@ -472,6 +476,7 @@ void CopyThread::AJAInputProc()
 		if (slot->Params.WaitEvent)
 			if (NOS_RESULT_SUCCESS != nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, frameTimeNs * 10))
 			{
+				nosEngine.LogW("In: GPU stalled for more than 10 frames, discarding VBL.");
 				Ring->EndPush(slot);
 				continue;
 			}
