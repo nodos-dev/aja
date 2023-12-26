@@ -44,12 +44,6 @@ struct CopyThread
 	rc<CPURing::Resource> SSBO;
 	rc<GPURing::Resource> ConversionIntermediateTex;
 
-	struct
-	{
-		std::chrono::nanoseconds Time;
-		u32 Counter;
-	} DebugInfo;
-
 	nosTextureFieldType OutFieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 
     CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 

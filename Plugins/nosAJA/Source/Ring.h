@@ -36,7 +36,7 @@ struct TRing
         ~Resource()
         { 
             if (Params.WaitEvent)
-				nosVulkan->WaitGpuEvent(&Params.WaitEvent);
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
             nosVulkan->DestroyResource(&Res);
         }
 

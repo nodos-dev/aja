@@ -174,7 +174,7 @@ void CopyThread::Stop()
 		Thread.join();
 	for (auto& res : Ring->Glob)
 		if (res->Params.WaitEvent)
-			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent);
+			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 }
 
 void CopyThread::SetRingSize(u32 ringSize)
@@ -411,14 +411,14 @@ void CopyThread::AJAInputProc()
 	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 	WaitForVBL(field);
 
-	DebugInfo.Time = std::chrono::nanoseconds(0);
-	DebugInfo.Counter = 0;
-
 	DropCount = 0;
 	u32 framesSinceLastDrop = 0;
 	u64 frameCount = 0;
 	ULWord lastVBLCount;
 	Client->Device->GetInputVerticalInterruptCount(lastVBLCount, Channel);
+
+	auto deltaSec = GetDeltaSeconds();
+	uint64_t frameTimeNs = (deltaSec.x() / static_cast<double>(deltaSec.y())) * 1'000'000;
 
 	while (Run && !Ring->Exit)
 	{
@@ -470,9 +470,11 @@ void CopyThread::AJAInputProc()
 		}
 
 		if (slot->Params.WaitEvent)
-		{
-			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
-		}
+			if (NOS_RESULT_SUCCESS != nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, frameTimeNs * 10))
+			{
+				Ring->EndPush(slot);
+				continue;
+			}
 	#pragma endregion
 
 	#pragma region Drop Calculations
@@ -641,7 +643,7 @@ void CopyThread::AJAOutputProc()
 		if (!WaitForVBL(field) || Ring->Exit)
 		{
 			if (slot->Params.WaitEvent)
-				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
 			Ring->EndPop(slot);
 			break;
 		}
@@ -649,7 +651,7 @@ void CopyThread::AJAOutputProc()
 			util::Stopwatch swGPU{};
 			assert(slot->Params.WaitEvent);
 			if (slot->Params.WaitEvent)
-				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
 			nosEngine.WatchLog("AJA Output GPU Wait Time", swGPU.ElapsedString().c_str());
 		}
 	#pragma endregion

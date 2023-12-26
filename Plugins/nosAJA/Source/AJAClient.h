@@ -196,10 +196,8 @@ struct NOSAPI_ATTR AJAClient
     void OnPinValueChanged(nos::Name pinName, void* value);
     void OnExecute();
 
-    bool BeginCopyFrom(nosCopyInfo &cpy);
-    bool BeginCopyTo(nosCopyInfo &cpy);
-    void EndCopyFrom(nosCopyInfo &cpy);
-    void EndCopyTo(nosCopyInfo &cpy);
+    bool CopyFrom(nosCopyInfo &cpy);
+    bool CopyTo(nosCopyInfo &cpy);
 
     void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
                        const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
