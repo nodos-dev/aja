@@ -170,9 +170,6 @@ void CopyThread::Stop()
 {
 	Run = false;
 	Ring->Stop();
-	nosCmd cmd;
-	nosVulkan->Begin("AJA Stop Submit", &cmd);
-	nosVulkan->End(cmd, NOS_TRUE);
 
 	if (Thread.joinable())
 		Thread.join();
@@ -422,7 +419,7 @@ void CopyThread::AJAInputProc()
 	Client->Device->GetInputVerticalInterruptCount(lastVBLCount, Channel);
 
 	auto deltaSec = GetDeltaSeconds();
-	uint64_t frameTimeNs = (deltaSec.x() / static_cast<double>(deltaSec.y())) * 1'000'000;
+	uint64_t frameTimeNs = (deltaSec.x() / static_cast<double>(deltaSec.y())) * 1'000'000'000;
 
 	while (Run && !Ring->Exit)
 	{
@@ -476,9 +473,7 @@ void CopyThread::AJAInputProc()
 		if (slot->Params.WaitEvent)
 			if (NOS_RESULT_SUCCESS != nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, frameTimeNs * 10))
 			{
-				nosEngine.LogW("In: GPU stalled for more than 10 frames, discarding VBL.");
-				Ring->EndPush(slot);
-				continue;
+				nosEngine.LogW("In: GPU stalled for more than 10 frames, expect tearing.");
 			}
 	#pragma endregion
 
