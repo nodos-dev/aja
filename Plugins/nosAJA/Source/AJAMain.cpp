@@ -190,14 +190,6 @@ struct AJA
         auto aja = ((AJAClient *)ctx);
         aja->OnPathCommand(cmd);
     }
-    static void OnPinConnected(void* ctx, const nosName pinName, nosUUID connectedPin, nosUUID nodeid)
-    {
-        ((AJAClient*)ctx)->OnPinConnected(pinName);
-    }
-    static void OnPinDisconnected(void* ctx, const nosName pinName)
-    {
-        ((AJAClient*)ctx)->OnPinDisconnected(pinName);
-    }
     
     static nosResult CanRemoveOrphanPin(void* ctx, nosName pinName, nosUUID pinId)
     {
@@ -274,8 +266,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     ajaIn->OnNodeCreated = ajaOut->OnNodeCreated = AJA::OnNodeCreated;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
     ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
-    ajaIn->OnPinConnected = ajaOut->OnPinConnected = AJA::OnPinConnected;
-    ajaIn->OnPinDisconnected = ajaOut->OnPinDisconnected = AJA::OnPinDisconnected;
     ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
     ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
     ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;

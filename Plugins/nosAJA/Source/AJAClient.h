@@ -181,8 +181,6 @@ struct NOSAPI_ATTR AJAClient
     void OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
                       std::vector<nos::fb::UUID> &pinsToDelete);
     void OnPinMenuFired(nosContextMenuRequest const &request);
-    void OnPinConnected(nos::Name pinName);
-    void OnPinDisconnected(nos::Name pinName);
     
     bool CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId);
     bool OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId);

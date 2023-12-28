@@ -40,6 +40,8 @@ struct CopyThread
     std::atomic<GammaCurve> GammaCurve = GammaCurve::REC709;
     std::atomic_bool NarrowRange = true;
 	std::atomic_bool IsOrphan = false;
+	std::atomic_bool ShouldResetRings = true; // out: refill, input: clear
+	bool PendingRestart = false;
     
 	rc<CPURing::Resource> SSBO;
 	rc<GPURing::Resource> ConversionIntermediateTex;
@@ -73,8 +75,10 @@ struct CopyThread
     void Live(bool);
     void PinUpdate(std::optional<nos::fb::TOrphanState>, Action live);
 
+    bool IsFull();
+
     void Stop();
-	void SetRingSize(u32 ringSize);
+	bool SetRingSize(u32 ringSize);
 	void Restart(u32 ringSize);
     void SetFrame(u32 doubleBufferIndex);
 	u32 GetFrameIndex(u32 doubleBufferIndex) const;
@@ -102,8 +106,7 @@ struct CopyThread
     template<class T>
     glm::mat<4,4,T> GetMatrix() const;
 
-	void NotifyRestart(RestartParams const& params);
-	void NotifyDrop();
+	void NotifyRestart(u32 ringSize = 0, nosPathEvent pathEvent = NOS_OUTPUT_DROP);
 
 	void SendRingStats();
 };

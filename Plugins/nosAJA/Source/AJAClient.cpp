@@ -313,8 +313,6 @@ void AJAClient::SetReference(std::string const &val)
         Device->SetReference(src);
     }
     this->Ref = src;
-    for (auto& [_,th] : Pins)
-        th->NotifyRestart({});
 }
 
 void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
@@ -472,20 +470,6 @@ void AJAClient::OnPinMenuFired(nosContextMenuRequest const &request)
         HandleEvent(CreateAppEvent(
             fbb, nos::CreateContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
     }
-}
-
-void AJAClient::OnPinConnected(nos::Name pinName)
-{
-    auto pin = FindChannel(ParseChannel(pinName.AsString()));
-    if (pin)
-		++pin->ConnectedPinCount;
-}
-
-void AJAClient::OnPinDisconnected(nos::Name pinName)
-{
-    auto pin = FindChannel(ParseChannel(pinName.AsString()));
-	if (pin)
-        --pin->ConnectedPinCount;
 }
 
 bool AJAClient::CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId)
@@ -751,43 +735,8 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
         nosEngine.LogD("Path command on unknown pin: %s", pinName.AsCStr());
 		return;
 	}
-    auto copyThread = result->second;
-
- 
-    switch (cmd->Command)
-    {
-    case NOS_PATH_COMMAND_TYPE_RESTART: {
-        nos::Buffer params(cmd->Args);
-        auto* res = params.As<RestartParams>();
-        u32 ringSize = copyThread->RingSize;
-        if (res && res->UpdateFlags & RestartParams::UpdateRingSize)
-        {
-            ringSize = res->RingSize;
-			copyThread->SetRingSize(ringSize);
-            if (copyThread->IsInput()) {
-                auto ringSizePinId = GetPinId(Name(pinName.AsString() + " Ring Size"));
-                nosEngine.SetPinValue(ringSizePinId, nosBuffer{.Data = &ringSize, .Size = sizeof(u32)});
-            }
-        }
-        copyThread->Restart(ringSize);
-        break;
-    }
-    case NOS_PATH_COMMAND_TYPE_NOTIFY_NEW_CONNECTION:
-    {
-        copyThread->Restart(copyThread->RingSize);
-        if (copyThread->IsInput() ||
-            !copyThread->Thread.joinable())
-            break;
-
-        // there is a new connection path
-        // we need to send a restart signal
-        copyThread->NotifyRestart({ RestartParams{
-            .UpdateFlags = RestartParams::UpdateRingSize,
-            .RingSize = copyThread->RingSize,
-        } });
-        break;
-    }
-    }
+	auto copyThread = result->second;
+	copyThread->Restart(cmd->Event == NOS_RING_SIZE_CHANGE ? cmd->RingSize : 0);
 }
 
 void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
@@ -869,11 +818,8 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     if (pinNameStr.ends_with("Ring Size"))
     {
         auto pin = FindChannel(ParseChannel(pinNameStr));
-		if (pin->RingSize != *(u32*)value)
-            pin->NotifyRestart(RestartParams{
-                .UpdateFlags = RestartParams::UpdateRingSize,
-                .RingSize = *(u32*)value,
-            });
+		if (pin && pin->RingSize != *(u32*)value)
+            pin->NotifyRestart(*(u32*)value);
     }
 	if (pinNameStr.ends_with("Ring Spare Count"))
     {

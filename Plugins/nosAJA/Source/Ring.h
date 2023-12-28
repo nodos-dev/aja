@@ -45,7 +45,7 @@ struct TRing
         std::atomic_bool read = false;
     };
 
-    void Resizex(u32 size)
+    void Resize(u32 size)
     {
         Write.Pool.clear();
         Read.Pool.clear();
@@ -62,7 +62,7 @@ struct TRing
         : Extent(extent), Sample()
     {
         Sample.Size = Extent.x * Extent.y * 4;
-        Resizex(Size);
+        Resize(Size);
     }
     
     TRing(nosVec2u extent, u32 Size, nosFormat format = NOS_FORMAT_R16G16B16A16_UNORM)
@@ -72,7 +72,7 @@ struct TRing
         Sample.Width = Extent.x;
         Sample.Height = Extent.y;
         Sample.Format = format;
-        Resizex(Size);
+        Resize(Size);
     }
 
     struct
@@ -218,7 +218,29 @@ struct TRing
         if (CanPop(frameNumber, spare))
             return BeginPop();
         return 0;
-    }
+	}
+
+	void Clear(bool prepareToWrite = true)
+	{
+		for (auto& res : Glob)
+        {
+            if (res->Params.WaitEvent)
+                nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, -1ull);
+        }
+        {
+			std::unique_lock l1(Write.Mutex);
+			std::unique_lock l2(Read.Mutex);
+			Read.Pool.clear();
+		    Write.Pool.clear();
+		}
+		{
+			std::unique_lock lock(prepareToWrite ? Write.Mutex : Read.Mutex);
+			std::transform(Glob.begin(),
+						   Glob.end(),
+						   std::back_inserter(prepareToWrite ? Write.Pool : Read.Pool),
+						   [](auto rc) { return rc.get(); });
+		}
+	}
 };
 
 typedef TRing<nosBufferInfo> CPURing;
