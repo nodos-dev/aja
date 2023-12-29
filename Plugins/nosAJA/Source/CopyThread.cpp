@@ -707,7 +707,7 @@ void CopyThread::SendDeleteRequest()
 	flatbuffers::FlatBufferBuilder fbb;
 	auto ids = Client->GeneratePinIDSet(nos::Name(Name()), Mode);
 	HandleEvent(
-		CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Client->Mapping.NodeId, ClearFlags::NONE, &ids)));
+		CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Client->Mapping.NodeId, app::ClearFlags::NONE, &ids)));
 }
 
 void CopyThread::ChangePinResolution(nosVec2u res)
@@ -756,23 +756,23 @@ CopyThread::~CopyThread()
 void CopyThread::Orphan(bool orphan, std::string const& message)
 {
 	IsOrphan = orphan;
-	PinUpdate(nos::fb::TOrphanState{.is_orphan=orphan, .message=message}, Action::NOP);
+	PinUpdate(nos::fb::TOrphanState{.is_orphan=orphan, .message=message}, app::Action::NOP);
 }
 
 void CopyThread::Live(bool b)
 {
-	PinUpdate(std::nullopt, b ? Action::SET : Action::RESET);
+	PinUpdate(std::nullopt, b ? app::Action::SET : app::Action::RESET);
 }
 
-void CopyThread::PinUpdate(std::optional<nos::fb::TOrphanState> orphan, nos::Action live)
+void CopyThread::PinUpdate(std::optional<nos::fb::TOrphanState> orphan, nos::app::Action live)
 {
 	flatbuffers::FlatBufferBuilder fbb;
 	auto ids = Client->GeneratePinIDSet(nos::Name(Name()), Mode);
-	std::vector<flatbuffers::Offset<PartialPinUpdate>> updates;
+	std::vector<flatbuffers::Offset<app::PartialPinUpdate>> updates;
 	std::transform(ids.begin(), ids.end(), std::back_inserter(updates),
-				   [&fbb, orphan, live](auto id) { return nos::CreatePartialPinUpdateDirect(fbb, &id, 0, orphan ? nos::fb::CreateOrphanState(fbb, &*orphan) : false, live); });
+				   [&fbb, orphan, live](auto id) { return nos::app::CreatePartialPinUpdateDirect(fbb, &id, 0, orphan ? nos::fb::CreateOrphanState(fbb, &*orphan) : false, live); });
 	HandleEvent(
-		CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Client->Mapping.NodeId, ClearFlags::NONE, 0, 0, 0,
+		CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Client->Mapping.NodeId, app::ClearFlags::NONE, 0, 0, 0,
 															  0, 0, 0, 0, &updates)));
 }
 

@@ -49,13 +49,13 @@ std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode)
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                         std::unordered_map<Name, const nos::fb::Pin *> &pins,
                         std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd, 
-                        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>>& toUpdate,
+                        std::vector<::flatbuffers::Offset<nos::app::PartialPinUpdate>>& toUpdate,
                         flatbuffers::FlatBufferBuilder &fbb,
                         nos::fb::ShowAs showAs, nos::fb::CanShowAs canShowAs, std::optional<nos::fb::TVisualizer> visualizer)
 {
     if (auto pin = pins[name])
     {
-        toUpdate.push_back(CreatePartialPinUpdateDirect(fbb, pin->id(), 0, nos::fb::CreateOrphanStateDirect(fbb, false)));
+        toUpdate.push_back(app::CreatePartialPinUpdateDirect(fbb, pin->id(), 0, nos::fb::CreateOrphanStateDirect(fbb, false)));
         return pin->data()->Data();
     }
     toAdd.push_back(
@@ -236,7 +236,7 @@ void AJAClient::UpdateDeviceValue()
     flatbuffers::FlatBufferBuilder fbb;
     auto pinId = GetPinId(NSN_Device);
     std::vector<u8> value = StringValue(Device->GetDisplayName());
-	HandleEvent(CreateAppEvent(fbb, nos::CreatePinValueChangedDirect(fbb, &pinId, &value)));
+	nosEngine.SetPinValue(pinId, {value.data(), value.size()});
     UpdateReferenceValue();
 }
 
@@ -258,7 +258,7 @@ void AJAClient::UpdateReferenceValue()
         return;
 
     std::vector<u8> value = StringValue(NTV2ReferenceSourceToString(Ref, true));
-    HandleEvent(CreateAppEvent(fbb, nos::CreatePinValueChangedDirect(fbb, &pinId, &value)));
+	nosEngine.SetPinValue(pinId, {value.data(), value.size()});
     UpdateStatus();
 }
 
@@ -268,7 +268,7 @@ void AJAClient::UpdateStatus()
     flatbuffers::FlatBufferBuilder fbb;
     UpdateStatus(fbb, msg);
     HandleEvent(CreateAppEvent(
-        fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
+        fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, app::ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 }
 
 void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
@@ -285,7 +285,7 @@ void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
             fb::NodeStatusMessageType::INFO));
     }
 
-    // services.HandleEvent(CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId,
+    // services.HandleEvent(CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId,
     // ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 }
 
@@ -325,7 +325,7 @@ void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
     {
         flatbuffers::FlatBufferBuilder fbb;
         HandleEvent(
-            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, &pinsToDelete,
+            CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, app::ClearFlags::NONE, &pinsToDelete,
                                                                   0, 0, 0, 0, 0, 0)));
     }
 }
@@ -468,7 +468,7 @@ void AJAClient::OnPinMenuFired(nosContextMenuRequest const &request)
                                             })};
 
         HandleEvent(CreateAppEvent(
-            fbb, nos::CreateContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
+            fbb, nos::app::CreateAppContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
     }
 }
 
@@ -593,7 +593,7 @@ void AJAClient::OnMenuFired(nosContextMenuRequest const&request)
     }
 
     HandleEvent(CreateAppEvent(
-        fbb, nos::CreateContextMenuUpdateDirect(fbb, &Mapping.NodeId, request.pos(), request.instigator(), &items)));
+        fbb, nos::app::CreateAppContextMenuUpdateDirect(fbb, &Mapping.NodeId, request.pos(), request.instigator(), &items)));
 }
 
 void AJAClient::OnCommandFired(u32 cmd)
@@ -702,7 +702,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         }
 
         HandleEvent(
-            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, &pins)));
+            CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, app::ClearFlags::NONE, 0, &pins)));
         break;
     }
     }
