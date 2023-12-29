@@ -108,8 +108,8 @@ struct TRing
 
     bool IsFull()
     {
-        std::unique_lock lock(Write.Mutex);
-        return Write.Pool.empty();
+        std::unique_lock lock(Read.Mutex);
+		return Read.Pool.size() == Glob.size(); 
     }
 
     bool IsEmpty()
@@ -156,6 +156,9 @@ struct TRing
         }
         Read.CV.notify_one();
     }
+
+    void CancelPush(Resource* res) { EndPop(res); }
+    void CancelPop(Resource* res) { EndPush(res); }
 
     Resource *BeginPop()
     {
@@ -211,6 +214,16 @@ struct TRing
         if (!IsFull())
             return BeginPush();
         return 0;
+    }
+
+    Resource *TryPush(const std::chrono::milliseconds timeout)
+    {
+		{
+            std::unique_lock lock(Write.Mutex);
+		    if (Write.Pool.empty())
+                Write.CV.wait_for(lock, timeout, [vec=Write.Pool]{ return !vec.empty(); });
+		}
+		return TryPush();
     }
 
     Resource *TryPop(u64& frameNumber, u32 spare = 0)

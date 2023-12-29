@@ -433,6 +433,7 @@ void CopyThread::AJAInputProc()
 
 	while (Run && !Ring->Exit)
 	{
+	#pragma region Clear Due To Restart Signal
 		if (ShouldResetRings)
 		{ /*
 			while (TransferInProgress)
@@ -441,6 +442,7 @@ void CopyThread::AJAInputProc()
 			Ring->Clear();
 			ShouldResetRings = false;
 		}
+	#pragma endregion
 
 		SendRingStats();
 

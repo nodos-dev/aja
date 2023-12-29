@@ -903,14 +903,14 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 
     auto th = it->second;
 
-	auto outgoing = th->Ring->TryPush();
+	auto outgoing = th->Ring->TryPush(std::chrono::milliseconds(100));
 	if (!outgoing)
 	{
         cpy.CopyToOptions.Stop = true;
 		return false;
 	}
 	outgoing->FrameNumber = cpy.FrameNumber;
-	auto wantedField = th->OutFieldType;
+ 	auto wantedField = th->OutFieldType;
 	auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
 	auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.CopyToOptions.IncomingPinData->Data);
 	auto incomingField = incomingTextureInfo.Info.Texture.FieldType;
@@ -919,7 +919,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	{
 		nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
 		cpy.CopyToOptions.Stop = false;
-		th->Ring->EndPush(outgoing);
+		th->Ring->CancelPush(outgoing);
 		return false;
 	}
 	outgoing->Params.FieldType = wantedField;
@@ -959,7 +959,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
 
 	th->Ring->EndPush(outgoing);
-	cpy.CopyToOptions.Stop = th->Ring->IsFull();
+	cpy.CopyToOptions.Stop = th->IsFull();
 	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 	return true;
 }
