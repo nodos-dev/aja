@@ -194,7 +194,7 @@ bool CopyThread::SetRingSize(u32 ringSize)
 
 void CopyThread::Restart(u32 ringSize)
 {
-	ShouldResetRings = true; // if ring size did not change, outs will just refill
+	ShouldResetRings.store(ShouldResetRings || !IsInput()); // if ring size did not change, outs will just refill
 	if (SetRingSize(ringSize))
 	{
 		Stop();
@@ -435,10 +435,7 @@ void CopyThread::AJAInputProc()
 	{
 	#pragma region Clear Due To Restart Signal
 		if (ShouldResetRings)
-		{ /*
-			while (TransferInProgress)
-				std::this_thread::yield();*/
-
+		{ 
 			Ring->Clear();
 			ShouldResetRings = false;
 		}
@@ -508,6 +505,7 @@ void CopyThread::AJAInputProc()
 		{
 			DropCount += vblDiff;
 			nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+			ShouldResetRings = true;
 			NotifyRestart(0, NOS_INPUT_DROP);
 		}
 		lastVBLCount = curVBLCount;
