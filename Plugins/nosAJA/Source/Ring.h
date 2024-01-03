@@ -47,13 +47,15 @@ struct TRing
 
     void Resize(u32 size)
     {
-        Write.Pool.clear();
-        Read.Pool.clear();
-        Glob.clear();
+        Write.Pool = {};
+        Read.Pool = {};
+        Resources.clear();
         for (u32 i = 0; i < size; ++i)
-            Glob.push_back(MakeShared<Resource>(Sample));
-
-        std::transform(Glob.begin(), Glob.end(), std::back_inserter(Write.Pool), [](auto rc) { return rc.get(); });
+		{
+            auto res = MakeShared<Resource>(Sample);
+			Resources.push_back(res);
+            Write.Pool.push(res.get());
+        }
         Size = size;
     }
     
@@ -77,12 +79,12 @@ struct TRing
 
     struct
     {
-        std::vector<Resource *> Pool;
+        std::queue<Resource *> Pool;
         std::mutex Mutex;
         std::condition_variable CV;
     } Write, Read;
 
-    std::vector<rc<Resource>> Glob;
+    std::vector<rc<Resource>> Resources;
 
     u32 Size = 0;
     nosVec2u Extent;
@@ -92,7 +94,7 @@ struct TRing
     ~TRing()
     {
         Stop();
-        Glob.clear();
+        Resources.clear();
     }
 
     void Stop()
@@ -109,7 +111,7 @@ struct TRing
     bool IsFull()
     {
         std::unique_lock lock(Read.Mutex);
-		return Read.Pool.size() == Glob.size(); 
+		return Read.Pool.size() == Resources.size(); 
     }
 
     bool IsEmpty()
@@ -140,7 +142,7 @@ struct TRing
         if (Exit)
             return 0;
         Resource *res = Write.Pool.front();
-		Write.Pool.erase(Write.Pool.begin());
+        Write.Pool.pop();
         assert(!res->written || !res->read);
         res->written = true;
         return res;
@@ -152,7 +154,7 @@ struct TRing
             std::unique_lock lock(Read.Mutex);
             assert(res->written || !res->read);
             res->written = false;
-            Read.Pool.push_back(res);
+            Read.Pool.push(res);
         }
         Read.CV.notify_one();
     }
@@ -170,7 +172,7 @@ struct TRing
         if (Exit)
             return 0;
         auto res = Read.Pool.front();
-        Read.Pool.erase(Read.Pool.begin());
+        Read.Pool.pop();
         assert(!res->written || !res->read);
         res->read = true;
         return res;
@@ -183,7 +185,7 @@ struct TRing
             assert(!res->written || res->read);
             res->read = false;
             res->FrameNumber = 0;
-            Write.Pool.push_back(res);
+            Write.Pool.push(res);
         }
         Write.CV.notify_one();
     }
@@ -235,7 +237,7 @@ struct TRing
 
 	void Clear(bool prepareToWrite = true)
 	{
-		for (auto& res : Glob)
+		for (auto& res : Resources)
         {
             if (res->Params.WaitEvent)
                 nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, 0);
@@ -243,15 +245,16 @@ struct TRing
         {
 			std::unique_lock l1(Write.Mutex);
 			std::unique_lock l2(Read.Mutex);
-			Read.Pool.clear();
-		    Write.Pool.clear();
+            Read.Pool = {};
+            Write.Pool = {};
 		}
 		{
 			std::unique_lock lock(prepareToWrite ? Write.Mutex : Read.Mutex);
-			std::transform(Glob.begin(),
-						   Glob.end(),
-						   std::back_inserter(prepareToWrite ? Write.Pool : Read.Pool),
-						   [](auto rc) { return rc.get(); });
+            for (auto res : Resources)
+                if (prepareToWrite)
+                    Write.Pool.push(res.get());
+                else
+					Read.Pool.push(res.get());
 		}
 	}
 };

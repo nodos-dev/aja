@@ -173,7 +173,7 @@ void CopyThread::Stop()
 
 	if (Thread.joinable())
 		Thread.join();
-	for (auto& res : Ring->Glob)
+	for (auto& res : Ring->Resources)
 		if (res->Params.WaitEvent)
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 }
