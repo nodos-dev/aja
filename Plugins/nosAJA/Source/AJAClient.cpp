@@ -904,11 +904,9 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
     auto th = it->second;
 
 	auto outgoing = th->Ring->TryPush(std::chrono::milliseconds(100));
-	if (!outgoing)
-	{
-        cpy.CopyToOptions.Stop = true;
+	cpy.CopyToOptions.Stop = th->IsFull();
+    if (!outgoing)
 		return false;
-	}
 	outgoing->FrameNumber = cpy.FrameNumber;
  	auto wantedField = th->OutFieldType;
 	auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
