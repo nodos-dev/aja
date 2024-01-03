@@ -14,6 +14,8 @@ using Clock = std::chrono::high_resolution_clock;
 using Milli = std::chrono::duration<double, std::milli>;
 using Micro = std::chrono::duration<double, std::micro>;
 
+constexpr auto AJA_MAX_RING_SIZE = 120u;
+
 struct CopyThread
 {
 	nos::Name PinName;

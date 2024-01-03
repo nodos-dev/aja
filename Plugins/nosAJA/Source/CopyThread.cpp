@@ -180,7 +180,7 @@ void CopyThread::Stop()
 
 bool CopyThread::SetRingSize(u32 ringSize)
 {
-	if (!ringSize || ringSize == RingSize || ringSize > 120)
+	if (!ringSize || ringSize == RingSize || ringSize > AJA_MAX_RING_SIZE)
 		return false;
 
 	RingSize = ringSize;
@@ -619,8 +619,6 @@ void CopyThread::AJAOutputProc()
 	{
 		while (ShouldResetRings && Run && !Ring->Exit && !IsFull())
 		{
-			HandleEvent(hungerSignal);
-			nosEngine.LogW("Out: %s trying to fill", Name().AsCStr());
 			std::this_thread::yield();
 			lastVBLCount = 0;
 		}

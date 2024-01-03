@@ -139,8 +139,8 @@ struct TRing
         }
         if (Exit)
             return 0;
-        Resource *res = Write.Pool.back();
-        Write.Pool.pop_back();
+        Resource *res = Write.Pool.front();
+		Write.Pool.erase(Write.Pool.begin());
         assert(!res->written || !res->read);
         res->written = true;
         return res;
@@ -221,7 +221,7 @@ struct TRing
 		{
             std::unique_lock lock(Write.Mutex);
 		    if (Write.Pool.empty())
-                Write.CV.wait_for(lock, timeout, [vec=Write.Pool]{ return !vec.empty(); });
+                Write.CV.wait_for(lock, timeout, [&]{ return !Write.Pool.empty(); });
 		}
 		return TryPush();
     }
@@ -238,7 +238,7 @@ struct TRing
 		for (auto& res : Glob)
         {
             if (res->Params.WaitEvent)
-                nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, -1ull);
+                nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, 0);
         }
         {
 			std::unique_lock l1(Write.Mutex);

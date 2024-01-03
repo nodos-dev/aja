@@ -662,7 +662,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         std::vector<u8> ringData = nos::Buffer::From(2);
         std::vector<u8> spareCountData = nos::Buffer::From(0);
         std::vector<u8> ringDataMin = nos::Buffer::From(1);
-        std::vector<u8> ringDataMax = nos::Buffer::From(120);
+        std::vector<u8> ringDataMax = nos::Buffer::From(AJA_MAX_RING_SIZE);
         flatbuffers::FlatBufferBuilder fbb;
         std::string fmtString = NTV2VideoFormatToString(format, true);
         std::vector<u8> fmtData(fmtString.data(), fmtString.data() + fmtString.size() + 1);
