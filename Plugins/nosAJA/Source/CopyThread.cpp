@@ -425,8 +425,7 @@ void CopyThread::AJAInputProc()
 
 	DropCount = 0;
 	u64 frameCount = 0;
-	ULWord lastVBLCount;
-	Client->Device->GetInputVerticalInterruptCount(lastVBLCount, Channel);
+	ULWord lastVBLCount = 0;
 
 	auto deltaSec = GetDeltaSeconds();
 	uint64_t frameTimeNs = (deltaSec.x() / static_cast<double>(deltaSec.y())) * 1'000'000'000;
@@ -437,6 +436,7 @@ void CopyThread::AJAInputProc()
 		if (ShouldResetRings)
 		{ 
 			Ring->Clear();
+			lastVBLCount = 0;
 			ShouldResetRings = false;
 		}
 	#pragma endregion
@@ -499,14 +499,16 @@ void CopyThread::AJAInputProc()
 		ULWord curVBLCount;
 		Client->Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
 
-		int64_t vblDiff = (int64_t) curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
-
-		if (vblDiff > 0)
+		if (lastVBLCount)
 		{
-			DropCount += vblDiff;
-			nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-			ShouldResetRings = true;
-			NotifyRestart(0, NOS_INPUT_DROP);
+			int64_t vblDiff = (int64_t) curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+			if (vblDiff > 0)
+			{
+				DropCount += vblDiff;
+				nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+				ShouldResetRings = true;
+				//NotifyRestart(0, NOS_INPUT_DROP);
+			}
 		}
 		lastVBLCount = curVBLCount;
 	#pragma endregion
@@ -611,14 +613,17 @@ void CopyThread::AJAOutputProc()
 	SetFrame(doubleBufferIndex);
 	doubleBufferIndex ^= 1;
 	DropCount = 0;
-	ULWord lastVBLCount;
-	Client->Device->GetOutputVerticalInterruptCount(lastVBLCount, Channel);
-
+	ULWord lastVBLCount = 0;
 
 	while (Run && !Ring->Exit)
 	{
 		while (ShouldResetRings && Run && !Ring->Exit && !IsFull())
+		{
+			HandleEvent(hungerSignal);
+			nosEngine.LogW("Out: %s trying to fill", Name().AsCStr());
 			std::this_thread::yield();
+			lastVBLCount = 0;
+		}
 
 		SendRingStats();
 
@@ -650,15 +655,17 @@ void CopyThread::AJAOutputProc()
 	#pragma region Drop Calculations
 		ULWord curVBLCount;
 		Client->Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
-
-		int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
-
 		// Drop calculations:
-		if (vblDiff > 0)
+		
+		if (lastVBLCount && !ShouldResetRings)
 		{
-			DropCount += vblDiff;
-			nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-			ShouldResetRings = true;
+			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+			if (vblDiff > 0)
+			{
+				DropCount += vblDiff;
+				nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+				ShouldResetRings = true;
+			}
 		}
 		lastVBLCount = curVBLCount;
 	#pragma endregion
