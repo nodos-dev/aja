@@ -507,7 +507,7 @@ void CopyThread::AJAInputProc()
 				DropCount += vblDiff;
 				nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
 				ShouldResetRings = true;
-				//NotifyRestart(0, NOS_INPUT_DROP);
+				NotifyRestart(0, NOS_INPUT_DROP);
 			}
 		}
 		lastVBLCount = curVBLCount;
