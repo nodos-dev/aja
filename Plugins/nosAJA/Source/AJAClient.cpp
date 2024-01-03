@@ -903,9 +903,14 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 
     auto th = it->second;
 
-	auto outgoing = th->Ring->TryPush(std::chrono::milliseconds(100));
-	cpy.CopyToOptions.Stop = th->IsFull();
-    if (!outgoing)
+    if (th->Ring->Write.Pool.empty())
+    {
+		nosEngine.LogI("hunger while ring full");
+    }
+	auto outgoing = th->Ring->BeginPush();
+	if (!outgoing)
+	{
+        cpy.CopyToOptions.Stop = true;
 		return false;
 	outgoing->FrameNumber = cpy.FrameNumber;
  	auto wantedField = th->OutFieldType;
@@ -957,7 +962,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
 
 	th->Ring->EndPush(outgoing);
-	cpy.CopyToOptions.Stop = th->IsFull();
+	cpy.CopyToOptions.Stop = th->Ring->Write.Pool.empty();
 	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 	return true;
 }

@@ -111,6 +111,8 @@ struct CopyThread
 	void NotifyRestart(u32 ringSize = 0, nosPathEvent pathEvent = NOS_OUTPUT_DROP);
 
 	void SendRingStats();
+
+    void ResetVBLEvent();
 };
 
 } // namespace nos

@@ -412,10 +412,8 @@ void CopyThread::AJAInputProc()
 
 	auto prevMode = Client->Device->GetMode(Channel);
 
-	// Reset interrupt event status
-	Client->Device->UnsubscribeInputVerticalEvent(Channel);
-	Client->Device->SubscribeInputVerticalEvent(Channel);
-
+	ResetVBLEvent();
+	
 	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
 	doubleBufferIndex ^= 1;
@@ -435,9 +433,11 @@ void CopyThread::AJAInputProc()
 	#pragma region Clear Due To Restart Signal
 		if (ShouldResetRings)
 		{ 
+			nosEngine.LogI("In: %s restarting", Name().AsCStr());
 			Ring->Clear();
 			lastVBLCount = 0;
 			ShouldResetRings = false;
+			ResetVBLEvent();
 		}
 	#pragma endregion
 
@@ -480,7 +480,6 @@ void CopyThread::AJAInputProc()
 			InputUpdate(prevMode, field);
 			Orphan(false);
 		}
-
 		CPURing::Resource* slot = Ring->BeginPush();
 		if (!slot)
 		{
@@ -489,10 +488,14 @@ void CopyThread::AJAInputProc()
 		}
 
 		if (slot->Params.WaitEvent)
+		{
+			util::Stopwatch swGPU{};
 			if (NOS_RESULT_SUCCESS != nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, frameTimeNs * 10))
 			{
 				nosEngine.LogW("In: GPU stalled for more than 10 frames, expect tearing.");
 			}
+			nosEngine.WatchLog("AJA Input GPU Wait Time", swGPU.ElapsedString().c_str());
+		}
 	#pragma endregion
 
 	#pragma region Drop Calculations
@@ -605,9 +608,7 @@ void CopyThread::AJAOutputProc()
 	Orphan(false);
 	nosEngine.LogI("AJAOut (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
-	//Reset interrupt event status
-	Client->Device->UnsubscribeOutputVerticalEvent(Channel);
-	Client->Device->SubscribeOutputVerticalEvent(Channel);
+	ResetVBLEvent();
 
 	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
@@ -617,12 +618,18 @@ void CopyThread::AJAOutputProc()
 
 	while (Run && !Ring->Exit)
 	{
-		while (ShouldResetRings && Run && !Ring->Exit && !IsFull())
+		if (ShouldResetRings)
 		{
-			std::this_thread::yield();
+			nosEngine.LogI("Out: %s restarting", Name().AsCStr());
+			if (!IsFull())
+				HandleEvent(hungerSignal);
+			while (ShouldResetRings && Run && !Ring->Exit && !IsFull())
+			{
+				std::this_thread::yield();
+			}
+			ResetVBLEvent();
 			lastVBLCount = 0;
 		}
-
 		SendRingStats();
 
 	#pragma region Wait For Ring & VBL
@@ -690,7 +697,8 @@ void CopyThread::AJAOutputProc()
 	#pragma endregion
 	
 		Ring->EndPop(slot);
-		HandleEvent(hungerSignal);
+		if (!Ring->Write.Pool.empty())
+			HandleEvent(hungerSignal);
 	}
 	Ring->Stop();
 
@@ -796,6 +804,20 @@ void CopyThread::SendRingStats() {
 	nosEngine.WatchLog((Name().AsString() + " Ring Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
 	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
 	nosEngine.WatchLog((Name().AsString() + " Drop Count").c_str(), std::to_string(DropCount).c_str());
+}
+
+void CopyThread::ResetVBLEvent() 
+{
+	if (IsInput())
+	{
+		Client->Device->UnsubscribeInputVerticalEvent(Channel);
+		Client->Device->SubscribeInputVerticalEvent(Channel);
+	}
+	else
+	{
+		Client->Device->UnsubscribeOutputVerticalEvent(Channel);
+		Client->Device->SubscribeOutputVerticalEvent(Channel);
+	}
 }
 
 } // namespace nos
