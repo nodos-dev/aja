@@ -907,7 +907,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
     {
 		nosEngine.LogI("hunger while ring full");
     }
-	auto outgoing = th->Ring->BeginPush();
+	auto outgoing = th->Ring->TryPush();
 	if (!outgoing)
 	{
 		cpy.CopyToOptions.Stop = true;
