@@ -910,8 +910,9 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	auto outgoing = th->Ring->BeginPush();
 	if (!outgoing)
 	{
-        cpy.CopyToOptions.Stop = true;
+		cpy.CopyToOptions.Stop = true;
 		return false;
+	}
 	outgoing->FrameNumber = cpy.FrameNumber;
  	auto wantedField = th->OutFieldType;
 	auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
