@@ -235,18 +235,20 @@ struct TRing
         return 0;
 	}
 
-	void Clear()
-	{
+    void Reset(bool fill)
+    {
+        auto& from = fill ? Write : Read;
+		auto& to = fill ? Read : Write;
 		std::unique_lock l1(Write.Mutex);
 		std::unique_lock l2(Read.Mutex);
-        while (!Read.Pool.empty())
-        {
-			auto* slot = Read.Pool.front();
-			Read.Pool.pop();
+		while (!from.Pool.empty())
+		{
+			auto* slot = from.Pool.front();
+			from.Pool.pop();
 			slot->Reset();
-			Write.Pool.push(slot);
-        }
-	}
+			to.Pool.push(slot);
+		}
+    }
 };
 
 typedef TRing<nosBufferInfo> CPURing;

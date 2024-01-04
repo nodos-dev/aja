@@ -194,7 +194,7 @@ bool CopyThread::SetRingSize(u32 ringSize)
 
 void CopyThread::Restart(u32 ringSize)
 {
-	ShouldResetRings.store(ShouldResetRings || !IsInput()); // if ring size did not change, outs will just refill
+	ShouldResetRings = true; // if ring size did not change, outs will just refill
 	if (SetRingSize(ringSize))
 	{
 		Stop();
@@ -434,7 +434,7 @@ void CopyThread::AJAInputProc()
 		if (ShouldResetRings)
 		{ 
 			nosEngine.LogI("In: %s restarting", Name().AsCStr());
-			Ring->Clear();
+			Ring->Reset(false);
 			lastVBLCount = 0;
 			ShouldResetRings = false;
 			ResetVBLEvent();
@@ -509,8 +509,7 @@ void CopyThread::AJAInputProc()
 			{
 				DropCount += vblDiff;
 				nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-				ShouldResetRings = true;
-				NotifyRestart(0, NOS_INPUT_DROP);
+				NotifyRestart(0, NOS_DROP);
 			}
 		}
 		lastVBLCount = curVBLCount;
@@ -621,14 +620,9 @@ void CopyThread::AJAOutputProc()
 		if (ShouldResetRings)
 		{
 			nosEngine.LogI("Out: %s restarting", Name().AsCStr());
-			if (!IsFull())
-				HandleEvent(hungerSignal);
-			while (ShouldResetRings && Run && !Ring->Exit && !IsFull())
-			{
-				std::this_thread::yield();
-			}
-			ResetVBLEvent();
+			Ring->Reset(true);
 			lastVBLCount = 0;
+			ShouldResetRings = false;
 		}
 		SendRingStats();
 
@@ -650,7 +644,6 @@ void CopyThread::AJAOutputProc()
 		}
 		{
 			util::Stopwatch swGPU{};
-			assert(slot->Params.WaitEvent);
 			if (slot->Params.WaitEvent)
 				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
 			nosEngine.WatchLog("AJA Output GPU Wait Time", swGPU.ElapsedString().c_str());
@@ -669,7 +662,7 @@ void CopyThread::AJAOutputProc()
 			{
 				DropCount += vblDiff;
 				nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-				ShouldResetRings = true;
+				NotifyRestart(0, NOS_DROP);
 			}
 		}
 		lastVBLCount = curVBLCount;
