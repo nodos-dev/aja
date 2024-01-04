@@ -40,9 +40,15 @@ struct TRing
             nosVulkan->DestroyResource(&Res);
         }
 
+        void Reset()
+		{
+			if (Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent, 0);
+            Params = {};
+			FrameNumber = 0;
+        }
+
         std::atomic_uint64_t FrameNumber;
-        std::atomic_bool written = false;
-        std::atomic_bool read = false;
     };
 
     void Resize(u32 size)
@@ -143,8 +149,6 @@ struct TRing
             return 0;
         Resource *res = Write.Pool.front();
         Write.Pool.pop();
-        assert(!res->written || !res->read);
-        res->written = true;
         return res;
     }
 
@@ -152,9 +156,8 @@ struct TRing
     {
         {
             std::unique_lock lock(Read.Mutex);
-            assert(res->written || !res->read);
-            res->written = false;
             Read.Pool.push(res);
+			assert(Read.Pool.size() <= Resources.size());
         }
         Read.CV.notify_one();
     }
@@ -173,8 +176,6 @@ struct TRing
             return 0;
         auto res = Read.Pool.front();
         Read.Pool.pop();
-        assert(!res->written || !res->read);
-        res->read = true;
         return res;
     }
 
@@ -182,10 +183,9 @@ struct TRing
     {
         {
             std::unique_lock lock(Write.Mutex);
-            assert(!res->written || res->read);
-            res->read = false;
             res->FrameNumber = 0;
             Write.Pool.push(res);
+			assert(Write.Pool.size() <= Resources.size());
         }
         Write.CV.notify_one();
     }
@@ -235,27 +235,17 @@ struct TRing
         return 0;
 	}
 
-	void Clear(bool prepareToWrite = true)
+	void Clear()
 	{
-		for (auto& res : Resources)
+		std::unique_lock l1(Write.Mutex);
+		std::unique_lock l2(Read.Mutex);
+        while (!Read.Pool.empty())
         {
-            if (res->Params.WaitEvent)
-                nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, 0);
+			auto* slot = Read.Pool.front();
+			Read.Pool.pop();
+			slot->Reset();
+			Write.Pool.push(slot);
         }
-        {
-			std::unique_lock l1(Write.Mutex);
-			std::unique_lock l2(Read.Mutex);
-            Read.Pool = {};
-            Write.Pool = {};
-		}
-		{
-			std::unique_lock lock(prepareToWrite ? Write.Mutex : Read.Mutex);
-            for (auto res : Resources)
-                if (prepareToWrite)
-                    Write.Pool.push(res.get());
-                else
-					Read.Pool.push(res.get());
-		}
 	}
 };
 
