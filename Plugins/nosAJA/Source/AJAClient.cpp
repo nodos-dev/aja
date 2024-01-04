@@ -649,7 +649,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         bool validates = !IsProgressiveTransport(format); // interlaced input and output both validate
 
         sys::vulkan::TTexture tex;
-        tex.size = sys::vulkan::SizePreset::CUSTOM;
+        tex.resolution = sys::vulkan::SizePreset::CUSTOM;
         tex.width = width;
         tex.height = height;
         tex.unscaled = true;    // Prevent auto-scaling when an output pin is connected to this pin.
