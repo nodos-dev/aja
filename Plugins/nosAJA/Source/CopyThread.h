@@ -85,7 +85,7 @@ struct CopyThread
     void SetFrame(u32 doubleBufferIndex);
 	u32 GetFrameIndex(u32 doubleBufferIndex) const;
 
-	nos::fb::vec2u GetDeltaSeconds() const;
+	nosVec2u GetDeltaSeconds() const;
 
 	struct DMAInfo
 	{

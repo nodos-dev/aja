@@ -217,10 +217,10 @@ void CopyThread::SetFrame(u32 doubleBufferIndex)
 
 u32 CopyThread::GetFrameIndex(u32 doubleBufferIndex) const { return 2 * Channel + doubleBufferIndex; }
 
-nos::fb::vec2u CopyThread::GetDeltaSeconds() const
+nosVec2u CopyThread::GetDeltaSeconds() const
 {
 	NTV2FrameRate frameRate = GetNTV2FrameRateFromVideoFormat(Format);
-	nos::fb::vec2u deltaSeconds = { 1,50 };
+	nosVec2u deltaSeconds = { 1,50 };
 	switch (frameRate)
 	{
 	case NTV2_FRAMERATE_6000:	deltaSeconds = { 1, 60 }; break;
@@ -240,7 +240,7 @@ nos::fb::vec2u CopyThread::GetDeltaSeconds() const
 	default:					deltaSeconds = { 1, 50 }; break;
 	}
 	if (Interlaced())
-		deltaSeconds.mutate_y(deltaSeconds.y() * 2);
+		deltaSeconds.y = deltaSeconds.y * 2;
 	return deltaSeconds;
 }
 
@@ -426,7 +426,7 @@ void CopyThread::AJAInputProc()
 	ULWord lastVBLCount = 0;
 
 	auto deltaSec = GetDeltaSeconds();
-	uint64_t frameTimeNs = (deltaSec.x() / static_cast<double>(deltaSec.y())) * 1'000'000'000;
+	uint64_t frameTimeNs = (deltaSec.x / static_cast<double>(deltaSec.y)) * 1'000'000'000;
 
 	while (Run && !Ring->Exit)
 	{
@@ -602,8 +602,6 @@ void CopyThread::AJAOutputProc()
 	flatbuffers::FlatBufferBuilder fbb;
 	auto id = Client->GetPinId(PinName);
 	auto deltaSec = GetDeltaSeconds();
-	auto hungerSignal = CreateAppEvent(fbb, nos::app::CreateScheduleRequest(fbb, nos::app::ScheduleRequestKind::PIN, &id, false, &deltaSec));
-	HandleEvent(hungerSignal);
 	Orphan(false);
 	nosEngine.LogI("AJAOut (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
@@ -619,6 +617,8 @@ void CopyThread::AJAOutputProc()
 	{
 		if (ShouldResetRings)
 		{
+			nosSchedulePinParams scheduleParams{id, 0, true, deltaSec, false};
+			nosEngine.SchedulePin(&scheduleParams);
 			nosEngine.LogI("Out: %s restarting", Name().AsCStr());
 			Ring->Reset(true);
 			lastVBLCount = 0;
@@ -690,13 +690,13 @@ void CopyThread::AJAOutputProc()
 	#pragma endregion
 	
 		Ring->EndPop(slot);
-		if (!Ring->Write.Pool.empty())
-			HandleEvent(hungerSignal);
+
+		nosSchedulePinParams scheduleParams{id, 1, false, deltaSec, false};
+		nosEngine.SchedulePin(&scheduleParams);
 	}
 	Ring->Stop();
 
-	HandleEvent(CreateAppEvent(fbb, 
-		nos::app::CreateScheduleRequest(fbb, nos::app::ScheduleRequestKind::PIN, &id, true)));
+	nosEngine.EndScheduling(id);
 
 	if (Run)
 		SendDeleteRequest();

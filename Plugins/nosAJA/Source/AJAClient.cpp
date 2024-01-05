@@ -672,7 +672,7 @@ void AJAClient::OnCommandFired(u32 cmd)
 
         std::vector<flatbuffers::Offset<nos::fb::Pin>> pins = {
             nos::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "nos.sys.vulkan.Texture", showAs, canShowAs, 0, 0, &data,
-                                    0, 0, 0, 0, 0, 0, 0, 0, 0, true, fb::PinContents::NONE, 0, 0, validates),
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, Input, fb::PinContents::NONE, 0, 0, validates),
             nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Size").c_str(), "uint",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
                                     &ringData, 0, &ringDataMin, &ringDataMax, nullptr, .0f, Input),
@@ -910,7 +910,6 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	auto outgoing = th->Ring->TryPush();
 	if (!outgoing)
 	{
-		cpy.CopyToOptions.Stop = true;
 		return false;
 	}
 	outgoing->FrameNumber = cpy.FrameNumber;
@@ -922,7 +921,6 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	if ((inInterlaced && outInterlaced) && incomingField != wantedField)
 	{
 		nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
-		cpy.CopyToOptions.Stop = false;
 		th->Ring->CancelPush(outgoing);
 		return false;
 	}
@@ -963,7 +961,6 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
 
 	th->Ring->EndPush(outgoing);
-	cpy.CopyToOptions.Stop = th->Ring->Write.Pool.empty();
 	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 	return true;
 }
