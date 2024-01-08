@@ -190,14 +190,6 @@ struct AJA
         auto aja = ((AJAClient *)ctx);
         aja->OnPathCommand(cmd);
     }
-    static void OnPinConnected(void* ctx, const nosName pinName, nosUUID connectedPin, nosUUID nodeid)
-    {
-        ((AJAClient*)ctx)->OnPinConnected(pinName);
-    }
-    static void OnPinDisconnected(void* ctx, const nosName pinName)
-    {
-        ((AJAClient*)ctx)->OnPinDisconnected(pinName);
-    }
     
     static nosResult CanRemoveOrphanPin(void* ctx, nosName pinName, nosUUID pinId)
     {
@@ -227,32 +219,22 @@ struct AJA
     }
     static nosResult  ExecuteNode(void* ctx, const nosNodeExecuteArgs * args) { return NOS_RESULT_SUCCESS; }
 
-    static nosResult  BeginCopyFrom(void* ctx, nosCopyInfo * cpy)
+    static nosResult  CopyFrom(void* ctx, nosCopyInfo * cpy)
     { 
-        if (((AJAClient*)ctx)->BeginCopyFrom(*cpy))
+        if (((AJAClient*)ctx)->CopyFrom(*cpy))
         {
             return NOS_RESULT_SUCCESS;
         }
         return NOS_RESULT_FAILED;
     }
 
-    static nosResult  BeginCopyTo(void* ctx, nosCopyInfo * cpy)
+    static nosResult  CopyTo(void* ctx, nosCopyInfo * cpy)
     { 
-        if (((AJAClient*)ctx)->BeginCopyTo(*cpy))
+        if (((AJAClient*)ctx)->CopyTo(*cpy))
         {
             return NOS_RESULT_SUCCESS;
         }
         return NOS_RESULT_FAILED;
-    }
-
-    static void  EndCopyFrom(void* ctx, nosCopyInfo * cpy)
-    { 
-        return ((AJAClient *)ctx)->EndCopyFrom(*cpy);
-    }
-
-    static void  EndCopyTo(void* ctx, nosCopyInfo * cpy)
-    { 
-        return ((AJAClient *)ctx)->EndCopyTo(*cpy);
     }
 
     static void OnMenuRequested(void* ctx, const nosContextMenuRequest * request) 
@@ -284,16 +266,12 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     ajaIn->OnNodeCreated = ajaOut->OnNodeCreated = AJA::OnNodeCreated;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
     ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
-    ajaIn->OnPinConnected = ajaOut->OnPinConnected = AJA::OnPinConnected;
-    ajaIn->OnPinDisconnected = ajaOut->OnPinDisconnected = AJA::OnPinDisconnected;
     ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
     ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
     ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;
     ajaIn->ExecuteNode = ajaOut->ExecuteNode = AJA::ExecuteNode;
-    ajaIn->BeginCopyFrom = ajaOut->BeginCopyFrom = AJA::BeginCopyFrom;
-    ajaIn->BeginCopyTo = ajaOut->BeginCopyTo = AJA::BeginCopyTo;
-    ajaIn->EndCopyFrom = ajaOut->EndCopyFrom = AJA::EndCopyFrom;
-    ajaIn->EndCopyTo = ajaOut->EndCopyTo = AJA::EndCopyTo;
+    ajaIn->CopyFrom = ajaOut->CopyFrom = AJA::CopyFrom;
+    ajaIn->CopyTo = ajaOut->CopyTo = AJA::CopyTo;
     ajaIn->OnMenuRequested = ajaOut->OnMenuRequested = AJA::OnMenuRequested;
     ajaIn->OnMenuCommand = ajaOut->OnMenuCommand = AJA::OnMenuCommand;
     ajaIn->OnKeyEvent = ajaOut->OnKeyEvent = AJA::OnKeyEvent;

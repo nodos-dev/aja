@@ -181,8 +181,6 @@ struct NOSAPI_ATTR AJAClient
     void OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
                       std::vector<nos::fb::UUID> &pinsToDelete);
     void OnPinMenuFired(nosContextMenuRequest const &request);
-    void OnPinConnected(nos::Name pinName);
-    void OnPinDisconnected(nos::Name pinName);
     
     bool CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId);
     bool OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId);
@@ -196,10 +194,8 @@ struct NOSAPI_ATTR AJAClient
     void OnPinValueChanged(nos::Name pinName, void* value);
     void OnExecute();
 
-    bool BeginCopyFrom(nosCopyInfo &cpy);
-    bool BeginCopyTo(nosCopyInfo &cpy);
-    void EndCopyFrom(nosCopyInfo &cpy);
-    void EndCopyTo(nosCopyInfo &cpy);
+    bool CopyFrom(nosCopyInfo &cpy);
+    bool CopyTo(nosCopyInfo &cpy);
 
     void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
                        const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,

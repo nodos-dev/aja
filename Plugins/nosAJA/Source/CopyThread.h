@@ -14,6 +14,8 @@ using Clock = std::chrono::high_resolution_clock;
 using Milli = std::chrono::duration<double, std::milli>;
 using Micro = std::chrono::duration<double, std::micro>;
 
+constexpr auto AJA_MAX_RING_SIZE = 120u;
+
 struct CopyThread
 {
 	nos::Name PinName;
@@ -40,15 +42,11 @@ struct CopyThread
     std::atomic<GammaCurve> GammaCurve = GammaCurve::REC709;
     std::atomic_bool NarrowRange = true;
 	std::atomic_bool IsOrphan = false;
+	std::atomic_bool ShouldResetRings = true; // out: fill, input: clear
+	bool PendingRestart = false;
     
 	rc<CPURing::Resource> SSBO;
-	rc<GPURing::Resource> CompressedTex;
-
-	struct
-	{
-		std::chrono::nanoseconds Time;
-		u32 Counter;
-	} DebugInfo;
+	rc<GPURing::Resource> ConversionIntermediateTex;
 
 	nosTextureFieldType OutFieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
 
@@ -79,13 +77,15 @@ struct CopyThread
     void Live(bool);
     void PinUpdate(std::optional<nos::fb::TOrphanState>, Action live);
 
+    bool IsFull();
+
     void Stop();
-	void SetRingSize(u32 ringSize);
+	bool SetRingSize(u32 ringSize);
 	void Restart(u32 ringSize);
     void SetFrame(u32 doubleBufferIndex);
 	u32 GetFrameIndex(u32 doubleBufferIndex) const;
 
-	nos::fb::vec2u GetDeltaSeconds() const;
+	nosVec2u GetDeltaSeconds() const;
 
 	struct DMAInfo
 	{
@@ -108,12 +108,11 @@ struct CopyThread
     template<class T>
     glm::mat<4,4,T> GetMatrix() const;
 
-	void NotifyRestart(RestartParams const& params);
-	void NotifyDrop();
-
-	u32 TotalFrameCount();
+	void NotifyRestart(u32 ringSize = 0, nosPathEvent pathEvent = NOS_DROP);
 
 	void SendRingStats();
+
+    void ResetVBLEvent();
 };
 
 } // namespace nos

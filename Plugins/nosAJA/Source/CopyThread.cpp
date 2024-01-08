@@ -170,22 +170,38 @@ void CopyThread::Stop()
 {
 	Run = false;
 	Ring->Stop();
+
 	if (Thread.joinable())
 		Thread.join();
+	for (auto& res : Ring->Resources)
+		if (res->Params.WaitEvent)
+			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
 }
 
-void CopyThread::SetRingSize(u32 ringSize)
+bool CopyThread::SetRingSize(u32 ringSize)
 {
+	if (!ringSize || ringSize == RingSize || ringSize > AJA_MAX_RING_SIZE)
+		return false;
+
 	RingSize = ringSize;
+
+	if (IsInput())
+		nosEngine.SetPinValue(Client->GetPinId(nos::Name(Name().AsString() + " Ring Size")),
+							 nosBuffer{.Data = &ringSize, .Size = sizeof(u32)});
+
+	return true;
 }
 
 void CopyThread::Restart(u32 ringSize)
 {
-	assert(ringSize && ringSize < 200);
-	SetRingSize(ringSize);
-	Stop();
-	CreateRings();
-	StartThread();
+	ShouldResetRings = true; // if ring size did not change, outs will just refill
+	if (SetRingSize(ringSize))
+	{
+		Stop();
+		CreateRings();
+		StartThread();
+	}
+	PendingRestart = false;
 }
 
 void CopyThread::SetFrame(u32 doubleBufferIndex)
@@ -201,10 +217,10 @@ void CopyThread::SetFrame(u32 doubleBufferIndex)
 
 u32 CopyThread::GetFrameIndex(u32 doubleBufferIndex) const { return 2 * Channel + doubleBufferIndex; }
 
-nos::fb::vec2u CopyThread::GetDeltaSeconds() const
+nosVec2u CopyThread::GetDeltaSeconds() const
 {
 	NTV2FrameRate frameRate = GetNTV2FrameRateFromVideoFormat(Format);
-	nos::fb::vec2u deltaSeconds = { 1,50 };
+	nosVec2u deltaSeconds = { 1,50 };
 	switch (frameRate)
 	{
 	case NTV2_FRAMERATE_6000:	deltaSeconds = { 1, 60 }; break;
@@ -224,7 +240,7 @@ nos::fb::vec2u CopyThread::GetDeltaSeconds() const
 	default:					deltaSeconds = { 1, 50 }; break;
 	}
 	if (Interlaced())
-		deltaSeconds.mutate_y(deltaSeconds.y() * 2);
+		deltaSeconds.y = deltaSeconds.y * 2;
 	return deltaSeconds;
 }
 
@@ -305,7 +321,7 @@ void CopyThread::CreateRings()
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
 	info.Format = NOS_FORMAT_R8G8B8A8_UINT;
-	CompressedTex = MakeShared<GPURing::Resource>(info);
+	ConversionIntermediateTex = MakeShared<GPURing::Resource>(info);
 }
 
 void CopyThread::InputUpdate(AJADevice::Mode& prevMode, nosTextureFieldType& field)
@@ -363,8 +379,8 @@ CopyThread::DMAInfo CopyThread::GetDMAInfo(nosResourceShareInfo& buffer, u32 dou
 {
 	return {
 		.Buffer = (u32*)nosVulkan->Map(&buffer),
-		.Pitch = CompressedTex->Res.Info.Texture.Width * 4,
-		.Segments = CompressedTex->Res.Info.Texture.Height,
+		.Pitch = ConversionIntermediateTex->Res.Info.Texture.Width * 4,
+		.Segments = ConversionIntermediateTex->Res.Info.Texture.Height,
 		.FrameIndex = GetFrameIndex(doubleBufferIndex)
 	};
 }
@@ -391,34 +407,43 @@ bool CopyThread::WaitForVBL(nosTextureFieldType writeField)
 
 void CopyThread::AJAInputProc()
 {
-	NotifyDrop();
 	Orphan(false);
 	nosEngine.LogI("AJAIn (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
 	auto prevMode = Client->Device->GetMode(Channel);
 
-	// Reset interrupt event status
-	Client->Device->UnsubscribeInputVerticalEvent(Channel);
-	Client->Device->SubscribeInputVerticalEvent(Channel);
-
-	u32 doubleBufferIndex = 0;
+	ResetVBLEvent();
+	
+	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
+	doubleBufferIndex ^= 1;
 
 	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 	WaitForVBL(field);
 
-	DebugInfo.Time = std::chrono::nanoseconds(0);
-	DebugInfo.Counter = 0;
-
 	DropCount = 0;
-	u32 framesSinceLastDrop = 0;
-
 	u64 frameCount = 0;
+	ULWord lastVBLCount = 0;
+
+	auto deltaSec = GetDeltaSeconds();
+	uint64_t frameTimeNs = (deltaSec.x / static_cast<double>(deltaSec.y)) * 1'000'000'000;
 
 	while (Run && !Ring->Exit)
 	{
+	#pragma region Clear Due To Restart Signal
+		if (ShouldResetRings)
+		{ 
+			nosEngine.LogI("In: %s restarting", Name().AsCStr());
+			Ring->Reset(false);
+			lastVBLCount = 0;
+			ShouldResetRings = false;
+			ResetVBLEvent();
+		}
+	#pragma endregion
+
 		SendRingStats();
 
+	#pragma region Check Input Signal
 		InputUpdate(prevMode, field);
 
 		if (LinkSizeMismatch())
@@ -435,7 +460,9 @@ void CopyThread::AJAInputProc()
 			} while (LinkSizeMismatch());
 			Orphan(false);
 		}
+	#pragma endregion
 
+	#pragma region Wait For VBL & Ring
 		if (!WaitForVBL(field))
 		{
 			field = vkss::FlippedField(field);
@@ -453,27 +480,42 @@ void CopyThread::AJAInputProc()
 			InputUpdate(prevMode, field);
 			Orphan(false);
 		}
-
-
-		int ringSize = EffectiveRingSize;
-		int totalFrameCount = TotalFrameCount();
-
-		frameCount++;
-
-		CPURing::Resource* slot = nullptr;
-		if (totalFrameCount >= ringSize || (!(slot = Ring->TryPush())))
+		CPURing::Resource* slot = Ring->BeginPush();
+		if (!slot)
 		{
-			DropCount++;
-			Ring->ResetFrameCount = true;
-			framesSinceLastDrop = 0;
+			nosEngine.LogW("In: %s push failed", Name().AsCStr());
 			continue;
 		}
 
 		if (slot->Params.WaitEvent)
-			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
+		{
+			util::Stopwatch swGPU{};
+			if (NOS_RESULT_SUCCESS != nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, frameTimeNs * 10))
+			{
+				nosEngine.LogW("In: GPU stalled for more than 10 frames, expect tearing.");
+			}
+			nosEngine.WatchLog("AJA Input GPU Wait Time", swGPU.ElapsedString().c_str());
+		}
+	#pragma endregion
 
-		slot->FrameNumber = frameCount;
+	#pragma region Drop Calculations
+		ULWord curVBLCount;
+		Client->Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
 
+		if (lastVBLCount)
+		{
+			int64_t vblDiff = (int64_t) curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+			if (vblDiff > 0)
+			{
+				DropCount += vblDiff;
+				nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+				NotifyRestart(0, NOS_DROP);
+			}
+		}
+		lastVBLCount = curVBLCount;
+	#pragma endregion
+
+	#pragma region DMA
 		util::Stopwatch swDma;
 		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
@@ -491,15 +533,17 @@ void CopyThread::AJAInputProc()
 		else
 			Client->Device->DMAReadFrame(FrameIndex, Buf, Pitch * Segments, Channel);
 		nosEngine.WatchLog("AJA Input DMA Time", swDma.ElapsedString().c_str());
-		
+	#pragma endregion
+
+	#pragma region Push To Ring
+		frameCount++;
+		slot->FrameNumber = frameCount;
 		slot->Params.FieldType = field;
 		slot->Params.ColorspaceMatrix = glm::inverse(GetMatrix<f64>());
 		Ring->EndPush(slot);
+	#pragma endregion
 
-		++framesSinceLastDrop;
-		if (DropCount && framesSinceLastDrop == 50)
-			NotifyDrop();
-
+	#pragma region Update Next Frame Info
 		if (!Interlaced())
 		{
 			SetFrame(doubleBufferIndex);
@@ -507,6 +551,8 @@ void CopyThread::AJAInputProc()
 		}
 		
 		field = vkss::FlippedField(field);
+	#pragma endregion	
+
 	}
 EXIT:
 
@@ -533,44 +579,22 @@ nosVec2u CopyThread::GetSuitableDispatchSize() const
 	};
 
 	const u32 q = IsQuad();
-	f32 x = glm::clamp<u32>(Client->DispatchSizeX.load(), 1, CompressedTex->Res.Info.Texture.Width) * (1 + q) * (.25 * BitWidth() - 1);
-	f32 y = glm::clamp<u32>(Client->DispatchSizeY.load(), 1, CompressedTex->Res.Info.Texture.Height) * (1. + q) * (1 + Interlaced());
+	f32 x = glm::clamp<u32>(Client->DispatchSizeX.load(), 1, ConversionIntermediateTex->Res.Info.Texture.Width) * (1 + q) * (.25 * BitWidth() - 1);
+	f32 y = glm::clamp<u32>(Client->DispatchSizeY.load(), 1, ConversionIntermediateTex->Res.Info.Texture.Height) * (1. + q) * (1 + Interlaced());
 
-	return nosVec2u(BestFit(x + .5, CompressedTex->Res.Info.Texture.Width >> (BitWidth() - 5)),
-					 BestFit(y + .5, CompressedTex->Res.Info.Texture.Height / 9));
+	return nosVec2u(BestFit(x + .5, ConversionIntermediateTex->Res.Info.Texture.Width >> (BitWidth() - 5)),
+					 BestFit(y + .5, ConversionIntermediateTex->Res.Info.Texture.Height / 9));
 }
 
-void CopyThread::NotifyRestart(RestartParams const& params)
+void CopyThread::NotifyRestart(u32 ringSize /* = 0*/, nosPathEvent pathEvent /* = MZ_OUTPUT_DROP*/)
 {
+	if (PendingRestart)
+		return;
 	nosEngine.LogW("%s is notifying path for restart", Name().AsCStr());
 	auto id = Client->GetPinId(Name());
-	auto args = Buffer::From(params);
-	nosEngine.SendPathCommand(nosPathCommand{
-		.PinId = id,
-		.Command = NOS_PATH_COMMAND_TYPE_RESTART,
-		.Execution = NOS_PATH_COMMAND_EXECUTION_TYPE_WALKBACK,
-		.Args = nosBuffer { args.Data(), args.Size() }
-	});
-}
-
-void CopyThread::NotifyDrop()
-{
-	if (!ConnectedPinCount)
-		return;
-	nosEngine.LogW("%s is notifying path about a drop event", Name().AsCStr());
-	auto id = Client->GetPinId(nos::Name(Name()));
-	auto args = Buffer::From(Ring->Size);
-	nosEngine.SendPathCommand(nosPathCommand{
-		.PinId = id,
-		.Command = NOS_PATH_COMMAND_TYPE_NOTIFY_DROP,
-		.Execution = NOS_PATH_COMMAND_EXECUTION_TYPE_NOTIFY_ALL_CONNECTIONS,
-		.Args = nosBuffer { args.Data(), args.Size() }
-	});
-}
-
-u32 CopyThread::TotalFrameCount()
-{
-	return Ring->TotalFrameCount();
+	nosEngine.SendPathCommand(
+		nosPathCommand{.Event = ringSize ? NOS_RING_SIZE_CHANGE : pathEvent, .PinId = id, .RingSize = ringSize});
+	PendingRestart = true;
 }
 
 void CopyThread::AJAOutputProc()
@@ -578,64 +602,73 @@ void CopyThread::AJAOutputProc()
 	flatbuffers::FlatBufferBuilder fbb;
 	auto id = Client->GetPinId(PinName);
 	auto deltaSec = GetDeltaSeconds();
-	auto hungerSignal = CreateAppEvent(fbb, nos::app::CreateScheduleRequest(fbb, nos::app::ScheduleRequestKind::PIN, &id, false, &deltaSec));
-	HandleEvent(hungerSignal);
 	Orphan(false);
 	nosEngine.LogI("AJAOut (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
-	while (Run && !Ring->Exit && TotalFrameCount() < EffectiveRingSize)
-		std::this_thread::yield();
+	ResetVBLEvent();
 
-	//Reset interrupt event status
-	Client->Device->UnsubscribeOutputVerticalEvent(Channel);
-	Client->Device->SubscribeOutputVerticalEvent(Channel);
-
-	u32 doubleBufferIndex = 0;
+	u32 doubleBufferIndex = 1;
 	SetFrame(doubleBufferIndex);
-
+	doubleBufferIndex ^= 1;
 	DropCount = 0;
-	u32 framesSinceLastDrop = 0;
+	ULWord lastVBLCount = 0;
 
 	while (Run && !Ring->Exit)
 	{
+		if (ShouldResetRings)
+		{
+			nosSchedulePinParams scheduleParams{id, 0, true, deltaSec, false};
+			nosEngine.SchedulePin(&scheduleParams);
+			nosEngine.LogI("Out: %s restarting", Name().AsCStr());
+			Ring->Reset(true);
+			lastVBLCount = 0;
+			ShouldResetRings = false;
+		}
 		SendRingStats();
 
-		ULWord lastVBLCount;
-		Client->Device->GetOutputVerticalInterruptCount(lastVBLCount, Channel);
-
+	#pragma region Wait For Ring & VBL
 		auto *slot = Ring->BeginPop();
 		if (!slot)
+		{
+			nosEngine.LogW("Out: %s pop failed", Name().AsCStr());
 			continue;
+		}
 		const auto field = slot->Params.FieldType;
 
 		if (!WaitForVBL(field) || Ring->Exit)
 		{
+			if (slot->Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
 			Ring->EndPop(slot);
 			break;
 		}
-		if (slot->Params.WaitEvent)
-			nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent);
-		
-		ULWord vblCount;
-		Client->Device->GetOutputVerticalInterruptCount(vblCount, Channel);
-		
-		// Drop calculations:
-		if (vblCount > lastVBLCount + 1 + Interlaced())
 		{
-			DropCount += vblCount - lastVBLCount - 1 - Interlaced();
-			framesSinceLastDrop = 0;
-			nosEngine.LogW("Out: %s dropped while waiting for a frame", Name().AsCStr());
+			util::Stopwatch swGPU{};
+			if (slot->Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&slot->Params.WaitEvent, UINT64_MAX);
+			nosEngine.WatchLog("AJA Output GPU Wait Time", swGPU.ElapsedString().c_str());
 		}
-		else
+	#pragma endregion
+
+	#pragma region Drop Calculations
+		ULWord curVBLCount;
+		Client->Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
+		// Drop calculations:
+		
+		if (lastVBLCount && !ShouldResetRings)
 		{
-			++framesSinceLastDrop;
-			if (DropCount && framesSinceLastDrop == 50)
+			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(lastVBLCount + 1 + Interlaced());
+			if (vblDiff > 0)
 			{
-				nosEngine.LogE("Out: %s dropped frames, notifying restart", Name().AsCStr());
-				NotifyRestart({});
+				DropCount += vblDiff;
+				nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
+				NotifyRestart(0, NOS_DROP);
 			}
 		}
+		lastVBLCount = curVBLCount;
+	#pragma endregion
 
+	#pragma region DMA
 		util::Stopwatch swDma;
 		auto [Buf, Pitch, Segments, FrameIndex] = GetDMAInfo(slot->Res, doubleBufferIndex);
 		if (Interlaced())
@@ -646,19 +679,24 @@ void CopyThread::AJAOutputProc()
 		else
 			Client->Device->DMAWriteFrame(FrameIndex, Buf, Pitch * Segments, Channel);
 		nosEngine.WatchLog("AJA Output DMA Time", swDma.ElapsedString().c_str());
+	#pragma endregion
 		
+	#pragma region Update Next Frame Info
 		if (!Interlaced())
 		{
 			SetFrame(doubleBufferIndex);
 			doubleBufferIndex ^= 1;
 		}
+	#pragma endregion
+	
 		Ring->EndPop(slot);
-		HandleEvent(hungerSignal);
+
+		nosSchedulePinParams scheduleParams{id, 1, false, deltaSec, false};
+		nosEngine.SchedulePin(&scheduleParams);
 	}
 	Ring->Stop();
 
-	HandleEvent(CreateAppEvent(fbb, 
-		nos::app::CreateScheduleRequest(fbb, nos::app::ScheduleRequestKind::PIN, &id, true)));
+	nosEngine.EndScheduling(id);
 
 	if (Run)
 		SendDeleteRequest();
@@ -701,7 +739,7 @@ CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, n
 		UpdateCurve(GammaCurve);
 	}
 
-	SetRingSize(ringSize);
+	RingSize = ringSize;
 
 	client->Device->SetRegisterWriteMode(Interlaced() ? NTV2_REGWRITE_SYNCTOFIELD : NTV2_REGWRITE_SYNCTOFRAME, Channel);
 
@@ -738,6 +776,17 @@ void CopyThread::PinUpdate(std::optional<nos::fb::TOrphanState> orphan, nos::Act
 															  0, 0, 0, 0, &updates)));
 }
 
+bool CopyThread::IsFull()
+{
+	if (Ring->IsFull())
+	{
+		ShouldResetRings = false;
+		return true;
+	}
+
+	return false;
+}
+
 u32 CopyThread::BitWidth() const
 {
 	return Client->BitWidth();
@@ -746,7 +795,22 @@ u32 CopyThread::BitWidth() const
 void CopyThread::SendRingStats() {
 	nosEngine.WatchLog((Name().AsString() + " Ring Read Size").c_str(), std::to_string(Ring->Read.Pool.size()).c_str());
 	nosEngine.WatchLog((Name().AsString() + " Ring Write Size").c_str(), std::to_string(Ring->Write.Pool.size()).c_str());
-	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(TotalFrameCount()).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Total Frame Count").c_str(), std::to_string(Ring->TotalFrameCount()).c_str());
+	nosEngine.WatchLog((Name().AsString() + " Drop Count").c_str(), std::to_string(DropCount).c_str());
+}
+
+void CopyThread::ResetVBLEvent() 
+{
+	if (IsInput())
+	{
+		Client->Device->UnsubscribeInputVerticalEvent(Channel);
+		Client->Device->SubscribeInputVerticalEvent(Channel);
+	}
+	else
+	{
+		Client->Device->UnsubscribeOutputVerticalEvent(Channel);
+		Client->Device->SubscribeOutputVerticalEvent(Channel);
+	}
 }
 
 } // namespace nos

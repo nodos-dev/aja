@@ -313,8 +313,6 @@ void AJAClient::SetReference(std::string const &val)
         Device->SetReference(src);
     }
     this->Ref = src;
-    for (auto& [_,th] : Pins)
-        th->NotifyRestart({});
 }
 
 void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
@@ -472,20 +470,6 @@ void AJAClient::OnPinMenuFired(nosContextMenuRequest const &request)
         HandleEvent(CreateAppEvent(
             fbb, nos::CreateContextMenuUpdateDirect(fbb, request.item_id(), request.pos(), request.instigator(), &remove)));
     }
-}
-
-void AJAClient::OnPinConnected(nos::Name pinName)
-{
-    auto pin = FindChannel(ParseChannel(pinName.AsString()));
-    if (pin)
-		++pin->ConnectedPinCount;
-}
-
-void AJAClient::OnPinDisconnected(nos::Name pinName)
-{
-    auto pin = FindChannel(ParseChannel(pinName.AsString()));
-	if (pin)
-        --pin->ConnectedPinCount;
 }
 
 bool AJAClient::CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId)
@@ -665,7 +649,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         bool validates = !IsProgressiveTransport(format); // interlaced input and output both validate
 
         sys::vulkan::TTexture tex;
-        tex.size = sys::vulkan::SizePreset::CUSTOM;
+        tex.resolution = sys::vulkan::SizePreset::CUSTOM;
         tex.width = width;
         tex.height = height;
         tex.unscaled = true;    // Prevent auto-scaling when an output pin is connected to this pin.
@@ -678,7 +662,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         std::vector<u8> ringData = nos::Buffer::From(2);
         std::vector<u8> spareCountData = nos::Buffer::From(0);
         std::vector<u8> ringDataMin = nos::Buffer::From(1);
-        std::vector<u8> ringDataMax = nos::Buffer::From(120);
+        std::vector<u8> ringDataMax = nos::Buffer::From(AJA_MAX_RING_SIZE);
         flatbuffers::FlatBufferBuilder fbb;
         std::string fmtString = NTV2VideoFormatToString(format, true);
         std::vector<u8> fmtData(fmtString.data(), fmtString.data() + fmtString.size() + 1);
@@ -688,7 +672,7 @@ void AJAClient::OnCommandFired(u32 cmd)
 
         std::vector<flatbuffers::Offset<nos::fb::Pin>> pins = {
             nos::fb::CreatePinDirect(fbb, generator(), pinName.c_str(), "nos.sys.vulkan.Texture", showAs, canShowAs, 0, 0, &data,
-                                    0, 0, 0, 0, 0, 0, 0, 0, 0, true, fb::PinContents::NONE, 0, 0, validates),
+                                    0, 0, 0, 0, 0, 0, 0, 0, 0, Input, fb::PinContents::NONE, 0, 0, validates),
             nos::fb::CreatePinDirect(fbb, generator(), (pinName + " Ring Size").c_str(), "uint",
                                     nos::fb::ShowAs::PROPERTY, nos::fb::CanShowAs::OUTPUT_PIN_OR_PROPERTY, 0, 0,
                                     &ringData, 0, &ringDataMin, &ringDataMax, nullptr, .0f, Input),
@@ -751,43 +735,8 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
         nosEngine.LogD("Path command on unknown pin: %s", pinName.AsCStr());
 		return;
 	}
-    auto copyThread = result->second;
-
- 
-    switch (cmd->Command)
-    {
-    case NOS_PATH_COMMAND_TYPE_RESTART: {
-        nos::Buffer params(cmd->Args);
-        auto* res = params.As<RestartParams>();
-        u32 ringSize = copyThread->RingSize;
-        if (res && res->UpdateFlags & RestartParams::UpdateRingSize)
-        {
-            ringSize = res->RingSize;
-			copyThread->SetRingSize(ringSize);
-            if (copyThread->IsInput()) {
-                auto ringSizePinId = GetPinId(Name(pinName.AsString() + " Ring Size"));
-                nosEngine.SetPinValue(ringSizePinId, nosBuffer{.Data = &ringSize, .Size = sizeof(u32)});
-            }
-        }
-        copyThread->Restart(ringSize);
-        break;
-    }
-    case NOS_PATH_COMMAND_TYPE_NOTIFY_NEW_CONNECTION:
-    {
-        copyThread->Restart(copyThread->RingSize);
-        if (copyThread->IsInput() ||
-            !copyThread->Thread.joinable())
-            break;
-
-        // there is a new connection path
-        // we need to send a restart signal
-        copyThread->NotifyRestart({ RestartParams{
-            .UpdateFlags = RestartParams::UpdateRingSize,
-            .RingSize = copyThread->RingSize,
-        } });
-        break;
-    }
-    }
+	auto copyThread = result->second;
+	copyThread->Restart(cmd->Event == NOS_RING_SIZE_CHANGE ? cmd->RingSize : 0);
 }
 
 void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
@@ -869,11 +818,8 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     if (pinNameStr.ends_with("Ring Size"))
     {
         auto pin = FindChannel(ParseChannel(pinNameStr));
-		if (pin->RingSize != *(u32*)value)
-            pin->NotifyRestart(RestartParams{
-                .UpdateFlags = RestartParams::UpdateRingSize,
-                .RingSize = *(u32*)value,
-            });
+		if (pin && pin->RingSize != *(u32*)value)
+            pin->NotifyRestart(*(u32*)value);
     }
 	if (pinNameStr.ends_with("Ring Spare Count"))
     {
@@ -894,33 +840,29 @@ void AJAClient::OnExecute()
 {
 }
 
-bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
+bool AJAClient::CopyFrom(nosCopyInfo &cpy)
 {
-	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
-	texCpy.ShouldCopyTexture = false; // TODO: Maybe remove nosTextureCopyInfo.ShouldCopyTexture?
-	texCpy.ShouldSubmitOnly = true;
-
     auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
     	return false;
 	auto th = it->second;
 	CPURing::Resource* slot = nullptr;
 	auto effectiveSpareCount = th->SpareCount * (1 + u32(th->Interlaced()));
+
 	if (!(slot = th->Ring->TryPop(cpy.FrameNumber, effectiveSpareCount)))
-	{
-		cpy.CustomData = nullptr;
 		return false;
-	}
+
 	auto& params = slot->Params;
-	auto outPinResource = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
-	texCpy.CopyTextureFrom = outPinResource;
-	texCpy.CopyTextureFrom.Info.Texture.FieldType = params.FieldType;
+	nos::sys::vulkan::TTexture outTex;
+	flatbuffers::GetRoot<nos::sys::vulkan::Texture>(cpy.PinData->Data)->UnPackTo(&outTex);
+	outTex.field_type = static_cast<nos::sys::vulkan::FieldType>(params.FieldType);
+	nosEngine.SetPinValue(cpy.ID, nos::Buffer::From(outTex));
 
 	std::vector<nosShaderBinding> inputs;
 	uint32_t iFlags = (vkss::IsTextureFieldTypeInterlaced(params.FieldType) ? u32(params.FieldType) : 0) | (Shader == ShaderType::Comp10) << 2;
 
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.ColorspaceMatrix));
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, th->CompressedTex->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, &th->ConversionIntermediateTex->Res));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iFlags));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, th->SSBO->Res));
 
@@ -930,9 +872,10 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	nosVulkan->Begin("AJA Input YUV Conversion", &cmd);
 	nosVulkan->Copy(cmd,
 					&slot->Res,
-					&th->CompressedTex->Res,
+					&th->ConversionIntermediateTex->Res,
 					Debug ? ("(GPUTransfer)" + MsgKey + ":" + std::to_string(Debug)).c_str() : 0);
 
+	auto outPinResource = vkss::DeserializeTextureInfo(cpy.PinData->Data);
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, outPinResource));
 	nosRunComputePassParams pass = {};
 	pass.Key = NSN_AJA_YCbCr2RGB_Compute_Pass;
@@ -943,43 +886,42 @@ bool AJAClient::BeginCopyFrom(nosCopyInfo &cpy)
 	nosVulkan->RunComputePass(cmd, &pass);
 
 	nosGPUEvent event{};
-	nosVulkan->End2(cmd, NOS_FALSE, &event);
-	slot->Params.WaitEvent = event;
+    nosVulkan->End2(cmd, NOS_FALSE, &event);
+    slot->Params.WaitEvent = event;
 
 	cpy.FrameNumber = slot->FrameNumber;
     cpy.CopyFromOptions.ShouldSetSourceFrameNumber = true;
-	cpy.CustomData = slot;
+    th->Ring->EndPop(slot);
 	return true;
 }
 
-bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
+bool AJAClient::CopyTo(nosCopyInfo &cpy)
 {
-	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
-	texCpy.ShouldCopyTexture = false;
 	auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
         return true;
 
     auto th = it->second;
 
+    if (th->Ring->Write.Pool.empty())
+    {
+		nosEngine.LogI("hunger while ring full");
+    }
 	auto outgoing = th->Ring->TryPush();
-    cpy.CustomData = outgoing;
 	if (!outgoing)
 	{
-        cpy.CopyToOptions.Stop = true;
 		return false;
 	}
 	outgoing->FrameNumber = cpy.FrameNumber;
-	auto wantedField = th->OutFieldType;
+ 	auto wantedField = th->OutFieldType;
 	auto outInterlaced = vkss::IsTextureFieldTypeInterlaced(wantedField);
-	auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.SrcPinData->Data);
+	auto incomingTextureInfo = vkss::DeserializeTextureInfo(cpy.CopyToOptions.IncomingPinData->Data);
 	auto incomingField = incomingTextureInfo.Info.Texture.FieldType;
 	auto inInterlaced = vkss::IsTextureFieldTypeInterlaced(incomingField);
 	if ((inInterlaced && outInterlaced) && incomingField != wantedField)
 	{
 		nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
-		cpy.CopyToOptions.Stop = false;
-		th->Ring->EndPush(outgoing);
+		th->Ring->CancelPush(outgoing);
 		return false;
 	}
 	outgoing->Params.FieldType = wantedField;
@@ -996,17 +938,15 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 	if (inInterlaced)
 		iFlags |= (u32(incomingField) << 2);
 
+	nosCmd cmd;
+	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
 	std::vector<nosShaderBinding> inputs;
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, colorspaceMatrix));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, incomingTextureInfo));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Interlaced, iFlags));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_ssbo, th->SSBO->Res));
-
-	nosCmd cmd;
-	nosVulkan->Begin("AJA Output YUV Conversion", &cmd);
-
 	// watch out for th members, they are not synced
-	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->CompressedTex->Res));
+	inputs.emplace_back(vkss::ShaderBinding(NSN_Output, th->ConversionIntermediateTex->Res));
 	nosRunComputePassParams pass = {};
 	pass.Key = NSN_AJA_RGB2YCbCr_Compute_Pass;
 	pass.DispatchSize = th->GetSuitableDispatchSize();
@@ -1017,40 +957,12 @@ bool AJAClient::BeginCopyTo(nosCopyInfo &cpy)
 	nosVulkan->End(cmd, NOS_TRUE);
 
 	nosVulkan->Begin("AJA Output Ring Copy", &cmd);
-	nosVulkan->Copy(cmd, &th->CompressedTex->Res, &outgoing->Res, 0);
+	nosVulkan->Copy(cmd, &th->ConversionIntermediateTex->Res, &outgoing->Res, 0);
 	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
-	
+
+	th->Ring->EndPush(outgoing);
+	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 	return true;
-}
-
-void AJAClient::EndCopyFrom(nosCopyInfo &cpy)
-{
-    if(!cpy.CustomData) 
-        return;
-    auto it = Pins.find(cpy.Name); 
-    if (it == Pins.end()) 
-        return;
-
-    auto th = it->second;
-    auto res = (CPURing::Resource *)cpy.CustomData;
-    th->Ring->EndPop(res);
-}
-
-void AJAClient::EndCopyTo(nosCopyInfo& cpy)
-{
-	auto& texCpy = *static_cast<nosTextureCopyInfo*>(cpy.TypeCopyInfo);
-	if (!cpy.CustomData)
-		return;
-	auto it = Pins.find(cpy.Name);
-	if (it == Pins.end())
-		return;
-
-	auto th = it->second;
-	auto res = (CPURing::Resource*)cpy.CustomData;
-    th->Ring->EndPush(res);
-
-    cpy.CopyToOptions.Stop = th->TotalFrameCount() >= th->EffectiveRingSize;
-    th->OutFieldType = vkss::FlippedField(th->OutFieldType);
 }
 
 void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,

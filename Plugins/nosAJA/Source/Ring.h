@@ -14,8 +14,8 @@ struct TRing
         nosResourceShareInfo Res;
 	    struct {
 		    nosTextureFieldType FieldType = NOS_TEXTURE_FIELD_TYPE_UNKNOWN;
-        	glm::mat4 ColorspaceMatrix;
-	    	nosGPUEvent WaitEvent;
+			glm::mat4 ColorspaceMatrix = {};
+			nosGPUEvent WaitEvent = nullptr;
 	    } Params {};
 
         Resource(T r) : Res{}
@@ -34,24 +34,34 @@ struct TRing
         }
         
         ~Resource()
-        {
+        { 
+            if (Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent, UINT64_MAX);
             nosVulkan->DestroyResource(&Res);
         }
 
+        void Reset()
+		{
+			if (Params.WaitEvent)
+				nosVulkan->WaitGpuEvent(&Params.WaitEvent, 0);
+            Params = {};
+			FrameNumber = 0;
+        }
+
         std::atomic_uint64_t FrameNumber;
-        std::atomic_bool written = false;
-        std::atomic_bool read = false;
     };
 
-    void Resizex(u32 size)
+    void Resize(u32 size)
     {
-        Write.Pool.clear();
-        Read.Pool.clear();
-        Glob.clear();
+        Write.Pool = {};
+        Read.Pool = {};
+        Resources.clear();
         for (u32 i = 0; i < size; ++i)
-            Glob.push_back(MakeShared<Resource>(Sample));
-
-        std::transform(Glob.begin(), Glob.end(), std::back_inserter(Write.Pool), [](auto rc) { return rc.get(); });
+		{
+            auto res = MakeShared<Resource>(Sample);
+			Resources.push_back(res);
+            Write.Pool.push(res.get());
+        }
         Size = size;
     }
     
@@ -60,7 +70,7 @@ struct TRing
         : Extent(extent), Sample()
     {
         Sample.Size = Extent.x * Extent.y * 4;
-        Resizex(Size);
+        Resize(Size);
     }
     
     TRing(nosVec2u extent, u32 Size, nosFormat format = NOS_FORMAT_R16G16B16A16_UNORM)
@@ -70,17 +80,17 @@ struct TRing
         Sample.Width = Extent.x;
         Sample.Height = Extent.y;
         Sample.Format = format;
-        Resizex(Size);
+        Resize(Size);
     }
 
     struct
     {
-        std::vector<Resource *> Pool;
+        std::queue<Resource *> Pool;
         std::mutex Mutex;
         std::condition_variable CV;
     } Write, Read;
 
-    std::vector<rc<Resource>> Glob;
+    std::vector<rc<Resource>> Resources;
 
     u32 Size = 0;
     nosVec2u Extent;
@@ -90,7 +100,7 @@ struct TRing
     ~TRing()
     {
         Stop();
-        Glob.clear();
+        Resources.clear();
     }
 
     void Stop()
@@ -100,14 +110,14 @@ struct TRing
             std::unique_lock l2(Read.Mutex);
             Exit = true;
         }
-        Write.CV.notify_all();
-        Read.CV.notify_all();
+		Write.CV.notify_all();
+		Read.CV.notify_all();
     }
 
     bool IsFull()
     {
-        std::unique_lock lock(Write.Mutex);
-        return Write.Pool.empty();
+        std::unique_lock lock(Read.Mutex);
+		return Read.Pool.size() == Resources.size(); 
     }
 
     bool IsEmpty()
@@ -137,10 +147,8 @@ struct TRing
         }
         if (Exit)
             return 0;
-        Resource *res = Write.Pool.back();
-        Write.Pool.pop_back();
-        assert(!res->written || !res->read);
-        res->written = true;
+        Resource *res = Write.Pool.front();
+        Write.Pool.pop();
         return res;
     }
 
@@ -148,12 +156,14 @@ struct TRing
     {
         {
             std::unique_lock lock(Read.Mutex);
-            assert(res->written || !res->read);
-            res->written = false;
-            Read.Pool.push_back(res);
+            Read.Pool.push(res);
+			assert(Read.Pool.size() <= Resources.size());
         }
         Read.CV.notify_one();
     }
+
+    void CancelPush(Resource* res) { EndPop(res); }
+    void CancelPop(Resource* res) { EndPush(res); }
 
     Resource *BeginPop()
     {
@@ -165,9 +175,7 @@ struct TRing
         if (Exit)
             return 0;
         auto res = Read.Pool.front();
-        Read.Pool.erase(Read.Pool.begin());
-        assert(!res->written || !res->read);
-        res->read = true;
+        Read.Pool.pop();
         return res;
     }
 
@@ -175,10 +183,9 @@ struct TRing
     {
         {
             std::unique_lock lock(Write.Mutex);
-            assert(!res->written || res->read);
-            res->read = false;
             res->FrameNumber = 0;
-            Write.Pool.push_back(res);
+            Write.Pool.push(res);
+			assert(Write.Pool.size() <= Resources.size());
         }
         Write.CV.notify_one();
     }
@@ -211,11 +218,36 @@ struct TRing
         return 0;
     }
 
+    Resource *TryPush(const std::chrono::milliseconds timeout)
+    {
+		{
+            std::unique_lock lock(Write.Mutex);
+		    if (Write.Pool.empty())
+                Write.CV.wait_for(lock, timeout, [&]{ return !Write.Pool.empty(); });
+		}
+		return TryPush();
+    }
+
     Resource *TryPop(u64& frameNumber, u32 spare = 0)
     {
         if (CanPop(frameNumber, spare))
             return BeginPop();
         return 0;
+	}
+
+    void Reset(bool fill)
+    {
+        auto& from = fill ? Write : Read;
+		auto& to = fill ? Read : Write;
+		std::unique_lock l1(Write.Mutex);
+		std::unique_lock l2(Read.Mutex);
+		while (!from.Pool.empty())
+		{
+			auto* slot = from.Pool.front();
+			from.Pool.pop();
+			slot->Reset();
+			to.Pool.push(slot);
+		}
     }
 };
 
