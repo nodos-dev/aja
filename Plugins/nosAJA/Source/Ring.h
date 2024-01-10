@@ -120,6 +120,12 @@ struct TRing
 		return Read.Pool.size() == Resources.size(); 
     }
 
+    bool CanTakeoGPU()
+    {
+		std::unique_lock lock(Read.Mutex);
+		return !Write.Pool.empty();
+	}
+
     bool IsEmpty()
     {
         std::unique_lock lock(Read.Mutex);
@@ -213,7 +219,7 @@ struct TRing
 
     Resource *TryPush()
     {
-        if (!IsFull())
+        if (CanPush())
             return BeginPush();
         return 0;
     }
@@ -223,7 +229,7 @@ struct TRing
 		{
             std::unique_lock lock(Write.Mutex);
 		    if (Write.Pool.empty())
-                Write.CV.wait_for(lock, timeout, [&]{ return !Write.Pool.empty(); });
+                Write.CV.wait_for(lock, timeout, [&]{ return CanPush(); });
 		}
 		return TryPush();
     }

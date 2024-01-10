@@ -903,9 +903,9 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 
     auto th = it->second;
 
-    if (th->Ring->Write.Pool.empty())
+    if (!th->Ring->CanPush())
     {
-		nosEngine.LogI("hunger while ring full");
+		nosEngine.LogI("%s: Trying to copy while ring full.", th->Name().AsCStr());
     }
 	auto outgoing = th->Ring->TryPush();
 	if (!outgoing)
