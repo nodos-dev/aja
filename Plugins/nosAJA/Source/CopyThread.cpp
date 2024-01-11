@@ -173,6 +173,9 @@ void CopyThread::Stop()
 
 	if (Thread.joinable())
 		Thread.join();
+	nosCmd cmd;
+	nosVulkan->Begin("AJA Copy Thread Stop Submit", &cmd);
+	nosVulkan->End2(cmd, NOS_TRUE, nullptr);
 	for (auto& res : Ring->Resources)
 		if (res->Params.WaitEvent)
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
