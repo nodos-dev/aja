@@ -280,9 +280,13 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 
 	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), 1, 0, (void**)&nosVulkan);
 
+    fs::path root = nosEngine.Context->RootFolderPath;
+    auto rgb2ycbcrPath = (root / ".." / "Shaders" / "RGB2YCbCr.comp").generic_string();
+	auto ycbcr2rgbPath = (root / ".." / "Shaders" / "YCbCr2RGB.comp").generic_string();
+
     const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
-		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
-        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
+		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, rgb2ycbcrPath.c_str(), {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
+        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, ycbcr2rgbPath.c_str(), {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
 	};
 
 	std::vector<nosShaderInfo> shaderInfos;
