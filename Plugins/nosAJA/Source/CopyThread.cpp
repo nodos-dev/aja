@@ -605,7 +605,7 @@ nosVec2u CopyThread::GetSuitableDispatchSize() const
 
 void CopyThread::NotifyRestart(u32 ringSize /* = 0*/, nosPathEvent pathEvent /* = MZ_OUTPUT_DROP*/)
 {
-	if (PendingRestart)
+	if (PendingRestart && ringSize == 0)
 		return;
 	nosEngine.LogW("%s is notifying path for restart", Name().AsCStr());
 	auto id = Client->GetPinId(Name());
