@@ -886,7 +886,8 @@ bool AJAClient::CopyFrom(nosCopyInfo &cpy)
 	nosVulkan->RunComputePass(cmd, &pass);
 
 	nosGPUEvent event{};
-    nosVulkan->End2(cmd, NOS_FALSE, &event);
+    nosCmdEndParams endParams = {.OutGPUEventHandle = &event};
+    nosVulkan->End(cmd, &endParams);
     slot->Params.WaitEvent = event;
 
 	cpy.FrameNumber = slot->FrameNumber;
@@ -954,11 +955,13 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	pass.BindingCount = inputs.size();
 	pass.Benchmark = Debug;
 	nosVulkan->RunComputePass(cmd, &pass);
-	nosVulkan->End(cmd, NOS_TRUE);
+	nosCmdEndParams endParams{.ForceSubmit = true};
+	nosVulkan->End(cmd, &endParams);
 
 	nosVulkan->Begin("AJA Output Ring Copy", &cmd);
 	nosVulkan->Copy(cmd, &th->ConversionIntermediateTex->Res, &outgoing->Res, 0);
-	nosVulkan->End2(cmd, NOS_TRUE, &outgoing->Params.WaitEvent); // Wait in DMA thread.
+	endParams.OutGPUEventHandle = &outgoing->Params.WaitEvent;
+    nosVulkan->End(cmd, &endParams); // Wait in DMA thread.
 
 	th->Ring->EndPush(outgoing);
 	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
