@@ -3,13 +3,13 @@
 #include "InterlacedFlags.h"
 
 layout (local_size_x = 8, local_size_y = 9) in;
-layout (binding = 0, rgba16)  uniform readonly   image2D Source;
+layout (binding = 0)  uniform sampler2D Source;
 layout (binding = 1, rgba8ui) uniform writeonly uimage2D Output;
 
 void yuv8(const ivec2 dst, const ivec2 src, const int YOffset)
 {
-    uvec3 Y0 = SDR_Out_8(imageLoad(Source, src + ivec2(0, YOffset)).xyz);
-    uvec3 Y1 = SDR_Out_8(imageLoad(Source, src + ivec2(1, YOffset)).xyz);
+    uvec3 Y0 = SDR_Out_8(texelFetch(Source, src + ivec2(0, YOffset), 0).xyz);
+    uvec3 Y1 = SDR_Out_8(texelFetch(Source, src + ivec2(1, YOffset), 0).xyz);
     uvec2 C0  = (Y0.yz + Y1.yz) >> 1;
     imageStore(Output, dst, uvec4(C0.x, Y0.x, C0.y, Y1.x));
 }
@@ -43,8 +43,8 @@ void v210(const ivec2 dst, const ivec2 src, const int YOffset)
     uvec4 Y[3];
     for(int k = 0; k < 3; ++k)
     {
-        uvec3 Y0 = SDR_Out_10(imageLoad(Source, src + ivec2(2*k+0, YOffset)).xyz);
-        uvec3 Y1 = SDR_Out_10(imageLoad(Source, src + ivec2(2*k+1, YOffset)).xyz);
+        uvec3 Y0 = SDR_Out_10(texelFetch(Source, src + ivec2(2*k+0, YOffset), 0).xyz);
+        uvec3 Y1 = SDR_Out_10(texelFetch(Source, src + ivec2(2*k+1, YOffset), 0).xyz);
         uvec2 C  = (Y0.yz + Y1.yz) >> 1;
         Y[k] = uvec4(C.x, Y0.x, C.y, Y1.x);
     }
