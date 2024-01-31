@@ -65,21 +65,23 @@ struct TRing
         Size = size;
     }
     
-    TRing(nosVec2u extent, u32 Size) 
+    TRing(nosVec2u extent, u32 Size, nosBufferUsage usage) 
         requires(std::is_same_v<T, nosBufferInfo>)
         : Extent(extent), Sample()
     {
         Sample.Size = Extent.x * Extent.y * 4;
+        Sample.Usage = usage;
         Resize(Size);
     }
     
-    TRing(nosVec2u extent, u32 Size, nosFormat format = NOS_FORMAT_R16G16B16A16_UNORM)
+    TRing(nosVec2u extent, u32 Size, nosImageUsage usage, nosFormat format = NOS_FORMAT_R16G16B16A16_UNORM)
         requires(std::is_same_v<T, nosTextureInfo>)
         : Extent(extent), Sample()
     {
         Sample.Width = Extent.x;
         Sample.Height = Extent.y;
         Sample.Format = format;
+        Sample.Usage = usage;
         Resize(Size);
     }
 

@@ -435,6 +435,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
           
             if (Device->RouteSignal(channel, fmt, Input, mode, FBFmt()))
             {
+				fmt = Device->GetInputVideoFormat(channel);
                 auto cs = *(Colorspace *)pr.colorspace->data()->Data();
                 auto gc = *(GammaCurve *)pr.curve->data()->Data();
                 auto range = *(bool *)pr.narrow_range->data()->Data();

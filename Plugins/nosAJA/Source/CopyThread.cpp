@@ -320,11 +320,12 @@ void CopyThread::CreateRings()
 	EffectiveRingSize = RingSize * (1 + uint32_t(Interlaced()));
 	const auto ext = Extent();
 	nosVec2u compressedExt((10 == BitWidth()) ? ((ext.x + (48 - ext.x % 48) % 48) / 3) << 1 : ext.x >> 1, ext.y >> u32(Interlaced()));
-	Ring = MakeShared<CPURing>(compressedExt, EffectiveRingSize);
+	Ring = MakeShared<CPURing>(compressedExt, EffectiveRingSize, nosBufferUsage::NOS_BUFFER_USAGE_TRANSFER_SRC);
 	nosTextureInfo info = {};
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
 	info.Format = NOS_FORMAT_R8G8B8A8_UINT;
+	info.Usage = NOS_IMAGE_USAGE_TRANSFER_DST;
 	ConversionIntermediateTex = MakeShared<GPURing::Resource>(info);
 }
 
