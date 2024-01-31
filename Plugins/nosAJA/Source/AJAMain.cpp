@@ -42,6 +42,7 @@ namespace nos
 
 struct AJA
 {
+    template<bool input>
     static nosResult CanCreateNode(const nosFbNode * node) 
     { 
         for (auto pin : *node->pins())
@@ -50,22 +51,22 @@ struct AJA
             {
                 if (flatbuffers::IsFieldPresent(pin, nos::fb::Pin::VT_DATA))
                     return AJADevice::DeviceAvailable((char *)pin->data()->Data(),
-                                                      node->class_name()->str() == "nos.aja.AJAIn") ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+                                                      input) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
                 break;
             }
         }
-		if (AJADevice::GetAvailableDevice(node->class_name()->str() == "nos.aja.AJAIn"))
+		if (AJADevice::GetAvailableDevice(input))
         {
             return NOS_RESULT_SUCCESS;
         }
         return NOS_RESULT_FAILED;
     }
     
+    template<bool input>
     static void OnNodeCreated(const nosFbNode * inNode, void** ctx) 
     { 
         auto& node = *inNode;
         AJADevice::Init();
-        const bool isIn = node.class_name()->str() == "nos.aja.AJAIn";
         AJADevice *dev = 0;
 
         if (auto devpin = std::find_if(node.pins()->begin(), node.pins()->end(),
@@ -78,7 +79,7 @@ struct AJA
             dev = AJADevice::GetDevice((char *)devpin->data()->Data()).get();
         }
         else
-            AJADevice::GetAvailableDevice(isIn, &dev);
+            AJADevice::GetAvailableDevice(input, &dev);
 
         if (!dev)
         {
@@ -101,7 +102,7 @@ struct AJA
                 fbb, nos::app::CreateUpdateStringList(fbb, nos::fb::CreateStringList(fbb, fbb.CreateString(str), fbb.CreateVectorOfStrings(list)))));
         }
 
-        AJAClient *c = new AJAClient(isIn, dev);
+        AJAClient *c = new AJAClient(input, dev);
         *ctx = c;
 
         std::string refSrc = "Ref : " + NTV2ReferenceSourceToString(c->Ref, true) + " - " + NTV2FrameRateToString(c->FR, true);
@@ -144,7 +145,7 @@ struct AJA
             c->Debug = *((u32 *)val);
         }
 
-        if (!isIn)
+        if (!input)
         {
             nos::fb::TVisualizer vis = { .type = nos::fb::VisualizerType::COMBO_BOX, .name = dev->GetDisplayName() + "-AJAOut-Reference-Source" };
             if (auto ref = AddIfNotFound(NSN_ReferenceSource,
@@ -262,8 +263,10 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     auto* ajaOut = outList[1];
     ajaIn->ClassName = NSN_AJA_AJAIn;
     ajaOut->ClassName = NSN_AJA_AJAOut;
-    ajaIn->CanCreateNode = ajaOut->CanCreateNode = AJA::CanCreateNode;
-    ajaIn->OnNodeCreated = ajaOut->OnNodeCreated = AJA::OnNodeCreated;
+	ajaIn->CanCreateNode = AJA::CanCreateNode<true>;
+	ajaOut->CanCreateNode = AJA::CanCreateNode<false>;
+	ajaIn->OnNodeCreated = AJA::OnNodeCreated<true>;
+	ajaOut->OnNodeCreated = AJA::OnNodeCreated<false>;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
     ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
     ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
@@ -278,11 +281,15 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     ajaIn->CanRemoveOrphanPin = ajaOut->CanRemoveOrphanPin= AJA::CanRemoveOrphanPin;
     ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
 
-	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), 1, 0, (void**)&nosVulkan);
+	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), NOS_VULKAN_SUBSYSTEM_VERSION_MAJOR, 0, (void**)&nosVulkan);
+
+    fs::path root = nosEngine.Context->RootFolderPath;
+    auto rgb2ycbcrPath = (root / ".." / "Shaders" / "RGB2YCbCr.comp").generic_string();
+	auto ycbcr2rgbPath = (root / ".." / "Shaders" / "YCbCr2RGB.comp").generic_string();
 
     const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
-		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, "RGB2YCbCr.comp", {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
-        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, "YCbCr2RGB.comp", {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
+		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, rgb2ycbcrPath.c_str(), {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
+        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, ycbcr2rgbPath.c_str(), {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
 	};
 
 	std::vector<nosShaderInfo> shaderInfos;

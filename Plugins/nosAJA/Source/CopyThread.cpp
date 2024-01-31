@@ -173,6 +173,10 @@ void CopyThread::Stop()
 
 	if (Thread.joinable())
 		Thread.join();
+	nosCmd cmd;
+	nosVulkan->Begin("AJA Copy Thread Stop Submit", &cmd);
+	nosCmdEndParams endParams{.ForceSubmit = true};
+	nosVulkan->End(cmd, &endParams);
 	for (auto& res : Ring->Resources)
 		if (res->Params.WaitEvent)
 			nosVulkan->WaitGpuEvent(&res->Params.WaitEvent, UINT64_MAX);
@@ -424,6 +428,8 @@ void CopyThread::AJAInputProc()
 	DropCount = 0;
 	u64 frameCount = 0;
 	ULWord lastVBLCount = 0;
+	bool dropped = false;
+	uint64_t framesSinceLastDrop = 0;
 
 	auto deltaSec = GetDeltaSeconds();
 	uint64_t frameTimeNs = (deltaSec.x / static_cast<double>(deltaSec.y)) * 1'000'000'000;
@@ -437,6 +443,8 @@ void CopyThread::AJAInputProc()
 			Ring->Reset(false);
 			lastVBLCount = 0;
 			ShouldResetRings = false;
+			framesSinceLastDrop = 0;
+			dropped = 0;
 			ResetVBLEvent();
 		}
 	#pragma endregion
@@ -508,8 +516,18 @@ void CopyThread::AJAInputProc()
 			if (vblDiff > 0)
 			{
 				DropCount += vblDiff;
+				dropped = true;
+				framesSinceLastDrop = 0;
 				nosEngine.LogW("In: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-				NotifyRestart(0, NOS_DROP);
+			}
+			else if (dropped)
+			{
+				if (framesSinceLastDrop++ > 50)
+				{
+					dropped = false;
+					framesSinceLastDrop = 0;
+					NotifyRestart(0, NOS_DROP);
+				}
 			}
 		}
 		lastVBLCount = curVBLCount;
@@ -588,7 +606,7 @@ nosVec2u CopyThread::GetSuitableDispatchSize() const
 
 void CopyThread::NotifyRestart(u32 ringSize /* = 0*/, nosPathEvent pathEvent /* = MZ_OUTPUT_DROP*/)
 {
-	if (PendingRestart)
+	if (PendingRestart && ringSize == 0)
 		return;
 	nosEngine.LogW("%s is notifying path for restart", Name().AsCStr());
 	auto id = Client->GetPinId(Name());
@@ -612,7 +630,8 @@ void CopyThread::AJAOutputProc()
 	doubleBufferIndex ^= 1;
 	DropCount = 0;
 	ULWord lastVBLCount = 0;
-
+	bool dropped = false;
+	uint64_t framesSinceLastDrop = 0;
 	while (Run && !Ring->Exit)
 	{
 		if (ShouldResetRings)
@@ -623,6 +642,8 @@ void CopyThread::AJAOutputProc()
 			Ring->Reset(true);
 			lastVBLCount = 0;
 			ShouldResetRings = false;
+			dropped = false;
+			framesSinceLastDrop = 0;
 		}
 		SendRingStats();
 
@@ -662,7 +683,17 @@ void CopyThread::AJAOutputProc()
 			{
 				DropCount += vblDiff;
 				nosEngine.LogW("Out: %s dropped %lld frames", Name().AsCStr(), vblDiff);
-				NotifyRestart(0, NOS_DROP);
+				dropped = true;
+				framesSinceLastDrop = 0;
+			}
+			else if (dropped)
+			{
+				if (framesSinceLastDrop++ >= 50)
+				{
+					dropped = false;
+					framesSinceLastDrop = 0;
+					NotifyRestart(0, NOS_DROP);
+				}
 			}
 		}
 		lastVBLCount = curVBLCount;

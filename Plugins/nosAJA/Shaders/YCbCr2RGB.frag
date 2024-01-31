@@ -7,8 +7,6 @@ layout(location = 0) in vec2 uv;
 
 layout (binding = 1, rgba8)  uniform writeonly image2D Output;
 
-
-
 void main()
 {
 
