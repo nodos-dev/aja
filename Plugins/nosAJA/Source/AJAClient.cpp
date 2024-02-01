@@ -743,9 +743,7 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
 void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 {
     if (!value)
-    {
         return;
-    }
 
     std::string pinNameStr = pinName.AsString();
     

@@ -434,6 +434,7 @@ void CopyThread::AJAInputProc()
 
 	auto deltaSec = GetDeltaSeconds();
 	uint64_t frameTimeNs = (deltaSec.x / static_cast<double>(deltaSec.y)) * 1'000'000'000;
+	ShouldResetRings = true;
 
 	while (Run && !Ring->Exit)
 	{
@@ -633,6 +634,8 @@ void CopyThread::AJAOutputProc()
 	ULWord lastVBLCount = 0;
 	bool dropped = false;
 	uint64_t framesSinceLastDrop = 0;
+	ShouldResetRings = true;
+
 	while (Run && !Ring->Exit)
 	{
 		if (ShouldResetRings)

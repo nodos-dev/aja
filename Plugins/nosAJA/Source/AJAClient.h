@@ -19,7 +19,6 @@ struct UUID
 }
 
 template<> struct std::hash<nos::UUID>{ size_t operator()(nos::UUID const& val) const { return nos::UUIDHash(val); } };
-// template<> struct std::hash<nos::Name>{ size_t operator()(nos::Name const& val) const { return std::hash<std::string>()(val.AsString()); } };
 
 namespace nos
 {
