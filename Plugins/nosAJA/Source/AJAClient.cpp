@@ -609,10 +609,12 @@ void AJAClient::OnCommandFired(u32 cmd)
     switch (action.Action)
     {
     case AjaAction::SELECT_DEVICE: {
-        for (auto& [_,pin] : Pins)
-        {
-            pin->SendDeleteRequest();
-        }
+		for (auto& [_, pin] : Pins)
+		{
+			Device->CloseChannel(pin->Channel, pin->IsInput(), pin->IsQuad());
+			pin->Stop();
+			pin->SendDeleteRequest();
+		}
 
         auto newDev = AJADevice::GetDevice(action.DeviceIndex).get();
         ;

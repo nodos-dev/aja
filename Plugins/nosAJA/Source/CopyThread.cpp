@@ -170,9 +170,9 @@ void CopyThread::Stop()
 {
 	Run = false;
 	Ring->Stop();
-
 	if (Thread.joinable())
 		Thread.join();
+	
 	nosCmd cmd;
 	nosVulkan->Begin("AJA Copy Thread Stop Submit", &cmd);
 	nosCmdEndParams endParams{.ForceSubmit = true};
