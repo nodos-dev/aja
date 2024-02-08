@@ -49,13 +49,13 @@ std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode)
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                         std::unordered_map<Name, const nos::fb::Pin *> &pins,
                         std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd, 
-                        std::vector<::flatbuffers::Offset<nos::app::PartialPinUpdate>>& toUpdate,
+                        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>>& toUpdate,
                         flatbuffers::FlatBufferBuilder &fbb,
                         nos::fb::ShowAs showAs, nos::fb::CanShowAs canShowAs, std::optional<nos::fb::TVisualizer> visualizer)
 {
     if (auto pin = pins[name])
     {
-        toUpdate.push_back(app::CreatePartialPinUpdateDirect(fbb, pin->id(), 0, nos::fb::CreateOrphanStateDirect(fbb, false)));
+        toUpdate.push_back(CreatePartialPinUpdateDirect(fbb, pin->id(), 0, nos::fb::CreateOrphanStateDirect(fbb, false)));
         return pin->data()->Data();
     }
     toAdd.push_back(
@@ -268,7 +268,7 @@ void AJAClient::UpdateStatus()
     flatbuffers::FlatBufferBuilder fbb;
     UpdateStatus(fbb, msg);
     HandleEvent(CreateAppEvent(
-        fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, app::ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
+        fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, 0, 0, 0, 0, 0, &msg)));
 }
 
 void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
@@ -325,7 +325,7 @@ void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
     {
         flatbuffers::FlatBufferBuilder fbb;
         HandleEvent(
-            CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, app::ClearFlags::NONE, &pinsToDelete,
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, &pinsToDelete,
                                                                   0, 0, 0, 0, 0, 0)));
     }
 }
@@ -705,7 +705,7 @@ void AJAClient::OnCommandFired(u32 cmd)
         }
 
         HandleEvent(
-            CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, app::ClearFlags::NONE, 0, &pins)));
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, 0, &pins)));
         break;
     }
     }

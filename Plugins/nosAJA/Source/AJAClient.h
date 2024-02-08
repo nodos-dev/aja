@@ -29,7 +29,7 @@ std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode);
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                                std::unordered_map<Name, const nos::fb::Pin *> &pins,
                                std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd,
-                               std::vector<::flatbuffers::Offset<nos::app::PartialPinUpdate>>& toUpdate,
+                               std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>>& toUpdate,
                                flatbuffers::FlatBufferBuilder &fbb, nos::fb::ShowAs showAs = nos::fb::ShowAs::PROPERTY,
                                nos::fb::CanShowAs canShowAs = nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 
                                std::optional<nos::fb::TVisualizer> visualizer = std::nullopt);

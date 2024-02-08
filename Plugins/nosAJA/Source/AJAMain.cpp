@@ -109,7 +109,7 @@ struct AJA
         flatbuffers::FlatBufferBuilder fbb;
 
         std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd;
-        std::vector<::flatbuffers::Offset<nos::app::PartialPinUpdate>> pinsToUpdate;
+        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>> pinsToUpdate;
         using nos::fb::ShowAs;
         using nos::fb::CanShowAs;
 
@@ -166,7 +166,7 @@ struct AJA
         c->OnNodeUpdate(std::move(mapping), loadedPins, pinsToDel);
         c->UpdateStatus(fbb, msg);
         HandleEvent(
-            CreateAppEvent(fbb, nos::app::CreatePartialNodeUpdateDirect(fbb, &c->Mapping.NodeId, app::ClearFlags::NONE, &pinsToDel,
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &c->Mapping.NodeId, ClearFlags::NONE, &pinsToDel,
                                                                   &pinsToAdd, 0, 0, 0, 0, &msg, &pinsToUpdate)));
     }
 

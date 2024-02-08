@@ -75,7 +75,7 @@ struct CopyThread
     void StartThread();
     void Orphan(bool, std::string const& msg = "");
     void Live(bool);
-    void PinUpdate(std::optional<nos::fb::TOrphanState>, app::Action live);
+    void PinUpdate(std::optional<nos::fb::TOrphanState>, Action live);
 
     bool IsFull();
 
