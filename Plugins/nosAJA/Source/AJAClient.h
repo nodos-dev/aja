@@ -148,13 +148,18 @@ struct NOSAPI_ATTR AJAClient
     std::atomic_uint Debug = 0;
 
     std::unordered_map<nos::Name, rc<struct CopyThread>> Pins;
+	std::unordered_map<nos::Name, AJADevice::Mode> OrphanPins;
     AJADevice *Device = 0;
+
+    std::optional<nos::Table<nos::fb::Node>> NodeFb = std::nullopt;
 
     NTV2ReferenceSource Ref = NTV2_REFERENCE_EXTERNAL;
     NTV2FrameRate FR = NTV2_FRAMERATE_5994;
 
     AJAClient(bool input, AJADevice *device);
     ~AJAClient();
+
+    void Init(nos::fb::Node const& node, AJADevice* dev);
 
     u32 BitWidth() const;
 
@@ -178,7 +183,7 @@ struct NOSAPI_ATTR AJAClient
     void SetReference(std::string const &val);
     void OnNodeUpdate(nos::fb::Node const &event);
     void OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
-                      std::vector<nos::fb::UUID> &pinsToDelete);
+                      std::vector<nos::fb::UUID> &pinsToOrphan);
     void OnPinMenuFired(nosContextMenuRequest const &request);
     
     bool CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId);
@@ -200,6 +205,15 @@ struct NOSAPI_ATTR AJAClient
                        const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
                        Colorspace cs, GammaCurve gc, bool range, unsigned spareCount);
     void DeleteTexturePin(rc<CopyThread> const& c);
+
+    bool HasDevice() const { return Device != nullptr; }
+    AJADevice* TryGetAvailableDevice() 
+    { 
+        AJADevice* dev = nullptr;
+		AJADevice::GetAvailableDevice(Input, &dev);
+		return dev;
+    }
+
 };
 
 } // namespace nos

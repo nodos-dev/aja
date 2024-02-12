@@ -41,27 +41,7 @@ namespace nos
 {
 
 struct AJA
-{
-    template<bool input>
-    static nosResult CanCreateNode(const nosFbNode * node) 
-    { 
-        for (auto pin : *node->pins())
-        {
-            if (pin->name()->str() == "Device")
-            {
-                if (flatbuffers::IsFieldPresent(pin, nos::fb::Pin::VT_DATA))
-                    return AJADevice::DeviceAvailable((char *)pin->data()->Data(),
-                                                      input) ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
-                break;
-            }
-        }
-		if (AJADevice::GetAvailableDevice(input))
-        {
-            return NOS_RESULT_SUCCESS;
-        }
-        return NOS_RESULT_FAILED;
-    }
-    
+{   
     template<bool input>
     static void OnNodeCreated(const nosFbNode * inNode, void** ctx) 
     { 
@@ -75,18 +55,12 @@ struct AJA
                                                   flatbuffers::IsFieldPresent(pin, fb::Pin::VT_DATA);
                                        });
             devpin != node.pins()->end())
-        {
-            dev = AJADevice::GetDevice((char *)devpin->data()->Data()).get();
+		{
+			if (AJADevice::DeviceAvailable((char*)devpin->data()->Data(), input))
+                dev = AJADevice::GetDevice((char *)devpin->data()->Data()).get();
         }
-        else
+		if (!dev)
             AJADevice::GetAvailableDevice(input, &dev);
-
-        if (!dev)
-        {
-            // This case shouldn't happen with canCreate
-            AJADevice::Deinit();
-            return;
-        }
 
         for (auto dev : AJADevice::Devices)
         {
@@ -105,69 +79,8 @@ struct AJA
         AJAClient *c = new AJAClient(input, dev);
         *ctx = c;
 
-        std::string refSrc = "Ref : " + NTV2ReferenceSourceToString(c->Ref, true) + " - " + NTV2FrameRateToString(c->FR, true);
-        flatbuffers::FlatBufferBuilder fbb;
+        c->Init(node, dev);
 
-        std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd;
-        std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>> pinsToUpdate;
-        using nos::fb::ShowAs;
-        using nos::fb::CanShowAs;
-
-        PinMapping mapping;
-        auto loadedPins = mapping.Load(node);
-
-        AddIfNotFound(NSN_Device,
-					  "string",
-					  StringValue(dev->GetDisplayName()),
-					  loadedPins,
-					  pinsToAdd, pinsToUpdate,
-					  fbb,
-                      ShowAs::PROPERTY, CanShowAs::PROPERTY_ONLY);
-		if (auto val = AddIfNotFound(NSN_Dispatch_Size,
-									 "nos.fb.vec2u",
-									 nos::Buffer::From(nos::fb::vec2u(c->DispatchSizeX, c->DispatchSizeY)),
-                                     loadedPins, pinsToAdd, pinsToUpdate, fbb))
-        {
-            c->DispatchSizeX = ((glm::uvec2 *)val)->x;
-            c->DispatchSizeY = ((glm::uvec2 *)val)->y;
-        }
-
-        if (auto val = AddIfNotFound(
-				NSN_Shader_Type, "nos.aja.Shader", nos::Buffer::From(ShaderType(c->Shader)), loadedPins,
-                                     pinsToAdd, pinsToUpdate, fbb))
-        {
-            c->Shader = *((ShaderType *)val);
-        }
-
-        if (auto val =
-				AddIfNotFound(NSN_Debug, "uint", nos::Buffer::From(u32(c->Debug)), loadedPins, pinsToAdd, pinsToUpdate, fbb))
-        {
-            c->Debug = *((u32 *)val);
-        }
-
-        if (!input)
-        {
-            nos::fb::TVisualizer vis = { .type = nos::fb::VisualizerType::COMBO_BOX, .name = dev->GetDisplayName() + "-AJAOut-Reference-Source" };
-            if (auto ref = AddIfNotFound(NSN_ReferenceSource,
-                "string",
-                StringValue(refSrc),
-                loadedPins,
-                pinsToAdd, pinsToUpdate,
-                fbb,
-                ShowAs::PROPERTY, CanShowAs::PROPERTY_ONLY, vis))
-            {
-                refSrc = (char *)ref;
-            }
-        }
-        c->SetReference(refSrc);
-
-        std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
-        std::vector<nos::fb::UUID> pinsToDel;
-        c->OnNodeUpdate(std::move(mapping), loadedPins, pinsToDel);
-        c->UpdateStatus(fbb, msg);
-        HandleEvent(
-            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &c->Mapping.NodeId, ClearFlags::NONE, &pinsToDel,
-                                                                  &pinsToAdd, 0, 0, 0, 0, &msg, &pinsToUpdate)));
     }
 
 
@@ -263,8 +176,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
     auto* ajaOut = outList[1];
     ajaIn->ClassName = NSN_AJA_AJAIn;
     ajaOut->ClassName = NSN_AJA_AJAOut;
-	ajaIn->CanCreateNode = AJA::CanCreateNode<true>;
-	ajaOut->CanCreateNode = AJA::CanCreateNode<false>;
 	ajaIn->OnNodeCreated = AJA::OnNodeCreated<true>;
 	ajaOut->OnNodeCreated = AJA::OnNodeCreated<false>;
     ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
