@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 
 #include "CopyThread.h"
 #include "AppEvents_generated.h"

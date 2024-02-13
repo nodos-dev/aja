@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 #include "AJAClient.h"
 #include "CopyThread.h"
 #include "Ring.h"
