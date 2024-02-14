@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 #extension GL_EXT_shader_16bit_storage : enable
 
 struct umat4

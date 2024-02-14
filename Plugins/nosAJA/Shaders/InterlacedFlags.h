@@ -1,3 +1,7 @@
+/*
+ * Copyright MediaZ AS. All Rights Reserved.
+ */
+
 #ifndef _INTERLACED_FLAGS_H
 #define _INTERLACED_FLAGS_H
 

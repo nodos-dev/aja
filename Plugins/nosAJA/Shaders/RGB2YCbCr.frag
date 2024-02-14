@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 #version 450
 #include "Common.glsl"
 

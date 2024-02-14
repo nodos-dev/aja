@@ -26,8 +26,8 @@ enum GammaCurve : uint {
 }
 
 enum Shader : uint {
-    Comp8  = 1,
-    Comp10 = 2,
+    Comp8  = 0,
+    Comp10 = 1,
 }
 
 enum QuadLinkMode : uint

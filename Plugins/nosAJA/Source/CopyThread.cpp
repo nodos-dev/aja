@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 
 #include "CopyThread.h"
 #include "AppEvents_generated.h"
@@ -170,9 +172,9 @@ void CopyThread::Stop()
 {
 	Run = false;
 	Ring->Stop();
-
 	if (Thread.joinable())
 		Thread.join();
+	
 	nosCmd cmd;
 	nosVulkan->Begin("AJA Copy Thread Stop Submit", &cmd);
 	nosCmdEndParams endParams{.ForceSubmit = true};
@@ -433,6 +435,7 @@ void CopyThread::AJAInputProc()
 
 	auto deltaSec = GetDeltaSeconds();
 	uint64_t frameTimeNs = (deltaSec.x / static_cast<double>(deltaSec.y)) * 1'000'000'000;
+	ShouldResetRings = true;
 
 	while (Run && !Ring->Exit)
 	{
@@ -632,6 +635,8 @@ void CopyThread::AJAOutputProc()
 	ULWord lastVBLCount = 0;
 	bool dropped = false;
 	uint64_t framesSinceLastDrop = 0;
+	ShouldResetRings = true;
+
 	while (Run && !Ring->Exit)
 	{
 		if (ShouldResetRings)

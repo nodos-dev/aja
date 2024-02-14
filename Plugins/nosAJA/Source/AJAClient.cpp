@@ -1,3 +1,5 @@
+// Copyright MediaZ AS. All Rights Reserved.
+
 #include "AJAClient.h"
 #include "CopyThread.h"
 #include "Ring.h"
@@ -132,14 +134,113 @@ auto EnumerateFormats()
 AJAClient::AJAClient(bool input, AJADevice *device) : Input(input), Device(device)
 {
     Ctx.Add(this);
-    (input ? device->HasInput : device->HasOutput) = true;
-    Device->SetReference(Ref);
-    device->GetReferenceAndFrameRate(Ref, FR);
 }
 
 AJAClient::~AJAClient()
 {
-    Ctx.Remove(this);
+    Ctx.Remove(this); 
+}
+
+void AJAClient::Init(nos::fb::Node const& node, AJADevice* dev)
+{
+	flatbuffers::FlatBufferBuilder fbb;
+	std::vector<flatbuffers::Offset<nos::fb::Pin>> pinsToAdd;
+	std::vector<::flatbuffers::Offset<nos::PartialPinUpdate>> pinsToUpdate;
+	flatbuffers::Offset<nos::fb::OrphanState> orphanState;
+	PinMapping mapping;
+	auto loadedPins = mapping.Load(node);
+
+    if (HasDevice())
+	{
+		(Input ? Device->HasInput : Device->HasOutput) = true;
+		Device->SetReference(Ref);
+		Device->GetReferenceAndFrameRate(Ref, FR);
+		orphanState = nos::fb::CreateOrphanStateDirect(fbb, false);
+	    std::string refSrc =
+		    "Ref : " + NTV2ReferenceSourceToString(Ref, true) + " - " + NTV2FrameRateToString(FR, true);
+
+	    using nos::fb::CanShowAs;
+	    using nos::fb::ShowAs;
+
+	    AddIfNotFound(NSN_Device,
+				      "string",
+				      StringValue(dev->GetDisplayName()),
+				      loadedPins,
+				      pinsToAdd,
+				      pinsToUpdate,
+				      fbb,
+				      ShowAs::PROPERTY,
+				      CanShowAs::PROPERTY_ONLY);
+	    if (auto val = AddIfNotFound(NSN_Dispatch_Size,
+								     "nos.fb.vec2u",
+								     nos::Buffer::From(nos::fb::vec2u(DispatchSizeX, DispatchSizeY)),
+								     loadedPins,
+								     pinsToAdd,
+								     pinsToUpdate,
+								     fbb))
+	    {
+		    DispatchSizeX = ((glm::uvec2*)val)->x;
+		    DispatchSizeY = ((glm::uvec2*)val)->y;
+	    }
+
+	    if (auto val = AddIfNotFound(NSN_Shader_Type,
+								     "nos.aja.Shader",
+								     nos::Buffer::From(ShaderType(Shader)),
+								     loadedPins,
+								     pinsToAdd,
+								     pinsToUpdate,
+								     fbb))
+	    {
+		    Shader = *((ShaderType*)val);
+	    }
+
+	    if (auto val = AddIfNotFound(
+			    NSN_Debug, "uint", nos::Buffer::From(u32(Debug)), loadedPins, pinsToAdd, pinsToUpdate, fbb))
+	    {
+		    Debug = *((u32*)val);
+	    }
+
+	    if (!Input)
+	    {
+		    nos::fb::TVisualizer vis = {.type = nos::fb::VisualizerType::COMBO_BOX,
+									    .name = dev->GetDisplayName() + "-AJAOut-Reference-Source"};
+		    if (auto ref = AddIfNotFound(NSN_ReferenceSource,
+									     "string",
+									     StringValue(refSrc),
+									     loadedPins,
+									     pinsToAdd,
+									     pinsToUpdate,
+									     fbb,
+									     ShowAs::PROPERTY,
+									     CanShowAs::PROPERTY_ONLY,
+									     vis))
+		    {
+			    refSrc = (char*)ref;
+		    }
+	    }
+	    SetReference(refSrc);
+    }
+	else
+	{
+		NodeFb = nos::Buffer::From(node);
+		orphanState = nos::fb::CreateOrphanStateDirect(fbb, true, "No suitable device selected.");
+    }
+	std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> msg;
+	std::vector<nos::fb::UUID> pinsToOrphan;
+
+	OnNodeUpdate(std::move(mapping), loadedPins, pinsToOrphan);
+	UpdateStatus(fbb, msg);
+
+    for (auto const& pinToOrphan : pinsToOrphan)
+    {
+		pinsToUpdate.push_back(nos::CreatePartialPinUpdateDirect(
+			fbb, &pinToOrphan, 0, nos::fb::CreateOrphanStateDirect(fbb, true, "No suitable channel found.")));
+    }
+
+	HandleEvent(CreateAppEvent(
+		fbb,
+		nos::CreatePartialNodeUpdateDirect(
+			fbb, &Mapping.NodeId, ClearFlags::NONE, 0, &pinsToAdd, 0, 0, 0, 0, &msg, &pinsToUpdate, 0, orphanState)));
 }
 
 u32 AJAClient::BitWidth() const
@@ -217,6 +318,16 @@ void AJAClient::StartAll()
 
 void AJAClient::UpdateDeviceStatus()
 {
+    if (!HasDevice())
+    {
+        if (auto* dev = TryGetAvailableDevice())
+		{ 
+            Device = dev;
+			nosEngine.LogI("AAA: %s", (*NodeFb)->name()->c_str());
+            Init(*NodeFb, dev);
+        }
+        return;
+    }
     UpdateReferenceValue();
     if (!Input)
         return;
@@ -274,10 +385,10 @@ void AJAClient::UpdateStatus()
 void AJAClient::UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
                              std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> &msg)
 {
-    msg.push_back(
-        fb::CreateNodeStatusMessageDirect(fbb, Device->GetDisplayName().c_str(), fb::NodeStatusMessageType::INFO));
+    msg.push_back(fb::CreateNodeStatusMessageDirect(
+		fbb, HasDevice() ? Device->GetDisplayName().c_str() : "No device", fb::NodeStatusMessageType::INFO));
 
-    if (!Input)
+    if (HasDevice() && !Input)
     {
         Device->GetReferenceAndFrameRate(Ref, FR);
         msg.push_back(fb::CreateNodeStatusMessageDirect(
@@ -319,22 +430,34 @@ void AJAClient::OnNodeUpdate(nos::fb::Node const &event)
 {
     PinMapping mapping;
     auto pins = mapping.Load(event);
-    std::vector<nos::fb::UUID> pinsToDelete;
-    OnNodeUpdate(std::move(mapping), pins, pinsToDelete);
-    if (!pinsToDelete.empty())
+    if (!HasDevice())
     {
+		NodeFb = nos::Buffer::From(event);
+		return;
+    }
+    std::vector<nos::fb::UUID> pinsToOrphan;
+    OnNodeUpdate(std::move(mapping), pins, pinsToOrphan);
+    if (!pinsToOrphan.empty())
+    {
+		std::vector<flatbuffers::Offset<nos::PartialPinUpdate>> pinsToUpdate;
         flatbuffers::FlatBufferBuilder fbb;
+		for (auto const& pinToOrphan : pinsToOrphan)
+		{
+			pinsToUpdate.push_back(nos::CreatePartialPinUpdateDirect(
+				fbb, &pinToOrphan, 0, nos::fb::CreateOrphanStateDirect(fbb, true, "No suitable channel found.")));
+		}
         HandleEvent(
-            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, &pinsToDelete,
-                                                                  0, 0, 0, 0, 0, 0)));
+            CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &mapping.NodeId, ClearFlags::NONE, 0,
+                                                                  0, 0, 0, 0, 0, 0, &pinsToUpdate)));
     }
 }
 
 void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, const nos::fb::Pin *> &tmpPins,
-                             std::vector<nos::fb::UUID> &pinsToDelete)
+                             std::vector<nos::fb::UUID> &pinsToOrphan)
 {
     Mapping = std::move(newMapping);
-
+	if (!HasDevice())
+		return;
     struct StreamData
     {
         const nos::fb::Pin *pin = 0;
@@ -404,6 +527,8 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
     for (auto [channel, pr] : prs)
     {
         auto pin = pr.pin;
+		if (!pin)
+			continue;
         nos::Name name(pin->name()->c_str());
         auto tex = flatbuffers::GetRoot<sys::vulkan::Texture>(pin->data()->Data());
         auto id = *pin->id();
@@ -441,10 +566,14 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
                 auto spareCount = pr.spare_count ? *(u32*)pr.spare_count->data()->Data() : 0;
 
                 AddTexturePin(pin, *(u32*)pr.size->data()->Data(), channel, tex, fmt, mode, cs, gc, range, spareCount);
-            }
+			}
             else
             {
-                GeneratePinIDSet(name, mode, pinsToDelete);
+				if (!OrphanPins.contains(name))
+				{
+					GeneratePinIDSet(name, mode, pinsToOrphan);
+					OrphanPins[name] = mode;
+                }
                 continue;
             }
         }
@@ -475,14 +604,25 @@ void AJAClient::OnPinMenuFired(nosContextMenuRequest const &request)
 bool AJAClient::CanRemoveOrphanPin(nos::Name pinName, nosUUID pinId)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
-    return pin != nullptr;
+    return pin != nullptr || OrphanPins.contains(pinName);
 }
 
 bool AJAClient::OnOrphanPinRemoved(nos::Name pinName, nosUUID pinId)
 {
     auto pin = FindChannel(ParseChannel(pinName.AsString()));
     if (!pin)
+    {
+        if (auto it = OrphanPins.find(pinName); it != OrphanPins.end())
+        {
+			flatbuffers::FlatBufferBuilder fbb;
+			auto ids = GeneratePinIDSet(pinName, it->second);
+			HandleEvent(CreateAppEvent(
+				fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Mapping.NodeId, ClearFlags::NONE, &ids)));
+			OrphanPins.erase(it);
+            return true;
+        }
         return false;
+    }
     pin->SendDeleteRequest();
     return true;
 }
@@ -511,72 +651,75 @@ void AJAClient::OnMenuFired(nosContextMenuRequest const&request)
         }
     }
 
-    static auto Descriptors = EnumerateFormats();
-
-    for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
+    if (HasDevice())
     {
+        static auto Descriptors = EnumerateFormats();
 
-        AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
-        for (auto mode : modes)
+        for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
         {
-            NTV2Channel channel = NTV2Channel(AJADevice::SL == mode ? i : NTV2_MAX_NUM_CHANNELS - i - 1);
-            AjaAction action = {
-                .Action = (AJADevice::SL == mode) ? AjaAction::ADD_CHANNEL : AjaAction::ADD_QUAD_CHANNEL,
-                .DeviceIndex = Device->GetIndexNumber(),
-                .Channel = channel,
-            };
-            auto it = AJADevice::SL != mode ? items.begin() : items.end();
-            auto channelStr = GetChannelStr(channel, mode);
-            if (Input)
+
+            AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
+            for (auto mode : modes)
             {
-                if (Device->ChannelIsValid(channel, Input, NTV2_FORMAT_UNKNOWN, mode))
+                NTV2Channel channel = NTV2Channel(AJADevice::SL == mode ? i : NTV2_MAX_NUM_CHANNELS - i - 1);
+                AjaAction action = {
+                    .Action = (AJADevice::SL == mode) ? AjaAction::ADD_CHANNEL : AjaAction::ADD_QUAD_CHANNEL,
+                    .DeviceIndex = Device->GetIndexNumber(),
+                    .Channel = channel,
+                };
+                auto it = AJADevice::SL != mode ? items.begin() : items.end();
+                auto channelStr = GetChannelStr(channel, mode);
+                if (Input)
                 {
-                    items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), action));
-                }
-            }
-            else
-            {
-                std::vector<flatbuffers::Offset<nos::ContextMenuItem>> extents;
-                for (auto &[extent, Container0] : Descriptors)
-                {
-                    std::vector<flatbuffers::Offset<nos::ContextMenuItem>> frameRates;
-                    for (auto &[fps, Container1] : Container0)
+                    if (Device->ChannelIsValid(channel, Input, NTV2_FORMAT_UNKNOWN, mode))
                     {
-                        std::vector<flatbuffers::Offset<nos::ContextMenuItem>> formats;
-                        for (auto &desc : Container1)
+                        items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), action));
+                    }
+                }
+                else
+                {
+                    std::vector<flatbuffers::Offset<nos::ContextMenuItem>> extents;
+                    for (auto &[extent, Container0] : Descriptors)
+                    {
+                        std::vector<flatbuffers::Offset<nos::ContextMenuItem>> frameRates;
+                        for (auto &[fps, Container1] : Container0)
                         {
-                            if (Device->ChannelIsValid(channel, false, desc.fmt, mode))
+                            std::vector<flatbuffers::Offset<nos::ContextMenuItem>> formats;
+                            for (auto &desc : Container1)
                             {
-                                action.Format = desc.fmt;
-                                std::string name = (desc.Interlaced ? "Interlaced" : "Progressive");
-                                if (desc.ALevel)
-                                    name += "-A";
-                                if (desc.BLevel)
-                                    name += "-B";
-                                formats.push_back(nos::CreateContextMenuItemDirect(fbb, name.c_str(), action));
+                                if (Device->ChannelIsValid(channel, false, desc.fmt, mode))
+                                {
+                                    action.Format = desc.fmt;
+                                    std::string name = (desc.Interlaced ? "Interlaced" : "Progressive");
+                                    if (desc.ALevel)
+                                        name += "-A";
+                                    if (desc.BLevel)
+                                        name += "-B";
+                                    formats.push_back(nos::CreateContextMenuItemDirect(fbb, name.c_str(), action));
+                                }
+                            }
+
+                            if (!formats.empty())
+                            {
+                                GetNTV2FrameRateFromNumeratorDenominator(0, 0);
+                                char buf[16] = {};
+                                std::sprintf(buf, "%.2f", fps);
+                                frameRates.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &formats));
                             }
                         }
 
-                        if (!formats.empty())
+                        if (!frameRates.empty())
                         {
-                            GetNTV2FrameRateFromNumeratorDenominator(0, 0);
-                            char buf[16] = {};
-                            std::sprintf(buf, "%.2f", fps);
-                            frameRates.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &formats));
+                            char buf[32] = {};
+                            std::sprintf(buf, "%dx%d", extent.x, extent.y);
+                            extents.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &frameRates));
                         }
                     }
 
-                    if (!frameRates.empty())
+                    if (!extents.empty())
                     {
-                        char buf[32] = {};
-                        std::sprintf(buf, "%dx%d", extent.x, extent.y);
-                        extents.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &frameRates));
+                        items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), 0, &extents));
                     }
-                }
-
-                if (!extents.empty())
-                {
-                    items.insert(it, nos::CreateContextMenuItemDirect(fbb, channelStr.c_str(), 0, &extents));
                 }
             }
         }
@@ -608,16 +751,22 @@ void AJAClient::OnCommandFired(u32 cmd)
     switch (action.Action)
     {
     case AjaAction::SELECT_DEVICE: {
-        for (auto& [_,pin] : Pins)
-        {
-            pin->SendDeleteRequest();
-        }
+		for (auto& [_, pin] : Pins)
+		{
+			Device->CloseChannel(pin->Channel, pin->IsInput(), pin->IsQuad());
+			pin->Stop();
+			pin->SendDeleteRequest();
+		}
 
         auto newDev = AJADevice::GetDevice(action.DeviceIndex).get();
         ;
         (Input ? Device->HasInput : Device->HasOutput) = false;
         Device = newDev;
         (Input ? Device->HasInput : Device->HasOutput) = true;
+        if (!HasDevice())
+        {
+			Init(*NodeFb, newDev);
+        }
         UpdateDeviceValue();
         UpdateStatus();
         break;
@@ -716,7 +865,8 @@ void AJAClient::OnNodeRemoved()
         // here to avoid accessing the device (in CopyThread) after it has been destroyed.
         th->Stop();
     Pins.clear();
-    (Input ? Device->HasInput : Device->HasOutput) = false;
+	if (HasDevice())
+        (Input ? Device->HasInput : Device->HasOutput) = false;
 }
 
 void AJAClient::OnPathCommand(const nosPathCommand* cmd)
@@ -742,9 +892,7 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
 void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 {
     if (!value)
-    {
         return;
-    }
 
     std::string pinNameStr = pinName.AsString();
     
@@ -974,6 +1122,7 @@ void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel
     auto th = MakeShared<CopyThread>(this, ringSize, spareCount, 
                                      pin->show_as(), channel, fmt, mode, cs, gc, range, tex);
     Pins.insert({th->Name(), std::move(th)});
+	OrphanPins.erase(nos::Name(pin->name()->c_str()));
 }
 
 void AJAClient::DeleteTexturePin(rc<CopyThread> const& c)
