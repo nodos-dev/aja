@@ -132,6 +132,7 @@ bool CopyThread::Interlaced() const
 
 void CopyThread::StartThread()
 {
+	Refresh();
 	Ring->Exit = false;
 	Run = true;
 	std::string threadName("AJA ");

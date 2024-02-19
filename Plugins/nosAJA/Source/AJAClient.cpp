@@ -890,6 +890,20 @@ void AJAClient::OnPathCommand(const nosPathCommand* cmd)
 	copyThread->Restart(cmd->Event == NOS_RING_SIZE_CHANGE ? cmd->RingSize : 0);
 }
 
+void AJAClient::Refresh()
+{
+    StopAll();
+    for (auto& [_,th] : Pins)
+    {
+        th->Refresh();
+        th->UpdateCurve(th->GammaCurve);
+    }
+    StartAll();
+    for (auto& [_,th] : Pins)
+        th->NotifyRestart({});
+    return;
+}
+
 void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 {
     if (!value)
@@ -899,16 +913,9 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     
     if (pinNameStr == "Shader Type")
     {
-        StopAll();
+		StopAll();
         Shader = *(ShaderType *)value;
-        for (auto& [_,th] : Pins)
-        {
-            th->Refresh();
-            th->UpdateCurve(th->GammaCurve);
-        }
-        StartAll();
-        for (auto& [_,th] : Pins)
-            th->NotifyRestart({});
+        Refresh();
         return;
     }
 

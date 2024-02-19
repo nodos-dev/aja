@@ -181,7 +181,7 @@ struct NOSAPI_ATTR AJAClient
     void UpdateDeviceValue();
     void UpdateReferenceValue();
     void UpdateStatus();
-
+    void Refresh();
     void UpdateStatus(flatbuffers::FlatBufferBuilder &fbb,
                       std::vector<flatbuffers::Offset<nos::fb::NodeStatusMessage>> &msg);
     void SetReference(std::string const &val);
