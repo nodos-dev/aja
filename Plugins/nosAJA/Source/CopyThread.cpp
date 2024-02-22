@@ -40,29 +40,29 @@ static std::set<u32> const& FindDivisors(const u32 N)
 	return re;
 }
 
-auto LUTFn(bool input, GammaCurve curve) -> f64 (*)(f64)
+auto LUTFn(bool input, aja::GammaCurve curve) -> f64 (*)(f64)
 {
 	switch (curve)
 	{
-	case GammaCurve::REC709:
+	case aja::GammaCurve::REC709:
 	default:
 		return input ? [](f64 c) -> f64 { return (c < 0.081) ? (c / 4.5) : pow((c + 0.099) / 1.099, 1.0 / 0.45); }
 					 : [](f64 c) -> f64 { return (c < 0.018) ? (c * 4.5) : (pow(c, 0.45) * 1.099 - 0.099); };
-	case GammaCurve::HLG:
+	case aja::GammaCurve::HLG:
 		return input
 			   ? [](f64 c)
 					 -> f64 { return (c < 0.5) ? (c * c / 3) : (exp(c / 0.17883277 - 5.61582460179) + 0.02372241); }
 			   : [](f64 c) -> f64 {
 					 return (c < 1. / 12.) ? sqrt(c * 3) : (std::log(c - 0.02372241) * 0.17883277 + 1.00429346);
 				 };
-	case GammaCurve::ST2084:
+	case aja::GammaCurve::ST2084:
 		return input ? 
 				[](f64 c) -> f64 { c = pow(c, 0.01268331); return pow(glm::max(c - 0.8359375f, 0.) / (18.8515625  - 18.6875 * c), 6.27739463); } : 
 				[](f64 c) -> f64 { c = pow(c, 0.15930175); return pow((0.8359375 + 18.8515625 * c) / (1 + 18.6875 * c), 78.84375); };
 	}
 }
 
-static std::vector<u16> GetGammaLUT(bool input, GammaCurve curve, u16 bits)
+static std::vector<u16> GetGammaLUT(bool input, aja::GammaCurve curve, u16 bits)
 {
 	std::vector<u16> re(1 << bits, 0.f);
 	auto fn = LUTFn(input, curve);
@@ -253,7 +253,7 @@ nosVec2u CopyThread::GetDeltaSeconds() const
 
 #define SSBO_SIZE 10
 
-void CopyThread::UpdateCurve(enum GammaCurve curve)
+void CopyThread::UpdateCurve(aja::GammaCurve curve)
 {
 	GammaCurve = curve;
 	auto data = GetGammaLUT(IsInput(), GammaCurve, SSBO_SIZE);
@@ -265,11 +265,11 @@ std::array<f64, 2> CopyThread::GetCoeffs() const
 {
 	switch (Colorspace)
 	{
-	case Colorspace::REC601:
+	case aja::Colorspace::REC601:
 		return {.299, .114};
-	case Colorspace::REC2020:
+	case aja::Colorspace::REC2020:
 		return {.2627, .0593};
-	case Colorspace::REC709:
+	case aja::Colorspace::REC709:
 	default:
 		return {.2126, .0722};
 	}
@@ -764,7 +764,7 @@ void CopyThread::ChangePinResolution(nosVec2u res)
 
 CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, 
 					   NTV2Channel channel, NTV2VideoFormat initalFmt,
-					   AJADevice::Mode mode, enum class Colorspace colorspace, enum class GammaCurve curve,
+					   AJADevice::Mode mode, aja::Colorspace colorspace, aja::GammaCurve curve,
 					   bool narrowRange, const sys::vulkan::Texture* tex)
 	: PinName(GetChannelStr(channel, mode)), Client(client), PinKind(kind), Channel(channel), SpareCount(spareCount), Mode(mode),
 	  Colorspace(colorspace), GammaCurve(curve), NarrowRange(narrowRange), Format(initalFmt)

@@ -6,6 +6,7 @@
 
 #include "AJAMain.h"
 #include "AJADevice.h"
+#include "AJA_generated.h"
 
 namespace nos
 {
@@ -54,26 +55,6 @@ inline NTV2FieldID GetAJAFieldID(nosTextureFieldType type)
 			   ? NTV2_FIELD_INVALID
 			   : (type == NOS_TEXTURE_FIELD_TYPE_EVEN ? NTV2_FIELD0 : NTV2_FIELD1);
 }
-
-enum class ShaderType : u32
-{
-    Comp8 = 1,
-    Comp10 = 2,
-};
-
-enum class Colorspace : u32
-{
-    REC709  = 0,
-    REC601  = 1,
-    REC2020 = 2,
-};
-
-enum class GammaCurve : u32
-{
-    REC709  = 0,
-    HLG     = 1,
-    ST2084  = 2,
-};
 
 struct AjaAction
 {
@@ -147,7 +128,7 @@ struct NOSAPI_ATTR AJAClient
     PinMapping Mapping;
 
     bool Input = false;
-    std::atomic<ShaderType> Shader = ShaderType::Comp8;
+    std::atomic<aja::Shader> Shader = aja::Shader::Comp8;
     std::atomic_uint DispatchSizeX = 80, DispatchSizeY = 135;
     std::atomic_uint Debug = 0;
 
@@ -207,7 +188,7 @@ struct NOSAPI_ATTR AJAClient
 
     void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
                        const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,
-                       Colorspace cs, GammaCurve gc, bool range, unsigned spareCount);
+                       aja::Colorspace cs, aja::GammaCurve gc, bool range, unsigned spareCount);
     void DeleteTexturePin(rc<CopyThread> const& c);
 
     bool HasDevice() const { return Device != nullptr; }

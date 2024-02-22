@@ -42,8 +42,8 @@ struct CopyThread
     struct AJAClient *Client = 0;
     NTV2VideoFormat Format = NTV2_FORMAT_UNKNOWN;
     AJADevice::Mode Mode = AJADevice::SL;
-    std::atomic<Colorspace> Colorspace = Colorspace::REC709;
-    std::atomic<GammaCurve> GammaCurve = GammaCurve::REC709;
+    std::atomic<aja::Colorspace> Colorspace = aja::Colorspace::REC709;
+    std::atomic<aja::GammaCurve> GammaCurve = aja::GammaCurve::REC709;
     std::atomic_bool NarrowRange = true;
 	std::atomic_bool IsOrphan = false;
 	std::atomic_bool ShouldResetRings = true; // out: fill, input: clear
@@ -57,7 +57,7 @@ struct CopyThread
     CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, nos::fb::ShowAs kind, NTV2Channel channel, 
                 NTV2VideoFormat initalFmt, 
                 AJADevice::Mode mode,
-                enum class Colorspace colorspace, enum class GammaCurve curve, bool narrowRange, const sys::vulkan::Texture* tex);
+                aja::Colorspace colorspace, aja::GammaCurve curve, bool narrowRange, const sys::vulkan::Texture* tex);
 
     nos::Name const& Name() const;
 	nosVec2u GetSuitableDispatchSize() const;
@@ -105,7 +105,7 @@ struct CopyThread
 
     u32 BitWidth() const;
 
-    void UpdateCurve(enum GammaCurve curve);
+    void UpdateCurve(aja::GammaCurve curve);
 
     std::array<f64, 2> GetCoeffs() const;
 

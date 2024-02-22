@@ -185,13 +185,13 @@ void AJAClient::Init(nos::fb::Node const& node, AJADevice* dev)
 
 	    if (auto val = AddIfNotFound(NSN_Shader_Type,
 								     "nos.aja.Shader",
-								     nos::Buffer::From(ShaderType(Shader)),
+								     nos::Buffer::From(Shader.load()),
 								     loadedPins,
 								     pinsToAdd,
 								     pinsToUpdate,
 								     fbb))
 	    {
-		    Shader = *((ShaderType*)val);
+		    Shader = *((aja::Shader*)val);
 	    }
 
 	    if (auto val = AddIfNotFound(
@@ -247,7 +247,7 @@ u32 AJAClient::BitWidth() const
 {
     switch (Shader)
     {
-    case ShaderType::Comp10:
+	case aja::Shader::Comp10:
         return 10;
     default:
         return 8;
@@ -301,7 +301,7 @@ std::shared_ptr<CopyThread> AJAClient::FindChannel(NTV2Channel channel)
 
 NTV2FrameBufferFormat AJAClient::FBFmt() const
 {
-    return Shader == ShaderType::Comp10 ? NTV2_FBF_10BIT_YCBCR : NTV2_FBF_8BIT_YCBCR;
+    return Shader == aja::Shader::Comp10 ? NTV2_FBF_10BIT_YCBCR : NTV2_FBF_8BIT_YCBCR;
 }
 
 void AJAClient::StopAll()
@@ -561,8 +561,8 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
             if (Device->RouteSignal(channel, fmt, Input, mode, FBFmt()))
             {
 				fmt = Device->GetInputVideoFormat(channel);
-                auto cs = *(Colorspace *)pr.colorspace->data()->Data();
-                auto gc = *(GammaCurve *)pr.curve->data()->Data();
+                auto cs = *(aja::Colorspace *)pr.colorspace->data()->Data();
+                auto gc = *(aja::GammaCurve *)pr.curve->data()->Data();
                 auto range = *(bool *)pr.narrow_range->data()->Data();
                 auto spareCount = pr.spare_count ? *(u32*)pr.spare_count->data()->Data() : 0;
 
@@ -816,8 +816,8 @@ void AJAClient::OnCommandFired(u32 cmd)
         flatbuffers::FlatBufferBuilder fbb;
         std::string fmtString = NTV2VideoFormatToString(format, true);
         std::vector<u8> fmtData(fmtString.data(), fmtString.data() + fmtString.size() + 1);
-        std::vector<u8> colorspaceData = nos::Buffer::From(Colorspace::REC709);
-        std::vector<u8> curveData = nos::Buffer::From(GammaCurve::REC709);
+        std::vector<u8> colorspaceData = nos::Buffer::From(aja::Colorspace::REC709);
+        std::vector<u8> curveData = nos::Buffer::From(aja::GammaCurve::REC709);
         std::vector<u8> narrowRangeData = nos::Buffer::From(true);
 
         std::vector<flatbuffers::Offset<nos::fb::Pin>> pins = {
@@ -913,8 +913,8 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     
     if (pinNameStr == "Shader Type")
     {
-		StopAll();
-        Shader = *(ShaderType *)value;
+        StopAll();
+        Shader = *(aja::Shader *)value;
         Refresh();
         return;
     }
@@ -947,13 +947,13 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 
     if (pinNameStr.ends_with("Colorspace"))
     {
-		FindChannel(ParseChannel(pinNameStr))->Colorspace = *(Colorspace*)value;
+		FindChannel(ParseChannel(pinNameStr))->Colorspace = *(aja::Colorspace*)value;
         return;
     }
 
     if (pinNameStr.ends_with("Gamma Curve"))
     {
-		FindChannel(ParseChannel(pinNameStr))->UpdateCurve(*(GammaCurve*)value);
+		FindChannel(ParseChannel(pinNameStr))->UpdateCurve(*(aja::GammaCurve*)value);
         return;
     }
 
@@ -1015,7 +1015,7 @@ bool AJAClient::CopyFrom(nosCopyInfo &cpy)
 	nosEngine.SetPinValue(cpy.ID, nos::Buffer::From(outTex));
 
 	std::vector<nosShaderBinding> inputs;
-	uint32_t iFlags = (vkss::IsTextureFieldTypeInterlaced(params.FieldType) ? u32(params.FieldType) : 0) | (Shader == ShaderType::Comp10) << 2;
+	uint32_t iFlags = (vkss::IsTextureFieldTypeInterlaced(params.FieldType) ? u32(params.FieldType) : 0) | (Shader == aja::Shader::Comp10) << 2;
 
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Colorspace, params.ColorspaceMatrix));
 	inputs.emplace_back(vkss::ShaderBinding(NSN_Source, &th->ConversionIntermediateTex->Res));
@@ -1089,7 +1089,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	// 2nd bit: is input even
 	// 3rd bit: is input odd
 	// 4th bit: comp10
-	uint32_t iFlags = ((Shader == ShaderType::Comp10) << 4);
+	uint32_t iFlags = ((Shader == aja::Shader::Comp10) << 4);
 	if (outInterlaced)
 		iFlags |= u32(wantedField);
 	if (inInterlaced)
@@ -1125,7 +1125,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 }
 
 void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
-    const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode, Colorspace cs, GammaCurve gc, bool range, unsigned spareCount)
+    const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode, aja::Colorspace cs, aja::GammaCurve gc, bool range, unsigned spareCount)
 {
     auto th = MakeShared<CopyThread>(this, ringSize, spareCount, 
                                      pin->show_as(), channel, fmt, mode, cs, gc, range, tex);
