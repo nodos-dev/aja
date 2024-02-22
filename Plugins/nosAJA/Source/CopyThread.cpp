@@ -422,10 +422,7 @@ void CopyThread::AJAInputProc()
 
 	ResetVBLEvent();
 	
-	u32 doubleBufferIndex = uint32_t(!Interlaced());
-	SetFrame(doubleBufferIndex);
-	if (!Interlaced())
-	doubleBufferIndex ^= 1;
+	u32 doubleBufferIndex = StartDoubleBuffer();
 
 	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
 	WaitForVBL(field);
@@ -568,11 +565,7 @@ void CopyThread::AJAInputProc()
 	#pragma endregion
 
 	#pragma region Update Next Frame Info
-		if (!Interlaced())
-		{
-			SetFrame(doubleBufferIndex);
-			doubleBufferIndex ^= 1;
-		}
+		doubleBufferIndex =	NextDoubleBuffer(doubleBufferIndex);
 		
 		field = vkss::FlippedField(field);
 	#pragma endregion	
@@ -631,10 +624,8 @@ void CopyThread::AJAOutputProc()
 
 	ResetVBLEvent();
 
-	u32 doubleBufferIndex = uint32_t(!Interlaced());
-	SetFrame(doubleBufferIndex);
-	if (!Interlaced())
-	doubleBufferIndex ^= 1;
+	u32 doubleBufferIndex = StartDoubleBuffer();
+
 	DropCount = 0;
 	ULWord lastVBLCount = 0;
 	bool dropped = false;
@@ -722,11 +713,7 @@ void CopyThread::AJAOutputProc()
 	#pragma endregion
 		
 	#pragma region Update Next Frame Info
-		if (!Interlaced())
-		{
-			SetFrame(doubleBufferIndex);
-			doubleBufferIndex ^= 1;
-		}
+		doubleBufferIndex = NextDoubleBuffer(doubleBufferIndex);
 	#pragma endregion
 	
 		Ring->EndPop(slot);
@@ -755,7 +742,7 @@ void CopyThread::ChangePinResolution(nosVec2u res)
 	sys::vulkan::TTexture tex;
 	tex.width = res.x;
 	tex.height = res.y;
-	tex.unscaled = true;
+	tex.unscaled = true; 
 	tex.unmanaged = !IsInput();
 	tex.format = sys::vulkan::Format::R16G16B16A16_UNORM;
 	flatbuffers::FlatBufferBuilder fbb;
@@ -851,6 +838,20 @@ void CopyThread::ResetVBLEvent()
 		Client->Device->UnsubscribeOutputVerticalEvent(Channel);
 		Client->Device->SubscribeOutputVerticalEvent(Channel);
 	}
+}
+
+uint32_t CopyThread::StartDoubleBuffer() 
+{
+	SetFrame(uint32_t(!Interlaced()));
+	return 0; 
+}
+
+uint32_t CopyThread::NextDoubleBuffer(uint32_t curDoubleBuffer)
+{
+	if (Interlaced())
+		return curDoubleBuffer;
+	SetFrame(curDoubleBuffer);
+	return curDoubleBuffer ^ 1;
 }
 
 } // namespace nos

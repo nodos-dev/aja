@@ -117,6 +117,16 @@ struct CopyThread
 	void SendRingStats();
 
     void ResetVBLEvent();
+
+    //Starts the double buffer from 0, 
+    //if progressive, sets the frame to 1 to avoid tearing on first frame
+    //if interlaced, sets the frame to 0 since only 0th buffer is used for interlaced
+    uint32_t StartDoubleBuffer();
+
+    //If interlaced, doesn't do anything since double buffering is achieved by offsetting the same buffer depending on odd/even fields
+    //If progressive, toggle the frame index
+    uint32_t NextDoubleBuffer(uint32_t curDoubleBuffer);
+
 };
 
 } // namespace nos
