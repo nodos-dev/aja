@@ -422,8 +422,9 @@ void CopyThread::AJAInputProc()
 
 	ResetVBLEvent();
 	
-	u32 doubleBufferIndex = 1;
+	u32 doubleBufferIndex = uint32_t(!Interlaced());
 	SetFrame(doubleBufferIndex);
+	if (!Interlaced())
 	doubleBufferIndex ^= 1;
 
 	auto field = Interlaced() ? NOS_TEXTURE_FIELD_TYPE_EVEN : NOS_TEXTURE_FIELD_TYPE_PROGRESSIVE;
@@ -630,8 +631,9 @@ void CopyThread::AJAOutputProc()
 
 	ResetVBLEvent();
 
-	u32 doubleBufferIndex = 1;
+	u32 doubleBufferIndex = uint32_t(!Interlaced());
 	SetFrame(doubleBufferIndex);
+	if (!Interlaced())
 	doubleBufferIndex ^= 1;
 	DropCount = 0;
 	ULWord lastVBLCount = 0;
