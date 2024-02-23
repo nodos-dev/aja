@@ -1,4 +1,4 @@
-// Copyright MediaZ AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #version 450
 #include "Common.glsl"

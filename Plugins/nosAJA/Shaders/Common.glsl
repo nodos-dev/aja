@@ -1,4 +1,4 @@
-// Copyright MediaZ AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #extension GL_EXT_shader_16bit_storage : enable
 
