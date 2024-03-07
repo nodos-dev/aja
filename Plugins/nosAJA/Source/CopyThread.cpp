@@ -639,6 +639,7 @@ void CopyThread::AJAOutputProc()
 
 	while (Run && !Ring->Exit)
 	{
+		bool skipHunger = false;
 		if (ShouldResetRings)
 		{
 			nosSchedulePinParams scheduleParams{id, 0, true, deltaSec, false};
@@ -649,10 +650,16 @@ void CopyThread::AJAOutputProc()
 			ShouldResetRings = false;
 			dropped = false;
 			framesSinceLastDrop = 0;
+			skipHunger = true;
+			scheduleParams = {id, 1, false, deltaSec, false};
+			WaitingForFirstArrival = true;
+			nosEngine.SchedulePin(&scheduleParams);
 		}
 		SendRingStats();
 
-	#pragma region Wait For Ring & VBL
+		while (WaitingForFirstArrival && !Ring->Exit)
+			;
+#pragma region Wait For Ring & VBL
 		auto *slot = Ring->BeginPop();
 		if (!slot)
 		{
@@ -725,9 +732,11 @@ void CopyThread::AJAOutputProc()
 	#pragma endregion
 	
 		Ring->EndPop(slot);
-
-		nosSchedulePinParams scheduleParams{id, 1, false, deltaSec, false};
-		nosEngine.SchedulePin(&scheduleParams);
+		if (!skipHunger)
+		{
+			nosSchedulePinParams scheduleParams{id, 1, false, deltaSec, false};
+			nosEngine.SchedulePin(&scheduleParams);
+		}
 	}
 	Ring->Stop();
 

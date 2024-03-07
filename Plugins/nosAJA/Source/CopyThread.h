@@ -47,8 +47,13 @@ struct CopyThread
     std::atomic_bool NarrowRange = true;
 	std::atomic_bool IsOrphan = false;
 	std::atomic_bool ShouldResetRings = true; // out: fill, input: clear
-	bool PendingRestart = false;
+
+	// out: wait until the first frame arrives after restart to start DMA
+    std::atomic_bool WaitingForFirstArrival = false;
     
+    bool PendingRestart = false;
+    
+
 	rc<CPURing::Resource> SSBO;
 	rc<GPURing::Resource> ConversionIntermediateTex;
 

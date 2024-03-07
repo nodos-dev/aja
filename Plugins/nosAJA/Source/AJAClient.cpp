@@ -1060,11 +1060,20 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 
     auto th = it->second;
 
-    if (!th->Ring->CanPush())
+	CPURing::Resource* outgoing = nullptr;
+    if (!th->WaitingForFirstArrival)
     {
-		nosEngine.LogI("%s: Trying to copy while ring full.", th->Name().AsCStr());
+        if (!th->Ring->CanPush())
+        {
+		    nosEngine.LogI("%s: Trying to copy while ring full.", th->Name().AsCStr());
+        }
+		outgoing = th->Ring->TryPush();
     }
-	auto outgoing = th->Ring->TryPush();
+    else
+    {
+		th->WaitingForFirstArrival = false;
+		outgoing = th->Ring->BeginPush();
+    }
 	if (!outgoing)
 	{
 		return false;
