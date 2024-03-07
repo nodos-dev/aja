@@ -199,6 +199,10 @@ struct NOSAPI_ATTR AJAClient
 		return dev;
     }
 
+
+    size_t GetFrameBufferOffset(NTV2Channel channel, u32 frame);
+    size_t GetMaxFrameBufferSize();
+
 };
 
 } // namespace nos

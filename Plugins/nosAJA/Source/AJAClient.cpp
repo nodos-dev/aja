@@ -1139,4 +1139,19 @@ void AJAClient::DeleteTexturePin(rc<CopyThread> const& c)
     Pins.erase(c->Name());
 }
 
+size_t AJAClient::GetFrameBufferOffset(NTV2Channel channel, u32 frame)
+{
+    return GetMaxFrameBufferSize() * 2 * channel + (frame & 1) * Device->GetFBSize(channel);
+}
+
+size_t AJAClient::GetMaxFrameBufferSize()
+{
+    size_t max = 0;
+
+    for (int i = 0; i < NTV2_MAX_NUM_CHANNELS; ++i)
+        max = std::max(max, (size_t)Device->GetFBSize(NTV2Channel(i)));
+
+    return max;
+}
+
 } // namespace nos

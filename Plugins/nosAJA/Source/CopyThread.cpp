@@ -213,7 +213,9 @@ void CopyThread::Restart(u32 ringSize)
 
 void CopyThread::SetFrame(u32 doubleBufferIndex)
 {
-	u32 frameIndex = GetFrameIndex(doubleBufferIndex);
+	// u32 frameIndex = GetFrameIndex(doubleBufferIndex);
+	u32 frameIndex  = Client->GetFrameBufferOffset(Channel, doubleBufferIndex) / Client->Device->GetFBSize(Channel);
+
 	IsInput() ? Client->Device->SetInputFrame(Channel, frameIndex)
 			  : Client->Device->SetOutputFrame(Channel, frameIndex);
 	if (IsQuad())
@@ -552,7 +554,10 @@ void CopyThread::AJAInputProc()
 														// for ex. next odd line or next even line
 		}
 		else
-			Client->Device->DMAReadFrame(FrameIndex, Buf, Pitch * Segments, Channel);
+		{
+			auto offset = Client->GetFrameBufferOffset(Channel, doubleBufferIndex);
+			Client->Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, true, 0, const_cast<ULWord*>(Buf), offset, Pitch * Segments, true);
+		}
 		nosEngine.WatchLog("AJA Input DMA Time", swDma.ElapsedString().c_str());
 	#pragma endregion
 
@@ -708,7 +713,10 @@ void CopyThread::AJAOutputProc()
 			Client->Device->DMAWriteSegments(FrameIndex, Buf, fieldId * Pitch, Pitch, Segments, Pitch, Pitch * 2);
 		}
 		else
-			Client->Device->DMAWriteFrame(FrameIndex, Buf, Pitch * Segments, Channel);
+		{
+			auto offset = Client->GetFrameBufferOffset(Channel, doubleBufferIndex);
+			Client->Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast<ULWord*>(Buf), offset, Pitch * Segments, true);
+		}
 		nosEngine.WatchLog("AJA Output DMA Time", swDma.ElapsedString().c_str());
 	#pragma endregion
 		
