@@ -46,7 +46,7 @@
         },
         {
             "class_name": "DMAWrite",
-            "display_name": "DMA Write",
+            "display_name": "AJA DMA Write",
             "contents_type": "Job",
             "description":  "Sends received YCbCr frame to the specified channel",
             "pins": [
@@ -72,7 +72,7 @@
         },
         {
             "class_name": "WaitVBL",
-            "display_name": "Wait VBL",
+            "display_name": "AJA Wait VBL",
             "contents_type": "Job",
             "description":  "",
             "pins": [

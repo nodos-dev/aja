@@ -827,7 +827,7 @@
           ],
           "orphan_state": { },
           "description": "Sends received YCbCr frame to the specified channel",
-          "display_name": "DMA Write",
+          "display_name": "AJA DMA Write",
           "template_parameters": []
         },
         {
@@ -953,7 +953,7 @@
           ],
           "orphan_state": { },
           "description": "",
-          "display_name": "Wait VBL",
+          "display_name": "AJA Wait VBL",
           "template_parameters": []
         },
         {

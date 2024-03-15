@@ -3,6 +3,7 @@
 // External
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosUtil/Stopwatch.hpp>
 
 #include "AJA_generated.h"
 #include "AJADevice.h"
@@ -99,7 +100,12 @@ struct DMAWriteNodeContext : NodeContext
 		auto buffer = nosVulkan->Map(&inputBuffer);
 
 		auto frameBufferIndex = GetFrameBufferIndex(DoubleBufferIdx);
-		Device->DMAWriteFrame(frameBufferIndex, reinterpret_cast<uint32_t*>(buffer), inputBuffer.Info.Buffer.Size, Channel);
+		{
+			util::Stopwatch sw;
+			Device->DMAWriteFrame(frameBufferIndex, reinterpret_cast<uint32_t*>(buffer), inputBuffer.Info.Buffer.Size, Channel);
+			auto elapsed = sw.Elapsed();
+			nosEngine.WatchLog(("AJA " + channelStr->str() + " DMA Write").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+		}
 
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
 
