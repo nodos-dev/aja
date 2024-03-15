@@ -28,9 +28,6 @@ template<> struct std::hash<nos::UUID>{ size_t operator()(nos::UUID const& val) 
 namespace nos
 {
 
-std::vector<u8> StringValue(std::string const& str);
-std::string GetQuadName(NTV2Channel channel);
-std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode);
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                                std::unordered_map<Name, const nos::fb::Pin *> &pins,
                                std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd,
@@ -38,8 +35,6 @@ const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                                flatbuffers::FlatBufferBuilder &fbb, nos::fb::ShowAs showAs = nos::fb::ShowAs::PROPERTY,
                                nos::fb::CanShowAs canShowAs = nos::fb::CanShowAs::INPUT_PIN_OR_PROPERTY, 
                                std::optional<nos::fb::TVisualizer> visualizer = std::nullopt);
-
-nos::fb::UUID GenerateUUID();
 
 inline auto generator() 
 {
@@ -69,13 +64,9 @@ struct AjaAction
     u32 DeviceIndex:4;
     NTV2Channel Channel:5;
     NTV2VideoFormat Format:12;
-    static void TestAjaAction()
-    {
-        static_assert(sizeof(AjaAction) == sizeof(u32));
-    }
-
     operator u32() const { return *(u32*)this; }
 };
+static_assert(sizeof(AjaAction) == sizeof(u32));
 
 struct NOSAPI_ATTR AJAClient
 {
@@ -182,9 +173,11 @@ struct NOSAPI_ATTR AJAClient
     void OnPathCommand(const nosPathCommand* cmd);
     void OnPinValueChanged(nos::Name pinName, void* value);
     void OnExecute();
+    
+    void GetScheduleInfo(nosScheduleInfo* info);
 
-    bool CopyFrom(nosCopyInfo &cpy);
-    bool CopyTo(nosCopyInfo &cpy);
+    nosResult CopyFrom(nosCopyInfo &cpy);
+	nosResult CopyTo(nosCopyInfo& cpy);
 
     void AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
                        const sys::vulkan::Texture* tex, NTV2VideoFormat fmt, AJADevice::Mode mode,

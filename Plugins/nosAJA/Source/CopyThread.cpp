@@ -319,18 +319,18 @@ void CopyThread::Refresh()
 	Client->Device->SetRegisterWriteMode(Interlaced() ? NTV2_REGWRITE_SYNCTOFIELD : NTV2_REGWRITE_SYNCTOFRAME, Channel);
 	CreateRings();
 }
-
+	
 void CopyThread::CreateRings()
 {
 	EffectiveRingSize = RingSize * (1 + uint32_t(Interlaced()));
 	const auto ext = Extent();
 	nosVec2u compressedExt((10 == BitWidth()) ? ((ext.x + (48 - ext.x % 48) % 48) / 3) << 1 : ext.x >> 1, ext.y >> u32(Interlaced()));
-	Ring = MakeShared<CPURing>(compressedExt, EffectiveRingSize, nosBufferUsage::NOS_BUFFER_USAGE_TRANSFER_SRC);
+	Ring = MakeShared<CPURing>(EffectiveRingSize, compressedExt.x * compressedExt.y * 4, IsInput() ? NOS_BUFFER_USAGE_TRANSFER_SRC : NOS_BUFFER_USAGE_TRANSFER_DST);
 	nosTextureInfo info = {};
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
 	info.Format = NOS_FORMAT_R8G8B8A8_UINT;
-	info.Usage = NOS_IMAGE_USAGE_TRANSFER_DST;
+	info.Usage = IsInput() ? NOS_IMAGE_USAGE_TRANSFER_DST : NOS_IMAGE_USAGE_TRANSFER_SRC;
 	ConversionIntermediateTex = MakeShared<GPURing::Resource>(info);
 }
 
@@ -642,8 +642,8 @@ void CopyThread::AJAOutputProc()
 		bool skipHunger = false;
 		if (ShouldResetRings)
 		{
-			nosSchedulePinParams scheduleParams{id, 0, true, deltaSec, false};
-			nosEngine.SchedulePin(&scheduleParams);
+			nosScheduleNodeParams scheduleParams{Client->Mapping.NodeId, 0, true};
+			nosEngine.ScheduleNode(&scheduleParams);
 			nosEngine.LogI("Out: %s restarting", Name().AsCStr());
 			Ring->Reset(true);
 			lastVBLCount = 0;
@@ -651,9 +651,9 @@ void CopyThread::AJAOutputProc()
 			dropped = false;
 			framesSinceLastDrop = 0;
 			skipHunger = true;
-			scheduleParams = {id, 1, false, deltaSec, false};
+			scheduleParams = {id, 1, false};
 			WaitingForFirstArrival = true;
-			nosEngine.SchedulePin(&scheduleParams);
+			nosEngine.ScheduleNode(&scheduleParams);
 		}
 		SendRingStats();
 
@@ -734,8 +734,8 @@ void CopyThread::AJAOutputProc()
 		Ring->EndPop(slot);
 		if (!skipHunger)
 		{
-			nosSchedulePinParams scheduleParams{id, 1, false, deltaSec, false};
-			nosEngine.SchedulePin(&scheduleParams);
+			nosScheduleNodeParams scheduleParams{Client->Mapping.NodeId, 1, false};
+			nosEngine.ScheduleNode(&scheduleParams);
 		}
 	}
 	Ring->Stop();
@@ -772,7 +772,7 @@ CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, n
 					   NTV2Channel channel, NTV2VideoFormat initalFmt,
 					   AJADevice::Mode mode, aja::Colorspace colorspace, aja::GammaCurve curve,
 					   bool narrowRange, const sys::vulkan::Texture* tex)
-	: PinName(GetChannelStr(channel, mode)), Client(client), PinKind(kind), Channel(channel), SpareCount(spareCount), Mode(mode),
+	: PinName(GetChannelName(channel, mode)), Client(client), PinKind(kind), Channel(channel), SpareCount(spareCount), Mode(mode),
 	  Colorspace(colorspace), GammaCurve(curve), NarrowRange(narrowRange), Format(initalFmt)
 {
 	{
@@ -800,21 +800,16 @@ CopyThread::~CopyThread()
 void CopyThread::Orphan(bool orphan, std::string const& message)
 {
 	IsOrphan = orphan;
-	PinUpdate(nos::fb::TOrphanState{.is_orphan=orphan, .message=message}, Action::NOP);
+	PinUpdate(nos::fb::TOrphanState{.is_orphan=orphan, .message=message});
 }
 
-void CopyThread::Live(bool b)
-{
-	PinUpdate(std::nullopt, b ? Action::SET : Action::RESET);
-}
-
-void CopyThread::PinUpdate(std::optional<nos::fb::TOrphanState> orphan, nos::Action live)
+void CopyThread::PinUpdate(std::optional<nos::fb::TOrphanState> orphan)
 {
 	flatbuffers::FlatBufferBuilder fbb;
 	auto ids = Client->GeneratePinIDSet(nos::Name(Name()), Mode);
 	std::vector<flatbuffers::Offset<PartialPinUpdate>> updates;
 	std::transform(ids.begin(), ids.end(), std::back_inserter(updates),
-				   [&fbb, orphan, live](auto id) { return nos::CreatePartialPinUpdateDirect(fbb, &id, 0, orphan ? nos::fb::CreateOrphanState(fbb, &*orphan) : false, live); });
+				   [&fbb, orphan](auto id) { return nos::CreatePartialPinUpdateDirect(fbb, &id, 0, orphan ? nos::fb::CreateOrphanState(fbb, &*orphan) : false); });
 	HandleEvent(
 		CreateAppEvent(fbb, nos::CreatePartialNodeUpdateDirect(fbb, &Client->Mapping.NodeId, ClearFlags::NONE, 0, 0, 0,
 															  0, 0, 0, 0, &updates)));

@@ -43,6 +43,72 @@
                     "contents_type": "Job"
                 }
             ]
+        },
+        {
+            "class_name": "DMAWrite",
+            "display_name": "DMA Write",
+            "contents_type": "Job",
+            "description":  "Sends received YCbCr frame to the specified channel",
+            "pins": [
+                {
+                    "name": "Run",
+                    "type_name": "nos.exe",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                },
+                {
+                    "name": "Channel",
+                    "type_name": "nos.aja.ChannelInfo",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                },
+                {
+                    "name": "Input",
+                    "type_name": "nos.sys.vulkan.Buffer",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                }
+            ]
+        },
+        {
+            "class_name": "WaitVBL",
+            "display_name": "Wait VBL",
+            "contents_type": "Job",
+            "description":  "",
+            "pins": [
+                {
+                    "name": "Run",
+                    "type_name": "nos.exe",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                },
+                {
+                    "name": "VBL",
+                    "type_name": "nos.exe",
+                    "show_as": "OUTPUT_PIN",
+                    "can_show_as": "OUTPUT_PIN_ONLY"
+                },
+                {
+                    "name": "Channel",
+                    "type_name": "nos.aja.ChannelInfo",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                }
+            ]
+        },
+        {
+            "class_name": "Channel",
+            "display_name": "AJA Channel",
+            "contents_type": "Job",
+            "description":  "Debugging/test node for opening channels",
+            "pins": [
+                {
+                    "name": "Channel",
+                    "type_name": "nos.aja.ChannelInfo",
+                    "show_as": "OUTPUT_PIN",
+                    "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+                }
+            ]
         }
     ]
 }

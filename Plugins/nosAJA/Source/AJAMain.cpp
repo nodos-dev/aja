@@ -62,7 +62,7 @@ struct AJA
 		if (!dev)
             AJADevice::GetAvailableDevice(input, &dev);
 
-        for (auto dev : AJADevice::Devices)
+		for (auto [_, dev] : AJADevice::Devices)
         {
             const auto str = dev->GetDisplayName() + "-AJAOut-Reference-Source";
             flatbuffers::FlatBufferBuilder fbb;
@@ -95,6 +95,7 @@ struct AJA
         c->OnNodeRemoved();
         delete c;
     }
+
     static void OnPinValueChanged(void* ctx, const nosName pinName, const nosUUID pinId, nosBuffer value)
     { 
         return ((AJAClient *)ctx)->OnPinValueChanged(pinName, value.Data);
@@ -135,20 +136,12 @@ struct AJA
 
     static nosResult  CopyFrom(void* ctx, nosCopyInfo * cpy)
     { 
-        if (((AJAClient*)ctx)->CopyFrom(*cpy))
-        {
-            return NOS_RESULT_SUCCESS;
-        }
-        return NOS_RESULT_FAILED;
+        return ((AJAClient*)ctx)->CopyFrom(*cpy);
     }
 
     static nosResult  CopyTo(void* ctx, nosCopyInfo * cpy)
     { 
-        if (((AJAClient*)ctx)->CopyTo(*cpy))
-        {
-            return NOS_RESULT_SUCCESS;
-        }
-        return NOS_RESULT_FAILED;
+        return ((AJAClient*)ctx)->CopyTo(*cpy);
     }
 
     static void OnMenuRequested(void* ctx, const nosContextMenuRequest * request) 
@@ -162,45 +155,71 @@ struct AJA
     }
 
     static void OnKeyEvent(void* ctx, const nosKeyEvent * keyEvent) { }
+
+    static void GetScheduleInfo(void* ctx, nosScheduleInfo* info)
+	{
+		((AJAClient*)ctx)->GetScheduleInfo(info);
+	}
 };
+
+namespace aja
+{
+
+enum class Nodes : int
+{
+	AJAIn_Legacy,
+	AJAOut_Legacy,
+	DMAWrite,
+	WaitVBL,
+	Output,
+	Channel,
+	Count
+};
+
+nosResult RegisterDMAWriteNode(nosNodeFunctions*);
+nosResult RegisterWaitVBLNode(nosNodeFunctions*);
+nosResult RegisterOutputNode(nosNodeFunctions*);
+nosResult RegisterChannelNode(nosNodeFunctions*);
 
 extern "C"
 {
 
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
-    *outSize = 2;
-    if (!outList)
-        return NOS_RESULT_SUCCESS;
-    auto* ajaIn = outList[0];
-    auto* ajaOut = outList[1];
-    ajaIn->ClassName = NSN_AJA_AJAIn;
-    ajaOut->ClassName = NSN_AJA_AJAOut;
+	*outSize = static_cast<size_t>(Nodes::Count);
+	if (!outList)
+		return NOS_RESULT_SUCCESS;
+	auto* ajaIn = outList[0];
+	auto* ajaOut = outList[1];
+	ajaIn->ClassName = NSN_AJA_AJAIn;
+	ajaOut->ClassName = NSN_AJA_AJAOut;
 	ajaIn->OnNodeCreated = AJA::OnNodeCreated<true>;
 	ajaOut->OnNodeCreated = AJA::OnNodeCreated<false>;
-    ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
-    ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
-    ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
-    ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
-    ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;
-    ajaIn->ExecuteNode = ajaOut->ExecuteNode = AJA::ExecuteNode;
-    ajaIn->CopyFrom = ajaOut->CopyFrom = AJA::CopyFrom;
-    ajaIn->CopyTo = ajaOut->CopyTo = AJA::CopyTo;
-    ajaIn->OnMenuRequested = ajaOut->OnMenuRequested = AJA::OnMenuRequested;
-    ajaIn->OnMenuCommand = ajaOut->OnMenuCommand = AJA::OnMenuCommand;
-    ajaIn->OnKeyEvent = ajaOut->OnKeyEvent = AJA::OnKeyEvent;
-    ajaIn->CanRemoveOrphanPin = ajaOut->CanRemoveOrphanPin= AJA::CanRemoveOrphanPin;
-    ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
+	ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
+	ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
+	ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
+	ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
+	ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;
+	ajaIn->ExecuteNode = ajaOut->ExecuteNode = AJA::ExecuteNode;
+	ajaIn->CopyFrom = ajaOut->CopyFrom = AJA::CopyFrom;
+	ajaIn->CopyTo = ajaOut->CopyTo = AJA::CopyTo;
+	ajaIn->OnMenuRequested = ajaOut->OnMenuRequested = AJA::OnMenuRequested;
+	ajaIn->OnMenuCommand = ajaOut->OnMenuCommand = AJA::OnMenuCommand;
+	ajaIn->OnKeyEvent = ajaOut->OnKeyEvent = AJA::OnKeyEvent;
+	ajaIn->CanRemoveOrphanPin = ajaOut->CanRemoveOrphanPin= AJA::CanRemoveOrphanPin;
+	ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
+	ajaOut->GetScheduleInfo = AJA::GetScheduleInfo;
 
-	nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), NOS_VULKAN_SUBSYSTEM_VERSION_MAJOR, 0, (void**)&nosVulkan);
+	nosResult res{};
+    NOS_RETURN_ON_FAILURE(res, nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), NOS_VULKAN_SUBSYSTEM_VERSION_MAJOR, 0, (void**)&nosVulkan))
 
-    fs::path root = nosEngine.Context->RootFolderPath;
-    auto rgb2ycbcrPath = (root / ".." / "Shaders" / "RGB2YCbCr.comp").generic_string();
+	fs::path root = nosEngine.Context->RootFolderPath;
+	auto rgb2ycbcrPath = (root / ".." / "Shaders" / "RGB2YCbCr.comp").generic_string();
 	auto ycbcr2rgbPath = (root / ".." / "Shaders" / "YCbCr2RGB.comp").generic_string();
 
-    const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
+	const std::vector<std::pair<Name, std::tuple<nosShaderStage, const char*, std::vector<u8>>>> shaders = {
 		{NSN_AJA_RGB2YCbCr_Compute_Shader, { NOS_SHADER_STAGE_COMP, rgb2ycbcrPath.c_str(), {std::begin(RGB2YCbCr_comp_spv), std::end(RGB2YCbCr_comp_spv)}}},
-        {NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, ycbcr2rgbPath.c_str(), {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
+		{NSN_AJA_YCbCr2RGB_Compute_Shader, { NOS_SHADER_STAGE_COMP, ycbcr2rgbPath.c_str(), {std::begin(YCbCr2RGB_comp_spv), std::end(YCbCr2RGB_comp_spv)}}},
 	};
 
 	std::vector<nosShaderInfo> shaderInfos;
@@ -216,18 +235,22 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 			},
 		});
 	}
-	auto ret = nosVulkan->RegisterShaders(shaderInfos.size(), shaderInfos.data());
-	if (NOS_RESULT_SUCCESS != ret)
-		return ret;
-    std::vector<nosPassInfo> passes =
-    {
-	    {.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
-	    {.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
-    };
-	ret = nosVulkan->RegisterPasses(passes.size(), passes.data());
-    return ret;
+	NOS_RETURN_ON_FAILURE(res, nosVulkan->RegisterShaders(shaderInfos.size(), shaderInfos.data()))
+	std::vector<nosPassInfo> passes =
+	{
+		{.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
+		{.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
+	};
+	NOS_RETURN_ON_FAILURE(res, nosVulkan->RegisterPasses(passes.size(), passes.data()))
+	
+	NOS_RETURN_ON_FAILURE(res, RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
+	NOS_RETURN_ON_FAILURE(res, RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
+	NOS_RETURN_ON_FAILURE(res, RegisterOutputNode(outList[(int)Nodes::Output]))
+	NOS_RETURN_ON_FAILURE(res, RegisterChannelNode(outList[(int)Nodes::Channel]))
+	return res;
 }
 
+}
 }
 
 } // namespace nos

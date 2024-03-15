@@ -35,6 +35,7 @@ list(APPEND DEPENDENCIES stb ajantv2)
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${SUBSYSTEMS_SOURCE_DIR}/nosVulkanSubsystem/Include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Source
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2
     ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/src/win

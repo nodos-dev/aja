@@ -1,3 +1,5 @@
+include "../../nosUtilities/Config/Conversion.fbs";
+
 namespace nos.aja;
 
 enum ReferenceSource : uint {
@@ -41,4 +43,26 @@ enum QuadLinkInputMode : uint
     Tsi = 0,
     Squares = 1,
     Auto = 2,
+}
+
+enum FrameBufferFormat : uint {
+    FBF_8BIT_YCBCR,
+    FBF_10BIT_YCBCR,
+}
+
+table Device {
+    serial_number: uint64;
+    name: string;
+}
+
+table ChannelInfo {
+    device: Device;
+    channel_name: string;
+    is_input: bool;
+    video_format: string;
+    video_format_idx: int;
+    frame_buffer_format: FrameBufferFormat;
+    is_quad: bool;
+    input_quad_link_mode: QuadLinkInputMode; // Don't care if !is_input
+    output_quad_link_mode: QuadLinkMode; // Don't care if is_input
 }

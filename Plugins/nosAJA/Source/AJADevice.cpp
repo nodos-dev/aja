@@ -51,7 +51,7 @@ bool AJADevice::GetAvailableDevice(bool input, AJADevice** pOut)
 {
     if(AvailableDevices.empty()) return false;
     if(Devices.empty()) return true;
-    for(auto& dev : Devices)
+    for(auto& [_, dev] : Devices)
         if(input ? !dev->HasInput : !dev->HasOutput)
         {
             if(pOut) *pOut = dev.get();
@@ -69,14 +69,12 @@ void AJADevice::Init()
     
     CNTV2DeviceScanner scanner;
     for(auto& dev: scanner.GetDeviceInfoList())
-    {
-        Devices.push_back(std::make_shared<AJADevice>(dev.deviceSerialNumber));
-    }
+        Devices[dev.deviceSerialNumber] = (std::make_shared<AJADevice>(dev.deviceSerialNumber)); // TODO: Error check on AJADevice ctor.
 }
 
 void AJADevice::Deinit()
 {
-    for(auto& dev : Devices)
+    for(auto& [_, dev] : Devices)
     {
         if(dev->HasInput || dev->HasOutput)
         {
@@ -88,7 +86,7 @@ void AJADevice::Deinit()
 
 std::shared_ptr<AJADevice> AJADevice::GetDevice(std::string const& name)
 {
-    for(auto& dev: Devices)
+    for(auto& [_, dev]: Devices)
     {
         if(name == dev->GetDisplayName())
         {
@@ -100,14 +98,22 @@ std::shared_ptr<AJADevice> AJADevice::GetDevice(std::string const& name)
 
 std::shared_ptr<AJADevice> AJADevice::GetDevice(uint32_t index)
 {
-    for(auto& dev: Devices)
-    {
-        if(index == dev->GetIndexNumber())
-        {
-            return dev;
-        }
-    }
-    return 0;
+	for(auto& [_, dev]: Devices)
+	{
+		if(index == dev->GetIndexNumber())
+		{
+			return dev;
+		}
+	}
+	return 0;
+}
+
+std::shared_ptr<AJADevice> AJADevice::GetDeviceBySerialNumber(uint64_t serial)
+{
+	auto it = Devices.find(serial);
+	if (it != Devices.end())
+		return it->second;
+	return nullptr;
 }
 
 CNTV2VPID AJADevice::GetVPID(NTV2Channel channel, CNTV2VPID* B)

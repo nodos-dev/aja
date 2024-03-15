@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <unordered_map>
 #include <ajabase/common/types.h>
 #include <ajabase/system/memory.h>
 #include <ajabase/system/process.h>
@@ -26,6 +25,10 @@
 #include "ntv2vpid.h"
 #include "ntv2enums.h"
 #include "ntv2utils.h"
+
+// stl
+#include <unordered_map>
+#include <unordered_set>
 
 #define AJA_ASSERT(x) { if(!(x)) { printf("%s:%d\n", __FILE__, __LINE__); abort();} }
 
@@ -56,7 +59,7 @@ struct AJADevice : CNTV2Card
         }
     }
     
-    inline static std::vector<std::shared_ptr<AJADevice>> Devices;
+    inline static std::unordered_map<uint64_t, std::shared_ptr<AJADevice>> Devices;
    
 
     NTV2FrameRate FPSFamily = NTV2_FRAMERATE_INVALID;
@@ -65,6 +68,7 @@ struct AJADevice : CNTV2Card
 
     std::set<NTV2Channel> Channels;
 
+	// TODO: Remove when Legacy nodes are removed
     std::atomic_bool HasInput = false;
     std::atomic_bool HasOutput = false;
 
@@ -90,6 +94,7 @@ struct AJADevice : CNTV2Card
     static void Deinit();
     static std::shared_ptr<AJADevice> GetDevice(std::string const& name);
     static std::shared_ptr<AJADevice> GetDevice(uint32_t index);
+	static std::shared_ptr<AJADevice> GetDeviceBySerialNumber(uint64_t serial);
 
     static NTV2ReferenceSource ChannelToRefSrc(NTV2Channel channel)
     {
@@ -150,3 +155,31 @@ public:
     void GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2FrameRate& framerate);
 
 };
+
+inline NTV2Channel ParseChannel(std::string_view const &name)
+{
+	size_t idx = name.find("Link");
+	return NTV2Channel(name[idx + sizeof("Link")] - '1');
+}
+
+inline std::vector<uint8_t> StringValue(std::string const &str)
+{
+	return std::vector<uint8_t>((uint8_t *)str.data(), (uint8_t *)str.data() + str.size() + 1);
+}
+
+inline std::string GetQuadName(NTV2Channel channel)
+{
+	const char *links[8] = {"1234", "5678"};
+	return (std::string) "QuadLink " + links[channel / 4];
+}
+
+inline std::string GetChannelName(NTV2Channel channel, AJADevice::Mode mode)
+{
+	switch (mode)
+	{
+	default:
+		return GetQuadName(channel);
+	case AJADevice::SL:
+		return "SingleLink " + std::to_string(channel + 1);
+	}
+}

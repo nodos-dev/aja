@@ -13,41 +13,6 @@
 namespace nos
 {
 
-fb::UUID GenerateUUID()
-{
-    static std::mt19937 eng = std::mt19937(std::random_device()());
-    static uuids::uuid_random_generator gen (&eng);
-    return *(fb::UUID*)gen().as_bytes().data();
-}
-
-static NTV2Channel ParseChannel(std::string const &name)
-{
-    size_t idx = name.find("Link");
-    return NTV2Channel(name[idx + sizeof("Link")] - '1');
-}
-
-std::vector<u8> StringValue(std::string const &str)
-{
-    return std::vector<u8>((u8 *)str.data(), (u8 *)str.data() + str.size() + 1);
-}
-
-std::string GetQuadName(NTV2Channel channel)
-{
-    const char *links[8] = {"1234", "5678"};
-    return (std::string) "QuadLink " + links[channel / 4];
-}
-
-std::string GetChannelStr(NTV2Channel channel, AJADevice::Mode mode)
-{
-    switch (mode)
-    {
-    default:
-        return GetQuadName(channel);
-    case AJADevice::SL:
-        return "SingleLink " + std::to_string(channel + 1);
-    }
-}
-
 const u8 *AddIfNotFound(Name name, std::string tyName, std::vector<u8> val,
                         std::unordered_map<Name, const nos::fb::Pin *> &pins,
                         std::vector<flatbuffers::Offset<nos::fb::Pin>> &toAdd, 
@@ -261,13 +226,17 @@ PinMapping *AJAClient::operator->()
 
 fb::UUID AJAClient::GetPinId(Name pinName) const
 {
-    return *Mapping.GetPinId(pinName);
+	if (auto id = Mapping.GetPinId(pinName))
+        return *id;
+	return {};
 }
 
 void AJAClient::GeneratePinIDSet(Name pinName, AJADevice::Mode mode, std::vector<nos::fb::UUID> &ids)
 {
 	auto pinStr = pinName.AsString();
 
+    if (!Input)
+	    ids.push_back(GetPinId(Name(pinStr + " Thread")));
     ids.push_back(GetPinId(pinName));
 	ids.push_back(GetPinId(Name(pinStr + " Ring Size")));
     ids.push_back(GetPinId(Name(pinStr + " Ring Spare Count")));
@@ -468,6 +437,7 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
         const nos::fb::Pin *colorspace = 0;
         const nos::fb::Pin *curve = 0;
         const nos::fb::Pin *narrow_range = 0;
+		const nos::fb::Pin* exe_pin = 0;
     };
 
     std::map<NTV2Channel, StreamData> prs;
@@ -480,36 +450,40 @@ void AJAClient::OnNodeUpdate(PinMapping &&newMapping, std::unordered_map<Name, c
 		std::string str = name.AsString();
 		NTV2Channel channel = ParseChannel(str);
 		if (str.ends_with("Ring Size"))
-        {
-            prs[channel].size = pin;
-        }
-        else if (str.ends_with("Video Format"))
-        {
-            prs[channel].frame_rate = pin;
-        }
+		{
+			prs[channel].size = pin;
+		}
+		else if (str.ends_with("Video Format"))
+		{
+			prs[channel].frame_rate = pin;
+		}
 		else if (str.ends_with("Ring Spare Count"))
-        {
-            prs[channel].spare_count = pin;
-        }
-        else if (tyname == "nos.sys.vulkan.Texture")
-        {
-            prs[channel].pin = pin;
-        }
-        else if (tyname == "nos.aja.QuadLinkMode" || tyname == "nos.aja.QuadLinkInputMode")
-        {
-            prs[channel].quad_mode = pin;
-        }
-        else if (tyname == "nos.aja.Colorspace")
-        {
-            prs[channel].colorspace = pin;
-        }
-        else if (tyname == "nos.aja.GammaCurve")
-        {
-            prs[channel].curve = pin;
-        }
+		{
+			prs[channel].spare_count = pin;
+		}
+		else if (tyname == "nos.sys.vulkan.Texture")
+		{
+			prs[channel].pin = pin;
+		}
+		else if (tyname == "nos.aja.QuadLinkMode" || tyname == "nos.aja.QuadLinkInputMode")
+		{
+			prs[channel].quad_mode = pin;
+		}
+		else if (tyname == "nos.aja.Colorspace")
+		{
+			prs[channel].colorspace = pin;
+		}
+		else if (tyname == "nos.aja.GammaCurve")
+		{
+			prs[channel].curve = pin;
+		}
 		else if (str.ends_with("Narrow Range"))
+		{
+			prs[channel].narrow_range = pin;
+		}
+        else if (tyname == "nos.exe")
         {
-            prs[channel].narrow_range = pin;
+			prs[channel].exe_pin = pin;
         }
     }
 
@@ -640,7 +614,7 @@ void AJAClient::OnMenuFired(nosContextMenuRequest const&request)
     std::vector<flatbuffers::Offset<nos::ContextMenuItem>> items;
     std::vector<flatbuffers::Offset<nos::ContextMenuItem>> devices;
 
-    for (auto &d : AJADevice::Devices)
+	for (auto& [_, d] : AJADevice::Devices)
     {
         if (d.get() != Device && ((Input && !d->HasInput) || (!Input && !d->HasOutput)))
         {
@@ -669,7 +643,7 @@ void AJAClient::OnMenuFired(nosContextMenuRequest const&request)
                     .Channel = channel,
                 };
                 auto it = AJADevice::SL != mode ? items.begin() : items.end();
-                auto channelStr = GetChannelStr(channel, mode);
+                auto channelStr = GetChannelName(channel, mode);
                 if (Input)
                 {
                     if (Device->ChannelIsValid(channel, Input, NTV2_FORMAT_UNKNOWN, mode))
@@ -843,6 +817,16 @@ void AJAClient::OnCommandFired(u32 cmd)
                                     &narrowRangeData, 0, 0, 0, 0, 0, false),
         };
 
+        if (!Input)
+		{
+			pins.insert(pins.begin(), nos::fb::CreatePinDirect(fbb,
+									 generator(),
+									 (pinName + " Thread").c_str(),
+									 "nos.exe",
+									 nos::fb::ShowAs::INPUT_PIN,
+									 nos::fb::CanShowAs::INPUT_PIN_ONLY));
+		}
+
         if (isQuad)
         {
             std::vector<u8> data = nos::Buffer::From(mode);
@@ -993,20 +977,37 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
 }
 
 void AJAClient::OnExecute()
+{}
+
+void AJAClient::GetScheduleInfo(nosScheduleInfo* info)
 {
+    // TODO: PathRunner Assuming only 1 thread
+	//for (auto& [_,th] : Pins)
+	//{
+ //       for (size_t i = 0; i < size; i++)
+ //       {
+	//		if (infos[i].PinName == th->PinName)
+	//		{
+	//			infos[i].OnDemand.NeedsRepeats = true;
+	//			infos[i].Type = NOS_SCHEDULE_TYPE_ON_DEMAND;
+	//			infos[i].DeltaSeconds = th->GetDeltaSeconds();
+	//		}
+ //       }
+ //       return;
+	//}
 }
 
-bool AJAClient::CopyFrom(nosCopyInfo &cpy)
+nosResult AJAClient::CopyFrom(nosCopyInfo& cpy)
 {
     auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
-    	return false;
+    	return NOS_RESULT_FAILED;
 	auto th = it->second;
 	CPURing::Resource* slot = nullptr;
 	auto effectiveSpareCount = th->SpareCount * (1 + u32(th->Interlaced()));
 
 	if (!(slot = th->Ring->TryPop(cpy.FrameNumber, effectiveSpareCount)))
-		return false;
+		return NOS_RESULT_PENDING;
 
 	auto& params = slot->Params;
 	nos::sys::vulkan::TTexture outTex;
@@ -1049,14 +1050,14 @@ bool AJAClient::CopyFrom(nosCopyInfo &cpy)
 	cpy.FrameNumber = slot->FrameNumber;
     cpy.CopyFromOptions.ShouldSetSourceFrameNumber = true;
     th->Ring->EndPop(slot);
-	return true;
+	return NOS_RESULT_SUCCESS;
 }
 
-bool AJAClient::CopyTo(nosCopyInfo &cpy)
+nosResult AJAClient::CopyTo(nosCopyInfo& cpy)
 {
 	auto it = Pins.find(cpy.Name); 
     if (it == Pins.end()) 
-        return true;
+        return NOS_RESULT_FAILED;
 
     auto th = it->second;
 
@@ -1076,7 +1077,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
     }
 	if (!outgoing)
 	{
-		return false;
+		return NOS_RESULT_PENDING;
 	}
 	outgoing->FrameNumber = cpy.FrameNumber;
  	auto wantedField = th->OutFieldType;
@@ -1088,7 +1089,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 	{
 		nosEngine.LogW("%s: Field mismatch. Waiting for a new frame.", th->PinName.AsCStr());
 		th->Ring->CancelPush(outgoing);
-		return false;
+		return NOS_RESULT_FAILED;
 	}
 	outgoing->Params.FieldType = wantedField;
 
@@ -1130,7 +1131,7 @@ bool AJAClient::CopyTo(nosCopyInfo &cpy)
 
 	th->Ring->EndPush(outgoing);
 	th->OutFieldType = vkss::FlippedField(th->OutFieldType);
-	return true;
+	return NOS_RESULT_SUCCESS;
 }
 
 void AJAClient::AddTexturePin(const nos::fb::Pin* pin, u32 ringSize, NTV2Channel channel,
