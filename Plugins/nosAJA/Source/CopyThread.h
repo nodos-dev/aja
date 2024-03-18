@@ -50,9 +50,6 @@ struct CopyThread
 
 	// out: wait until the first frame arrives after restart to start DMA
     std::atomic_bool WaitingForFirstArrival = false;
-    
-    bool PendingRestart = false;
-    
 
 	rc<CPURing::Resource> SSBO;
 	rc<GPURing::Resource> ConversionIntermediateTex;
@@ -116,8 +113,8 @@ struct CopyThread
     template<class T>
     glm::mat<4,4,T> GetMatrix() const;
 
-	void NotifyRestart(u32 ringSize = 0, nosPathEvent pathEvent = NOS_DROP);
-
+	void NotifyRestart();
+    void SendRingSizeCommand(u32 ringSize);
 	void SendRingStats();
 
     void ResetVBLEvent();

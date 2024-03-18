@@ -279,12 +279,6 @@ void AJAClient::StopAll()
         th->Stop();
 }
 
-void AJAClient::StartAll()
-{
-    for (auto& [_,th] : Pins)
-        th->StartThread();
-}
-
 void AJAClient::UpdateDeviceStatus()
 {
     if (!HasDevice())
@@ -854,24 +848,23 @@ void AJAClient::OnNodeRemoved()
         (Input ? Device->HasInput : Device->HasOutput) = false;
 }
 
+void AJAClient::OnPathStop()
+{
+	for (auto& [_, th] : Pins)
+		th->Stop();
+}
+
+void AJAClient::OnPathStart() 
+{
+	for (auto& [_, th] : Pins)
+		th->StartThread();
+}
+
 void AJAClient::OnPathCommand(const nosPathCommand* cmd)
 {
-    auto pinId = cmd->PinId;
-    auto pinNameOpt = Mapping.GetPinName(pinId);
-    if (!pinNameOpt)
-    {
-        nosEngine.LogD("Path command on unknown pin: %s", UUID2STR(pinId).c_str());
-        return;
-    }
-    auto pinName = *pinNameOpt;
-	auto result = Pins.find(pinName);
-	if (result == Pins.end())
-	{
-        nosEngine.LogD("Path command on unknown pin: %s", pinName.AsCStr());
-		return;
-	}
-	auto copyThread = result->second;
-	copyThread->Restart(cmd->Event == NOS_RING_SIZE_CHANGE ? cmd->RingSize : 0);
+	if (cmd->Event == NOS_RING_SIZE_CHANGE)
+	    for(auto& [_, th] : Pins)
+	        th->Restart(cmd->RingSize);
 }
 
 void AJAClient::Refresh()
@@ -882,9 +875,8 @@ void AJAClient::Refresh()
         th->Refresh();
         th->UpdateCurve(th->GammaCurve);
     }
-    StartAll();
     for (auto& [_,th] : Pins)
-        th->NotifyRestart({});
+        th->NotifyRestart();
     return;
 }
 
@@ -950,7 +942,7 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
             pin->Stop();
             pin->Mode = mode;
             pin->Refresh();
-            pin->StartThread();
+			pin->NotifyRestart();
         }
         return;
     }
@@ -959,7 +951,7 @@ void AJAClient::OnPinValueChanged(nos::Name pinName, void *value)
     {
         auto pin = FindChannel(ParseChannel(pinNameStr));
 		if (pin && pin->RingSize != *(u32*)value)
-            pin->NotifyRestart(*(u32*)value);
+            pin->SendRingSizeCommand(*(u32*)value);
     }
 	if (pinNameStr.ends_with("Ring Spare Count"))
     {

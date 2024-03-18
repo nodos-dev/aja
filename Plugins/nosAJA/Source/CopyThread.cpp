@@ -206,9 +206,8 @@ void CopyThread::Restart(u32 ringSize)
 	{
 		Stop();
 		CreateRings();
-		StartThread();
+		NotifyRestart();
 	}
-	PendingRestart = false;
 }
 
 void CopyThread::SetFrame(u32 doubleBufferIndex)
@@ -414,10 +413,10 @@ bool CopyThread::WaitForVBL(nosTextureFieldType writeField)
 	return ret;
 }
 
-
+// Orphans are disabled until AjaIn is divided
 void CopyThread::AJAInputProc()
 {
-	Orphan(false);
+	//Orphan(false);
 	nosEngine.LogI("AJAIn (%s) Thread: %d", Name().AsCStr(), std::this_thread::get_id());
 
 	auto prevMode = Client->Device->GetMode(Channel);
@@ -461,7 +460,7 @@ void CopyThread::AJAInputProc()
 
 		if (LinkSizeMismatch())
 		{
-			Orphan(true, "Quad - Single link mismatch");
+			//Orphan(true, "Quad - Single link mismatch");
 			do
 			{
 				if (!Run || Ring->Exit)
@@ -471,7 +470,7 @@ void CopyThread::AJAInputProc()
 				WaitForVBL(field);
 				InputUpdate(prevMode, field);
 			} while (LinkSizeMismatch());
-			Orphan(false);
+			//Orphan(false);
 		}
 	#pragma endregion
 
@@ -479,7 +478,7 @@ void CopyThread::AJAInputProc()
 		if (!WaitForVBL(field))
 		{
 			field = vkss::FlippedField(field);
-			Orphan(true, "AJA Input has no signal");
+			//Orphan(true, "AJA Input has no signal");
 			while (!WaitForVBL(field))
 			{
 				field = vkss::FlippedField(field);
@@ -491,7 +490,7 @@ void CopyThread::AJAInputProc()
 				InputUpdate(prevMode, field);
 			}
 			InputUpdate(prevMode, field);
-			Orphan(false);
+			//Orphan(false);
 		}
 		CPURing::Resource* slot = Ring->BeginPush();
 		if (!slot)
@@ -531,7 +530,7 @@ void CopyThread::AJAInputProc()
 				{
 					dropped = false;
 					framesSinceLastDrop = 0;
-					NotifyRestart(0, NOS_DROP);
+					NotifyRestart();
 				}
 			}
 		}
@@ -608,15 +607,17 @@ nosVec2u CopyThread::GetSuitableDispatchSize() const
 					 BestFit(y + .5, ConversionIntermediateTex->Res.Info.Texture.Height / 9));
 }
 
-void CopyThread::NotifyRestart(u32 ringSize /* = 0*/, nosPathEvent pathEvent /* = MZ_OUTPUT_DROP*/)
+void CopyThread::NotifyRestart()
 {
-	if (PendingRestart && ringSize == 0)
-		return;
 	nosEngine.LogW("%s is notifying path for restart", Name().AsCStr());
 	auto id = Client->GetPinId(Name());
-	nosEngine.SendPathCommand(
-		nosPathCommand{.Event = ringSize ? NOS_RING_SIZE_CHANGE : pathEvent, .PinId = id, .RingSize = ringSize});
-	PendingRestart = true;
+	nosEngine.SendPathRestart(id);
+}
+
+void CopyThread::SendRingSizeCommand(u32 ringSize) 
+{
+	auto id = Client->GetPinId(Name());
+	nosEngine.SendPathCommand(id, nosPathCommand{.Event = NOS_RING_SIZE_CHANGE, .RingSize = ringSize});
 }
 
 void CopyThread::AJAOutputProc()
@@ -704,7 +705,7 @@ void CopyThread::AJAOutputProc()
 				{
 					dropped = false;
 					framesSinceLastDrop = 0;
-					NotifyRestart(0, NOS_DROP);
+					NotifyRestart();
 				}
 			}
 		}
@@ -788,7 +789,6 @@ CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, n
 	client->Device->SetRegisterWriteMode(Interlaced() ? NTV2_REGWRITE_SYNCTOFIELD : NTV2_REGWRITE_SYNCTOFRAME, Channel);
 
 	CreateRings();
-	StartThread();
 }
 
 CopyThread::~CopyThread()

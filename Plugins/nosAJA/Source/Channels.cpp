@@ -93,6 +93,7 @@ bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
 		Info = std::move(newChannelInfo);
 		if (setPinValue)
 			nosEngine.SetPinValue(ChannelPinId, Buffer::From(Info));
+		nosEngine.SendPathRestart(ChannelPinId);
 		return Open();
 	}
 	return true;

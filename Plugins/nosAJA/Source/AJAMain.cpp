@@ -100,6 +100,17 @@ struct AJA
     { 
         return ((AJAClient *)ctx)->OnPinValueChanged(pinName, value.Data);
     }
+    
+    static void OnPathStop(void* ctx)
+	{
+		auto aja = ((AJAClient*)ctx);
+		aja->OnPathStop();
+	}
+	static void OnPathStart(void* ctx)
+	{
+		auto aja = ((AJAClient*)ctx);
+		aja->OnPathStart();
+	}
     static void OnPathCommand(void* ctx, const nosPathCommand* cmd)
     { 
         auto aja = ((AJAClient *)ctx);
@@ -120,7 +131,7 @@ struct AJA
     {
         auto aja = ((AJAClient *)ctx);
         for (auto& [_,th] : aja->Pins)
-            th->NotifyRestart({});
+            th->NotifyRestart();
     }
 
     static nosResult GetFunctions(size_t * outCount, nosName* outName, nosPfnNodeFunctionExecute* outFunction) 
@@ -198,6 +209,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	ajaIn->OnNodeUpdated = ajaOut->OnNodeUpdated = AJA::OnNodeUpdated;
 	ajaIn->OnNodeDeleted = ajaOut->OnNodeDeleted = AJA::OnNodeDeleted;
 	ajaIn->OnPinValueChanged = ajaOut->OnPinValueChanged = AJA::OnPinValueChanged;
+	ajaIn->OnPathStop = ajaOut->OnPathStop = AJA::OnPathStop;
+	ajaIn->OnPathStart = ajaOut->OnPathStart = AJA::OnPathStart;
 	ajaIn->OnPathCommand = ajaOut->OnPathCommand = AJA::OnPathCommand;
 	ajaIn->GetFunctions = ajaOut->GetFunctions = AJA::GetFunctions;
 	ajaIn->ExecuteNode = ajaOut->ExecuteNode = AJA::ExecuteNode;

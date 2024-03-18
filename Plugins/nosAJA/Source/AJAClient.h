@@ -148,7 +148,6 @@ struct NOSAPI_ATTR AJAClient
     std::shared_ptr<CopyThread> FindChannel(NTV2Channel channel);
     NTV2FrameBufferFormat FBFmt() const;
     void StopAll();
-    void StartAll();
     void UpdateDeviceStatus();
     void UpdateDeviceValue();
     void UpdateReferenceValue();
@@ -170,7 +169,9 @@ struct NOSAPI_ATTR AJAClient
 
     void OnNodeRemoved();
 
-    void OnPathCommand(const nosPathCommand* cmd);
+    void OnPathStop();
+	void OnPathStart();
+	void OnPathCommand(const nosPathCommand* cmd);
     void OnPinValueChanged(nos::Name pinName, void* value);
     void OnExecute();
     
