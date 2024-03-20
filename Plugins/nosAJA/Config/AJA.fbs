@@ -1,4 +1,4 @@
-include "../../nosUtilities/Config/Conversion.fbs";
+include "Conversion.fbs";
 
 namespace nos.aja;
 
