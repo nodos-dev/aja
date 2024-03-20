@@ -62,7 +62,7 @@ bool Channel::Open()
 	                        fmt,
 	                        Info.is_input,
 	                        GetMode(),
-	                        Info.frame_buffer_format == FrameBufferFormat::FBF_8BIT_YCBCR
+	                        Info.frame_buffer_format == utilities::YCbCrPixelFormat::YUV8
 		                        ? NTV2_FBF_8BIT_YCBCR
 		                        : NTV2_FBF_10BIT_YCBCR))
 	{

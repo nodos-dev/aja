@@ -38,10 +38,11 @@ struct OutputNodeContext : NodeContext
 	{
 		if (pinName == NOS_NAME_STATIC("FrameBufferFormat"))
 		{
-			auto newFbf = *static_cast<FrameBufferFormat*>(value.Data);
+			auto newFbf = *static_cast<utilities::YCbCrPixelFormat*>(value.Data);
 			auto info = CurrentChannel.Info;
 			info.frame_buffer_format = newFbf;
 			CurrentChannel.Update(std::move(info), true);
+			nosEngine.LogI("Frame buffer format updated");
 		}
 		if (pinName == NOS_NAME_STATIC("QuadMode"))
 		{
@@ -120,7 +121,7 @@ struct OutputNodeContext : NodeContext
 			channelPin.video_format_idx = static_cast<int>(format);
 			if (isQuad)
 				channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(mode);
-			channelPin.frame_buffer_format = FrameBufferFormat::FBF_8BIT_YCBCR;
+			channelPin.frame_buffer_format = utilities::YCbCrPixelFormat::YUV8;
 			CurrentChannel.Update(std::move(channelPin), true);
 		}
 		flatbuffers::FlatBufferBuilder fbb;

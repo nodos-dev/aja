@@ -45,11 +45,6 @@ enum QuadLinkInputMode : uint
     Auto = 2,
 }
 
-enum FrameBufferFormat : uint {
-    FBF_8BIT_YCBCR,
-    FBF_10BIT_YCBCR,
-}
-
 table Device {
     serial_number: uint64;
     name: string;
@@ -61,7 +56,7 @@ table ChannelInfo {
     is_input: bool;
     video_format: string;
     video_format_idx: int;
-    frame_buffer_format: FrameBufferFormat;
+    frame_buffer_format: nos.utilities.YCbCrPixelFormat;
     is_quad: bool;
     input_quad_link_mode: QuadLinkInputMode; // Don't care if !is_input
     output_quad_link_mode: QuadLinkMode; // Don't care if is_input

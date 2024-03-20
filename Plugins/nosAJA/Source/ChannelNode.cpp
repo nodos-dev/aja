@@ -19,7 +19,7 @@ struct ChannelNodeContext : NodeContext
 	{
 		if (pinName == NOS_NAME_STATIC("FrameBufferFormat"))
 		{
-			auto newFbf = *static_cast<FrameBufferFormat*>(value.Data);
+			auto newFbf = *static_cast<utilities::YCbCrPixelFormat*>(value.Data);
 			auto info = CurrentChannel.Info;
 			info.frame_buffer_format = newFbf;
 			CurrentChannel.Update(std::move(info), true);
@@ -105,7 +105,7 @@ struct ChannelNodeContext : NodeContext
 			channelPin.video_format_idx = static_cast<int>(format);
 			if (isQuad)
 				channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(mode);
-			channelPin.frame_buffer_format = static_cast<FrameBufferFormat>(format);
+			channelPin.frame_buffer_format = static_cast<utilities::YCbCrPixelFormat>(format);
 			CurrentChannel.Update(std::move(channelPin), true);
 		}
 		flatbuffers::FlatBufferBuilder fbb;
