@@ -13,6 +13,7 @@ struct ChannelNodeContext : NodeContext
 	
 	~ChannelNodeContext() override
 	{
+		CurrentChannel.Close();
 	}
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
@@ -99,7 +100,7 @@ struct ChannelNodeContext : NodeContext
 			TChannelInfo channelPin{};
 			channelPin.device = std::make_unique<TDevice>(TDevice{ {}, device->GetSerialNumber(), device->GetDisplayName() });
 			channelPin.channel_name = channelName;
-			channelPin.is_input = false;
+			channelPin.is_input = input;
 	    	channelPin.is_quad = isQuad;
 			channelPin.video_format = NTV2VideoFormatToString(format, true); // TODO: Readonly.
 			channelPin.video_format_idx = static_cast<int>(format);
