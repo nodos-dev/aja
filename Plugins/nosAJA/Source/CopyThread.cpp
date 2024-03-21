@@ -741,8 +741,6 @@ void CopyThread::AJAOutputProc()
 	}
 	Ring->Stop();
 
-	nosEngine.EndScheduling(id);
-
 	if (Run)
 		SendDeleteRequest();
 }

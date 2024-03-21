@@ -22,6 +22,8 @@ struct DMAWriteNodeContext : NodeContext
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
 	std::shared_ptr<AJADevice> Device = nullptr;
 	NTV2VideoFormat Format = NTV2_FORMAT_UNKNOWN;
+	std::string ChannelName;
+	nos::Buffer LastChannelInfo = {};
 
 	bool Interlaced() const
 	{
@@ -64,16 +66,31 @@ struct DMAWriteNodeContext : NodeContext
 			.Type = NOS_SCHEDULE_TYPE_ON_DEMAND,
 		};
 	}
+
+	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
+	{ 
+		if (pinName == NOS_NAME_STATIC("Channel"))
+		{
+			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
+				return;
+			LastChannelInfo = value;
+			auto* channelInfo = InterpretPinValue<ChannelInfo>(value);
+			Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
+			if (!Device || !channelInfo->channel_name())
+				return;
+			ChannelName = channelInfo->channel_name()->c_str();
+			Channel = ParseChannel(ChannelName);
+			Format = NTV2VideoFormat(channelInfo->video_format_idx());
+			nosEngine.RecompilePath(NodeId);
+		}
+	}
 	
 	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
 	{
-		ChannelInfo* channelInfo = nullptr;
 		nosResourceShareInfo inputBuffer{};
 		for (size_t i = 0; i < args->PinCount; ++i)
 		{
 			auto& pin = args->Pins[i];
-			if (pin.Name == NOS_NAME_STATIC("Channel"))
-				channelInfo = InterpretPinValue<ChannelInfo>(*pin.Data);
 			if (pin.Name == NOS_NAME_STATIC("Input"))
 				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 		}
@@ -81,14 +98,8 @@ struct DMAWriteNodeContext : NodeContext
 		if (!inputBuffer.Memory.Handle)
 			return NOS_RESULT_FAILED;
 
-		Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
 		if (!Device)
 			return NOS_RESULT_FAILED;
-		auto channelStr = channelInfo->channel_name();
-		if (!channelStr)
-			return NOS_RESULT_FAILED;
-		Channel = ParseChannel(channelStr->string_view());
-		Format = NTV2VideoFormat(channelInfo->video_format_idx());
 
 		nosCmd cmd;
 		nosVulkan->Begin("Flush Before AJA DMA Write", &cmd);
@@ -104,7 +115,7 @@ struct DMAWriteNodeContext : NodeContext
 			util::Stopwatch sw;
 			Device->DMAWriteFrame(frameBufferIndex, reinterpret_cast<uint32_t*>(buffer), inputBuffer.Info.Buffer.Size, Channel);
 			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog(("AJA " + channelStr->str() + " DMA Write").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+			nosEngine.WatchLog(("AJA " + ChannelName + " DMA Write").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
 
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);

@@ -13,9 +13,8 @@
 
 using namespace nos;
 
-nosVulkanSubsystem* nosVulkan = nullptr;
-
 NOS_INIT();
+NOS_VULKAN_INIT();
 
 NOS_REGISTER_NAME(Device);
 NOS_REGISTER_NAME(ReferenceSource);
@@ -223,8 +222,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	ajaIn->OnOrphanPinRemoved = ajaOut->OnOrphanPinRemoved = AJA::OnOrphanPinRemoved;
 	ajaOut->GetScheduleInfo = AJA::GetScheduleInfo;
 
-	nosResult res{};
-    NOS_RETURN_ON_FAILURE(res, nosEngine.RequestSubsystem(NOS_NAME_STATIC(NOS_VULKAN_SUBSYSTEM_NAME), NOS_VULKAN_SUBSYSTEM_VERSION_MAJOR, 0, (void**)&nosVulkan))
+	NOS_RETURN_ON_FAILURE(RequestVulkanSubsystem());
 
 	fs::path root = nosEngine.Context->RootFolderPath;
 	auto rgb2ycbcrPath = (root / ".." / "Shaders" / "RGB2YCbCr.comp").generic_string();
@@ -248,19 +246,19 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 			},
 		});
 	}
-	NOS_RETURN_ON_FAILURE(res, nosVulkan->RegisterShaders(shaderInfos.size(), shaderInfos.data()))
+	NOS_RETURN_ON_FAILURE(nosVulkan->RegisterShaders(shaderInfos.size(), shaderInfos.data()))
 	std::vector<nosPassInfo> passes =
 	{
 		{.Key = NSN_AJA_RGB2YCbCr_Compute_Pass, .Shader = NSN_AJA_RGB2YCbCr_Compute_Shader, .MultiSample = 1},
 		{.Key = NSN_AJA_YCbCr2RGB_Compute_Pass, .Shader = NSN_AJA_YCbCr2RGB_Compute_Shader, .MultiSample = 1},
 	};
-	NOS_RETURN_ON_FAILURE(res, nosVulkan->RegisterPasses(passes.size(), passes.data()))
+	NOS_RETURN_ON_FAILURE(nosVulkan->RegisterPasses(passes.size(), passes.data()))
 	
-	NOS_RETURN_ON_FAILURE(res, RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
-	NOS_RETURN_ON_FAILURE(res, RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
-	NOS_RETURN_ON_FAILURE(res, RegisterOutputNode(outList[(int)Nodes::Output]))
-	NOS_RETURN_ON_FAILURE(res, RegisterChannelNode(outList[(int)Nodes::Channel]))
-	return res;
+	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
+	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
+	NOS_RETURN_ON_FAILURE(RegisterOutputNode(outList[(int)Nodes::Output]))
+	NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
+	return NOS_RESULT_SUCCESS;
 }
 
 }
