@@ -48,6 +48,7 @@ bool Channel::Open()
 	NTV2VideoFormat fmt = NTV2_FORMAT_UNKNOWN;
 	if (Info.is_input)
 	{
+		fmt = device->GetInputVideoFormat(channel);
 		nosEngine.LogI("Route input %s", NTV2ChannelToString(channel, true).c_str());
 	}
 	else
