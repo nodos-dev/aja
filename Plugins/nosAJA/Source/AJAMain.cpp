@@ -180,6 +180,7 @@ enum class Nodes : int
 	AJAIn_Legacy,
 	AJAOut_Legacy,
 	DMAWrite,
+	DMARead,
 	WaitVBL,
 	Output,
 	Channel,
@@ -187,6 +188,7 @@ enum class Nodes : int
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions*);
+nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
 nosResult RegisterOutputNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
@@ -258,6 +260,7 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
 	NOS_RETURN_ON_FAILURE(RegisterOutputNode(outList[(int)Nodes::Output]))
 	NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
+	NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
 	return NOS_RESULT_SUCCESS;
 }
 

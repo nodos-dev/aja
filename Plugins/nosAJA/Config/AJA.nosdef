@@ -71,6 +71,38 @@
             ]
         },
         {
+            "class_name": "DMARead",
+            "display_name": "AJA DMA Read",
+            "contents_type": "Job",
+            "description":  "Sends received YCbCr frame to the specified channel",
+            "pins": [
+                {
+                    "name": "Run",
+                    "type_name": "nos.exe",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                },
+                {
+                    "name": "DMA Complete",
+                    "type_name": "nos.exe",
+                    "show_as": "OUTPUT_PIN",
+                    "can_show_as": "OUTPUT_PIN_ONLY"
+                },
+                {
+                    "name": "Channel",
+                    "type_name": "nos.aja.ChannelInfo",
+                    "show_as": "INPUT_PIN",
+                    "can_show_as": "INPUT_PIN_ONLY"
+                },
+                {
+                    "name": "Output",
+                    "type_name": "nos.sys.vulkan.Buffer",
+                    "show_as": "OUTPUT_PIN",
+                    "can_show_as": "OUTPUT_PIN_ONLY"
+                }
+            ]
+        },
+        {
             "class_name": "WaitVBL",
             "display_name": "AJA Wait VBL",
             "contents_type": "Job",
@@ -102,12 +134,19 @@
             "contents_type": "Job",
             "description":  "Debugging/test node for opening channels",
             "pins": [
-                {
-                    "name": "Channel",
-                    "type_name": "nos.aja.ChannelInfo",
-                    "show_as": "OUTPUT_PIN",
-                    "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-                }
+				{
+					"name": "Channel",
+					"type_name": "nos.aja.ChannelInfo",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+				},
+				{
+					"name": "FrameBufferFormat", 
+					"display_name": "Frame Buffer Format",
+					"type_name": "nos.utilities.YCbCrPixelFormat",
+					"show_as": "PROPERTY",
+					"can_show_as": "INPUT_PIN_OR_PROPERTY"
+				}
             ]
         }
     ]

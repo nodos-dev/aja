@@ -39,6 +39,11 @@
         },
         {
             "category": "Device|AJA",
+            "class_name": "DMARead",
+            "display_name": "DMA Read"
+        },
+        {
+            "category": "Device|AJA",
             "class_name": "WaitVBL",
             "display_name": "Wait VBL"
         },
