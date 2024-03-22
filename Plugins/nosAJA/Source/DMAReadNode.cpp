@@ -47,7 +47,7 @@ struct DMAReadNodeContext : NodeContext
 		Device->SetInputFrame(Channel, idx);
 		if (NTV2_IS_QUAD_FRAME_FORMAT(Format)) // TODO: Get from channel info
 			for (u32 i = Channel + 1; i < Channel + 4; ++i)
-				Device->SetOutputFrame(NTV2Channel(i), idx);
+				Device->SetInputFrame(NTV2Channel(i), idx);
 	}
 
 	uint32_t StartDoubleBuffer() 
