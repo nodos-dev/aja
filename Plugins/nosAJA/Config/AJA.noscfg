@@ -15,7 +15,8 @@
     },
     "node_definitions": [
         "AJA.nosdef",
-        "OutputNode.nosdef"
+        "OutputNode.nosdef",
+        "InputNode.nosdef"
     ],
     "custom_types" :[
       "AJA.fbs"
@@ -56,6 +57,11 @@
             "category": "Device|AJA",
             "class_name": "Output",
             "display_name": "AJA Out"
+        },
+        {
+            "category": "Device|AJA",
+            "class_name": "Input",
+            "display_name": "AJA In"
         }
     ]
 }
