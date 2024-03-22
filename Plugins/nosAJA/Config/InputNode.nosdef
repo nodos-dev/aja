@@ -306,7 +306,7 @@
                 ],
                 "pos": { "x": 670.0, "y": 903.0 },
                 "contents_type": "Job",
-                "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "../Shaders/YCbCr2RGB.comp.spv", "stage": "COMPUTE" } },
+                "contents": { "type": "nos.sys.vulkan.GPUNode", "options": { "shader": "../Shaders/YCbCr2RGB.comp", "stage": "COMPUTE" } },
                 "app_key": "",
                 "functions": [],
                 "function_category": "Default Node",
