@@ -73,11 +73,11 @@ struct DMAWriteNodeContext : NodeContext
 		{
 			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
 				return;
-			LastChannelInfo = value;
 			auto* channelInfo = InterpretPinValue<ChannelInfo>(value);
 			Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
 			if (!Device || !channelInfo->channel_name())
 				return;
+			LastChannelInfo = value;
 			ChannelName = channelInfo->channel_name()->c_str();
 			Channel = ParseChannel(ChannelName);
 			Format = NTV2VideoFormat(channelInfo->video_format_idx());

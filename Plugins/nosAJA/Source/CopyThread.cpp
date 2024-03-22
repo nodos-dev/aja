@@ -787,6 +787,7 @@ CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, n
 	client->Device->SetRegisterWriteMode(Interlaced() ? NTV2_REGWRITE_SYNCTOFIELD : NTV2_REGWRITE_SYNCTOFRAME, Channel);
 
 	CreateRings();
+	Orphan(false);
 }
 
 CopyThread::~CopyThread()
