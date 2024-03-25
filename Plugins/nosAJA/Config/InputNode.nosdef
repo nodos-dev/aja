@@ -406,8 +406,8 @@
               },
               {
                 "id": "dc27a049-c4d8-486d-8428-e9987d2077d6",
-                "name": "TextureBoundedQueue",
-                "class_name": "nos.utilities.TextureBoundedQueue",
+                "name": "BoundedTextureQueue",
+                "class_name": "nos.utilities.BoundedTextureQueue",
                 "pins": [
                   {
                     "id": "c5a2636d-7062-4dba-882a-68f4b9f01289",
@@ -522,7 +522,7 @@
                 ],
                 "orphan_state": { },
                 "description": "",
-                "display_name": "Texture Bounded Queue",
+                "display_name": "Bounded Texture Queue",
                 "template_parameters": []
               },
               {
