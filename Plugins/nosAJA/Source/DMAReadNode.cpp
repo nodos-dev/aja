@@ -112,7 +112,12 @@ struct DMAReadNodeContext : NodeContext
 
 		u32 width, height;
 		Device->GetExtent(Format, AJADevice::SL, width, height);
-		u32 bufferSize = Device->GetFBSize(Channel);
+		
+		auto PixelFormat = nos::utilities::YCbCrPixelFormat::YUV8;
+		int BitWidth = PixelFormat == nos::utilities::YCbCrPixelFormat::YUV8 ? 8 : 10;
+		nosVec2u compressedExt((10 == BitWidth) ? ((width + (48 - width % 48) % 48) / 3) << 1 : width >> 1, height >> u32(Interlaced()));
+		uint32_t bufferSize = compressedExt.x * compressedExt.y * 4;
+
 		constexpr nosMemoryFlags memoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE);
 		if (outputBuffer.Memory.Size != bufferSize || outputBuffer.Info.Buffer.MemoryFlags != memoryFlags)
 		{
