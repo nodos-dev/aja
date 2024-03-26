@@ -390,7 +390,6 @@
                     "pin_category": "",
                     "visualizer": { },
                     "data": {
-                      "size_in_bytes": 8388608,
                       "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
                       "memory_flags": "NONE",
                       "element_type": "ELEMENT_TYPE_UNDEFINED"
@@ -417,7 +416,6 @@
                     "pin_category": "",
                     "visualizer": { },
                     "data": {
-                      "size_in_bytes": 8388608,
                       "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
                       "memory_flags": "DEVICE_MEMORY",
                       "element_type": "ELEMENT_TYPE_UNDEFINED"
