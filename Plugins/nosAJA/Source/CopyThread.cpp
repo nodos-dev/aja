@@ -324,7 +324,7 @@ void CopyThread::CreateRings()
 	EffectiveRingSize = RingSize * (1 + uint32_t(Interlaced()));
 	const auto ext = Extent();
 	nosVec2u compressedExt((10 == BitWidth()) ? ((ext.x + (48 - ext.x % 48) % 48) / 3) << 1 : ext.x >> 1, ext.y >> u32(Interlaced()));
-	Ring = MakeShared<CPURing>(EffectiveRingSize, compressedExt.x * compressedExt.y * 4, IsInput() ? NOS_BUFFER_USAGE_TRANSFER_SRC : NOS_BUFFER_USAGE_TRANSFER_DST);
+	Ring = MakeShared<CPURing>(EffectiveRingSize, nosBufferInfo{.Size = compressedExt.x * compressedExt.y * 4, .Usage = IsInput() ? NOS_BUFFER_USAGE_TRANSFER_SRC : NOS_BUFFER_USAGE_TRANSFER_DST, .MemoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE | (IsInput() ? NOS_MEMORY_FLAGS_NONE : NOS_MEMORY_FLAGS_DOWNLOAD))});
 	nosTextureInfo info = {};
 	info.Width  = compressedExt.x;
 	info.Height = compressedExt.y;
@@ -778,6 +778,7 @@ CopyThread::CopyThread(struct AJAClient *client, u32 ringSize, u32 spareCount, n
 		nosBufferInfo info = {};
 		info.Size = (1<<(SSBO_SIZE)) * sizeof(u16);
 		info.Usage = NOS_BUFFER_USAGE_STORAGE_BUFFER; // | NOS_BUFFER_USAGE_DEVICE_MEMORY;
+		info.MemoryFlags = NOS_MEMORY_FLAGS_HOST_VISIBLE;
 		SSBO = MakeShared<CPURing::Resource>(info);
 		UpdateCurve(GammaCurve);
 	}

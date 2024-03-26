@@ -101,13 +101,6 @@ struct DMAWriteNodeContext : NodeContext
 		if (!Device)
 			return NOS_RESULT_FAILED;
 
-		nosCmd cmd;
-		nosVulkan->Begin("Flush Before AJA DMA Write", &cmd);
-		nosGPUEvent event;
-		nosCmdEndParams end {.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &event};
-		nosVulkan->End(cmd, &end);
-		nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
-		
 		auto buffer = nosVulkan->Map(&inputBuffer);
 
 		auto frameBufferIndex = GetFrameBufferIndex(DoubleBufferIdx);

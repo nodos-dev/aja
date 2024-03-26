@@ -113,19 +113,27 @@ struct DMAReadNodeContext : NodeContext
 		u32 width, height;
 		Device->GetExtent(Format, AJADevice::SL, width, height);
 		u32 bufferSize = Device->GetFBSize(Channel);
-
-		if (outputBuffer.Memory.Size != bufferSize)
+		constexpr nosMemoryFlags memoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE);
+		if (outputBuffer.Memory.Size != bufferSize || outputBuffer.Info.Buffer.MemoryFlags != memoryFlags)
 		{
 			nosResourceShareInfo bufInfo = {
 				.Info = {
 					.Type = NOS_RESOURCE_TYPE_BUFFER,
 					.Buffer = nosBufferInfo{
 						.Size = (uint32_t)bufferSize,
-						.Usage = nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_DST |
-												NOS_BUFFER_USAGE_TRANSFER_SRC | NOS_BUFFER_USAGE_DEVICE_MEMORY),
+						.Usage = nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_SRC),
+						.MemoryFlags = memoryFlags,
 					}}};
 			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
 			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
+			for (size_t i = 0; i < args->PinCount; ++i)
+			{
+				auto& pin = args->Pins[i];
+				if (pin.Name == NOS_NAME_STATIC("Channel"))
+					channelInfo = InterpretPinValue<ChannelInfo>(*pin.Data);
+				if (pin.Name == NOS_NAME_STATIC("Output"))
+					outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
+			}
 		}
 
 		if(!outputBuffer.Memory.Handle)
