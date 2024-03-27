@@ -775,7 +775,7 @@
                     "can_show_as": "INPUT_PIN_OR_PROPERTY",
                     "pin_category": "",
                     "visualizer": { },
-                    "data": { "x": 40, "y": 120 },
+                    "data": { "x": 120, "y": 120 },
                     "referred_by": [],
                     "def": { "x": 120, "y": 120 },
                     "meta_data_map": [],
