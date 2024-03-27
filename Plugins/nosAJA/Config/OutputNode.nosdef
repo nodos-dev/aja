@@ -87,6 +87,8 @@
           "visualizer": {},
           "data": 2,
           "referred_by": [],
+          "min": 1,
+          "max": 120,
           "def": 2,
           "meta_data_map": [],
           "contents_type": "PortalPin",
@@ -1433,9 +1435,11 @@
                 "pin_category": "",
                 "visualizer": {},
                 "data": 2,
-                "referred_by": [
-                  "97ab3eb5-910d-43f8-9d05-0b7356927b66"
-                ],
+				"referred_by": [
+					"97ab3eb5-910d-43f8-9d05-0b7356927b66"
+				],
+				"min": 1,
+				"max": 120,
                 "def": 2,
                 "meta_data_map": [
                   {
