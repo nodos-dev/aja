@@ -182,7 +182,7 @@ u32 AJADevice::GetIntrinsicSize()
     u32 max = 0;
     for (auto c : Channels)
     {
-        max = std::max(max, GetFBSize(c));
+        max = max(max, GetFBSize(c));
     }
     return max;
 }
@@ -400,13 +400,13 @@ static NTV2InputCrosspointID GetInputTSIFB(NTV2Channel channel)
     {
         default: return NTV2_FIRST_INPUT_CROSSPOINT;
         case NTV2_CHANNEL1: return NTV2_XptFrameBuffer1Input;
-        case NTV2_CHANNEL2: return NTV2_XptFrameBuffer1BInput;
+        case NTV2_CHANNEL2: return NTV2_XptFrameBuffer1DS2Input;
         case NTV2_CHANNEL3: return NTV2_XptFrameBuffer2Input;
-        case NTV2_CHANNEL4: return NTV2_XptFrameBuffer2BInput;
+        case NTV2_CHANNEL4: return NTV2_XptFrameBuffer2DS2Input;
         case NTV2_CHANNEL5: return NTV2_XptFrameBuffer5Input;
-        case NTV2_CHANNEL6: return NTV2_XptFrameBuffer5BInput;
+        case NTV2_CHANNEL6: return NTV2_XptFrameBuffer5DS2Input;
         case NTV2_CHANNEL7: return NTV2_XptFrameBuffer6Input;
-        case NTV2_CHANNEL8: return NTV2_XptFrameBuffer6BInput;
+        case NTV2_CHANNEL8: return NTV2_XptFrameBuffer6DS2Input;
     }
 }
 
@@ -416,13 +416,13 @@ static NTV2OutputCrosspointID GetOutputTSIFB(NTV2Channel channel)
     {
         default: return NTV2_FIRST_OUTPUT_CROSSPOINT;
         case NTV2_CHANNEL1: return NTV2_XptFrameBuffer1YUV;
-        case NTV2_CHANNEL2: return NTV2_XptFrameBuffer1_425YUV;
+        case NTV2_CHANNEL2: return NTV2_XptFrameBuffer1_DS2YUV;
         case NTV2_CHANNEL3: return NTV2_XptFrameBuffer2YUV;
-        case NTV2_CHANNEL4: return NTV2_XptFrameBuffer2_425YUV;
+        case NTV2_CHANNEL4: return NTV2_XptFrameBuffer2_DS2YUV;
         case NTV2_CHANNEL5: return NTV2_XptFrameBuffer5YUV;
-        case NTV2_CHANNEL6: return NTV2_XptFrameBuffer5_425YUV;
+        case NTV2_CHANNEL6: return NTV2_XptFrameBuffer5_DS2YUV;
         case NTV2_CHANNEL7: return NTV2_XptFrameBuffer6YUV;
-        case NTV2_CHANNEL8: return NTV2_XptFrameBuffer6_425YUV;
+        case NTV2_CHANNEL8: return NTV2_XptFrameBuffer6_DS2YUV;
     }
 }
 

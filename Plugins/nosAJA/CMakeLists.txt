@@ -2,32 +2,36 @@
 
 # Dependencies
 # ------------
-# AJA
-if(WIN32)
-    add_compile_definitions(NOMINMAX)
-endif()
 
 if (GENERATE_FLATBUFFERS_FILES)
     generate_flatbuffers("${TOOLS_DIR}/flatc" "${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/__temp__" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Config")
 endif()
 
 # TODO: Make External/ajalibraries a submodule (https://github.com/aja-video/ntv2)?
-list(APPEND CMAKE_MODULE_PATH  ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/cmake)
+#list(APPEND CMAKE_MODULE_PATH  ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/cmake)
 
 # Caution: AJA wants C++11 standard. Change it back to our's after processing AJA
-include(AJAHelpers)
-include(AJABuildOptions)
-include(AJACommonDefines)
-include(AJACommonFlags)
-include(AJACommonPaths)
-include(AJACommonVars)
-include(AJAVersionConfig)
-# CMake includes
-include(GNUInstallDirs)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
+set(CMAKE_CXX_STANDARD 11)
 
-get_targets(NOSAJA_EXTERNAL_TARGETS "./External/ntv2/ajalibraries")
+set(AJANTV2_DISABLE_DEMOS ON)
+set(AJANTV2_DISABLE_DRIVER ON)
+set(AJANTV2_DISABLE_TESTS ON)
+set(AJANTV2_DISABLE_TOOLS ON)
+set(AJANTV2_DISABLE_PLUGINS ON)
+
+
+if(WIN32)
+	remove_definitions(-DNOMINMAX)
+endif()
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/libajantv2 "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
+
+
+get_targets(NOSAJA_EXTERNAL_TARGETS "./External/libajantv2")
 group_targets("${NOSAJA_EXTERNAL_TARGETS}" "External")
+
+
+set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_DEBUG_POSTFIX "")
 
@@ -37,7 +41,9 @@ list(APPEND INCLUDE_FOLDERS
     ${SUBSYSTEMS_SOURCE_DIR}/nosVulkanSubsystem/Include
     ${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Source
     ${CMAKE_CURRENT_LIST_DIR}/External
-    ${CMAKE_CURRENT_LIST_DIR}/External/ntv2
-    ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/src/win
-    ${CMAKE_CURRENT_LIST_DIR}/External/ntv2/ajalibraries/ajantv2/includes)
+    ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
+#   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win
+    ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/includes)
 add_folder_as_plugin_project("nosAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
+
+
