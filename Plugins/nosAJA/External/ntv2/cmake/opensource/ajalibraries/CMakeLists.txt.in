@@ -1,3 +1,0 @@
-if (AJA_BUILD_LIBS)
-    aja_add_subdirectory(ajantv2)
-endif()

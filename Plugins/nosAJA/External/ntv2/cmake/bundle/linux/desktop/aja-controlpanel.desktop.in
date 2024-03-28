@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=AJA ControlPanel
-Exec=/opt/aja/bin/controlpanel
-Icon=/opt/aja/icons/256x256/apps/controlpanel.png
-Terminal=false
-Categories=AudioVideo;
-Type=Application
-Version=@AJA_NTV2_VER_STR_LONG@
