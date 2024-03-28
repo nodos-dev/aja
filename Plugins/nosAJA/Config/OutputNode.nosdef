@@ -1202,6 +1202,18 @@
                 "description": ""
               },
               {
+                "id": "1faa116a-638b-47d6-8f3e-c7abccb4f7fc",
+                "name": "Alignment",
+                "type_name": "uint",
+                "show_as": "PROPERTY",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": {},
+                "data": 0,
+                "contents_type": "JobPin",
+                "contents": {}
+              },
+              {
                 "id": "2bfbaa51-108a-4e49-8e9b-e11395ae7659",
                 "name": "Input",
                 "type_name": "nos.sys.vulkan.Buffer",
