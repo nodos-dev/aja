@@ -26,7 +26,11 @@ struct InputNodeContext : NodeContext
 		LoadNode(node);
 	}
 
-	~InputNodeContext() override { CurrentChannel.Close(); }
+	~InputNodeContext() override
+	{
+		CurrentChannel.Close();
+		AJADevice::Deinit();
+	}
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
 	{

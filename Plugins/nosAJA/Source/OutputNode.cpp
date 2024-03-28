@@ -32,6 +32,7 @@ struct OutputNodeContext : NodeContext
 	~OutputNodeContext() override
 	{
 		CurrentChannel.Close();
+		AJADevice::Deinit();
 	}
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
