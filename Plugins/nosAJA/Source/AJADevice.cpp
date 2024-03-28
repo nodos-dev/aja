@@ -6,6 +6,9 @@
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
 
+#undef min
+#undef max
+
 std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
 {
     CNTV2DeviceScanner scanner;
@@ -182,7 +185,7 @@ u32 AJADevice::GetIntrinsicSize()
     u32 max = 0;
     for (auto c : Channels)
     {
-        max = max(max, GetFBSize(c));
+        max = std::max(max, GetFBSize(c));
     }
     return max;
 }

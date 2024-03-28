@@ -20,9 +20,9 @@ set(AJANTV2_DISABLE_TOOLS ON)
 set(AJANTV2_DISABLE_PLUGINS ON)
 
 
-if(WIN32)
+#if(WIN32)
 	remove_definitions(-DNOMINMAX)
-endif()
+#endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/libajantv2 "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
 
