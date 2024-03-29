@@ -48,7 +48,7 @@
             "class_name": "DMAWrite",
             "display_name": "AJA DMA Write",
             "contents_type": "Job",
-            "description":  "Sends received YCbCr frame to the specified channel",
+            "description":  "Sends YCbCr frames to the specified channel",
             "pins": [
                 {
                     "name": "Run",
@@ -74,7 +74,7 @@
             "class_name": "DMARead",
             "display_name": "AJA DMA Read",
             "contents_type": "Job",
-            "description":  "Sends received YCbCr frame to the specified channel",
+            "description":  "Reads YCbCr frames from the specified channel",
             "pins": [
                 {
                     "name": "Run",
