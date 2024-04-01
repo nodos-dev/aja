@@ -674,7 +674,7 @@
                   {
                     "id": "2cc51710-c324-4636-9198-612d8944d0dc",
                     "name": "Resolution",
-                    "type_name": "nos.fb.vec2i",
+                    "type_name": "nos.fb.vec2u",
                     "show_as": "INPUT_PIN",
                     "can_show_as": "INPUT_PIN_OR_PROPERTY",
                     "pin_category": "",
