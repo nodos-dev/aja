@@ -71,19 +71,21 @@ bool Channel::Open()
 			IsProgressivePicture(fmt) ? NTV2_REGWRITE_SYNCTOFRAME : NTV2_REGWRITE_SYNCTOFIELD,
 			channel);
 		SetStatus(fb::NodeStatusMessageType::INFO, NTV2ChannelToString(channel, true) + " " + NTV2VideoFormatToString(fmt, true));
+		IsOpen = true;
 		return true;
 	}
 	SetStatus(fb::NodeStatusMessageType::FAILURE, "Unable to open channel " + NTV2ChannelToString(channel, true));
 	return false;
 }
 
-void Channel::Close() const
+void Channel::Close()
 {
 	auto device = GetDevice();
 	if (!device)
 		return;
 	auto channel = GetChannel();
 	device->CloseChannel(channel, Info.is_input, AJADevice::IsQuad(GetMode()));
+	IsOpen = false;
 }
 
 bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
@@ -95,9 +97,20 @@ bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
 		if (setPinValue)
 			nosEngine.SetPinValue(ChannelPinId, Buffer::From(Info));
 		nosEngine.SendPathRestart(ChannelPinId);
-		return Open();
+		if (Open())
+		{
+			nosEngine.SetItemOrphanState(ChannelPinId, nullptr);
+			return true;
+		}
+		else
+		{
+			IsOpen = false;
+			nosOrphanState orphanState{.IsOrphan = true, .Message = "Invalid channel"};
+			nosEngine.SetItemOrphanState(ChannelPinId, &orphanState);
+			return false;
+		}
 	}
-	return true;
+	return IsOpen;
 }
 
 void Channel::SetStatus(fb::NodeStatusMessageType type, std::string text)

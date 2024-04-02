@@ -159,12 +159,6 @@ struct DMAReadNodeContext : NodeContext
 
 		return NOS_RESULT_SUCCESS;
 	}
-
-	void OnPathStart() override
-	{
-		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
-		nosEngine.ScheduleNode(&schedule);
-	}
 };
 
 nosResult RegisterDMAReadNode(nosNodeFunctions* functions)

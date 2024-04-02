@@ -29,6 +29,8 @@ struct Channel
 
 	TChannelInfo Info{};
 
+	bool IsOpen = false;
+
 	std::shared_ptr<AJADevice> GetDevice() const;
 
 	NTV2Channel GetChannel() const;
@@ -37,7 +39,7 @@ struct Channel
 
 	bool Open();
 
-	void Close() const;
+	void Close();
 
 	bool Update(TChannelInfo newChannelInfo, bool setPinValue);
 

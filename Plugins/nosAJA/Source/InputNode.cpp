@@ -39,7 +39,7 @@ struct InputNodeContext : NodeContext
 			auto newFbf = *static_cast<utilities::YCbCrPixelFormat*>(value.Data);
 			auto info = CurrentChannel.Info;
 			info.frame_buffer_format = newFbf;
-			CurrentChannel.Update(std::move(info), true);
+			UpdateChannel(std::move(info), true);
 			nosEngine.LogI("Frame buffer format updated");
 		}
 		if (pinName == NOS_NAME_STATIC("QuadMode"))
@@ -47,7 +47,7 @@ struct InputNodeContext : NodeContext
 			auto newQuadMode = *static_cast<AJADevice::Mode*>(value.Data);
 			auto info = CurrentChannel.Info;
 			info.output_quad_link_mode = static_cast<QuadLinkMode>(newQuadMode);
-			CurrentChannel.Update(std::move(info), true);
+			UpdateChannel(std::move(info), true);
 		}
 	}
 
@@ -65,11 +65,22 @@ struct InputNodeContext : NodeContext
 					flatbuffers::GetRoot<ChannelInfo>(pin->data()->data())->UnPackTo(&info);
 				}
 			}
-			CurrentChannel.Update(std::move(info), false);
+			UpdateChannel(std::move(info), false);
 		}
 	}
 
-	void OnNodeUpdated(const fb::Node* updatedNode) override { LoadNode(updatedNode); }
+	void UpdateChannel(TChannelInfo info, bool setPinValue)
+	{
+		if (CurrentChannel.Update(std::move(info), true))
+		{
+			nosEngine.SetItemOrphanState(PinName2Id[NOS_NAME_STATIC("Output")], nullptr);
+		}
+		else
+		{
+			nosOrphanState orphanState{.IsOrphan = true, .Message = "Invalid channel"};
+			nosEngine.SetItemOrphanState(PinName2Id[NOS_NAME_STATIC("Output")], &orphanState);
+		}
+	}
 
 	void OnPinMenuRequested(nos::Name pinName, const nosContextMenuRequest* request) override {}
 
@@ -118,7 +129,7 @@ struct InputNodeContext : NodeContext
 			if (isQuad)
 				channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(mode);
 			channelPin.frame_buffer_format = utilities::YCbCrPixelFormat::YUV8;
-			CurrentChannel.Update(std::move(channelPin), true);
+			UpdateChannel(std::move(channelPin), true);
 		}
 		flatbuffers::FlatBufferBuilder fbb;
 		std::vector<flatbuffers::Offset<fb::Pin>> pins;
