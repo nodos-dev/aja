@@ -33,12 +33,14 @@ struct WaitVBLNodeContext : NodeContext
 			if (pin.Name == NOS_NAME_STATIC("Run"))
 				inId = pin.Id;
 		}
+		if (!channelInfo->device())
+			return NOS_RESULT_FAILED;
 		auto device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
 		if (!device)
-			return NOS_RESULT_SUCCESS;
+			return NOS_RESULT_FAILED;
 		auto channelStr = channelInfo->channel_name();
 		if (!channelStr)
-			return NOS_RESULT_SUCCESS;
+			return NOS_RESULT_FAILED;
 		auto channel = ParseChannel(channelStr->string_view());
 		if (channelInfo->is_input())
 			device->WaitForInputVerticalInterrupt(channel);

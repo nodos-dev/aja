@@ -44,6 +44,10 @@ struct Channel
 	bool Update(TChannelInfo newChannelInfo, bool setPinValue);
 
 	void SetStatus(fb::NodeStatusMessageType type, std::string text);
+
+	std::optional<TDevice> DecodeDeviceName(const std::string& deviceName);
+	NTV2VideoFormat DecodeVideoFormat(const std::string& videoFormat);
+
 };
 
 void EnumerateOutputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>& devices);

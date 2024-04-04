@@ -80,6 +80,7 @@ bool Channel::Open()
 
 void Channel::Close()
 {
+	SetStatus(fb::NodeStatusMessageType::INFO, "Channel closed");
 	auto device = GetDevice();
 	if (!device)
 		return;
@@ -120,6 +121,22 @@ void Channel::SetStatus(fb::NodeStatusMessageType type, std::string text)
 		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), type});
 	messages.push_back(fb::TNodeStatusMessage{{}, text, type});
 	Context->SetNodeStatusMessages(messages);
+}
+
+std::optional<TDevice> Channel::DecodeDeviceName(const std::string& deviceName) 
+{
+	auto dev = AJADevice::GetDevice(deviceName);
+	if (!dev)
+		return std::nullopt;
+	return TDevice{ {}, dev->GetSerialNumber(), dev->GetDisplayName() };
+}
+
+NTV2VideoFormat Channel::DecodeVideoFormat(const std::string& videoFormat) 
+{
+	for (int i = 0; i < NTV2VideoFormat::NTV2_MAX_NUM_VIDEO_FORMATS; i++)
+		if (videoFormat == NTV2VideoFormatToString(NTV2VideoFormat(i), true))
+			return NTV2VideoFormat(i);
+	return NTV2VideoFormat::NTV2_FORMAT_UNKNOWN;
 }
 
 template <class K, class V> using SeqMap = std::vector<std::pair<K, V>>;
@@ -229,7 +246,6 @@ void EnumerateOutputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<fl
 
 						if (!formats.empty())
 						{
-							GetNTV2FrameRateFromNumeratorDenominator(0, 0);
 							char buf[16] = {};
 							std::sprintf(buf, "%.2f", fps);
 							frameRates.push_back(nos::CreateContextMenuItemDirect(fbb, buf, 0, &formats));

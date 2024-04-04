@@ -1,139 +1,139 @@
 {
-    "nodes": [
-        {
-            "class_name": "AJAIn",
-            "allows_cyclic": true,
-            "contents_type": "Job",
-            "description":  "Video input node for AJA cards",
-            "functions": [
-                {
-                    "class_name": "PathRestart",
-                    "contents_type": "Job"
-                },
-                {
-                    "class_name": "DumpInfo",
-                    "contents_type": "Job"
-                },
-                {
-                    "class_name": "StartLog",
-                    "contents_type": "Job"
-                },
-                {
-                    "class_name": "StopLog",
-                    "contents_type": "Job"
-                }
-            ]
-        },
-        {
-            "class_name": "AJAOut",
-            "allows_cyclic": true,
-            "contents_type": "Job",
-            "description":  "Video output node for AJA cards",
-            "functions": [
-                {
-                    "class_name": "PathRestart",
-                    "contents_type": "Job"
-                },
-                {
-                    "class_name": "StartLog",
-                    "contents_type": "Job"
-                },
-                {
-                    "class_name": "StopLog",
-                    "contents_type": "Job"
-                }
-            ]
-        },
-        {
-            "class_name": "DMAWrite",
-            "display_name": "AJA DMA Write",
-            "contents_type": "Job",
-            "description":  "Sends YCbCr frames to the specified channel",
-            "pins": [
-                {
-                    "name": "Run",
-                    "type_name": "nos.exe",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                },
-                {
-                    "name": "Channel",
-                    "type_name": "nos.aja.ChannelInfo",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                },
-                {
-                    "name": "Input",
-                    "type_name": "nos.sys.vulkan.Buffer",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                }
-            ]
-        },
-        {
-            "class_name": "DMARead",
-            "display_name": "AJA DMA Read",
-            "contents_type": "Job",
-            "description":  "Reads YCbCr frames from the specified channel",
-            "pins": [
-                {
-                    "name": "Run",
-                    "type_name": "nos.exe",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                },
-                {
-                    "name": "DMA Complete",
-                    "type_name": "nos.exe",
-                    "show_as": "OUTPUT_PIN",
-                    "can_show_as": "OUTPUT_PIN_ONLY"
-                },
-                {
-                    "name": "Channel",
-                    "type_name": "nos.aja.ChannelInfo",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                },
-                {
-                    "name": "Output",
-                    "type_name": "nos.sys.vulkan.Buffer",
-                    "show_as": "OUTPUT_PIN",
-                    "can_show_as": "OUTPUT_PIN_ONLY"
-                }
-            ]
-        },
-        {
-            "class_name": "WaitVBL",
-            "display_name": "AJA Wait VBL",
-            "contents_type": "Job",
-            "description":  "",
-            "pins": [
-                {
-                    "name": "Run",
-                    "type_name": "nos.exe",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                },
-                {
-                    "name": "VBL",
-                    "type_name": "nos.exe",
-                    "show_as": "OUTPUT_PIN",
-                    "can_show_as": "OUTPUT_PIN_ONLY"
-                },
-                {
-                    "name": "Channel",
-                    "type_name": "nos.aja.ChannelInfo",
-                    "show_as": "INPUT_PIN",
-                    "can_show_as": "INPUT_PIN_ONLY"
-                }
-            ]
-        },
-        {
-            "class_name": "Channel",
-            "display_name": "AJA Channel",
-            "contents_type": "Job",
-            "description":  "Debugging/test node for opening channels",
-            "pins": [
+	"nodes": [
+		{
+			"class_name": "AJAIn",
+			"allows_cyclic": true,
+			"contents_type": "Job",
+			"description": "Video input node for AJA cards",
+			"functions": [
+				{
+					"class_name": "PathRestart",
+					"contents_type": "Job"
+				},
+				{
+					"class_name": "DumpInfo",
+					"contents_type": "Job"
+				},
+				{
+					"class_name": "StartLog",
+					"contents_type": "Job"
+				},
+				{
+					"class_name": "StopLog",
+					"contents_type": "Job"
+				}
+			]
+		},
+		{
+			"class_name": "AJAOut",
+			"allows_cyclic": true,
+			"contents_type": "Job",
+			"description": "Video output node for AJA cards",
+			"functions": [
+				{
+					"class_name": "PathRestart",
+					"contents_type": "Job"
+				},
+				{
+					"class_name": "StartLog",
+					"contents_type": "Job"
+				},
+				{
+					"class_name": "StopLog",
+					"contents_type": "Job"
+				}
+			]
+		},
+		{
+			"class_name": "DMAWrite",
+			"display_name": "AJA DMA Write",
+			"contents_type": "Job",
+			"description": "Sends YCbCr frames to the specified channel",
+			"pins": [
+				{
+					"name": "Run",
+					"type_name": "nos.exe",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "Channel",
+					"type_name": "nos.aja.ChannelInfo",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "Input",
+					"type_name": "nos.sys.vulkan.Buffer",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				}
+			]
+		},
+		{
+			"class_name": "DMARead",
+			"display_name": "AJA DMA Read",
+			"contents_type": "Job",
+			"description": "Reads YCbCr frames from the specified channel",
+			"pins": [
+				{
+					"name": "Run",
+					"type_name": "nos.exe",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "DMA Complete",
+					"type_name": "nos.exe",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_ONLY"
+				},
+				{
+					"name": "Channel",
+					"type_name": "nos.aja.ChannelInfo",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "Output",
+					"type_name": "nos.sys.vulkan.Buffer",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_ONLY"
+				}
+			]
+		},
+		{
+			"class_name": "WaitVBL",
+			"display_name": "AJA Wait VBL",
+			"contents_type": "Job",
+			"description": "",
+			"pins": [
+				{
+					"name": "Run",
+					"type_name": "nos.exe",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "VBL",
+					"type_name": "nos.exe",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_ONLY"
+				},
+				{
+					"name": "Channel",
+					"type_name": "nos.aja.ChannelInfo",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				}
+			]
+		},
+		{
+			"class_name": "Channel",
+			"display_name": "AJA Channel",
+			"contents_type": "Job",
+			"description": "Debugging/test node for opening channels",
+			"pins": [
 				{
 					"name": "Channel",
 					"type_name": "nos.aja.ChannelInfo",
@@ -141,13 +141,77 @@
 					"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
 				},
 				{
-					"name": "FrameBufferFormat", 
+					"name": "IsOpen",
+					"type_name": "bool",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "IsInput",
+					"type_name": "bool",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "Device",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY",
+					"visualizer": {
+						"type": "COMBO_BOX",
+						"name": "aja.DeviceStringList"
+					}
+				},
+				{
+					"name": "ChannelName",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "Resolution",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "FrameRate",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "IsInterlaced",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "FrameBufferFormat",
 					"display_name": "Frame Buffer Format",
 					"type_name": "nos.utilities.YCbCrPixelFormat",
 					"show_as": "PROPERTY",
-					"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "IsQuad",
+					"type_name": "bool",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "QuadLinkInputMode",
+					"type_name": "nos.aja.QuadLinkInputMode",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "QuadLinkOutputMode",
+					"type_name": "nos.aja.QuadLinkMode",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY"
 				}
-            ]
-        }
-    ]
+			]
+		}
+	]
 }

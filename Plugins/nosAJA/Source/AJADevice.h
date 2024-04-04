@@ -109,18 +109,20 @@ struct AJADevice : CNTV2Card
     ~AJADevice();
     AJADevice(uint64_t serial);
     bool ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode);
+
+    bool CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode);
+
+    bool ChannelCanInput(NTV2Channel channel);
+	bool ChannelCanOutput(NTV2Channel channel);
+
+	bool CanMakeQuadInputFromChannel(NTV2Channel channel);
+	bool CanMakeQuadOutputFromChannel(NTV2Channel channel);
 private:
     bool RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
     bool RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
 
     bool RouteQuadInputSignal (NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt);
     bool RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt);
-
-    bool ChannelCanInput (NTV2Channel channel);
-    bool ChannelCanOutput(NTV2Channel channel);
-
-    bool CanMakeQuadInputFromChannel (NTV2Channel channel);
-    bool CanMakeQuadOutputFromChannel(NTV2Channel channel);
 
     bool RouteInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt)
     {

@@ -232,22 +232,27 @@ AJADevice::AJADevice(uint64_t serial)
 
 bool AJADevice::ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
 {
-    if(
-        !isInput && (NTV2_FRAMERATE_INVALID != FPSFamily) && 
-        (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily))
-        )
-    {
-        return false;
-    }
-    
-    const bool validFmt = isInput || (NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode || NTV2_IS_QUAD_FRAME_FORMAT(fmt)));
+	if (!CanChannelDoFormat(channel, isInput, fmt, mode))
+		return false;
     
     bool (AJADevice::*Arr[2][2])(NTV2Channel) = {
         {&AJADevice::ChannelCanOutput, &AJADevice::CanMakeQuadOutputFromChannel},
         {&AJADevice::ChannelCanInput,  &AJADevice::CanMakeQuadInputFromChannel},
     };
     
-    return validFmt && (this->*Arr[isInput][SL != mode])(channel);
+    return (this->*Arr[isInput][SL != mode])(channel);
+}
+
+bool AJADevice::CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
+{
+	if (isInput)
+		return true;
+	if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
+	{
+		return false;
+	}
+
+	return NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode || NTV2_IS_QUAD_FRAME_FORMAT(fmt));
 }
 
 bool AJADevice::ChannelCanInput(NTV2Channel channel)

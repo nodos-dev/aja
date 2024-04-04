@@ -182,18 +182,14 @@ enum class Nodes : int
 	DMAWrite,
 	DMARead,
 	WaitVBL,
-	Output,
 	Channel,
-	Input,
 	Count
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions*);
 nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
-nosResult RegisterOutputNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
-nosResult RegisterInputNode(nosNodeFunctions*);
 
 extern "C"
 {
@@ -260,10 +256,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	
 	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
 	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
-	NOS_RETURN_ON_FAILURE(RegisterOutputNode(outList[(int)Nodes::Output]))
 	NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
 	NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
-	NOS_RETURN_ON_FAILURE(RegisterInputNode(outList[(int)Nodes::Input]))
 	return NOS_RESULT_SUCCESS;
 }
 

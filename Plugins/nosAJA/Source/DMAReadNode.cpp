@@ -101,6 +101,9 @@ struct DMAReadNodeContext : NodeContext
 				outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 		}
 		
+		if (!channelInfo->device())
+			return NOS_RESULT_FAILED;
+
 		Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
 		if (!Device)
 			return NOS_RESULT_FAILED;
