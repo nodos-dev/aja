@@ -74,6 +74,10 @@ struct DMAWriteNodeContext : NodeContext
 			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
 				return;
 			auto* channelInfo = InterpretPinValue<ChannelInfo>(value);
+			Device = nullptr;
+			LastChannelInfo = {};
+			if (!channelInfo || !channelInfo->device())
+				return;
 			Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
 			if (!Device || !channelInfo->channel_name())
 				return;
