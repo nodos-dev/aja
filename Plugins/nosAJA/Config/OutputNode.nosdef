@@ -30,7 +30,12 @@
 					"usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
 				},
 				"advanced_property": true,
-				"meta_data_map": [],
+				"meta_data_map": [
+					{
+						"key": "OrphanPortal",
+						"value": "/Channel.Channel"
+					}
+				],
 				"contents_type": "PortalPin",
 				"contents": {
 					"source_id": "05bce43a-203f-412a-b784-f76df9759f73"
@@ -1946,6 +1951,10 @@
 			{
 				"key": "PluginVersion",
 				"value": "1.1.0"
+			},
+			{
+				"key": "NodeStatusPortal",
+				"value": "/Channel"
 			}
 		],
 		"orphan_state": {},
