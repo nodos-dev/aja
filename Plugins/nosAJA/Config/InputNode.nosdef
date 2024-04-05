@@ -1215,7 +1215,8 @@
 								"contents_type": "JobPin",
 								"contents": {},
 								"orphan_state": {},
-								"description": ""
+								"description": "",
+								"live":  true
 							}
 						],
 						"pos": {
