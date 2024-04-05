@@ -107,6 +107,13 @@ struct DMAWriteNodeContext : NodeContext
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
 
+		nosCmd cmd;
+		nosGPUEvent event;
+		nosVulkan->Begin("Flush before AJA DMA Write", &cmd);
+		nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &event};
+		nosVulkan->End(cmd, &end);
+		nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
+
 		auto frameBufferIndex = GetFrameBufferIndex(DoubleBufferIdx);
 		{
 			util::Stopwatch sw;
