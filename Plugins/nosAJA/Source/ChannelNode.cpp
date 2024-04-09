@@ -166,6 +166,9 @@ struct ChannelNodeContext : NodeContext
 		channelPin.is_input = IsInput;
 		channelPin.is_quad = AJADevice::IsQuad(Mode);
 		channelPin.video_format = NTV2VideoFormatToString(format, true); // TODO: Readonly.
+		uint32_t width , height;
+		Device->GetExtent(Channel, Mode, width, height);
+		channelPin.resolution = std::make_unique<nos::fb::vec2u>(width, height);
 		channelPin.video_format_idx = static_cast<int>(format);
 		if (AJADevice::IsQuad(Mode))
 			channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);

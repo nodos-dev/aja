@@ -4,7 +4,7 @@
 # ------------
 
 if (GENERATE_FLATBUFFERS_FILES)
-    generate_flatbuffers("${TOOLS_DIR}/flatc" "${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/__temp__" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Config")
+    generate_flatbuffers("${TOOLS_DIR}/flatc" "${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/__temp__" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Config;${NODOS_BUILTIN_TYPES_DIR}")
 endif()
 
 # TODO: Make External/ajalibraries a submodule (https://github.com/aja-video/ntv2)?
