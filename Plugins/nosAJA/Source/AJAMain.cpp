@@ -194,6 +194,12 @@ nosResult RegisterChannelNode(nosNodeFunctions*);
 extern "C"
 {
 
+
+NOSAPI_ATTR void NOSAPI_CALL nosUnloadPlugin()
+{
+	AJADevice::Deinit();
+}
+
 NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
 {
 	*outSize = static_cast<size_t>(Nodes::Count);
