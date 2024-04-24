@@ -4,7 +4,7 @@
 # ------------
 
 if (GENERATE_FLATBUFFERS_FILES)
-    generate_flatbuffers("${TOOLS_DIR}/flatc" "${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/__temp__" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Config;${NODOS_BUILTIN_TYPES_DIR}")
+    generate_flatbuffers("${TOOLS_DIR}/flatc" "${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "${CMAKE_CURRENT_SOURCE_DIR}/__temp__" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Config;${CMAKE_CURRENT_SOURCE_DIR}/../nosMediaIO/Config;${NODOS_BUILTIN_TYPES_DIR}")
 endif()
 
 # TODO: Make External/ajalibraries a submodule (https://github.com/aja-video/ntv2)?
@@ -39,7 +39,7 @@ list(APPEND DEPENDENCIES stb ajantv2)
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${SUBSYSTEMS_SOURCE_DIR}/nosVulkanSubsystem/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities/Source
+    ${CMAKE_CURRENT_SOURCE_DIR}/../nosMediaIO/Source
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
 #   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win

@@ -125,13 +125,13 @@ struct ChannelNodeContext : NodeContext
 		CurrentChannel.Close();
 	}
 	
-	utilities::YCbCrPixelFormat CurrentPixelFormat = utilities::YCbCrPixelFormat::YUV8;
+	MediaIO::YCbCrPixelFormat CurrentPixelFormat = MediaIO::YCbCrPixelFormat::YUV8;
 
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
 	{
 		if (pinName == NOS_NAME_STATIC("FrameBufferFormat"))
 		{
-			auto newFbf = *static_cast<utilities::YCbCrPixelFormat*>(value.Data);
+			auto newFbf = *static_cast<MediaIO::YCbCrPixelFormat*>(value.Data);
 			auto info = CurrentChannel.Info;
 			info.frame_buffer_format = newFbf;
 			CurrentPixelFormat = newFbf;
@@ -172,7 +172,7 @@ struct ChannelNodeContext : NodeContext
 		channelPin.video_format_idx = static_cast<int>(format);
 		if (AJADevice::IsQuad(Mode))
 			channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);
-		channelPin.frame_buffer_format = static_cast<utilities::YCbCrPixelFormat>(CurrentPixelFormat);
+		channelPin.frame_buffer_format = static_cast<MediaIO::YCbCrPixelFormat>(CurrentPixelFormat);
  		CurrentChannel.Update(std::move(channelPin), true);
 	}
 
@@ -461,7 +461,7 @@ struct ChannelNodeContext : NodeContext
 	} InterlacedState = InterlacedState::NONE;
 	AJADevice::Mode Mode = AJADevice::SL;
 
-	utilities::YCbCrPixelFormat FrameBufferFormat = utilities::YCbCrPixelFormat::YUV8;
+	MediaIO::YCbCrPixelFormat FrameBufferFormat = MediaIO::YCbCrPixelFormat::YUV8;
 	QuadLinkInputMode QuadLinkInputMode = QuadLinkInputMode::Tsi;
 	QuadLinkMode QuadLinkOutputMode = QuadLinkMode::Tsi;
 };

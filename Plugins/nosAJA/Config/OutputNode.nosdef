@@ -40,7 +40,7 @@
 			{
 				"id": "551d1e41-a6f4-49a5-acea-2356dab013dd",
 				"name": "GammaCurve",
-				"type_name": "nos.utilities.GammaCurve",
+				"type_name": "nos.MediaIO.GammaCurve",
 				"show_as": "PROPERTY",
 				"can_show_as": "INPUT_PIN_OR_PROPERTY",
 				"pin_category": "",
@@ -57,7 +57,7 @@
 			{
 				"id": "17889869-fa74-4340-9542-2c39a3f835d7",
 				"name": "ColorSpace",
-				"type_name": "nos.utilities.ColorSpace",
+				"type_name": "nos.MediaIO.ColorSpace",
 				"show_as": "PROPERTY",
 				"can_show_as": "INPUT_PIN_OR_PROPERTY",
 				"pin_category": "",
@@ -213,7 +213,7 @@
 			{
 				"id": "e24b04d7-e232-4e1b-85cd-4a4cc190d4d4",
 				"name": "FrameBufferFormat",
-				"type_name": "nos.utilities.YCbCrPixelFormat",
+				"type_name": "nos.MediaIO.YCbCrPixelFormat",
 				"show_as": "PROPERTY",
 				"can_show_as": "INPUT_PIN_OR_PROPERTY",
 				"pin_category": "",
@@ -240,7 +240,7 @@
 					{
 						"id": "7f616f76-1ad2-45aa-888b-ea1a84d62ca5",
 						"name": "Output",
-						"type_name": "nos.utilities.ColorSpace",
+						"type_name": "nos.MediaIO.ColorSpace",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"pin_category": "",
@@ -257,7 +257,7 @@
 					{
 						"id": "f6de4fdd-6659-4643-af56-8ffac06b5a44",
 						"name": "Input",
-						"type_name": "nos.utilities.ColorSpace",
+						"type_name": "nos.MediaIO.ColorSpace",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -371,7 +371,7 @@
 			{
 				"id": "3811c507-2b89-4477-a05a-c1b0db5eeeea",
 				"name": "GammaLUT",
-				"class_name": "nos.utilities.GammaLUT",
+				"class_name": "nos.MediaIO.GammaLUT",
 				"pins": [
 					{
 						"id": "ae23e1c4-f3f6-48e3-b261-febc13d56cd8",
@@ -405,7 +405,7 @@
 					{
 						"id": "e49d51fd-2cf3-415e-b1fe-2a2d235b1c78",
 						"name": "Type",
-						"type_name": "nos.utilities.GammaConversionType",
+						"type_name": "nos.MediaIO.GammaConversionType",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -422,7 +422,7 @@
 					{
 						"id": "6f151fff-b454-46ec-9580-e6ef3c42f928",
 						"name": "GammaCurve",
-						"type_name": "nos.utilities.GammaCurve",
+						"type_name": "nos.MediaIO.GammaCurve",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -491,7 +491,7 @@
 			{
 				"id": "839c9c36-80e0-4843-83c6-c5a93c92cd74",
 				"name": "RGB2YCbCr",
-				"class_name": "nos.utilities.RGB2YCbCr",
+				"class_name": "nos.MediaIO.RGB2YCbCr",
 				"pins": [
 					{
 						"id": "6d567b8e-2040-4c03-a76d-fbb688cf9a4c",
@@ -620,7 +620,7 @@
 					{
 						"id": "9c8ad0a7-eab1-4f91-a1d2-d3a606213936",
 						"name": "InterlacedFlags",
-						"type_name": "nos.utilities.InterlacedFlags",
+						"type_name": "nos.MediaIO.InterlacedFlags",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -638,7 +638,7 @@
 					{
 						"id": "58ab7845-7dcb-41f2-b507-79dddf7c79b0",
 						"name": "PixelFormat",
-						"type_name": "nos.utilities.YCbCrPixelFormat",
+						"type_name": "nos.MediaIO.YCbCrPixelFormat",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -829,7 +829,7 @@
 					{
 						"id": "b41ba709-fb56-4e1b-9db3-4c631b016797",
 						"name": "FrameBufferFormat",
-						"type_name": "nos.utilities.YCbCrPixelFormat",
+						"type_name": "nos.MediaIO.YCbCrPixelFormat",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"pin_category": "",
@@ -914,7 +914,7 @@
 			{
 				"id": "9eb45b15-0821-4aef-ad84-0abaa1341955",
 				"name": "ColorSpaceMatrix",
-				"class_name": "nos.utilities.ColorSpaceMatrix",
+				"class_name": "nos.MediaIO.ColorSpaceMatrix",
 				"pins": [
 					{
 						"id": "41273908-3ae7-400e-9340-e2e43fdddf64",
@@ -936,7 +936,7 @@
 					{
 						"id": "dbe60bf1-4748-45e4-8986-1467e021da2d",
 						"name": "ColorSpace",
-						"type_name": "nos.utilities.ColorSpace",
+						"type_name": "nos.MediaIO.ColorSpace",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -972,7 +972,7 @@
 					{
 						"id": "19e71be9-5671-4bcd-bdb7-bdfe22df13f6",
 						"name": "PixelFormat",
-						"type_name": "nos.utilities.YCbCrPixelFormat",
+						"type_name": "nos.MediaIO.YCbCrPixelFormat",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -990,7 +990,7 @@
 					{
 						"id": "7d50b3ec-be9e-4d4e-a027-08eb703170e6",
 						"name": "Type",
-						"type_name": "nos.utilities.GammaConversionType",
+						"type_name": "nos.MediaIO.GammaConversionType",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
@@ -1295,7 +1295,7 @@
 			{
 				"id": "b9aa55ae-3845-4856-bac2-efb3652b8b28",
 				"name": "BufferRing",
-				"class_name": "nos.utilities.BufferRing",
+				"class_name": "nos.MediaIO.BufferRing",
 				"pins": [
 					{
 						"id": "de354917-546c-4923-99f4-0460181f9299",
@@ -1510,7 +1510,7 @@
 					{
 						"id": "e65e0b63-b1f3-45bc-b272-513c5916389a",
 						"name": "Output",
-						"type_name": "nos.utilities.GammaCurve",
+						"type_name": "nos.MediaIO.GammaCurve",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY",
 						"pin_category": "",
@@ -1527,7 +1527,7 @@
 					{
 						"id": "940727ce-8f25-4fac-b534-56eee72a1e1f",
 						"name": "Input",
-						"type_name": "nos.utilities.GammaCurve",
+						"type_name": "nos.MediaIO.GammaCurve",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"pin_category": "",
