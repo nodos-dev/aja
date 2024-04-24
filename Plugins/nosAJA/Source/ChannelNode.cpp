@@ -181,31 +181,56 @@ struct ChannelNodeContext : NodeContext
 		SetPinVisualizer(pinName, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = stringListName});
 	}
 
+	void AutoSelectIfSingle(nosName pinName, std::vector<std::string> const& list)
+	{
+		if (list.size() == 2)
+			SetPinValue(pinName, nosBuffer{.Data = (void*)list[1].c_str(), .Size = list[1].size() + 1});
+	}
+
 	void UpdateAfter(AJAChangedPinType pin)
 	{
 		switch (pin)
 		{
-		case AJAChangedPinType::IsInput:
+		case AJAChangedPinType::IsInput: {
 
 			ChangePinReadOnyl(NSN_Resolution, IsInput);
 			ChangePinReadOnyl(NSN_FrameRate, IsInput);
 			ChangePinReadOnyl(NSN_IsInterlaced, IsInput);
-			UpdateStringList(GetDeviceStringListName(), GetPossibleDeviceNames()); 
+
+			auto deviceList = GetPossibleDeviceNames();
+			UpdateStringList(GetDeviceStringListName(), deviceList);
+
+			AutoSelectIfSingle(NSN_Device, deviceList);
 			break;
-		case AJAChangedPinType::Device:
-			UpdateStringList(GetChannelStringListName(), GetPossibleChannelNames()); 
+		}
+		case AJAChangedPinType::Device: {
+			auto channelList = GetPossibleChannelNames();
+			UpdateStringList(GetChannelStringListName(), channelList);
+			AutoSelectIfSingle(NSN_ChannelName, channelList);
 			break;
-		case AJAChangedPinType::ChannelName:
+		}
+		case AJAChangedPinType::ChannelName: {
 			if (IsInput)
 				TryUpdateChannel();
-			UpdateStringList(GetResolutionStringListName(), GetPossibleResolutions());
+			auto resolutionList = GetPossibleResolutions();
+			UpdateStringList(GetResolutionStringListName(), resolutionList);
+			if(!IsInput)
+				AutoSelectIfSingle(NSN_Resolution, resolutionList);
+			
 			break;
-		case AJAChangedPinType::Resolution:
-			UpdateStringList(GetFrameRateStringListName(), GetPossibleFrameRates());
+		}
+		case AJAChangedPinType::Resolution: {
+			auto frameRateList = GetPossibleFrameRates();
+			UpdateStringList(GetFrameRateStringListName(), frameRateList);
+			AutoSelectIfSingle(NSN_FrameRate, frameRateList);
 			break;
-		case AJAChangedPinType::FrameRate:
-			UpdateStringList(GetInterlacedStringListName(), GetPossibleInterlaced());
+		}
+		case AJAChangedPinType::FrameRate: {
+			auto interlacedList = GetPossibleInterlaced();
+			UpdateStringList(GetInterlacedStringListName(), interlacedList);
+			AutoSelectIfSingle(NSN_IsInterlaced, interlacedList);
 			break;
+		}
 		}
 	}
 
