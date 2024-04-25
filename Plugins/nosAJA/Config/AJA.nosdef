@@ -89,6 +89,14 @@
 					"can_show_as": "OUTPUT_PIN_ONLY"
 				},
 				{
+					"name": "FieldType",
+					"display_name": "Field Type",
+					"type_name": "nos.sys.vulkan.FieldType",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_OR_PROPERTY",
+					"data": "PROGRESSIVE"
+				},
+				{
 					"name": "Channel",
 					"type_name": "nos.aja.ChannelInfo",
 					"show_as": "INPUT_PIN",
@@ -119,6 +127,25 @@
 					"type_name": "nos.exe",
 					"show_as": "OUTPUT_PIN",
 					"can_show_as": "OUTPUT_PIN_ONLY"
+				},
+				{
+					"name": "WaitField",
+					"display_name": "Wait Field",
+					"type_name": "nos.sys.vulkan.FieldType",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_OR_PROPERTY",
+					"data": "PROGRESSIVE",
+					"description": "Field to wait VBL on. If set to UNKNOWN, it will keep track of fields to wait on its own. If signal is progressive, this property is ignored."
+				},
+				{
+					"name": "FieldType",
+					"display_name": "Field Type",
+					"type_name": "nos.sys.vulkan.FieldType",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+					"data": "UNKNOWN",
+					"description": "Which field this VBL belongs to",
+					"readonly": true
 				},
 				{
 					"name": "Channel",

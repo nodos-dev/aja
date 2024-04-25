@@ -62,4 +62,5 @@ table ChannelInfo {
     input_quad_link_mode: QuadLinkInputMode; // Don't care if !is_input
     output_quad_link_mode: QuadLinkMode; // Don't care if is_input
 	resolution: nos.fb.vec2u;
+	is_interlaced: bool;
 }

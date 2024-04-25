@@ -33,7 +33,20 @@ struct DMAReadNodeContext : NodeContext
 
 	bool Interlaced() const
 	{
-		return false; // TODO: Implement
+		return !IsProgressivePicture(Format); // TODO: Implement
+	}
+
+	uint32_t StartDoubleBuffer()
+	{
+		SetFrame(uint8_t(!Interlaced()));
+		return 0;
+	}
+
+	bool NeedsFrameSet = false;
+
+	virtual void OnPathStart()
+	{
+		NeedsFrameSet = true;
 	}
 
 	uint32_t GetFrameBufferIndex(uint8_t doubleBufferIndex) const
@@ -48,12 +61,6 @@ struct DMAReadNodeContext : NodeContext
 		if (NTV2_IS_QUAD_FRAME_FORMAT(Format)) // TODO: Get from channel info
 			for (u32 i = Channel + 1; i < Channel + 4; ++i)
 				Device->SetInputFrame(NTV2Channel(i), idx);
-	}
-
-	uint32_t StartDoubleBuffer() 
-	{
-		SetFrame(uint8_t(!Interlaced()));
-		return 0; 
 	}
 
 	uint8_t NextDoubleBuffer(uint8_t curDoubleBuffer)
@@ -92,13 +99,20 @@ struct DMAReadNodeContext : NodeContext
 	{
 		ChannelInfo* channelInfo = nullptr;
 		nosResourceShareInfo outputBuffer{};
+		const nosBuffer* outputPinData = nullptr;
+		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
 		for (size_t i = 0; i < args->PinCount; ++i)
 		{
 			auto& pin = args->Pins[i];
 			if (pin.Name == NOS_NAME_STATIC("Channel"))
 				channelInfo = InterpretPinValue<ChannelInfo>(*pin.Data);
 			if (pin.Name == NOS_NAME_STATIC("Output"))
-				outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
+			{
+				outputPinData = pin.Data;
+				outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*outputPinData));
+			}
+			if (pin.Name == NOS_NAME("FieldType"))
+				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
 		}
 		
 		if (!channelInfo->device())
@@ -112,6 +126,12 @@ struct DMAReadNodeContext : NodeContext
 			return NOS_RESULT_FAILED;
 		Channel = ParseChannel(channelStr->string_view());
 		Format = NTV2VideoFormat(channelInfo->video_format_idx());
+
+		if (NeedsFrameSet)
+		{
+			StartDoubleBuffer();
+			NeedsFrameSet = false;
+		}
 
 		u32 width, height;
 		Device->GetExtent(Format, AJADevice::SL, width, height);
@@ -147,16 +167,36 @@ struct DMAReadNodeContext : NodeContext
 		if(!outputBuffer.Memory.Handle)
 			return NOS_RESULT_SUCCESS;
 
-		u8* buf = nosVulkan->Map(&outputBuffer);
+		u8* buffer = nosVulkan->Map(&outputBuffer);
 
 		//auto frameBufferIndex = GetFrameBufferIndex(DoubleBufferIdx);
 		auto offset = GetFrameBufferOffset(Channel, DoubleBufferIdx);
+		if (Interlaced())
 		{
 			util::Stopwatch sw;
-			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, true, 0, const_cast<ULWord*>((u32*)buf), offset, bufferSize, true);
+			auto pitch = compressedExt.x * 4;
+			auto segments = compressedExt.y;
+			auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
+			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, true, 0,
+				const_cast<ULWord*>((u32*)buffer), // target CPU buffer address
+				fieldId * pitch, // source AJA buffer address
+				pitch, // length of one line
+				segments, // number of lines
+				pitch, // increment target buffer one line on CPU memory
+				pitch * 2, // increment AJA card source buffer double the size of one line
+				true);
 			auto elapsed = sw.Elapsed();
 			nosEngine.WatchLog(("AJA " + channelStr->str() + " DMA Read").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
 		}
+		else
+		{
+			util::Stopwatch sw;
+			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, true, 0, const_cast<ULWord*>((u32*)buffer), offset, bufferSize, true);
+			auto elapsed = sw.Elapsed();
+			nosEngine.WatchLog(("AJA " + channelStr->str() + " DMA Read").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+		}
+
+		static_cast<nos::sys::vulkan::Buffer*>(outputPinData->Data)->mutate_field_type(fieldType);
 
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
 

@@ -173,6 +173,7 @@ struct ChannelNodeContext : NodeContext
 		if (AJADevice::IsQuad(Mode))
 			channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);
 		channelPin.frame_buffer_format = static_cast<MediaIO::YCbCrPixelFormat>(CurrentPixelFormat);
+		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
 	}
 
@@ -193,9 +194,9 @@ struct ChannelNodeContext : NodeContext
 		{
 		case AJAChangedPinType::IsInput: {
 
-			ChangePinReadOnyl(NSN_Resolution, IsInput);
-			ChangePinReadOnyl(NSN_FrameRate, IsInput);
-			ChangePinReadOnyl(NSN_IsInterlaced, IsInput);
+			ChangePinReadOnly(NSN_Resolution, IsInput);
+			ChangePinReadOnly(NSN_FrameRate, IsInput);
+			ChangePinReadOnly(NSN_IsInterlaced, IsInput);
 
 			auto deviceList = GetPossibleDeviceNames();
 			UpdateStringList(GetDeviceStringListName(), deviceList);
