@@ -18,7 +18,7 @@
             "format": "R16G16B16A16_SFLOAT",
             "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
             "unscaled": true,
-            "field_type": "ODD"
+            "field_type": "UNKNOWN"
           },
           "referred_by": [],
           "def": {
@@ -220,7 +220,7 @@
                 "can_show_as": "OUTPUT_PIN_ONLY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "ODD",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "UNKNOWN",
                 "meta_data_map": [],
@@ -302,7 +302,7 @@
                   "height": 1080,
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -333,7 +333,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "EVEN"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -869,7 +869,7 @@
                   "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
                   "memory_flags": "DEVICE_MEMORY",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1021,7 +1021,7 @@
                   "height": 1080,
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1485,7 +1485,7 @@
                   "usage": "TRANSFER_SRC STORAGE_BUFFER",
                   "memory_flags": "HOST_VISIBLE",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1510,7 +1510,7 @@
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "ODD",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "PROGRESSIVE",
                 "meta_data_map": [],
@@ -1555,7 +1555,7 @@
                   "usage": "TRANSFER_SRC STORAGE_BUFFER",
                   "memory_flags": "HOST_VISIBLE",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1586,7 +1586,7 @@
                   "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
                   "memory_flags": "DEVICE_MEMORY",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1638,7 +1638,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1669,7 +1669,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [
                   "e3727c93-7e4b-4713-8b24-1c375c6c41fc"

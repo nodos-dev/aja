@@ -18,7 +18,7 @@
             "format": "R16G16B16A16_SFLOAT",
             "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
             "unscaled": true,
-            "field_type": "ODD"
+            "field_type": "UNKNOWN"
           },
           "referred_by": [],
           "def": {
@@ -499,7 +499,7 @@
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "ODD",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "PROGRESSIVE",
                 "meta_data_map": [],
@@ -517,7 +517,7 @@
                 "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "EVEN",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "UNKNOWN",
                 "readonly": true,
@@ -608,7 +608,7 @@
                   "usage": "TRANSFER_SRC TRANSFER_DST",
                   "memory_flags": "HOST_VISIBLE DOWNLOAD",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "EVEN"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -633,7 +633,7 @@
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "EVEN",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "PROGRESSIVE",
                 "meta_data_map": [],
@@ -1326,7 +1326,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1423,7 +1423,7 @@
                   "usage": "TRANSFER_SRC STORAGE_BUFFER",
                   "memory_flags": "DEVICE_MEMORY",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1466,7 +1466,7 @@
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "ODD",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "PROGRESSIVE",
                 "readonly": true,
@@ -1588,7 +1588,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1619,7 +1619,7 @@
                   "format": "R16G16B16A16_SFLOAT",
                   "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
                   "unscaled": true,
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [
                   "2c85c86d-d133-4d61-bcbf-e35c5f592be8"
@@ -1746,7 +1746,7 @@
                   "usage": "TRANSFER_SRC STORAGE_BUFFER",
                   "memory_flags": "DEVICE_MEMORY",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1777,7 +1777,7 @@
                   "usage": "TRANSFER_SRC TRANSFER_DST",
                   "memory_flags": "HOST_VISIBLE DOWNLOAD",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -1942,7 +1942,7 @@
                   "usage": "TRANSFER_SRC TRANSFER_DST",
                   "memory_flags": "HOST_VISIBLE DOWNLOAD",
                   "element_type": "ELEMENT_TYPE_UNDEFINED",
-                  "field_type": "ODD"
+                  "field_type": "UNKNOWN"
                 },
                 "referred_by": [],
                 "def": {
@@ -2103,7 +2103,7 @@
                 "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": "ODD",
+                "data": "UNKNOWN",
                 "referred_by": [],
                 "def": "UNKNOWN",
                 "meta_data_map": [],
