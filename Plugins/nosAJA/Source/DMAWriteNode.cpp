@@ -48,6 +48,7 @@ struct DMAWriteNodeContext : DMANodeBase
 			ChannelName = channelInfo->channel_name()->c_str();
 			Channel = ParseChannel(ChannelName);
 			Format = NTV2VideoFormat(channelInfo->video_format_idx());
+			PixelFormat = channelInfo->frame_buffer_format();
 			nosEngine.RecompilePath(NodeId);
 		}
 	}

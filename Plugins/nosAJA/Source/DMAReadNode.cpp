@@ -50,6 +50,7 @@ struct DMAReadNodeContext : DMANodeBase
 		ChannelName = channelStr->str();
 		Channel = ParseChannel(ChannelName);
 		Format = NTV2VideoFormat(channelInfo->video_format_idx());
+		PixelFormat = channelInfo->frame_buffer_format();
 
 		auto [_, bufferSize] = GetDMAInfo();
 
