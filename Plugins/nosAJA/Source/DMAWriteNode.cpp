@@ -8,65 +8,19 @@
 #include "AJA_generated.h"
 #include "AJADevice.h"
 #include "AJAMain.h"
+#include "DMANodeBase.hpp"
 
 namespace nos::aja
 {
 
-struct DMAWriteNodeContext : NodeContext
+struct DMAWriteNodeContext : DMANodeBase
 {
-	DMAWriteNodeContext(const nosFbNode* node) : NodeContext(node)
+	DMAWriteNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_WRITE)
 	{
 	}
 
-	uint8_t DoubleBufferIdx = 0;
-	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
-	std::shared_ptr<AJADevice> Device = nullptr;
-	NTV2VideoFormat Format = NTV2_FORMAT_UNKNOWN;
-	std::string ChannelName;
 	nos::Buffer LastChannelInfo = {};
-
-	bool Interlaced() const
-	{
-		return false; // TODO: Implement
-	}
-
-	uint32_t GetFrameBufferIndex(uint8_t doubleBufferIndex) const
-	{
-		return 2 * Channel + doubleBufferIndex;
-	}
-
-	void SetFrame(uint8_t curDoubleBufferIndex)
-	{
-		u32 idx = GetFrameBufferIndex(curDoubleBufferIndex);
-		Device->SetOutputFrame(Channel, idx);
-		if (NTV2_IS_QUAD_FRAME_FORMAT(Format)) // TODO: Get from channel info
-			for (u32 i = Channel + 1; i < Channel + 4; ++i)
-				Device->SetOutputFrame(NTV2Channel(i), idx);
-	}
-
-	uint32_t StartDoubleBuffer() 
-	{
-		SetFrame(uint8_t(!Interlaced()));
-		return 0; 
-	}
-
-	uint8_t NextDoubleBuffer(uint8_t curDoubleBuffer)
-	{
-		if (Interlaced())
-			return curDoubleBuffer;
-		SetFrame(curDoubleBuffer);
-		return curDoubleBuffer ^ 1;
-	}
  
-	void GetScheduleInfo(nosScheduleInfo* out) override
-	{
-		*out = nosScheduleInfo {
-			.Importance = 1,
-			.DeltaSeconds = GetDeltaSeconds(Format, Interlaced()),
-			.Type = NOS_SCHEDULE_TYPE_ON_DEMAND,
-		};
-	}
-
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
 	{ 
 		if (pinName == NOS_NAME_STATIC("Channel"))
@@ -92,11 +46,14 @@ struct DMAWriteNodeContext : NodeContext
 	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
 	{
 		nosResourceShareInfo inputBuffer{};
+		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
 		for (size_t i = 0; i < args->PinCount; ++i)
 		{
 			auto& pin = args->Pins[i];
 			if (pin.Name == NOS_NAME_STATIC("Input"))
 				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
+			if (pin.Name == NOS_NAME("FieldType"))
+				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
 		}
 
 		if (!inputBuffer.Memory.Handle)
@@ -114,15 +71,7 @@ struct DMAWriteNodeContext : NodeContext
 		nosVulkan->End(cmd, &end);
 		nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 
-		auto frameBufferIndex = GetFrameBufferIndex(DoubleBufferIdx);
-		{
-			util::Stopwatch sw;
-			Device->DMAWriteFrame(frameBufferIndex, reinterpret_cast<uint32_t*>(buffer), inputBuffer.Info.Buffer.Size, Channel);
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog(("AJA " + ChannelName + " DMA Write").c_str(), nos::util::Stopwatch::ElapsedString(elapsed).c_str());
-		}
-
-		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
+		DMATransfer(fieldType, buffer);
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,
@@ -135,6 +84,7 @@ struct DMAWriteNodeContext : NodeContext
 
 	void OnPathStart() override
 	{
+		DMANodeBase::OnPathStart();
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
 	}
