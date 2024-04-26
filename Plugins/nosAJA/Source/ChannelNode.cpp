@@ -13,6 +13,7 @@ NOS_REGISTER_NAME(IsQuad);
 NOS_REGISTER_NAME(QuadLinkInputMode);
 NOS_REGISTER_NAME(QuadLinkOutputMode);
 NOS_REGISTER_NAME(IsOpen);
+NOS_REGISTER_NAME(FrameBufferFormat);
 
 enum class AJAChangedPinType
 {
@@ -116,6 +117,10 @@ struct ChannelNodeContext : NodeContext
 
 			if (interlaced != "NONE" && InterlacedState == InterlacedState::NONE)
 				SetPinValue(NSN_IsInterlaced, nosBuffer{.Data = (void*)"NONE", .Size = 5});
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
+			CurrentPixelFormat = *InterpretPinValue<MediaIO::YCbCrPixelFormat>(newVal);
 			TryUpdateChannel();
 		});
 	}
@@ -487,7 +492,6 @@ struct ChannelNodeContext : NodeContext
 	} InterlacedState = InterlacedState::NONE;
 	AJADevice::Mode Mode = AJADevice::SL;
 
-	MediaIO::YCbCrPixelFormat FrameBufferFormat = MediaIO::YCbCrPixelFormat::YUV8;
 	QuadLinkInputMode QuadLinkInputMode = QuadLinkInputMode::Tsi;
 	QuadLinkMode QuadLinkOutputMode = QuadLinkMode::Tsi;
 };
