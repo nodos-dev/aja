@@ -75,9 +75,10 @@ struct DMAReadNodeContext : DMANodeBase
 					outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 			}
 		}
+		
 
-		if(!outputBuffer.Memory.Handle)
-			return NOS_RESULT_SUCCESS;
+		if (!outputBuffer.Memory.Handle || Format == NTV2_FORMAT_UNKNOWN)
+			return NOS_RESULT_FAILED;
 
 		u8* buffer = nosVulkan->Map(&outputBuffer);
 

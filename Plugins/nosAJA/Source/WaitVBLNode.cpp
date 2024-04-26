@@ -13,11 +13,6 @@ struct WaitVBLNodeContext : NodeContext
 	{
 	}
 
-	bool Interlaced() const
-	{
-		return false;
-	}
-
 	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
 	{
 		ChannelInfo* channelInfo = nullptr;

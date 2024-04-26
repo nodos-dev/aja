@@ -36,8 +36,6 @@ struct DMANodeBase : NodeContext
 
 	virtual void OnPathStart() { NeedsFrameSet = true; DoubleBufferIdx = 0; }
 
-	uint32_t GetFrameBufferIndex(uint8_t doubleBufferIndex) const { return 2 * Channel + doubleBufferIndex; }
-
 	void SetFrame(u32 doubleBufferIndex)
 	{
 		u32 frameIndex = GetFrameBufferOffset(Channel, doubleBufferIndex) / Device->GetFBSize(Channel);
@@ -61,15 +59,6 @@ struct DMANodeBase : NodeContext
 			return curDoubleBuffer;
 		SetFrame(curDoubleBuffer);
 		return curDoubleBuffer ^ 1;
-	}
-
-	void GetScheduleInfo(nosScheduleInfo* out) override
-	{
-		*out = nosScheduleInfo {
-			.Importance = 1,
-			.DeltaSeconds = GetDeltaSeconds(Format, IsInterlaced()),
-			.Type = NOS_SCHEDULE_TYPE_ON_DEMAND,
-		};
 	}
 
 	size_t GetMaxFrameBufferSize()
@@ -122,7 +111,7 @@ struct DMANodeBase : NodeContext
 			util::Stopwatch sw;
 			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, Direction == DMA_READ, 0,
 				const_cast<ULWord*>((u32*)buffer), // target CPU buffer address
-				fieldId * pitch, // source AJA buffer address
+				offset + fieldId * pitch, // source AJA buffer address
 				pitch, // length of one line
 				segments, // number of lines
 				pitch, // increment target buffer one line on CPU memory

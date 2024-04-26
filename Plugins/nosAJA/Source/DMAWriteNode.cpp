@@ -20,6 +20,15 @@ struct DMAWriteNodeContext : DMANodeBase
 	}
 
 	nos::Buffer LastChannelInfo = {};
+
+	void GetScheduleInfo(nosScheduleInfo* out) override
+	{
+		*out = nosScheduleInfo{
+			.Importance = 1,
+			.DeltaSeconds = GetDeltaSeconds(Format, IsInterlaced()),
+			.Type = NOS_SCHEDULE_TYPE_ON_DEMAND,
+		};
+	}
  
 	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
 	{ 
@@ -56,10 +65,7 @@ struct DMAWriteNodeContext : DMANodeBase
 				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
 		}
 
-		if (!inputBuffer.Memory.Handle)
-			return NOS_RESULT_FAILED;
-
-		if (!Device)
+		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
