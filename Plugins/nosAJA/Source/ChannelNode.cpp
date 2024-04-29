@@ -65,16 +65,21 @@ struct ChannelNodeContext : NodeContext
 			IsInput = *InterpretPinValue<bool>(newVal);
 			if (!first)
 				ResetAfter(AJAChangedPinType::IsInput);
-			UpdateAfter(AJAChangedPinType::IsInput);
+			UpdateAfter(AJAChangedPinType::IsInput, first);
 		});
 		AddPinValueWatcher(NSN_Device, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
 			DevicePin = InterpretPinValue<const char>(newVal);
 			Device = AJADevice::GetDevice(DevicePin).get();
 			if (DevicePin != "NONE" && !Device)
 				SetPinValue(NSN_Device, nosBuffer{.Data = (void*)"NONE", .Size = 5});
-			else if (!first)
-				ResetAfter(AJAChangedPinType::Device);
-			UpdateAfter(AJAChangedPinType::Device);
+			else
+			{
+				if (!first)
+					ResetAfter(AJAChangedPinType::Device);
+				else if (DevicePin == "NONE")
+					AutoSelectIfSingle(NSN_Device, GetPossibleDeviceNames());
+			}
+			UpdateAfter(AJAChangedPinType::Device, first);
 		});
 		AddPinValueWatcher(NSN_ChannelName, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
 			ChannelPin = InterpretPinValue<const char>(newVal);
@@ -83,27 +88,42 @@ struct ChannelNodeContext : NodeContext
 			Mode = mode;
 			if (ChannelPin != "NONE" && Channel == NTV2_CHANNEL_INVALID)
 				SetPinValue(NSN_ChannelName, nosBuffer{.Data = (void*)"NONE", .Size = 5});
-			else if (!first)
-				ResetAfter(AJAChangedPinType::ChannelName);
-			UpdateAfter(AJAChangedPinType::ChannelName);
+			else
+			{
+				if (!first)
+					ResetAfter(AJAChangedPinType::ChannelName);
+				else if (ChannelPin == "NONE")
+					AutoSelectIfSingle(NSN_ChannelName, GetPossibleChannelNames());
+			}
+			UpdateAfter(AJAChangedPinType::ChannelName, first);
 		});
 		AddPinValueWatcher(NSN_Resolution, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
 			ResolutionPin = InterpretPinValue<const char>(newVal);
 			Resolution = GetNTV2FrameGeometryFromString(ResolutionPin);
 			if (ResolutionPin != "NONE" && Resolution == NTV2_FG_INVALID)
 				SetPinValue(NSN_Resolution, nosBuffer{.Data = (void*)"NONE", .Size = 5});
-			else if (!first)
-				ResetAfter(AJAChangedPinType::Resolution);
-			UpdateAfter(AJAChangedPinType::Resolution);
+			else
+			{
+				if (!first)
+					ResetAfter(AJAChangedPinType::Resolution);
+				else if (ResolutionPin == "NONE")
+					AutoSelectIfSingle(NSN_Resolution, GetPossibleResolutions());
+			}
+			UpdateAfter(AJAChangedPinType::Resolution, first);
 		});
 		AddPinValueWatcher(NSN_FrameRate, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
 			FrameRatePin = InterpretPinValue<const char>(newVal);
 			FrameRate = GetNTV2FrameRateFromString(FrameRatePin);
 			if (FrameRatePin != "NONE" && FrameRate == NTV2_FRAMERATE_INVALID)
 				SetPinValue(NSN_FrameRate, nosBuffer{.Data = (void*)"NONE", .Size = 5});
-			else if (!first)
-				ResetAfter(AJAChangedPinType::FrameRate);
-			UpdateAfter(AJAChangedPinType::FrameRate);
+			else
+			{
+				if (!first)
+					ResetAfter(AJAChangedPinType::FrameRate);
+				else if (FrameRatePin == "NONE")
+					AutoSelectIfSingle(NSN_FrameRate, GetPossibleFrameRates());
+			}
+			UpdateAfter(AJAChangedPinType::FrameRate, first);
 		});
 		AddPinValueWatcher(NSN_IsInterlaced, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
 			std::string interlaced = InterpretPinValue<const char>(newVal);
@@ -117,6 +137,10 @@ struct ChannelNodeContext : NodeContext
 
 			if (interlaced != "NONE" && InterlacedState == InterlacedState::NONE)
 				SetPinValue(NSN_IsInterlaced, nosBuffer{.Data = (void*)"NONE", .Size = 5});
+
+			if (first && interlaced == "NONE")
+				AutoSelectIfSingle(NSN_IsInterlaced, GetPossibleInterlaced());
+
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, const nos::Buffer& old, bool first) {
@@ -193,12 +217,11 @@ struct ChannelNodeContext : NodeContext
 			SetPinValue(pinName, nosBuffer{.Data = (void*)list[1].c_str(), .Size = list[1].size() + 1});
 	}
 
-	void UpdateAfter(AJAChangedPinType pin)
+	void UpdateAfter(AJAChangedPinType pin, bool first)
 	{
 		switch (pin)
 		{
 		case AJAChangedPinType::IsInput: {
-
 			ChangePinReadOnly(NSN_Resolution, IsInput);
 			ChangePinReadOnly(NSN_FrameRate, IsInput);
 			ChangePinReadOnly(NSN_IsInterlaced, IsInput);
@@ -206,13 +229,15 @@ struct ChannelNodeContext : NodeContext
 			auto deviceList = GetPossibleDeviceNames();
 			UpdateStringList(GetDeviceStringListName(), deviceList);
 
-			AutoSelectIfSingle(NSN_Device, deviceList);
+			if (!first)
+				AutoSelectIfSingle(NSN_Device, deviceList);
 			break;
 		}
 		case AJAChangedPinType::Device: {
 			auto channelList = GetPossibleChannelNames();
 			UpdateStringList(GetChannelStringListName(), channelList);
-			AutoSelectIfSingle(NSN_ChannelName, channelList);
+			if (!first)
+				AutoSelectIfSingle(NSN_ChannelName, channelList);
 			break;
 		}
 		case AJAChangedPinType::ChannelName: {
@@ -220,7 +245,7 @@ struct ChannelNodeContext : NodeContext
 				TryUpdateChannel();
 			auto resolutionList = GetPossibleResolutions();
 			UpdateStringList(GetResolutionStringListName(), resolutionList);
-			if(!IsInput)
+			if(!IsInput && !first )
 				AutoSelectIfSingle(NSN_Resolution, resolutionList);
 			
 			break;
@@ -228,13 +253,15 @@ struct ChannelNodeContext : NodeContext
 		case AJAChangedPinType::Resolution: {
 			auto frameRateList = GetPossibleFrameRates();
 			UpdateStringList(GetFrameRateStringListName(), frameRateList);
-			AutoSelectIfSingle(NSN_FrameRate, frameRateList);
+			if (!first)
+				AutoSelectIfSingle(NSN_FrameRate, frameRateList);
 			break;
 		}
 		case AJAChangedPinType::FrameRate: {
 			auto interlacedList = GetPossibleInterlaced();
 			UpdateStringList(GetInterlacedStringListName(), interlacedList);
-			AutoSelectIfSingle(NSN_IsInterlaced, interlacedList);
+			if (!first)
+				AutoSelectIfSingle(NSN_IsInterlaced, interlacedList);
 			break;
 		}
 		}
