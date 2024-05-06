@@ -189,7 +189,7 @@ struct ChannelNodeContext : NodeContext
 			CurrentChannel.Update({}, true);
 			return;
 		}
-		TChannelInfo channelPin{};
+		TChannelInfo channelPin{}; 
 		channelPin.device = std::make_unique<TDevice>(TDevice{{}, Device->GetSerialNumber(), Device->GetDisplayName()});
 		channelPin.channel_name = ChannelPin;
 		channelPin.is_input = IsInput;
