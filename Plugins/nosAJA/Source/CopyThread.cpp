@@ -661,7 +661,7 @@ void CopyThread::AJAOutputProc()
 		while (WaitingForFirstArrival && !Ring->Exit)
 			;
 #pragma region Wait For Ring & VBL
-		auto *slot = Ring->BeginPop();
+		auto *slot = Ring->BeginPop(20);
 		if (!slot)
 		{
 			nosEngine.LogW("Out: %s pop failed", Name().AsCStr());
