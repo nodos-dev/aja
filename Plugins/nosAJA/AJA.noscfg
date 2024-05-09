@@ -18,14 +18,14 @@
         ]
     },
     "node_definitions": [
-        "AJA.nosdef",
-        "OutputNode.nosdef",
-        "InputNode.nosdef"
+        "Config/AJA.nosdef",
+        "Config/OutputNode.nosdef",
+        "Config/InputNode.nosdef"
     ],
     "custom_types" :[
-      "AJA.fbs"
+      "Config/AJA.fbs"
     ],
-    "binary_path": "../Binaries/nosAJA",
+    "binary_path": "Binaries/nosAJA",
     "associated_nodes": [
         {
             "category": "Device|AJA",

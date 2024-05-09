@@ -1,4 +1,4 @@
-include "Conversion.fbs";
+include "Config/Conversion.fbs";
 include "Builtins.fbs";
 
 namespace nos.aja;
