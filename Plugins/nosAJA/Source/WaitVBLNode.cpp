@@ -13,27 +13,14 @@ struct WaitVBLNodeContext : NodeContext
 	{
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
 	{
-		ChannelInfo* channelInfo = nullptr;
-		nosUUID const* outId = nullptr;
-		nosUUID inId;
-		nos::sys::vulkan::FieldType waitField;
-		nosUUID outFieldPinId;
-		for (size_t i = 0; i < args->PinCount; ++i)
-		{
-			auto& pin = args->Pins[i];
-			if (pin.Name == NOS_NAME_STATIC("Channel"))
-				channelInfo = InterpretPinValue<ChannelInfo>(pin.Data->Data);
-			if (pin.Name == NOS_NAME_STATIC("VBL"))
-				outId = &pin.Id;
-			if (pin.Name == NOS_NAME_STATIC("Run"))
-				inId = pin.Id;
-			if (pin.Name == NOS_NAME("WaitField"))
-				waitField = *static_cast<nos::sys::vulkan::FieldType*>(pin.Data->Data);
-			if (pin.Name == NOS_NAME("FieldType"))
-				outFieldPinId = pin.Id;
-		}
+		NodeExecuteArgs args = execArgs;
+		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(args[NOS_NAME_STATIC("Channel")].Data->Data);
+		nosUUID const* outId = &args[NOS_NAME_STATIC("VBL")].Id;
+		nosUUID inId = args[NOS_NAME_STATIC("Run")].Id;
+		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(args[NOS_NAME("WaitField")].Data->Data);
+		nosUUID outFieldPinId = args[NOS_NAME("FieldType")].Id;
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
 		auto device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
@@ -43,8 +30,11 @@ struct WaitVBLNodeContext : NodeContext
 		if (!channelStr)
 			return NOS_RESULT_FAILED;
 		auto channel = ParseChannel(channelStr->string_view());
+		
+
 		auto videoFormat = static_cast<NTV2VideoFormat>(channelInfo->video_format_idx());
-		if (IsProgressivePicture(videoFormat))
+		bool isInterlaced = !IsProgressivePicture(videoFormat);
+		if (!isInterlaced)
 		{
 			if (channelInfo->is_input())
 				device->WaitForInputVerticalInterrupt(channel);
@@ -69,6 +59,33 @@ struct WaitVBLNodeContext : NodeContext
 				device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
 			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(InterlacedWaitField));
 		}
+
+		ULWord curVBLCount = 0;
+		device->GetInputVerticalInterruptCount(curVBLCount, channel);
+
+		if (VBLState.LastVBLCount)
+		{
+			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(VBLState.LastVBLCount + 1 + isInterlaced);
+			if (vblDiff > 0)
+			{
+				VBLState.Dropped = true;
+				VBLState.FramesSinceLastDrop = 0;
+				nosEngine.LogW("%s: %s dropped %lld frames", channelInfo->is_input() ? "In" : "Out", channelInfo->channel_name()->c_str(), vblDiff);
+			} 
+			else
+			{
+				if (VBLState.Dropped)
+				{
+					if (VBLState.FramesSinceLastDrop++ > 50)
+					{
+						VBLState.Dropped = false;
+						VBLState.FramesSinceLastDrop = 0;
+						nosEngine.SendPathRestart(*outId);
+					}
+				}
+			}
+		}
+		VBLState.LastVBLCount = curVBLCount;
 		
 		nosEngine.SetPinDirty(*outId); // This is unnecessary for now, but when we remove automatically setting outputs dirty on execute, this will be required.
 		return NOS_RESULT_SUCCESS;
@@ -81,6 +98,15 @@ struct WaitVBLNodeContext : NodeContext
 	}
 	
 	sys::vulkan::FieldType InterlacedWaitField = sys::vulkan::FieldType::EVEN;
+	struct {
+		ULWord LastVBLCount = 0;
+		bool Dropped = false;
+		int FramesSinceLastDrop = 0;
+	} VBLState;
+	void OnPathStart() override
+	{
+		VBLState = {};
+	}
 };
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
