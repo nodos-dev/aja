@@ -16,27 +16,17 @@ struct DMAReadNodeContext : DMANodeBase
 {
 	DMAReadNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_READ)
 	{
+		AddPinValueWatcher(NOS_NAME_STATIC("BufferToWrite"), [this](nos::Buffer const& newVal, nos::Buffer const& oldVal, bool first) {
+			nosEngine.SetPinValueDirect(PinName2Id[NOS_NAME_STATIC("Output")], newVal);
+		});
 	}
 
 	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
 	{
-		ChannelInfo* channelInfo = nullptr;
-		nosResourceShareInfo outputBuffer{};
-		const nosBuffer* outputPinData = nullptr;
-		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
-		for (size_t i = 0; i < args->PinCount; ++i)
-		{
-			auto& pin = args->Pins[i];
-			if (pin.Name == NOS_NAME_STATIC("Channel"))
-				channelInfo = InterpretPinValue<ChannelInfo>(*pin.Data);
-			if (pin.Name == NOS_NAME_STATIC("Output"))
-			{
-				outputPinData = pin.Data;
-				outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*outputPinData));
-			}
-			if (pin.Name == NOS_NAME("FieldType"))
-				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
-		}
+		NodeExecuteArgs execArgs = args;
+		nosResourceShareInfo bufferToWrite = vkss:: ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execArgs[NOS_NAME_STATIC("BufferToWrite")].Data));
+		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execArgs[NOS_NAME_STATIC("FieldType")].Data);
+		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execArgs[NOS_NAME_STATIC("Channel")].Data);
 		
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
@@ -54,38 +44,16 @@ struct DMAReadNodeContext : DMANodeBase
 
 		auto [_, bufferSize] = GetDMAInfo();
 
-		constexpr nosMemoryFlags memoryFlags = nosMemoryFlags(NOS_MEMORY_FLAGS_HOST_VISIBLE);
-		if (outputBuffer.Memory.Size != bufferSize || outputBuffer.Info.Buffer.MemoryFlags != memoryFlags)
-		{
-			nosResourceShareInfo bufInfo = {
-				.Info = {
-					.Type = NOS_RESOURCE_TYPE_BUFFER,
-					.Buffer = nosBufferInfo{
-						.Size = (uint32_t)bufferSize,
-						.Usage = nosBufferUsage(NOS_BUFFER_USAGE_STORAGE_BUFFER | NOS_BUFFER_USAGE_TRANSFER_SRC),
-						.MemoryFlags = memoryFlags,
-					}}};
-			auto bufferDesc = vkss::ConvertBufferInfo(bufInfo);
-			nosEngine.SetPinValueByName(NodeId, NOS_NAME_STATIC("Output"), Buffer::From(bufferDesc));
-			for (size_t i = 0; i < args->PinCount; ++i)
-			{
-				auto& pin = args->Pins[i];
-				if (pin.Name == NOS_NAME_STATIC("Channel"))
-					channelInfo = InterpretPinValue<ChannelInfo>(*pin.Data);
-				if (pin.Name == NOS_NAME_STATIC("Output"))
-					outputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
-			}
-		}
-		
-
-		if (!outputBuffer.Memory.Handle || Format == NTV2_FORMAT_UNKNOWN)
+		if (!bufferToWrite.Memory.Handle || bufferToWrite.Info.Buffer.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
-		u8* buffer = nosVulkan->Map(&outputBuffer);
+		u8* buffer = nosVulkan->Map(&bufferToWrite);
 
 		DMATransfer(fieldType, buffer);
 
-		static_cast<nos::sys::vulkan::Buffer*>(outputPinData->Data)->mutate_field_type(fieldType);
+		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
+
+		nosEngine.SetPinValueDirect(execArgs[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
 
 		return NOS_RESULT_SUCCESS;
 	}

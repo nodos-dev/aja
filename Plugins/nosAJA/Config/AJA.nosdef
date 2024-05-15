@@ -111,6 +111,12 @@
 					"can_show_as": "INPUT_PIN_ONLY"
 				},
 				{
+					"name": "BufferToWrite",
+					"type_name": "nos.sys.vulkan.Buffer",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
 					"name": "Output",
 					"type_name": "nos.sys.vulkan.Buffer",
 					"show_as": "OUTPUT_PIN",
