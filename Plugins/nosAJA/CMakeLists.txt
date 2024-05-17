@@ -28,7 +28,9 @@ group_targets("${NOSAJA_EXTERNAL_TARGETS}" "External")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_DEBUG_POSTFIX "")
 
-list(APPEND DEPENDENCIES stb ajantv2 ${NOS_PLUGIN_SDK_TARGET} ${NOS_SYS_VULKAN_TARGET})
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities;${CMAKE_CURRENT_SOURCE_DIR}/../nosMediaIO;${NOS_SDK_DIR}/types" nosAJA_generated)
+
+list(APPEND DEPENDENCIES stb ajantv2 ${NOS_PLUGIN_SDK_TARGET} ${NOS_SYS_VULKAN_TARGET} nosAJA_generated)
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../nosMediaIO/Source
@@ -37,6 +39,4 @@ list(APPEND INCLUDE_FOLDERS
 #   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/includes)
 
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${CMAKE_CURRENT_SOURCE_DIR}/../nosUtilities;${CMAKE_CURRENT_SOURCE_DIR}/../nosMediaIO;${NOS_SDK_DIR}/types" NOS_AJA_GENERATED)
 nos_add_plugin("nosAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
-target_sources(nosAJA PUBLIC ${NOS_AJA_GENERATED})
