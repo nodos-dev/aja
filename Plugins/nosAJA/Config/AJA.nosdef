@@ -235,6 +235,16 @@
 					"can_show_as": "PROPERTY_ONLY"
 				},
 				{
+					"name": "ReferenceSource",
+					"type_name": "string",
+					"show_as": "PROPERTY",
+					"can_show_as": "PROPERTY_ONLY",
+					"visualizer": {
+						"type": "COMBO_BOX",
+						"name": "aja.ReferenceSource"
+					}
+				},
+				{
 					"name": "IsQuad",
 					"type_name": "bool",
 					"show_as": "PROPERTY",

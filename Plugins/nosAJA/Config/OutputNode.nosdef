@@ -226,6 +226,17 @@
           "orphan_state": { },
           "description": "",
           "display_name": "Frame Buffer Format"
+        },
+        {
+          "id": "b05b944f-74db-4f7d-bc1c-7fbfad0e60fa",
+          "name": "ReferenceSource",
+          "type_name": "string",
+          "show_as": "PROPERTY",
+          "can_show_as": "PROPERTY_ONLY",
+          "pin_category": "",
+          "visualizer": { "type": "COMBO_BOX", "name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d" },
+          "contents_type": "PortalPin",
+          "contents": { "source_id": "faf9e505-8ce7-4cb5-8838-3cb70de7dcac" }
         }
       ],
       "pos": { "x": 0.0, "y": 0.0 },
@@ -1035,6 +1046,25 @@
                 "orphan_state": { },
                 "description": "",
                 "display_name": "Frame Buffer Format"
+              },
+              {
+                "id": "faf9e505-8ce7-4cb5-8838-3cb70de7dcac",
+                "name": "ReferenceSource",
+                "type_name": "string",
+                "show_as": "PROPERTY",
+                "can_show_as": "PROPERTY_ONLY",
+                "pin_category": "",
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.DeviceList.2d682f3c-fa23-4de6-8cb5-9d43fb25eab7" },
+                "data": "Reference In",
+                "referred_by": [
+                  "b05b944f-74db-4f7d-bc1c-7fbfad0e60fa"
+                ],
+                "def": "",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
               },
               {
                 "id": "044a6324-0800-4fbb-ac37-f2d90e0510ca",
