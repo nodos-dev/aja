@@ -253,7 +253,7 @@ struct ChannelNodeContext : NodeContext
 			UpdateStringList(GetChannelStringListName(), channelList);
 			if (!first)
 				AutoSelectIfSingle(NSN_ChannelName, channelList);
-			if (IsInput)
+			if (IsInput || !Device)
 			{
 				UpdateStringList(GetReferenceStringListName(), { "NONE" });
 				SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)"NONE", .Size = 5 });
