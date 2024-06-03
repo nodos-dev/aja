@@ -17,7 +17,7 @@ struct DMAReadNodeContext : DMANodeBase
 	DMAReadNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_READ)
 	{
 		AddPinValueWatcher(NOS_NAME_STATIC("BufferToWrite"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
-			nosEngine.SetPinValueDirect(PinName2Id[NOS_NAME_STATIC("Output")], newVal);
+			nosEngine.SetPinValue(PinName2Id[NOS_NAME_STATIC("Output")], newVal);
 		});
 	}
 
@@ -53,7 +53,7 @@ struct DMAReadNodeContext : DMANodeBase
 
 		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
 
-		nosEngine.SetPinValueDirect(execArgs[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
+		nosEngine.SetPinValue(execArgs[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
 
 		return NOS_RESULT_SUCCESS;
 	}
