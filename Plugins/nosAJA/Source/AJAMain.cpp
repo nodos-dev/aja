@@ -13,7 +13,7 @@
 
 using namespace nos;
 
-NOS_INIT();
+NOS_INIT_WITH_MIN_REQUIRED_MINOR(6);
 NOS_VULKAN_INIT();
 
 NOS_REGISTER_NAME(Device);

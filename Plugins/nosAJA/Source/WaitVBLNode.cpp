@@ -7,6 +7,8 @@
 namespace nos::aja
 {
 
+NOS_REGISTER_NAME(VBLFailed)
+
 struct WaitVBLNodeContext : NodeContext
 {
 	WaitVBLNodeContext(const nosFbNode* node) : NodeContext(node)
@@ -34,12 +36,13 @@ struct WaitVBLNodeContext : NodeContext
 
 		auto videoFormat = static_cast<NTV2VideoFormat>(channelInfo->video_format_idx());
 		bool isInterlaced = !IsProgressivePicture(videoFormat);
+		bool vblSuccess = false;
 		if (!isInterlaced)
 		{
 			if (channelInfo->is_input())
-				device->WaitForInputVerticalInterrupt(channel);
+				vblSuccess = device->WaitForInputVerticalInterrupt(channel);
 			else
-				device->WaitForOutputVerticalInterrupt(channel);
+				vblSuccess = device->WaitForOutputVerticalInterrupt(channel);
 			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(sys::vulkan::FieldType::PROGRESSIVE));
 		}
 		else
@@ -54,10 +57,15 @@ struct WaitVBLNodeContext : NodeContext
 				InterlacedWaitField = waitField;
 			}
 			if (channelInfo->is_input())
-				device->WaitForInputFieldID(GetFieldId(InterlacedWaitField), channel);
+				vblSuccess = device->WaitForInputFieldID(GetFieldId(InterlacedWaitField), channel);
 			else
-				device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
+				vblSuccess = device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
 			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(InterlacedWaitField));
+		}
+		if (!vblSuccess)
+		{
+			nosEngine.CallNodeFunction(NodeId, NSN_VBLFailed);
+			return NOS_RESULT_FAILED;
 		}
 
 		ULWord curVBLCount = 0;
@@ -107,6 +115,23 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		VBLState = {};
 	}
+
+	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
+	{
+		*outCount = 1;
+		if (!outFunctionNames || !outFunction)
+			return NOS_RESULT_SUCCESS;
+
+		outFunctionNames[0] = NSN_VBLFailed;
+		*outFunction = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		{
+			NodeExecuteArgs funcArgs(functionArgs);
+			nosEngine.SetPinDirty(funcArgs[NOS_NAME("OutTrigger")].Id);
+		};
+
+		return NOS_RESULT_SUCCESS; 
+	}
+
 };
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)

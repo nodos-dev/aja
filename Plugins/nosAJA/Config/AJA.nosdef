@@ -167,6 +167,19 @@
 					"show_as": "INPUT_PIN",
 					"can_show_as": "INPUT_PIN_ONLY"
 				}
+			],
+			"functions": [
+				{
+					"class_name": "VBLFailed",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "OutTrigger",
+							"type_name": "nos.exe",
+							"show_as": "OUTPUT_PIN"
+						}
+					]
+				}
 			]
 		},
 		{
@@ -175,6 +188,18 @@
 			"contents_type": "Job",
 			"description": "Debugging/test node for opening channels",
 			"pins": [
+				{
+					"name": "Run",
+					"type_name": "nos.exe",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "Continue",
+					"type_name": "nos.exe",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_ONLY"
+				},
 				{
 					"name": "Channel",
 					"type_name": "nos.aja.ChannelInfo",
@@ -261,6 +286,19 @@
 					"type_name": "nos.aja.QuadLinkMode",
 					"show_as": "PROPERTY",
 					"can_show_as": "PROPERTY_ONLY"
+				}
+			],
+			"functions": [
+				{
+					"class_name": "TryUpdateChannel",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "InTrigger",
+							"type_name": "nos.exe",
+							"show_as": "INPUT_PIN"
+						}
+					]
 				}
 			]
 		}

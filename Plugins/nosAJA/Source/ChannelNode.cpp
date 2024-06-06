@@ -471,9 +471,9 @@ struct ChannelNodeContext : NodeContext
 		{
 			if (AJADevice::IsQuad(Mode))
 				if (Device->CanMakeQuadInputFromChannel(Channel))
-					return Device->GetInputVideoFormat(Channel);
+					return Device->GetSDIInputVideoFormat(Channel);
 			if (Device->ChannelCanInput(Channel))
-				return Device->GetInputVideoFormat(Channel);
+				return Device->GetSDIInputVideoFormat(Channel);
 			return NTV2_FORMAT_UNKNOWN;
 		}
 		for (int i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
@@ -522,6 +522,40 @@ struct ChannelNodeContext : NodeContext
 		return NTV2_FRAMERATE_INVALID;
 	}
 
+	bool TryFindChannel = false;
+
+	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	{
+		if (!TryFindChannel)
+			return NOS_RESULT_SUCCESS;
+		if (!Device)
+			return NOS_RESULT_FAILED;
+		TryUpdateChannel();
+		if (Device->GetSDIInputVideoFormat(Channel) != NTV2_FORMAT_UNKNOWN)
+		{
+			nosEngine.LogI("Input signal reconnected.");
+			TryFindChannel = false;
+			return NOS_RESULT_SUCCESS;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		return NOS_RESULT_PENDING;
+	}
+
+	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
+	{
+		*outCount = 1;
+		if (!outFunctionNames || !outFunction)
+			return NOS_RESULT_SUCCESS;
+		*outFunction = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+			{
+				auto* context = static_cast<ChannelNodeContext*>(ctx);
+				context->TryFindChannel = true;
+				nosEngine.SendPathRestart(context->NodeId);
+				nosEngine.LogW("Input signal lost.");
+			};
+		*outFunctionNames = NOS_NAME_STATIC("TryUpdateChannel");
+		return NOS_RESULT_SUCCESS; 
+	}
 
 	Channel CurrentChannel;
 
