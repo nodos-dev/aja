@@ -1,0 +1,9 @@
+{
+    "globs": [
+        "Config/**",
+        "*.nossys",
+        "Include/**",
+        "Assets/**",
+        "Binaries/*.{dll,dylib,so}"
+    ]
+}
