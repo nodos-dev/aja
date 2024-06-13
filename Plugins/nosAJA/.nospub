@@ -1,7 +1,7 @@
 {
     "globs": [
         "Config/**",
-        "*.nossys",
+        "*.noscfg",
         "Include/**",
         "Assets/**",
         "Binaries/*.{dll,dylib,so}"
