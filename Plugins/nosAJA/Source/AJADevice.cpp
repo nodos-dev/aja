@@ -1,4 +1,4 @@
-// Copyright Nodos AS. All Rights Reserved.
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "AJADevice.h"
 #include "nosDefines.h"
