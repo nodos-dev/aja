@@ -92,9 +92,12 @@ struct DMANodeBase : NodeContext
 		return {compressedExt, bufferSize};
 	}
 
-	void DMATransfer(nos::sys::vulkan::FieldType fieldType, uint8_t* buffer)
+	void DMATransfer(nos::sys::vulkan::FieldType fieldType, uint8_t* buffer, uint64_t inputBufferSize)
 	{
 		auto [compressedExt, bufferSize] = GetDMAInfo();
+
+		if (bufferSize != inputBufferSize)
+			return nosEngine.LogE("DMATransfer buffer size mismatch");
 
 		if (NeedsFrameSet)
 		{

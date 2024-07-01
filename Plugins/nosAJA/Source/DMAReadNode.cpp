@@ -48,8 +48,9 @@ struct DMAReadNodeContext : DMANodeBase
 			return NOS_RESULT_FAILED;
 
 		u8* buffer = nosVulkan->Map(&bufferToWrite);
+		auto inputBufferSize = bufferToWrite.Memory.Size;
 
-		DMATransfer(fieldType, buffer);
+		DMATransfer(fieldType, buffer, inputBufferSize);
 
 		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
 

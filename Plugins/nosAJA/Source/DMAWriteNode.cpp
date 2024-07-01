@@ -70,6 +70,7 @@ struct DMAWriteNodeContext : DMANodeBase
 			return NOS_RESULT_FAILED;
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
+		auto inputSize = inputBuffer.Memory.Size;
 
 		nosCmd cmd;
 		nosGPUEvent event;
@@ -78,7 +79,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		//nosVulkan->End(cmd, &end);
 		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 
-		DMATransfer(fieldType, buffer);
+		DMATransfer(fieldType, buffer, inputSize);
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,
