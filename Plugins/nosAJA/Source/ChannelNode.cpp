@@ -1,4 +1,6 @@
-﻿#include "Channels.h"
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
+#include "Channels.h"
 // TODO: Remove this node once things settle down.
 namespace nos::aja
 {

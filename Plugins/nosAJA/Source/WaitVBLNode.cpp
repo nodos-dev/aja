@@ -1,4 +1,6 @@
-﻿#include <Nodos/PluginHelpers.hpp>
+// Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
+#include <Nodos/PluginHelpers.hpp>
 
 #include "AJA_generated.h"
 #include "AJADevice.h"
