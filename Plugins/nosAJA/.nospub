@@ -4,6 +4,7 @@
         "*.noscfg",
         "Include/**",
         "Assets/**",
+        "Shaders/**",
         "Binaries/*.{dll,dylib,so}"
     ],
     "trigger_publish_globs": [
