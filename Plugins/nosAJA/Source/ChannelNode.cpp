@@ -150,7 +150,7 @@ struct ChannelNodeContext : NodeContext
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			CurrentPixelFormat = *InterpretPinValue<MediaIO::YCbCrPixelFormat>(newVal);
+			CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_ReferenceSource, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
@@ -170,7 +170,7 @@ struct ChannelNodeContext : NodeContext
 		CurrentChannel.Close();
 	}
 	
-	MediaIO::YCbCrPixelFormat CurrentPixelFormat = MediaIO::YCbCrPixelFormat::YUV8;
+	mediaio::YCbCrPixelFormat CurrentPixelFormat = mediaio::YCbCrPixelFormat::YUV8;
 	std::string ReferenceSource = "NONE";
 
 	void UpdateReferenceSource()
@@ -216,7 +216,7 @@ struct ChannelNodeContext : NodeContext
 		channelPin.video_format_idx = static_cast<int>(format);
 		if (AJADevice::IsQuad(Mode))
 			channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);
-		channelPin.frame_buffer_format = static_cast<MediaIO::YCbCrPixelFormat>(CurrentPixelFormat);
+		channelPin.frame_buffer_format = static_cast<mediaio::YCbCrPixelFormat>(CurrentPixelFormat);
 		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
 		UpdateReferenceSource();

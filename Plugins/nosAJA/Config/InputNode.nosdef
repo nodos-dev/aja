@@ -41,7 +41,7 @@
         {
           "id": "21bd4b4b-9144-47c6-82a5-1a022ab5f04a",
           "name": "ColorSpace",
-          "type_name": "nos.MediaIO.ColorSpace",
+          "type_name": "nos.mediaio.ColorSpace",
           "show_as": "PROPERTY",
           "can_show_as": "INPUT_PIN_OR_PROPERTY",
           "pin_category": "",
@@ -58,7 +58,7 @@
         {
           "id": "5781b0fd-9a43-4668-9a1c-27222d19556d",
           "name": "GammaCurve",
-          "type_name": "nos.MediaIO.GammaCurve",
+          "type_name": "nos.mediaio.GammaCurve",
           "show_as": "PROPERTY",
           "can_show_as": "INPUT_PIN_OR_PROPERTY",
           "pin_category": "",
@@ -135,7 +135,7 @@
               {
                 "id": "c3e09d87-1b89-4cec-8f02-33670e5557c9",
                 "name": "Output",
-                "type_name": "nos.MediaIO.GammaCurve",
+                "type_name": "nos.mediaio.GammaCurve",
                 "show_as": "OUTPUT_PIN",
                 "can_show_as": "OUTPUT_PIN_ONLY",
                 "pin_category": "",
@@ -152,7 +152,7 @@
               {
                 "id": "b133b1cb-fc35-4f3f-a485-421abecc1e22",
                 "name": "Input",
-                "type_name": "nos.MediaIO.GammaCurve",
+                "type_name": "nos.mediaio.GammaCurve",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -437,7 +437,7 @@
           {
             "id": "1beab282-ee7a-45a2-acd2-74e276b41ec3",
             "name": "YCbCr2RGB",
-            "class_name": "nos.MediaIO.YCbCr2RGB",
+            "class_name": "nos.mediaio.YCbCr2RGB",
             "pins": [
               {
                 "id": "8252d846-50e2-4210-8633-f8d9293baecf",
@@ -523,7 +523,7 @@
               {
                 "id": "838e8a4c-d52d-40db-875c-8b2602832b32",
                 "name": "PixelFormat",
-                "type_name": "nos.MediaIO.YCbCrPixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -694,7 +694,7 @@
           {
             "id": "19617c84-74aa-42fb-8bd5-6a5733603708",
             "name": "GammaLUT",
-            "class_name": "nos.MediaIO.GammaLUT",
+            "class_name": "nos.mediaio.GammaLUT",
             "pins": [
               {
                 "id": "420fca6d-a5ec-4db6-a18a-62fae161cde4",
@@ -730,7 +730,7 @@
               {
                 "id": "d8ba6407-cca1-494c-bd0b-ca8caf55c890",
                 "name": "Type",
-                "type_name": "nos.MediaIO.GammaConversionType",
+                "type_name": "nos.mediaio.GammaConversionType",
                 "show_as": "PROPERTY",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -747,7 +747,7 @@
               {
                 "id": "fd925aa8-13da-40ed-9e82-5ccffcf5d645",
                 "name": "GammaCurve",
-                "type_name": "nos.MediaIO.GammaCurve",
+                "type_name": "nos.mediaio.GammaCurve",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -1054,7 +1054,7 @@
               {
                 "id": "8aca8344-c6aa-4a46-9c70-e7eeee0e1318",
                 "name": "FrameBufferFormat",
-                "type_name": "nos.MediaIO.YCbCrPixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
@@ -1193,7 +1193,7 @@
           {
             "id": "06a07928-629d-4896-8c58-df552a841502",
             "name": "BoundedTextureQueue",
-            "class_name": "nos.MediaIO.BoundedTextureQueue",
+            "class_name": "nos.mediaio.BoundedTextureQueue",
             "pins": [
               {
                 "id": "c36d98da-cca0-426d-89c6-e85d75d1e149",
@@ -1320,7 +1320,7 @@
               {
                 "id": "7f44cdbf-5c87-4764-aa3a-8ac27094021b",
                 "name": "Output",
-                "type_name": "nos.MediaIO.ColorSpace",
+                "type_name": "nos.mediaio.ColorSpace",
                 "show_as": "OUTPUT_PIN",
                 "can_show_as": "OUTPUT_PIN_ONLY",
                 "pin_category": "",
@@ -1337,7 +1337,7 @@
               {
                 "id": "e7d49898-2156-4491-9d68-e996356eeb5a",
                 "name": "Input",
-                "type_name": "nos.MediaIO.ColorSpace",
+                "type_name": "nos.mediaio.ColorSpace",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -1642,7 +1642,7 @@
               {
                 "id": "65cafcbe-a08b-4c2b-a31d-7421ba1514a7",
                 "name": "frame_buffer_format",
-                "type_name": "nos.MediaIO.YCbCrPixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "OUTPUT_PIN",
                 "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -1757,7 +1757,7 @@
           {
             "id": "7ebd61c5-61bb-41b1-9ce1-86b5de7b255c",
             "name": "UploadBufferProvider",
-            "class_name": "nos.MediaIO.UploadBufferProvider",
+            "class_name": "nos.mediaio.UploadBufferProvider",
             "pins": [
               {
                 "id": "a0ca63cc-5f65-4f6c-8c57-7215a153ddbe",
@@ -1894,7 +1894,7 @@
           {
             "id": "7302bdd1-57be-40a6-90c1-c1d4291afa86",
             "name": "YUVBufferSizeCalculator",
-            "class_name": "nos.MediaIO.YUVBufferSizeCalculator",
+            "class_name": "nos.mediaio.YUVBufferSizeCalculator",
             "pins": [
               {
                 "id": "b0942e79-cab7-4a01-bad9-9ee47c970917",
@@ -1934,7 +1934,7 @@
               {
                 "id": "81a3f672-0097-47d5-8ead-a65fb3d8f973",
                 "name": "PixelFormat",
-                "type_name": "nos.MediaIO.YCbCrPixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -1986,7 +1986,7 @@
           {
             "id": "c7ac9a13-4e01-4b69-8ac4-4d20c40d753e",
             "name": "ColorSpaceMatrix",
-            "class_name": "nos.MediaIO.ColorSpaceMatrix",
+            "class_name": "nos.mediaio.ColorSpaceMatrix",
             "pins": [
               {
                 "id": "0b02f7f8-c7b9-477b-bb55-86f9cc2b0fc8",
@@ -2008,7 +2008,7 @@
               {
                 "id": "e9bd2073-4950-497d-a35d-11da0c31e945",
                 "name": "ColorSpace",
-                "type_name": "nos.MediaIO.ColorSpace",
+                "type_name": "nos.mediaio.ColorSpace",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -2026,7 +2026,7 @@
               {
                 "id": "ffc174e0-61aa-49f1-9f13-cb4f3250c116",
                 "name": "PixelFormat",
-                "type_name": "nos.MediaIO.YCbCrPixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
@@ -2044,7 +2044,7 @@
               {
                 "id": "b76a3ff5-a111-4c48-82f8-f261d60e9a22",
                 "name": "Type",
-                "type_name": "nos.MediaIO.GammaConversionType",
+                "type_name": "nos.mediaio.GammaConversionType",
                 "show_as": "PROPERTY",
                 "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",

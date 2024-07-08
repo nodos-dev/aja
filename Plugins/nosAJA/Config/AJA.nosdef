@@ -255,7 +255,7 @@
 				{
 					"name": "FrameBufferFormat",
 					"display_name": "Frame Buffer Format",
-					"type_name": "nos.MediaIO.YCbCrPixelFormat",
+					"type_name": "nos.mediaio.YCbCrPixelFormat",
 					"show_as": "PROPERTY",
 					"can_show_as": "PROPERTY_ONLY"
 				},

@@ -57,7 +57,7 @@ table ChannelInfo {
     is_input: bool;
     video_format: string;
     video_format_idx: int;
-    frame_buffer_format: nos.MediaIO.YCbCrPixelFormat;
+    frame_buffer_format: nos.mediaio.YCbCrPixelFormat;
     is_quad: bool;
     input_quad_link_mode: QuadLinkInputMode; // Don't care if !is_input
     output_quad_link_mode: QuadLinkMode; // Don't care if is_input

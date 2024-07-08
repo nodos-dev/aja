@@ -8,7 +8,7 @@
         "description": "Video I/O plugin for AJA cards.",
         "dependencies": [
             {
-                "name": "nos.MediaIO",
+                "name": "nos.mediaio",
                 "version": "1.0.0"
             },
 			{
