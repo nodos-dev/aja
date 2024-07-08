@@ -87,7 +87,7 @@ struct DMANodeBase : NodeContext
 	DMAInfo GetDMAInfo()
 	{
 		u32 width, height;
-		Device->GetExtent(Format, AJADevice::SL, width, height);
+		Device->GetExtent(Format, Mode, width, height);
 		int BitWidth = PixelFormat == mediaio::YCbCrPixelFormat::YUV8 ? 8 : 10;
 		nosVec2u compressedExt((10 == BitWidth) ? ((width + (48 - width % 48) % 48) / 3) << 1 : width >> 1, height >> u32(IsInterlaced()));
 		uint32_t bufferSize = compressedExt.x * compressedExt.y * 4;

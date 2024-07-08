@@ -727,12 +727,6 @@ bool AJADevice::RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool 
         if (NTV2_FRAMERATE_INVALID == FPSFamily)
         {
             FPSFamily = GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(videoFmt));
-            SetMultiFormatMode(false);
-            for (u32 i = 0; i < NTV2_MAX_NUM_CHANNELS; ++i)
-            {
-                SetVideoFormat(videoFmt);
-            }
-            SetMultiFormatMode(true);
         }
         return true;
     }

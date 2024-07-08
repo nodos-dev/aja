@@ -43,7 +43,7 @@ struct DMAReadNodeContext : DMANodeBase
 		Channel = ParseChannel(ChannelName);
 		Format = NTV2VideoFormat(channelInfo->video_format_idx());
 		PixelFormat = channelInfo->frame_buffer_format();
-
+		Mode = static_cast<AJADevice::Mode>(channelInfo->input_quad_link_mode());
 		auto [_, bufferSize] = GetDMAInfo();
 
 		if (!bufferToWrite.Memory.Handle || bufferToWrite.Info.Buffer.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)

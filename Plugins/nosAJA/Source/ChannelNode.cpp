@@ -215,7 +215,12 @@ struct ChannelNodeContext : NodeContext
 		channelPin.resolution = std::make_unique<nos::fb::vec2u>(width, height);
 		channelPin.video_format_idx = static_cast<int>(format);
 		if (AJADevice::IsQuad(Mode))
-			channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);
+		{
+			if(IsInput)
+				channelPin.input_quad_link_mode = static_cast<nos::aja::QuadLinkInputMode>(Mode);
+			else 
+				channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(Mode);
+		}
 		channelPin.frame_buffer_format = static_cast<mediaio::YCbCrPixelFormat>(CurrentPixelFormat);
 		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
@@ -524,7 +529,7 @@ struct ChannelNodeContext : NodeContext
 		return NTV2_FRAMERATE_INVALID;
 	}
 
-	bool TryFindChannel = false;
+	std::atomic_bool TryFindChannel = false;
 
 	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
 	{
