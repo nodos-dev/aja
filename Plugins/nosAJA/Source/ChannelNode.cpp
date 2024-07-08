@@ -414,7 +414,7 @@ struct ChannelNodeContext : NodeContext
 		std::vector<std::string> possibleResolutions = {"NONE"};
 		for (auto res : resolutions)
 		{
-			possibleResolutions.push_back(NTV2FrameGeometryToString(res));
+			possibleResolutions.push_back(NTV2FrameGeometryToString(res, true));
 		}
 		return possibleResolutions;
 	}
@@ -508,7 +508,7 @@ struct ChannelNodeContext : NodeContext
 	{
 		for (int i = 0; i < NTV2_FG_NUMFRAMEGEOMETRIES; ++i)
 		{
-			if (NTV2FrameGeometryToString(NTV2FrameGeometry(i)) == str)
+			if (NTV2FrameGeometryToString(NTV2FrameGeometry(i), true) == str)
 				return NTV2FrameGeometry(i);
 		}
 		return NTV2_FG_INVALID;
