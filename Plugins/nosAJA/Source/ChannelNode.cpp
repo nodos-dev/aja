@@ -441,7 +441,7 @@ struct ChannelNodeContext : NodeContext
 		std::vector<std::string> possibleFrameRates = {"NONE"};
 		for (auto rate : frameRates)
 		{
-			possibleFrameRates.push_back(NTV2FrameRateToString(rate));
+			possibleFrameRates.push_back(NTV2FrameRateToString(rate, true));
 		}
 		return possibleFrameRates;
 	}
@@ -523,7 +523,7 @@ struct ChannelNodeContext : NodeContext
 	{
 		for (int i = 0; i < NTV2_NUM_FRAMERATES; ++i)
 		{
-			if (NTV2FrameRateToString(NTV2FrameRate(i)) == str)
+			if (NTV2FrameRateToString(NTV2FrameRate(i), true) == str)
 				return NTV2FrameRate(i);
 		}
 		return NTV2_FRAMERATE_INVALID;
