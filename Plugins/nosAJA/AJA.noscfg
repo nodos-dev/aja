@@ -67,5 +67,6 @@
             "class_name": "Input",
             "display_name": "AJA In"
         }
-    ]
+    ],
+    "third_party_software": ["./Config/Licenses.json"]
 }
