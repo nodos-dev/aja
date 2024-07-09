@@ -51,7 +51,10 @@ struct DMAWriteNodeContext : DMANodeBase
 			Channel = ParseChannel(ChannelName);
 			Format = NTV2VideoFormat(channelInfo->video_format_idx());
 			PixelFormat = channelInfo->frame_buffer_format();
-			Mode = static_cast<AJADevice::Mode>(channelInfo->output_quad_link_mode());
+			if (channelInfo->is_quad())
+				Mode = static_cast<AJADevice::Mode>(channelInfo->output_quad_link_mode());
+			else
+				Mode = AJADevice::SL;
 			nosEngine.RecompilePath(NodeId);
 		}
 	}

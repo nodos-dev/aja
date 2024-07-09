@@ -43,11 +43,22 @@ struct DMAReadNodeContext : DMANodeBase
 		Channel = ParseChannel(ChannelName);
 		Format = NTV2VideoFormat(channelInfo->video_format_idx());
 		PixelFormat = channelInfo->frame_buffer_format();
-		Mode = static_cast<AJADevice::Mode>(channelInfo->input_quad_link_mode());
+		if (channelInfo->is_quad())
+			Mode = static_cast<AJADevice::Mode>(channelInfo->input_quad_link_mode());
+		else 
+			Mode = AJADevice::SL;
 		auto [_, bufferSize] = GetDMAInfo();
 
-		if (!bufferToWrite.Memory.Handle || bufferToWrite.Info.Buffer.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
+		if (!bufferToWrite.Memory.Handle)
+		{
+			nosEngine.LogE("DMA read target buffer is not valid.");
 			return NOS_RESULT_FAILED;
+		}
+		if (bufferToWrite.Info.Buffer.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
+		{
+			nosEngine.LogE("DMA read target buffer size or format is not valid.");
+			return NOS_RESULT_FAILED;
+		}
 
 		u8* buffer = nosVulkan->Map(&bufferToWrite);
 		auto inputBufferSize = bufferToWrite.Memory.Size;
