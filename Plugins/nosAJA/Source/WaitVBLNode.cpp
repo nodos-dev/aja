@@ -71,7 +71,10 @@ struct WaitVBLNodeContext : NodeContext
 		}
 
 		ULWord curVBLCount = 0;
-		device->GetInputVerticalInterruptCount(curVBLCount, channel);
+		if (channelInfo->is_input())
+			device->GetInputVerticalInterruptCount(curVBLCount, channel);
+		else
+			device->GetOutputVerticalInterruptCount(curVBLCount, channel);
 
 		if (VBLState.LastVBLCount)
 		{
