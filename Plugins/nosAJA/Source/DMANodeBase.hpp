@@ -14,6 +14,7 @@ struct DMANodeBase : NodeContext
 
 	uint8_t DoubleBufferIdx = 0;
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
+	NTV2Channel CurrentChannel = NTV2_CHANNEL_INVALID;
 	std::shared_ptr<AJADevice> Device = nullptr;
 	NTV2VideoFormat Format = NTV2_FORMAT_UNKNOWN;
 	std::string ChannelName;
@@ -74,9 +75,16 @@ struct DMANodeBase : NodeContext
 		return max;
 	}
 
-	size_t GetFrameBufferOffset(NTV2Channel channel, u32 frame)
+	std::unordered_map<NTV2Channel, std::unordered_map<uint8_t, size_t>> FrameBufferOffsets;
+
+	size_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
-		return GetMaxFrameBufferSize() * 2 * channel + (frame & 1) * Device->GetFBSize(channel);
+		auto offsetsIt = FrameBufferOffsets.find(channel);
+		if (offsetsIt == FrameBufferOffsets.end())
+			offsetsIt = FrameBufferOffsets.insert({ channel, {} }).first;
+		if (offsetsIt->second.find(frame) == offsetsIt->second.end())
+			offsetsIt->second[frame] = GetMaxFrameBufferSize() * 2 * channel + (uint32_t(frame) & 1) * Device->GetFBSize(channel);
+		return offsetsIt->second[frame];
 	}
 
 	struct DMAInfo {
@@ -107,9 +115,9 @@ struct DMANodeBase : NodeContext
 			NeedsFrameSet = false;
 		}
 
+		auto offset =  GetFrameBufferOffset(Channel, DoubleBufferIdx);
 		if (IsInterlaced())
 		{
-			auto offset = GetFrameBufferOffset(Channel, DoubleBufferIdx);
 			auto pitch = compressedExt.x * 4;
 			auto segments = compressedExt.y;
 			auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
@@ -128,7 +136,6 @@ struct DMANodeBase : NodeContext
 		}
 		else
 		{
-			auto offset = GetFrameBufferOffset(Channel, DoubleBufferIdx);
 			util::Stopwatch sw;
 			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, Direction == DMA_READ, 0, const_cast<ULWord*>((u32*)buffer),
 				offset, bufferSize, true);
