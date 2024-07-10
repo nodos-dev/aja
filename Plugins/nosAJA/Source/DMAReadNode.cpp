@@ -18,9 +18,6 @@ struct DMAReadNodeContext : DMANodeBase
 {
 	DMAReadNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_READ)
 	{
-		AddPinValueWatcher(NOS_NAME_STATIC("BufferToWrite"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldVal) {
-			nosEngine.SetPinValue(PinName2Id[NOS_NAME_STATIC("Output")], newVal);
-		});
 	}
 
 	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
