@@ -79,12 +79,13 @@ struct DMANodeBase : NodeContext
 
 	size_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
-		auto offsetsIt = FrameBufferOffsets.find(channel);
-		if (offsetsIt == FrameBufferOffsets.end())
-			offsetsIt = FrameBufferOffsets.insert({ channel, {} }).first;
-		if (offsetsIt->second.find(frame) == offsetsIt->second.end())
-			offsetsIt->second[frame] = GetMaxFrameBufferSize() * 2 * channel + (uint32_t(frame) & 1) * Device->GetFBSize(channel);
-		return offsetsIt->second[frame];
+		auto it = FrameBufferOffsets.find(channel);
+		if (it == FrameBufferOffsets.end())
+			it = FrameBufferOffsets.insert({ channel, {} }).first;
+		auto offsetIt = it->second.find(frame);
+		if (offsetIt == it->second.end())
+			offsetIt = it->second.insert({ frame, GetMaxFrameBufferSize() * 2 * channel + (uint32_t(frame) & 1) * Device->GetFBSize(channel) }).first;
+		return offsetIt->second;
 	}
 
 	struct DMAInfo {
