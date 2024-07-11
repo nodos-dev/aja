@@ -35,17 +35,12 @@ struct ChannelNodeContext : NodeContext
 
 		if (auto* pins = node->pins())
 		{
-			TChannelInfo info;
 			for (auto const* pin : *pins)
 			{
 				auto name = pin->name()->c_str();
 				if (0 == strcmp(name, "Channel"))
-				{
 					CurrentChannel.ChannelPinId = *pin->id();
-					flatbuffers::GetRoot<ChannelInfo>(pin->data()->data())->UnPackTo(&info);
-				}
 			}
-			CurrentChannel.Update(std::move(info), false);
 		}
 
 		UpdateStringList(GetReferenceStringListName(), {"NONE"});
@@ -57,14 +52,13 @@ struct ChannelNodeContext : NodeContext
 		
 		SetPinVisualizer(NSN_ReferenceSource, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetReferenceStringListName()});
 		SetPinVisualizer(NSN_Device, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetDeviceStringListName()});
-		SetPinVisualizer(NSN_Device, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetDeviceStringListName()});
 		SetPinVisualizer(NSN_ChannelName, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetChannelStringListName()});
 		SetPinVisualizer(NSN_Resolution, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetResolutionStringListName()});
 		SetPinVisualizer(NSN_FrameRate, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetFrameRateStringListName()});
 		SetPinVisualizer(NSN_IsInterlaced, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
 
 		AddPinValueWatcher(NSN_IsOpen, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			IsOpen = *InterpretPinValue<bool>(newVal);
+			ShouldOpen = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_IsInput, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
@@ -199,18 +193,12 @@ struct ChannelNodeContext : NodeContext
 	
 	void TryUpdateChannel() 
 	{ 
-		if (!IsOpen)
-		{
-			CurrentChannel.Update({}, true);
-			return;
-		}
 		CurrentChannel.Update({}, true);
+		if (!ShouldOpen)
+			return;
 		auto format = GetVideoFormat();
 		if (format == NTV2_FORMAT_UNKNOWN)
-		{
-			CurrentChannel.Update({}, true);
 			return;
-		}
 		TChannelInfo channelPin{}; 
 		channelPin.device = std::make_unique<TDevice>(TDevice{{}, Device->GetSerialNumber(), Device->GetDisplayName()});
 		channelPin.channel_name = ChannelPin;
@@ -579,7 +567,7 @@ struct ChannelNodeContext : NodeContext
 	Channel CurrentChannel;
 
 	std::optional<nosUUID> QuadLinkModePinId = std::nullopt;
-	bool IsOpen = false;
+	bool ShouldOpen = false;
 	bool IsInput = false;
 	std::string DevicePin = "NONE";
 	std::string ChannelPin = "NONE";
