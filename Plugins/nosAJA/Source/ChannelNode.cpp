@@ -154,7 +154,7 @@ struct ChannelNodeContext : NodeContext
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_ReferenceSource, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			ReferenceSource = InterpretPinValue<const char>(newVal);
+			ReferenceSourceString = InterpretPinValue<const char>(newVal);
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_QuadMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
@@ -171,23 +171,30 @@ struct ChannelNodeContext : NodeContext
 	}
 	
 	mediaio::YCbCrPixelFormat CurrentPixelFormat = mediaio::YCbCrPixelFormat::YUV8;
-	std::string ReferenceSource = "NONE";
+	std::string ReferenceSourceString = "NONE";
+	NTV2ReferenceSource ReferenceSource = NTV2_REFERENCE_INVALID;
 
 	void UpdateReferenceSource()
 	{
 		if (IsInput)
 			return;
-		auto src = NTV2_REFERENCE_INVALID;
-		if (ReferenceSource.empty())
+		ReferenceSource = NTV2_REFERENCE_INVALID;
+		if (ReferenceSourceString.empty())
 			nosEngine.LogE("Empty value received for reference pin!");
-		else if (std::string::npos != ReferenceSource.find("Reference In"))
-			src = NTV2_REFERENCE_EXTERNAL;
-		else if (std::string::npos != ReferenceSource.find("Free Run"))
-			src = NTV2_REFERENCE_FREERUN;
-		else if(auto pos = ReferenceSource.find("SDI In"); std::string::npos != pos)
-			src = AJADevice::ChannelToRefSrc(NTV2Channel(ReferenceSource[pos + 7] - '1'));
-		if (src != NTV2_REFERENCE_INVALID)
-			Device->SetReference(src);
+		else if (std::string::npos != ReferenceSourceString.find("Reference In"))
+			ReferenceSource = NTV2_REFERENCE_EXTERNAL;
+		else if (std::string::npos != ReferenceSourceString.find("Free Run"))
+			ReferenceSource = NTV2_REFERENCE_FREERUN;
+		else if(auto pos = ReferenceSourceString.find("SDI In"); std::string::npos != pos)
+			ReferenceSource = AJADevice::ChannelToRefSrc(NTV2Channel(ReferenceSourceString[pos + 7] - '1'));
+		if (ReferenceSource != NTV2_REFERENCE_INVALID)
+		{
+			Device->SetReference(ReferenceSource);
+			auto refStatusText = NTV2ReferenceSourceToString(ReferenceSource, true);
+			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::INFO, "Reference: " + refStatusText);
+		}
+		else
+			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::FAILURE, "Reference: None");
 	}
 	
 	void TryUpdateChannel() 
@@ -271,6 +278,11 @@ struct ChannelNodeContext : NodeContext
 				for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(Device->ID); ++i)
 					list.push_back("SDI In " + std::to_string(i));
 				UpdateStringList(GetReferenceStringListName(), list);
+				if (Device->GetReference(ReferenceSource))
+				{
+					auto refStr = NTV2ReferenceSourceToString(ReferenceSource, true);
+					SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
+				}
 			}
 			break;
 		}

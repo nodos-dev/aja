@@ -44,7 +44,7 @@ bool Channel::Open()
 			text << ": Device not found";
 		else if (channel == NTV2_CHANNEL_INVALID)
 			text << "!";
-		SetStatus(fb::NodeStatusMessageType::FAILURE, text.str());
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, text.str());
 		return false;
 	}
 	NTV2VideoFormat fmt = NTV2_FORMAT_UNKNOWN;
@@ -72,17 +72,18 @@ bool Channel::Open()
 		device->SetRegisterWriteMode(
 			IsProgressivePicture(fmt) ? NTV2_REGWRITE_SYNCTOFRAME : NTV2_REGWRITE_SYNCTOFIELD,
 			channel);
-		SetStatus(fb::NodeStatusMessageType::INFO, NTV2ChannelToString(channel, true) + " " + NTV2VideoFormatToString(fmt, true));
+		auto text = NTV2ChannelToString(channel, true) + " " + NTV2VideoFormatToString(fmt, true);
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, text);
 		IsOpen = true;
 		return true;
 	}
-	SetStatus(fb::NodeStatusMessageType::FAILURE, "Unable to open channel " + NTV2ChannelToString(channel, true));
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, "Unable to open channel " + NTV2ChannelToString(channel, true));
 	return false;
 }
 
 void Channel::Close()
 {
-	SetStatus(fb::NodeStatusMessageType::INFO, "Channel closed");
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, "Channel closed");
 	auto device = GetDevice();
 	if (!device)
 		return;
@@ -116,29 +117,26 @@ bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
 	return IsOpen;
 }
 
-void Channel::SetStatus(fb::NodeStatusMessageType type, std::string text)
+void Channel::UpdateStatus()
 {
 	std::vector<fb::TNodeStatusMessage> messages;
 	if (auto device = GetDevice())
-		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), type});
-	messages.push_back(fb::TNodeStatusMessage{{}, text, type});
+		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), fb::NodeStatusMessageType::INFO});
+	for (auto& [type, message] : StatusMessages)
+		messages.push_back(message);
 	Context->SetNodeStatusMessages(messages);
 }
 
-std::optional<TDevice> Channel::DecodeDeviceName(const std::string& deviceName) 
+void Channel::SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
 {
-	auto dev = AJADevice::GetDevice(deviceName);
-	if (!dev)
-		return std::nullopt;
-	return TDevice{ {}, dev->GetSerialNumber(), dev->GetDisplayName() };
+	StatusMessages[statusType] = fb::TNodeStatusMessage{{}, text, msgType};
+	UpdateStatus();
 }
 
-NTV2VideoFormat Channel::DecodeVideoFormat(const std::string& videoFormat) 
+void Channel::ClearStatus(StatusType statusType)
 {
-	for (int i = 0; i < NTV2VideoFormat::NTV2_MAX_NUM_VIDEO_FORMATS; i++)
-		if (videoFormat == NTV2VideoFormatToString(NTV2VideoFormat(i), true))
-			return NTV2VideoFormat(i);
-	return NTV2VideoFormat::NTV2_FORMAT_UNKNOWN;
+	StatusMessages.erase(statusType);
+	UpdateStatus();
 }
 
 template <class K, class V> using SeqMap = std::vector<std::pair<K, V>>;
