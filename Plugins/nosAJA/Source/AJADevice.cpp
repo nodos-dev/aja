@@ -384,6 +384,33 @@ bool AJADevice::CanMakeQuadOutputFromChannel(NTV2Channel channel)
     return true;
 }
 
+uint64_t AJADevice::GetLastInputVerticalInterruptTimestamp(NTV2Channel channel, bool isInput)
+{
+    VirtualRegisterNum loRegisterNum = kVRegTimeStampLastInput1VerticalLo;
+    switch (channel)
+    {
+    case NTV2_CHANNEL1:
+    case NTV2_CHANNEL2:
+        loRegisterNum = VirtualRegisterNum(kVRegTimeStampLastInput1VerticalLo + (channel - NTV2_CHANNEL1) * 2);
+		break;
+    case NTV2_CHANNEL3:
+    case NTV2_CHANNEL4:
+    case NTV2_CHANNEL5:
+    case NTV2_CHANNEL6:
+    case NTV2_CHANNEL7:
+    case NTV2_CHANNEL8:
+        loRegisterNum = VirtualRegisterNum(kVRegTimeStampLastInput3VerticalLo + (channel - NTV2_CHANNEL3) * 2);
+        break;
+    default:
+        break;
+    }
+    ULWord nanosecondsLo = 0;
+	ULWord nanosecondsHi = 0;
+	ReadRegister(loRegisterNum, nanosecondsLo);
+	ReadRegister(VirtualRegisterNum(loRegisterNum+1), nanosecondsHi);
+    return ((uint64_t(nanosecondsHi) << 32) | nanosecondsLo)*100;
+}
+
 
 static bool GetTSIMUXPins(NTV2Channel channel, NTV2InputCrosspointID& in, NTV2OutputCrosspointID& out)
 {

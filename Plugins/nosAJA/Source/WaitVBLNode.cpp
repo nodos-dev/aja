@@ -64,10 +64,18 @@ struct WaitVBLNodeContext : NodeContext
 				vblSuccess = device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
 			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(InterlacedWaitField));
 		}
+
 		if (!vblSuccess)
 		{
 			nosEngine.CallNodeFunction(NodeId, NSN_VBLFailed);
 			return NOS_RESULT_FAILED;
+		}
+
+		if (channelInfo->is_input() && !VBLState.LastVBLCount)
+		{
+			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel, true);
+			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLNanoseconds = nanoseconds };
+			nosEngine.SendPathCommand(*outId, firstVblAfterStart);
 		}
 
 		ULWord curVBLCount = 0;
@@ -116,6 +124,7 @@ struct WaitVBLNodeContext : NodeContext
 		bool Dropped = false;
 		int FramesSinceLastDrop = 0;
 	} VBLState;
+
 	void OnPathStart() override
 	{
 		VBLState = {};
