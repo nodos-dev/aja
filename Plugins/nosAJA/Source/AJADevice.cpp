@@ -230,6 +230,7 @@ AJADevice::AJADevice(uint64_t serial)
     
     AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
     AJA_ASSERT(SetMultiFormatMode(true));
+    AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
 
     ClearState();
 }
@@ -388,7 +389,7 @@ bool AJADevice::CanMakeQuadOutputFromChannel(NTV2Channel channel)
     return true;
 }
 
-uint64_t AJADevice::GetLastInputVerticalInterruptTimestamp(NTV2Channel channel, bool isInput)
+uint64_t AJADevice::GetLastInputVerticalInterruptTimestamp(NTV2Channel channel)
 {
     VirtualRegisterNum loRegisterNum = kVRegTimeStampLastInput1VerticalLo;
     switch (channel)

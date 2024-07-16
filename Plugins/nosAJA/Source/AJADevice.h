@@ -109,7 +109,7 @@ struct AJADevice : CNTV2Card
 	bool CanMakeQuadInputFromChannel(NTV2Channel channel);
 	bool CanMakeQuadOutputFromChannel(NTV2Channel channel);
 
-    uint64_t GetLastInputVerticalInterruptTimestamp(NTV2Channel channel, bool isInput);
+    uint64_t GetLastInputVerticalInterruptTimestamp(NTV2Channel channel);
     
     bool RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool isInput, Mode mode, NTV2FrameBufferFormat fbFmt);
 

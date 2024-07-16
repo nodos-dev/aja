@@ -31,8 +31,10 @@ struct DMAReadNodeContext : DMANodeBase
 			return NOS_RESULT_FAILED;
 
 		Device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
-		if (!Device)
+		if (!Device) {
+			nosEngine.LogE("Device not found!");
 			return NOS_RESULT_FAILED;
+		}
 		auto channelStr = channelInfo->channel_name();
 		if (!channelStr)
 			return NOS_RESULT_FAILED;

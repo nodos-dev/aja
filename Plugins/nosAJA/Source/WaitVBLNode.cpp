@@ -73,7 +73,7 @@ struct WaitVBLNodeContext : NodeContext
 
 		if (channelInfo->is_input() && !VBLState.LastVBLCount)
 		{
-			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel, true);
+			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel);
 			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLNanoseconds = nanoseconds };
 			nosEngine.SendPathCommand(*outId, firstVblAfterStart);
 		}
