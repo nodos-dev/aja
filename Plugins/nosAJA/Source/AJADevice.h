@@ -5,28 +5,19 @@
 #pragma once
 
 #include <ajabase/common/types.h>
-#include <ajabase/system/memory.h>
-#include <ajabase/system/process.h>
 #include <ajabase/common/timecodeburn.h>
 
 #include <ajantv2/includes/ntv2card.h>
 #include <ajantv2/includes/ntv2enums.h>
 #include <ajantv2/includes/ntv2rp188.h>
 #include <ajantv2/includes/ntv2utils.h>
-#include <ajantv2/includes/ntv2devicescanner.h>
 #include <ajantv2/includes/ntv2signalrouter.h>
 
-#include "ntv2devicefeatures.h"
-#include "ntv2devicefeatures.hh"
-#include "ntv2enums.h"
 #include "ntv2publicinterface.h"
-#include "ntv2signalrouter.h"
-#include "ntv2utils.h"
 #include "ntv2vpid.h"
-#include "ntv2enums.h"
-#include "ntv2utils.h"
 
 // stl
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -119,6 +110,26 @@ struct AJADevice : CNTV2Card
 	bool CanMakeQuadOutputFromChannel(NTV2Channel channel);
 
     uint64_t GetLastInputVerticalInterruptTimestamp(NTV2Channel channel, bool isInput);
+    
+    bool RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool isInput, Mode mode, NTV2FrameBufferFormat fbFmt);
+
+    void CloseChannel(NTV2Channel channel, bool isInput, bool isQuad);
+
+    void ClearState();
+
+    uint32_t GetFBSize(NTV2Channel channel);
+    uint32_t GetIntrinsicSize();
+
+    bool GetExtent(NTV2Channel channel, Mode mode, uint32_t& width, uint32_t& height);
+    bool GetExtent(NTV2VideoFormat fmt, Mode mode, uint32_t& width, uint32_t& height);
+
+    void GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2FrameRate& framerate);
+
+    uint32_t AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener);
+    void RemoveReferenceSourceListener(uint32_t id);
+
+    bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
+
 private:
     bool RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
     bool RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
@@ -136,28 +147,13 @@ private:
         return (mode != SL) ? RouteQuadOutputSignal(channel, videoFmt, mode, fbFmt) : RouteSLOutputSignal(channel, videoFmt, fbFmt);
     }
 
-
     void CloseSLChannel(NTV2Channel channel, bool isInput);
     void CloseQLChannel(NTV2Channel channel, bool isInput);
 
-public:
-    bool RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool isInput, Mode mode, NTV2FrameBufferFormat fbFmt);
-
-    
-    bool SetRef(NTV2Channel channel);
-
-    void CloseChannel(NTV2Channel channel, bool isInput, bool isQuad);
-
-    void ClearState();
-
-    uint32_t GetFBSize(NTV2Channel channel);
-    uint32_t GetIntrinsicSize();
-
-    bool GetExtent(NTV2Channel channel, Mode mode, uint32_t& width, uint32_t& height);
-    bool GetExtent(NTV2VideoFormat fmt, Mode mode, uint32_t& width, uint32_t& height);
-
-    void GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2FrameRate& framerate);
-
+    struct {
+        std::unordered_map<uint32_t, std::function<void(NTV2ReferenceSource)>> Map;
+        uint32_t NextID = 0;
+    } ReferenceListeners;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

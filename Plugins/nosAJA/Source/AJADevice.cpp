@@ -5,6 +5,9 @@
 #include "ntv2enums.h"
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
+#include <ntv2devicescanner.h>
+#include <ranges>
+#include <system/process.h>
 
 #undef min
 #undef max
@@ -620,12 +623,6 @@ bool AJADevice::RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat fmt, 
     return re;
 }
 
-
-bool AJADevice::SetRef(NTV2Channel channel)
-{
-    return SetReference(ChannelToRefSrc(channel));
-}
-
 bool AJADevice::RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt)
 {
     NTV2InputSource src = NTV2ChannelToInputSource(channel, NTV2_INPUTSOURCES_SDI);
@@ -777,4 +774,27 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
     case NTV2_REFERENCE_INPUT8:     framerate = GetNTV2FrameRateFromVideoFormat(GetInputVideoFormat(NTV2_CHANNEL8)); break;
     // default: device->GetFrameRate(framerate); break;
     }
+}
+
+uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener)
+{
+    auto id = ReferenceListeners.NextID++;
+    ReferenceListeners.Map[id] = std::move(listener);
+    return id;
+}
+
+void AJADevice::RemoveReferenceSourceListener(uint32_t id)
+{
+    ReferenceListeners.Map.erase(id);
+}
+
+bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
+{
+    auto ret = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
+    if (ret)
+    {
+        for (auto& listener : ReferenceListeners.Map | std::views::values)
+            listener(inRefSource);
+    }
+    return ret;
 }
