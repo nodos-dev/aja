@@ -172,6 +172,7 @@ void AJADevice::ClearState()
         SetSDITransmitEnable(channel, false);
         SetMode(channel, NTV2_MODE_INVALID);
     }
+    SetReference(NTV2_REFERENCE_EXTERNAL);
 }
 
 u32 AJADevice::GetFBSize(NTV2Channel channel)
