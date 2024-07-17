@@ -3,36 +3,6 @@ include "Builtins.fbs";
 
 namespace nos.aja;
 
-enum ReferenceSource : uint {
-    External       = 0,
-    FreeRun        = 1,
-    SDI1           = 2,
-    SDI2           = 3,
-    SDI3           = 4,
-    SDI4           = 5,
-    SDI5           = 6,
-    SDI6           = 7,
-    SDI7           = 8,
-    SDI8           = 9,
-}
-
-enum Colorspace : uint {
-    REC709  = 0,
-    REC601  = 1,
-    REC2020 = 2,
-}
-
-enum GammaCurve : uint {
-    REC709  = 0,
-    HLG  = 1,
-    ST2084 = 2,
-}
-
-enum Shader : uint {
-    Comp8  = 0,
-    Comp10 = 1,
-}
-
 enum QuadLinkMode : uint
 {
     Tsi = 0,
