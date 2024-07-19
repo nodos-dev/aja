@@ -242,6 +242,12 @@
 					"type_name": "nos.aja.QuadLinkMode",
 					"show_as": "PROPERTY",
 					"can_show_as": "PROPERTY_ONLY"
+				},
+				{
+					"name": "ForceInterlaced",
+					"type_name": "bool",
+					"show_as": "PROPERTY",
+					"can_show_as": "INPUT_PIN_OR_PROPERTY"
 				}
 			],
 			"functions": [

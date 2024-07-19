@@ -17,6 +17,7 @@ NOS_REGISTER_NAME(QuadLinkOutputMode);
 NOS_REGISTER_NAME(IsOpen);
 NOS_REGISTER_NAME(FrameBufferFormat);
 NOS_REGISTER_NAME(QuadMode);
+NOS_REGISTER_NAME(ForceInterlaced);
 
 enum class AJAChangedPinType
 {
@@ -168,6 +169,11 @@ struct ChannelNodeContext : NodeContext
 			info.output_quad_link_mode = static_cast<QuadLinkMode>(newQuadMode);
 			CurrentChannel.Update(std::move(info), true);
 		});
+		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			ForceInterlaced = *InterpretPinValue<bool>(newVal);
+			TryUpdateChannel();
+		});
+
 	}
 
 	~ChannelNodeContext() override
@@ -491,9 +497,19 @@ struct ChannelNodeContext : NodeContext
 		{
 			if (AJADevice::IsQuad(Mode))
 				if (Device->CanMakeQuadInputFromChannel(Channel))
-					return Device->GetSDIInputVideoFormat(Channel);
+				{
+					auto fmt = Device->GetSDIInputVideoFormat(Channel);
+					if(ForceInterlaced)
+						return Device->ForceInterlace(fmt);
+					return fmt;
+				}
 			if (Device->ChannelCanInput(Channel))
-				return Device->GetSDIInputVideoFormat(Channel);
+			{
+				auto fmt = Device->GetSDIInputVideoFormat(Channel);
+				if(ForceInterlaced)
+					return Device->ForceInterlace(fmt);
+				return fmt;
+			}
 			return NTV2_FORMAT_UNKNOWN;
 		}
 		for (int i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
@@ -582,6 +598,7 @@ struct ChannelNodeContext : NodeContext
 	std::optional<nosUUID> QuadLinkModePinId = std::nullopt;
 	bool ShouldOpen = false;
 	bool IsInput = false;
+	bool ForceInterlaced = false;
 	std::string DevicePinValue = "NONE";
 	std::string ChannelPinValue = "NONE";
 	std::string ResolutionPinValue = "NONE";

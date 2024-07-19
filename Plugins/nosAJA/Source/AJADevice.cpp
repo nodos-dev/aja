@@ -130,6 +130,25 @@ CNTV2VPID AJADevice::GetVPID(NTV2Channel channel, CNTV2VPID* B)
     return CNTV2VPID(a);
 }
 
+NTV2VideoFormat AJADevice::ForceInterlace(NTV2VideoFormat format)
+{
+	if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(format))
+	{
+		auto frameRate = GetNTV2FrameRateFromVideoFormat(format);
+		switch (frameRate)
+		{
+			case NTV2_FRAMERATE_6000:	return NTV2_FORMAT_1080i_6000;
+			case NTV2_FRAMERATE_5994:	return NTV2_FORMAT_1080i_5994;
+			case NTV2_FRAMERATE_5000:	return NTV2_FORMAT_1080i_5000;
+			case NTV2_FRAMERATE_3000:	return NTV2_FORMAT_1080i_6000;
+			case NTV2_FRAMERATE_2997:	return NTV2_FORMAT_1080i_5994;
+			case NTV2_FRAMERATE_2500:	return NTV2_FORMAT_1080i_5000;
+			default:					return format;
+		}
+	}
+	return format;
+}
+
 NTV2VideoFormat AJADevice::GetInputVideoFormat(NTV2Channel channel)
 {
     NTV2VideoFormat fmt = GetSDIInputVideoFormat(channel, GetSDIInputIsProgressive(channel));

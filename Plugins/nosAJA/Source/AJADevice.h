@@ -95,6 +95,7 @@ struct AJADevice : CNTV2Card
     CNTV2VPID GetVPID(NTV2Channel channel, CNTV2VPID* B = 0);
 
     NTV2VideoFormat GetInputVideoFormat(NTV2Channel channel);
+    NTV2VideoFormat ForceInterlace(NTV2VideoFormat channel);
     bool IsTSI(NTV2Channel channel);
     Mode GetMode(NTV2Channel channel);
     ~AJADevice();

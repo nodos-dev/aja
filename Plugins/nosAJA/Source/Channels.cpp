@@ -47,15 +47,13 @@ bool Channel::Open()
 		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, text.str());
 		return false;
 	}
-	NTV2VideoFormat fmt = NTV2_FORMAT_UNKNOWN;
+	NTV2VideoFormat fmt = static_cast<NTV2VideoFormat>(Info.video_format_idx); //AJADevice::GetMatchingFormat(Info.video_format, AJADevice::IsQuad(GetMode()));
 	if (Info.is_input)
 	{
-		fmt = device->GetInputVideoFormat(channel);
 		nosEngine.LogI("Route input %s", NTV2ChannelToString(channel, true).c_str());
 	}
 	else
 	{
-		fmt = static_cast<NTV2VideoFormat>(Info.video_format_idx);//AJADevice::GetMatchingFormat(Info.video_format, AJADevice::IsQuad(GetMode()));
 		nosEngine.LogI("Route output %s with framerate %s",
 		               NTV2ChannelToString(channel, true).c_str(),
 		               NTV2VideoFormatToString(fmt, true).c_str());
