@@ -70,8 +70,20 @@ bool Channel::Open()
 		device->SetRegisterWriteMode(
 			IsProgressivePicture(fmt) ? NTV2_REGWRITE_SYNCTOFRAME : NTV2_REGWRITE_SYNCTOFIELD,
 			channel);
-		auto text = NTV2ChannelToString(channel, true) + " " + NTV2VideoFormatToString(fmt, true);
-		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, text);
+
+		auto channelName = [&]()
+		{
+			std::string ch = NTV2ChannelToString(channel, true);
+			if (Info.is_quad)
+			{
+				for (int i = channel + 1; i < channel + 4; ++i)
+					ch += i + '1';
+				ch += " 4x";
+			}
+			else ch += ' ';
+			return ch + NTV2VideoFormatToString(fmt, true);
+		};
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, channelName());
 		IsOpen = true;
 		return true;
 	}
