@@ -77,10 +77,13 @@ struct ChannelNodeContext : NodeContext
 			{
 				if (oldDevice)
 					oldDevice->RemoveReferenceSourceListener(RefListenerId);
-				RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
+				if(Device)
+					RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
 					auto refStr = NTV2ReferenceSourceToString(ref, true);
 					SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
 				});
+				else
+					RefListenerId = 0;
 			}
 			if (DevicePinValue != "NONE" && !Device)
 				SetPinValue(NSN_Device, nosBuffer{.Data = (void*)"NONE", .Size = 5});
