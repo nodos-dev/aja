@@ -565,12 +565,22 @@ struct ChannelNodeContext : NodeContext
 
 	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
 	{
-		if (!TryFindChannel)
-			return NOS_RESULT_SUCCESS;
-		if (!Device)
+		if(!Device)
 			return NOS_RESULT_FAILED;
+		if (!IsInput)
+			return NOS_RESULT_SUCCESS;
+		auto format = Device->GetSDIInputVideoFormat(Channel);
+		if (ForceInterlaced)
+			format = Device->ForceInterlace(format);
+		if (!TryFindChannel)
+		{
+			if (CurrentChannel.IsOpen)
+				if (CurrentChannel.Info.video_format_idx == static_cast<int>(format))
+					return NOS_RESULT_SUCCESS;
+			TryFindChannel = true;
+		}
 		TryUpdateChannel();
-		if (Device->GetSDIInputVideoFormat(Channel) != NTV2_FORMAT_UNKNOWN)
+		if (format != NTV2_FORMAT_UNKNOWN)
 		{
 			nosEngine.LogI("Input signal reconnected.");
 			TryFindChannel = false;
