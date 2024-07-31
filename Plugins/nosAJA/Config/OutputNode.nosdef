@@ -285,7 +285,6 @@
                 "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": { "serial_number": 4121133632353284144, "name": "Corvid88 - 0" },
                 "referred_by": [],
                 "def": { "name": "" },
                 "meta_data_map": [],
@@ -977,7 +976,7 @@
           },
           {
             "id": "abcc7784-ff0a-474c-a076-e049c29b7774",
-            "name": "Thread",
+            "name": "Main Thread",
             "class_name": "nos.Thread",
             "always_execute": true,
             "pins": [
@@ -3541,14 +3540,6 @@
                 "can_show_as": "INPUT_PIN_ONLY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": {
-                  "device": { "serial_number": 4121133632353284144, "name": "Corvid88 - 0" },
-                  "channel_name": "SingleLink 4",
-                  "video_format": "1080p59.94a",
-                  "video_format_idx": 24,
-                  "frame_buffer_format": "V210",
-                  "resolution": { "x": 1920, "y": 1080 }
-                },
                 "referred_by": [],
                 "def": {
                   "device": { "name": "" },
@@ -3679,14 +3670,6 @@
                 "can_show_as": "INPUT_PIN_ONLY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": {
-                  "device": { "serial_number": 4121133632353284144, "name": "Corvid88 - 0" },
-                  "channel_name": "SingleLink 4",
-                  "video_format": "1080p59.94a",
-                  "video_format_idx": 24,
-                  "frame_buffer_format": "V210",
-                  "resolution": { "x": 1920, "y": 1080 }
-                },
                 "referred_by": [],
                 "def": {
                   "device": { "name": "" },
