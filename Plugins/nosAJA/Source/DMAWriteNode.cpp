@@ -63,6 +63,7 @@ struct DMAWriteNodeContext : DMANodeBase
 	{
 		nosResourceShareInfo inputBuffer{};
 		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
+		uint32_t curVBLCount = 0;
 		for (size_t i = 0; i < args->PinCount; ++i)
 		{
 			auto& pin = args->Pins[i];
@@ -70,6 +71,8 @@ struct DMAWriteNodeContext : DMANodeBase
 				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 			if (pin.Name == NOS_NAME("FieldType"))
 				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
+			if (pin.Name == NOS_NAME("CurrentVBL"))
+				curVBLCount = *InterpretPinValue<uint32_t>(*pin.Data);
 		}
 
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
@@ -85,7 +88,10 @@ struct DMAWriteNodeContext : DMANodeBase
 		//nosVulkan->End(cmd, &end);
 		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
 
-		DMATransfer(fieldType, buffer, inputSize);
+		if (curVBLCount == 0)
+			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
+
+		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,

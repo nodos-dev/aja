@@ -14,7 +14,6 @@ struct DMANodeBase : NodeContext
 
 	uint8_t DoubleBufferIdx = 0;
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
-	NTV2Channel CurrentChannel = NTV2_CHANNEL_INVALID;
 	std::shared_ptr<AJADevice> Device = nullptr;
 	NTV2VideoFormat Format = NTV2_FORMAT_UNKNOWN;
 	std::string ChannelName;
@@ -37,8 +36,9 @@ struct DMANodeBase : NodeContext
 	}
 
 	bool NeedsFrameSet = false;
+	ULWord NextVBL = 0;
 
-	virtual void OnPathStart() { NeedsFrameSet = true; DoubleBufferIdx = 0; }
+	virtual void OnPathStart() { NeedsFrameSet = true; DoubleBufferIdx = 0; NextVBL = 0; }
 
 	void SetFrame(u32 doubleBufferIndex)
 	{
@@ -103,7 +103,7 @@ struct DMANodeBase : NodeContext
 		return {compressedExt, bufferSize};
 	}
 
-	void DMATransfer(nos::sys::vulkan::FieldType fieldType, uint8_t* buffer, uint64_t inputBufferSize)
+	void DMATransfer(nos::sys::vulkan::FieldType fieldType, uint32_t curVBLCount, uint8_t* buffer, uint64_t inputBufferSize)
 	{
 		auto [compressedExt, bufferSize] = GetDMAInfo();
 
@@ -116,6 +116,9 @@ struct DMANodeBase : NodeContext
 			NeedsFrameSet = false;
 		}
 
+		if (curVBLCount < NextVBL)
+			return;
+		
 		auto offset =  GetFrameBufferOffset(Channel, DoubleBufferIdx);
 		if (IsInterlaced())
 		{
@@ -146,6 +149,18 @@ struct DMANodeBase : NodeContext
 		}
 
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
+
+		ULWord newVBLCount = 0;
+		if (Direction == DMA_READ)
+			Device->GetInputVerticalInterruptCount(newVBLCount, Channel);
+		else
+			Device->GetOutputVerticalInterruptCount(newVBLCount, Channel);
+
+		// DMA likely skipped a frame
+		if (curVBLCount != newVBLCount)
+			nosEngine.CallNodeFunction(NodeId, NOS_NAME("Drop"));
+
+		NextVBL = newVBLCount + 1;
 	}
 };
 

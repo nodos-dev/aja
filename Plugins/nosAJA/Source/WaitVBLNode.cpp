@@ -22,6 +22,7 @@ struct WaitVBLNodeContext : NodeContext
 		NodeExecuteArgs args = execArgs;
 		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(args[NOS_NAME_STATIC("Channel")].Data->Data);
 		nosUUID const* outId = &args[NOS_NAME_STATIC("VBL")].Id;
+		nosUUID const* outVBLCountId = &args[NOS_NAME_STATIC("CurrentVBL")].Id;
 		nosUUID inId = args[NOS_NAME_STATIC("Run")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(args[NOS_NAME("WaitField")].Data->Data);
 		nosUUID outFieldPinId = args[NOS_NAME("FieldType")].Id;
@@ -64,7 +65,11 @@ struct WaitVBLNodeContext : NodeContext
 				vblSuccess = device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
 			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(InterlacedWaitField));
 		}
-
+		ULWord curVBLCount = 0;
+		if (channelInfo->is_input())
+			device->GetInputVerticalInterruptCount(curVBLCount, channel);
+		else
+			device->GetOutputVerticalInterruptCount(curVBLCount, channel);
 		if (!vblSuccess)
 		{
 			nosEngine.CallNodeFunction(NodeId, NSN_VBLFailed);
@@ -77,21 +82,15 @@ struct WaitVBLNodeContext : NodeContext
 			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLNanoseconds = nanoseconds };
 			nosEngine.SendPathCommand(*outId, firstVblAfterStart);
 		}
-
-		ULWord curVBLCount = 0;
-		if (channelInfo->is_input())
-			device->GetInputVerticalInterruptCount(curVBLCount, channel);
-		else
-			device->GetOutputVerticalInterruptCount(curVBLCount, channel);
+		ChannelStr = channelInfo->channel_name()->c_str();
+		IsInput = channelInfo->is_input();
 
 		if (VBLState.LastVBLCount)
 		{
 			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(VBLState.LastVBLCount + 1 + isInterlaced);
 			if (vblDiff > 0)
 			{
-				VBLState.Dropped = true;
-				VBLState.FramesSinceLastDrop = 0;
-				nosEngine.LogW("%s: %s dropped %lld frames", channelInfo->is_input() ? "In" : "Out", channelInfo->channel_name()->c_str(), vblDiff);
+				FrameDropped(vblDiff, true);
 			} 
 			else
 			{
@@ -109,6 +108,7 @@ struct WaitVBLNodeContext : NodeContext
 		VBLState.LastVBLCount = curVBLCount;
 		
 		nosEngine.SetPinDirty(*outId); // This is unnecessary for now, but when we remove automatically setting outputs dirty on execute, this will be required.
+		nosEngine.SetPinValue(*outVBLCountId, nos::Buffer::From(curVBLCount));
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -130,22 +130,38 @@ struct WaitVBLNodeContext : NodeContext
 		VBLState = {};
 	}
 
+	void FrameDropped(uint32_t dropCount, bool vblMissed)
+	{
+		VBLState.Dropped = true;
+		VBLState.FramesSinceLastDrop = 0;
+		nosEngine.LogW("%s: %s dropped %lld frames (%s missed)", IsInput ? "In" : "Out", ChannelStr.c_str(), dropCount, vblMissed ? "VBL" : "DMA");
+	}
+
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
 	{
-		*outCount = 1;
+		*outCount = 2;
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
 
 		outFunctionNames[0] = NSN_VBLFailed;
-		*outFunction = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		outFunction[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
 		{
 			NodeExecuteArgs funcArgs(functionArgs);
-			nosEngine.SetPinDirty(funcArgs[NOS_NAME("OutTrigger")].Id);
+			nosEngine.SetPinDirty(funcArgs[NOS_NAME("Propagate")].Id);
+		};
+
+		outFunctionNames[1] = NOS_NAME("Drop");
+		outFunction[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		{
+			WaitVBLNodeContext* context = reinterpret_cast<WaitVBLNodeContext*>(ctx);
+			context->FrameDropped(1, false);
 		};
 
 		return NOS_RESULT_SUCCESS; 
 	}
 
+	std::string ChannelStr;
+	bool IsInput = false;
 };
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)

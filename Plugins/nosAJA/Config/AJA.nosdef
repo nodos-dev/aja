@@ -27,10 +27,29 @@
 					"can_show_as": "INPUT_PIN_ONLY"
 				},
 				{
+					"name": "CurrentVBL",
+					"type_name": "uint",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
 					"name": "Input",
 					"type_name": "nos.sys.vulkan.Buffer",
 					"show_as": "INPUT_PIN",
 					"can_show_as": "INPUT_PIN_ONLY"
+				}
+			],
+			"functions": [
+				{
+					"class_name": "Drop",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "Propagate",
+							"type_name": "nos.exe",
+							"show_as": "OUTPUT_PIN"
+						}
+					]
 				}
 			]
 		},
@@ -73,10 +92,29 @@
 					"can_show_as": "INPUT_PIN_ONLY"
 				},
 				{
+					"name": "CurrentVBL",
+					"type_name": "uint",
+					"show_as": "INPUT_PIN",
+					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
 					"name": "Output",
 					"type_name": "nos.sys.vulkan.Buffer",
 					"show_as": "OUTPUT_PIN",
 					"can_show_as": "OUTPUT_PIN_ONLY"
+				}
+			],
+			"functions": [
+				{
+					"class_name": "Drop",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "Propagate",
+							"type_name": "nos.exe",
+							"show_as": "OUTPUT_PIN"
+						}
+					]
 				}
 			]
 		},
@@ -122,6 +160,12 @@
 					"type_name": "nos.aja.ChannelInfo",
 					"show_as": "INPUT_PIN",
 					"can_show_as": "INPUT_PIN_ONLY"
+				},
+				{
+					"name": "CurrentVBL",
+					"type_name": "uint",
+					"show_as": "OUTPUT_PIN",
+					"can_show_as": "OUTPUT_PIN_ONLY"
 				}
 			],
 			"functions": [
@@ -130,9 +174,20 @@
 					"contents_type": "Job",
 					"pins": [
 						{
-							"name": "OutTrigger",
+							"name": "Propagate",
 							"type_name": "nos.exe",
 							"show_as": "OUTPUT_PIN"
+						}
+					]
+				},
+				{
+					"class_name": "Drop",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "Trigger",
+							"type_name": "nos.exe",
+							"show_as": "INPUT_PIN"
 						}
 					]
 				}

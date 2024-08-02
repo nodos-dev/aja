@@ -26,7 +26,8 @@ struct DMAReadNodeContext : DMANodeBase
 		nosResourceShareInfo bufferToWrite = vkss:: ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execArgs[NOS_NAME_STATIC("BufferToWrite")].Data));
 		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execArgs[NOS_NAME_STATIC("FieldType")].Data);
 		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execArgs[NOS_NAME_STATIC("Channel")].Data);
-		
+		uint32_t curVBLCount = *InterpretPinValue<uint32_t>(*execArgs[NOS_NAME_STATIC("CurrentVBL")].Data);
+
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
 
@@ -62,7 +63,10 @@ struct DMAReadNodeContext : DMANodeBase
 		u8* buffer = nosVulkan->Map(&bufferToWrite);
 		auto inputBufferSize = bufferToWrite.Memory.Size;
 
-		DMATransfer(fieldType, buffer, inputBufferSize);
+		if (curVBLCount == 0)
+			Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
+
+		DMATransfer(fieldType, curVBLCount, buffer, inputBufferSize);
 
 		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
 
