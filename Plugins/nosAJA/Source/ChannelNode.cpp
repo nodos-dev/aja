@@ -228,7 +228,14 @@ struct ChannelNodeContext : NodeContext
 		channelPin.is_quad = AJADevice::IsQuad(Mode);
 		channelPin.video_format = NTV2VideoFormatToString(format, true); // TODO: Readonly.
 		uint32_t width, height;
-		Device->GetExtent(Channel, Mode, width, height);
+		if(IsInput)
+			Device->GetExtent(Channel, Mode, width, height);
+		else
+		{
+			auto geometry = GetNTV2FrameGeometryFromVideoFormat(format);
+			width = GetNTV2FrameGeometryWidth(geometry);
+			height = GetNTV2FrameGeometryHeight(geometry);
+		}
 		channelPin.resolution = std::make_unique<nos::fb::vec2u>(width, height);
 		channelPin.video_format_idx = static_cast<int>(format);
 		if (AJADevice::IsQuad(Mode))
