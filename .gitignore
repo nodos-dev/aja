@@ -1,0 +1,11 @@
+*Binaries
+*Build
+*.spv
+*.spv.dat
+.vscode
+.vs
+.cache
+__pycache__
+*_generated.h
+*.ptx
+*.egg-info

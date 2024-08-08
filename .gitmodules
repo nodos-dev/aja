@@ -1,0 +1,3 @@
+[submodule "External/libajantv2"]
+	path = External/libajantv2
+	url = https://github.com/mediaz/libajantv2.git
