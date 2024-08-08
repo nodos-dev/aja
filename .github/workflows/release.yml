@@ -1,0 +1,170 @@
+# Copyright MediaZ Teknoloji A.S. All Rights Reserved.
+
+# This is a basic workflow to help you get started with Actions
+
+name: Modules Releases
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ dev ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      build_all:
+        description: 'Build all modules'
+        required: false
+        default: 'false'
+      nodos_sdk_version:
+        description: 'Nodos SDK Version'
+        required: false
+        default: ''
+      clean:
+        description: 'Clean build'
+        required: false
+        default: "false"
+
+env:
+  GH_USERNAME: "nodos-bot"
+  GIT_EMAIL: "bot@nodos.dev"
+  GH_TOKEN: ${{ secrets.CI_TOKEN }}
+  DIST_TARGET_DIR: "D:/Builds/Nodos-Modules"
+  NOSMAN_EXECUTABLE: "C:/Tools/nosman.exe"
+  RUST_BACKTRACE: 1
+  BUILD_NUMBER_STARTS_AT: 561 # Repo split point
+
+# TODO: Support parallel runs
+concurrency:
+  group: single # For now, allow 1 run at a time.
+  cancel-in-progress: false # Queue up runs if one is already in progress.
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    name: Modules Releases
+    runs-on: self-hosted
+    steps:
+      - name: Update Git Credentials
+        continue-on-error: true
+        shell: bash
+        run: |
+          git credential-manager github login --username ${{ env.GH_USERNAME }} --token ${{ env.GH_TOKEN }} --force
+
+      - name: Offset Build Number
+        id: build_number
+        shell: bash
+        run: echo "BUILD_NUMBER=$((${{ env.BUILD_NUMBER_STARTS_AT }} + ${{ github.run_number }}))" >> $GITHUB_ENV
+      
+      - name: Show Build Info
+        shell: bash
+        run: echo "Build number is $BUILD_NUMBER"
+
+      - name: Clean Build
+        shell: pwsh
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.clean == 'true' }}
+        run: |
+          if (Test-Path -Path ./modules-${{ github.ref_name }}) { Remove-Item -Path ./modules-${{ github.ref_name }} -Recurse -Force }
+
+      - name: Cleanup
+        run: |
+          New-Item -ItemType Directory -Path ./modules-${{ github.ref_name }} -ErrorAction SilentlyContinue
+          cd ./modules-${{ github.ref_name }}
+          if (Test-Path -Path ./workspace/Module/modules-repo) { 
+            if (-not (Test-Path -Path ./modules-repo)) {
+              Move-Item -Path ./workspace/Module/modules-repo -Destination .
+            }
+          }
+        shell: pwsh
+
+      - name: Setup Nodos Workspace (Latest)
+        if: ${{  github.event_name != 'workflow_dispatch' || github.event.inputs.nodos_sdk_version == '' }}
+        run: |
+          if (-not (Test-Path -Path ./workspace)) {
+            ${{ env.NOSMAN_EXECUTABLE }} --workspace ./workspace get
+          } else {
+            cd ./workspace
+            ./nosman.exe get
+            cd ..
+          }
+          echo "Updating system nosman"
+          Copy-Item -Path ./workspace/nosman.exe -Destination ${{ env.NOSMAN_EXECUTABLE }} -Force
+        shell: pwsh
+        working-directory: ./modules-${{ github.ref_name }}
+
+      - name: Setup Nodos Workspace (Specific Version)
+        if: ${{  github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_sdk_version != '' }}
+        run: |
+          ${{ env.NOSMAN_EXECUTABLE }} --workspace ./workspace get --version "${{ github.event.inputs.nodos_sdk_version }}"
+        shell: pwsh
+        working-directory: ./modules-${{ github.ref_name }}
+
+      - name: Checkout
+        shell: pwsh
+        run: |
+          if (-not (Test-Path -Path ./modules-repo)) {
+            git clone --branch ${{ github.ref_name }} --depth 1 https://github.com/${{ github.repository }}.git --recurse-submodule --shallow-submodules ./modules-repo
+          }
+          cd ./modules-repo
+          git fetch origin
+          git checkout ${{ github.ref_name }}
+          git clean -ffd
+          git restore .
+          git pull --force
+          git submodule update --force --recursive --init
+          git status
+        working-directory: ./modules-${{ github.ref_name }}
+
+      - name: Setup Git
+        run: |
+          git config user.email "${{ env.GIT_EMAIL }}"
+          git config user.name "${{ env.GH_USERNAME }}"
+        working-directory: ./modules-${{ github.ref_name }}/modules-repo
+
+      - name: Move Repo Under Workspace
+        run: |
+          Move-Item -Path ./modules-repo -Destination ./workspace/Module/modules-repo
+        shell: pwsh
+        working-directory: ./modules-${{ github.ref_name }}
+  
+      - name: Update Nosman Cache
+        shell: pwsh
+        run: |
+          ./nosman.exe rescan --fetch-index
+        working-directory: ./modules-${{ github.ref_name }}/workspace
+
+      - name: Configure
+        run: |
+          cmake -S ./Toolchain/CMake -B ../Project -DCMAKE_BUILD_TYPE=Release
+        working-directory: ./modules-${{ github.ref_name }}/workspace
+
+      - name: Build
+        run: |
+          cmake --build ../Project --config Release -j 8
+        working-directory: ./modules-${{ github.ref_name }}/workspace
+
+      - name: Release (Changed)
+        if: ${{ github.event.inputs.build_all == null || github.event.inputs.build_all == 'false'}}
+        shell: pwsh
+        run: |
+          $LastBuildTag = git for-each-ref --sort=-v:refname --format='%(refname:short)' 'refs/tags/build.${{ github.ref_name }}-*' | Select-Object -First 1
+          ../../nosman.exe --workspace ../../ publish-batch --repo-path . --compare-with "$LastBuildTag" --vendor Nodos --version-suffix ".b${{ env.BUILD_NUMBER }}" --verbose --publisher-name "mediaz-bot" --publisher-email "bot@nodos.dev"
+        working-directory: ./modules-${{ github.ref_name }}/workspace/Module/modules-repo
+      
+      - name: Release (All)
+        if: ${{ github.event.inputs.build_all == 'true' }}
+        shell: pwsh
+        run: |
+          ../../nosman.exe --workspace ../../ publish-batch --repo-path . --vendor=Nodos --version-suffix ".b${{ env.BUILD_NUMBER }}" --verbose --publisher-name "mediaz-bot" --publisher-email "bot@nodos.dev"
+        working-directory: ./modules-${{ github.ref_name }}/workspace/Module/modules-repo
+      
+      - name: Tag
+        run: |
+          git tag -a "build.${{ github.ref_name }}-${{ env.BUILD_NUMBER }}" -m "Build ${{ github.ref_name }}-${{ env.BUILD_NUMBER }}"
+          git push origin "build.${{ github.ref_name }}-${{ env.BUILD_NUMBER }}"
+        working-directory: ./modules-${{ github.ref_name }}/workspace/Module/modules-repo
+      
+      - name: Move Back
+        run: |
+          Move-Item -Path ./workspace/Module/modules-repo -Destination .
+        shell: pwsh
+        working-directory: ./modules-${{ github.ref_name }}
