@@ -58,7 +58,7 @@ nos_generate_flatbuffers("${NOS_UTILITIES_PATH_2_3}/Config" "${CMAKE_CURRENT_SOU
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" 
     "${NOS_UTILITIES_PATH_2_3};${NOS_MEDIAIO_PATH_1_3};${NOS_SDK_DIR}/types" nosAJA_generated)
 
-list(APPEND DEPENDENCIES nosMediaIO_1_3_generated nosUtilities_2_3_generated nosAJA_generated stb ajantv2 ${NOS_SYS_VULKAN_TARGET_5_7} ${NOS_PLUGIN_SDK_TARGET})
+list(APPEND DEPENDENCIES nosMediaIO_1_3_generated nosUtilities_2_3_generated nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_7} ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Source
