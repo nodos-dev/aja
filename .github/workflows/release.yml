@@ -45,7 +45,7 @@ jobs:
     uses: nodos-dev/actions/.github/workflows/release-modules.yml@main
     with:
       ref_name: ${{ github.ref_name }}
-      build_all: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.build_all || false }}
+      build_all: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.build_all) || false }}
       nodos_sdk_version: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_sdk_version || '' }}
-      clean: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.clean || false }}
+      clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
