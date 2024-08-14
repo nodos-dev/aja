@@ -203,16 +203,6 @@ u32 AJADevice::GetFBSize(NTV2Channel channel)
     return NTV2FramesizeToByteCount(fsz) * (quad ? 4 : 1);
 }
 
-u32 AJADevice::GetIntrinsicSize()
-{
-    u32 max = 0;
-    for (auto c : Channels)
-    {
-        max = std::max(max, GetFBSize(c));
-    }
-    return max;
-}
-
 AJADevice::~AJADevice()
 {
     ClearState();
@@ -272,18 +262,19 @@ bool AJADevice::CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoF
 	if (isInput)
 		return true;
 	if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
-	{
 		return false;
-	}
 
 	return NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode || NTV2_IS_QUAD_FRAME_FORMAT(fmt));
 }
 
 bool AJADevice::ChannelCanInput(NTV2Channel channel)
 {
-    if (Channels.contains(channel))
     {
-        return false;
+        std::shared_lock lock(ChannelsMutex);
+        if (Channels.contains(channel))
+        {
+            return false;
+        }
     }
     NTV2InputSource src = NTV2ChannelToInputSource(channel, NTV2_INPUTSOURCES_SDI);
     // Validate channel
@@ -314,9 +305,12 @@ bool AJADevice::ChannelCanInput(NTV2Channel channel)
 
 bool AJADevice::ChannelCanOutput(NTV2Channel channel)
 {
-    if (Channels.contains(channel))
     {
-        return false;
+        std::shared_lock lock(ChannelsMutex);
+        if (Channels.contains(channel))
+        {
+            return false;
+        }
     }
     NTV2OutputDestination dst = NTV2ChannelToOutputDestination(channel);
 
@@ -487,6 +481,8 @@ static NTV2OutputCrosspointID GetOutputTSIFB(NTV2Channel channel)
 
 bool AJADevice::RouteQuadInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt)
 {
+    std::unique_lock lock(ChannelsMutex);
+
     if(channel & 3)
     {
         // Channel has to be multiple of 4
@@ -563,17 +559,15 @@ bool AJADevice::RouteQuadInputSignal(NTV2Channel channel, NTV2VideoFormat videoF
     }
     
     if(re)
-    {
         for(auto c : channels)
-        {
-            Channels.insert(c);
-        }
-    }
+            Channels[c] = true;
     return re;
 }
 
 bool AJADevice::RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat fmt, Mode mode, NTV2FrameBufferFormat fbFmt)
 {
+    std::unique_lock lock(ChannelsMutex);
+
     if(channel & 3)
     {
         // Channel has to be multiple of 4
@@ -634,18 +628,15 @@ bool AJADevice::RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat fmt, 
     }
     
     if(re)
-    {
         for(auto c : channels)
-        {
-            Channels.insert(c);
-        }
-    }
+            Channels[c] = false;
 
     return re;
 }
 
 bool AJADevice::RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt)
 {
+    std::unique_lock lock(ChannelsMutex);
     NTV2InputSource src = NTV2ChannelToInputSource(channel, NTV2_INPUTSOURCES_SDI);
 
     // Validate channel
@@ -661,12 +652,13 @@ bool AJADevice::RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt
     re &= (SetFrameBufferFormat(channel, fbFmt));
     re &= (Connect(GetFrameBufferInputXptFromChannel(channel), GetInputSourceOutputXpt(src)));
     // re &= (SetReference(NTV2InputSourceToReferenceSource(src)));
-    if (re) Channels.insert(channel);
+    if (re) Channels[channel] = true;
     return re;
 }
 
 bool AJADevice::RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt)
 {
+    std::unique_lock lock(ChannelsMutex);
     NTV2OutputDestination dst = NTV2ChannelToOutputDestination(channel);
             
     // Validate channel
@@ -682,12 +674,13 @@ bool AJADevice::RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFm
     re &= (SetVideoFormat(videoFmt, false, false, channel));
     re &= (SetFrameBufferFormat(channel, fbFmt));
     re &= (Connect(GetOutputDestInputXpt(dst), GetFrameBufferOutputXptFromChannel(channel), true));
-    if(re) Channels.insert(channel);
+    if(re) Channels[channel] = false;
     return re;
 }	
 
 void AJADevice::CloseChannel(NTV2Channel channel, bool isInput,  bool isQuad)
 {
+    std::unique_lock lock(ChannelsMutex);
     if (isQuad)
     {
         CloseQLChannel(NTV2Channel(channel + 0), isInput);
@@ -704,6 +697,7 @@ void AJADevice::CloseChannel(NTV2Channel channel, bool isInput,  bool isQuad)
     {
         FPSFamily = NTV2_FRAMERATE_INVALID;
     }
+    SendCheckConfigurationToNodes();
 }
 
 void AJADevice::CloseSLChannel(NTV2Channel channel, bool isInput)
@@ -731,6 +725,13 @@ void AJADevice::CloseQLChannel(NTV2Channel channel, bool isInput)
     AJA_ASSERT(isInput ? DisableInputInterrupt(channel) : DisableOutputInterrupt(channel));
     AJA_ASSERT(DisableChannel(channel));
     Channels.erase(channel);
+}
+
+void AJADevice::SendCheckConfigurationToNodes()
+{
+    std::unique_lock lock(RegisteredNodesMutex);
+    for (auto& id : RegisteredNodes)
+        nosEngine.CallNodeFunction(id, NOS_NAME("CheckChannelConfig"));
 }
 
 bool AJADevice::GetExtent(NTV2Channel channel, Mode mode, uint32_t& width, uint32_t& height)
@@ -769,10 +770,9 @@ bool AJADevice::RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool 
 
     if (isInput ? RouteInputSignal(channel, videoFmt, mode, fbFmt) : RouteOutputSignal(channel, videoFmt, mode, fbFmt))
     {
-        if (NTV2_FRAMERATE_INVALID == FPSFamily)
-        {
+        if (NTV2_FRAMERATE_INVALID == FPSFamily || (isInput && (mode == Mode::SL && GetFilteredChannels(true).size() <= 1) || (mode != Mode::AUTO && GetFilteredChannels(true).size() <= 4)))
             FPSFamily = GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(videoFmt));
-        }
+        SendCheckConfigurationToNodes();
         return true;
     }
     return false;
@@ -799,6 +799,7 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
 
 uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener)
 {
+    std::unique_lock lock(ReferenceListeners.Mutex);
     auto id = ReferenceListeners.NextID++;
     ReferenceListeners.Map[id] = std::move(listener);
     return id;
@@ -806,6 +807,7 @@ uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceS
 
 void AJADevice::RemoveReferenceSourceListener(uint32_t id)
 {
+    std::unique_lock lock(ReferenceListeners.Mutex);
     ReferenceListeners.Map.erase(id);
 }
 
@@ -814,8 +816,30 @@ bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool i
     auto ret = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
     if (ret)
     {
+        std::unique_lock lock(ReferenceListeners.Mutex);
         for (auto& listener : ReferenceListeners.Map | std::views::values)
             listener(inRefSource);
     }
     return ret;
+}
+
+std::unordered_set<NTV2Channel> AJADevice::GetFilteredChannels(bool isInput)
+{
+    std::unordered_set<NTV2Channel> re;
+    for (auto [c, isChannelInput] : Channels)
+        if (isInput == isChannelInput)
+			re.insert(c);
+	return re;
+}
+
+void AJADevice::RegisterNode(nosUUID id)
+{
+    std::unique_lock lock(RegisteredNodesMutex);
+	RegisteredNodes.insert(id);
+}
+
+void AJADevice::UnregisterNode(nosUUID id)
+{
+	std::unique_lock lock(RegisteredNodesMutex);
+	RegisteredNodes.erase(id);
 }

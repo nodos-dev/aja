@@ -21,6 +21,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include <Nodos/PluginHelpers.hpp>
+
 #define AJA_ASSERT(x) { if(!(x)) { printf("%s:%d\n", __FILE__, __LINE__); abort();} }
 
 struct RestartParams {
@@ -57,7 +59,9 @@ struct AJADevice : CNTV2Card
 
     NTV2DeviceID ID;
 
-    std::set<NTV2Channel> Channels;
+    std::shared_mutex ChannelsMutex;
+    //Channel To IsInput
+    std::unordered_map<NTV2Channel, bool> Channels;
 
 	// TODO: Remove when Legacy nodes are removed
     std::atomic_bool HasInput = false;
@@ -119,7 +123,6 @@ struct AJADevice : CNTV2Card
     void ClearState();
 
     uint32_t GetFBSize(NTV2Channel channel);
-    uint32_t GetIntrinsicSize();
 
     bool GetExtent(NTV2Channel channel, Mode mode, uint32_t& width, uint32_t& height);
     bool GetExtent(NTV2VideoFormat fmt, Mode mode, uint32_t& width, uint32_t& height);
@@ -129,8 +132,12 @@ struct AJADevice : CNTV2Card
     uint32_t AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener);
     void RemoveReferenceSourceListener(uint32_t id);
 
+    void RegisterNode(nosUUID id);
+    void UnregisterNode(nosUUID id);
+
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
 
+    std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
 private:
     bool RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
     bool RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
@@ -151,10 +158,16 @@ private:
     void CloseSLChannel(NTV2Channel channel, bool isInput);
     void CloseQLChannel(NTV2Channel channel, bool isInput);
 
+    void SendCheckConfigurationToNodes();
+
     struct {
         std::unordered_map<uint32_t, std::function<void(NTV2ReferenceSource)>> Map;
         uint32_t NextID = 0;
+        std::mutex Mutex;
     } ReferenceListeners;
+
+    std::mutex RegisteredNodesMutex;
+    std::unordered_set<nosUUID> RegisteredNodes;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

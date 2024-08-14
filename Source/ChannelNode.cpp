@@ -76,12 +76,18 @@ struct ChannelNodeContext : NodeContext
 			if (oldDevice != Device)
 			{
 				if (oldDevice)
+				{
+					oldDevice->UnregisterNode(NodeId);
 					oldDevice->RemoveReferenceSourceListener(RefListenerId);
+				}
 				if(Device)
+				{
+					Device->RegisterNode(NodeId);
 					RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
-					auto refStr = NTV2ReferenceSourceToString(ref, true);
-					SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
-				});
+						auto refStr = NTV2ReferenceSourceToString(ref, true);
+						SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
+						});
+				}
 				else
 					RefListenerId = 0;
 			}
@@ -181,8 +187,12 @@ struct ChannelNodeContext : NodeContext
 
 	~ChannelNodeContext() override
 	{
-		if (Device && RefListenerId)
-			Device->RemoveReferenceSourceListener(RefListenerId);
+		if (Device)
+		{
+			Device->UnregisterNode(NodeId);
+			if(RefListenerId)
+				Device->RemoveReferenceSourceListener(RefListenerId);
+		}
 		CurrentChannel.Close();
 	}
 	
@@ -229,7 +239,7 @@ struct ChannelNodeContext : NodeContext
 		channelPin.video_format = NTV2VideoFormatToString(format, true); // TODO: Readonly.
 		uint32_t width, height;
 		if(IsInput)
-			Device->GetExtent(Channel, Mode, width, height);
+			Device->GetExtent(format, Mode, width, height);
 		else
 		{
 			auto geometry = GetNTV2FrameGeometryFromVideoFormat(format);
@@ -249,6 +259,56 @@ struct ChannelNodeContext : NodeContext
 		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
 		UpdateReferenceSource();
+	}
+
+	void CheckChannelConfig()
+	{
+		if (!Device)
+			return;
+		// Check if the current channel configuration & pin values are valid. If not, close the channel and reset invalid pins to NONE.
+		if (CurrentChannel.IsOpen)
+		{
+			// Check if output && FPSFamily is suitable
+			if (IsInput)
+				return;
+			if (GetVideoFormat() == NTV2_FORMAT_UNKNOWN)
+			{
+				ResetFrameRatePin();
+				UpdateStringList(GetFrameRateStringListName(), GetPossibleFrameRates());
+			}
+			return;
+		}
+
+		// If the channel is not open, get string lists, if string list does not contain current value, set to NONE.
+		auto channelList = GetPossibleChannelNames();
+		UpdateStringList(GetChannelStringListName(), channelList);
+		if (Channel == NTV2_CHANNEL_INVALID)
+			return;
+		if (std::find(channelList.begin(), channelList.end(), ChannelPinValue) == channelList.end())
+		{
+			ResetChannelNamePin();
+			return;
+		}
+
+		auto resolutionList = GetPossibleResolutions();
+		UpdateStringList(GetResolutionStringListName(), resolutionList);
+		if (Resolution == NTV2_FG_INVALID)
+			return;
+		if (std::find(resolutionList.begin(), resolutionList.end(), ResolutionPinValue) == resolutionList.end())
+		{
+			ResetResolutionPin();
+			return;
+		}
+
+		auto frameRateList = GetPossibleFrameRates();
+		UpdateStringList(GetFrameRateStringListName(), frameRateList);
+		if (FrameRate == NTV2_FRAMERATE_INVALID)
+			return;
+		if (std::find(frameRateList.begin(), frameRateList.end(), FrameRatePinValue) == frameRateList.end())
+		{
+			ResetFrameRatePin();
+			return;
+		}
 	}
 
 	void UpdateVisualizer(nos::Name pinName, std::string stringListName)
@@ -576,6 +636,8 @@ struct ChannelNodeContext : NodeContext
 			return NOS_RESULT_FAILED;
 		if (!IsInput)
 			return NOS_RESULT_SUCCESS;
+		if (!ShouldOpen)
+			return NOS_RESULT_FAILED;
 		auto format = Device->GetSDIInputVideoFormat(Channel);
 		if (ForceInterlaced)
 			format = Device->ForceInterlace(format);
@@ -599,17 +661,24 @@ struct ChannelNodeContext : NodeContext
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
 	{
-		*outCount = 1;
+		*outCount = 2;
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
-		*outFunction = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		outFunctionNames[0] = NOS_NAME_STATIC("TryUpdateChannel");
+		outFunction[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
 			{
 				auto* context = static_cast<ChannelNodeContext*>(ctx);
 				context->TryFindChannel = true;
 				nosEngine.SendPathRestart(context->NodeId);
 				nosEngine.LogW("Input signal lost.");
 			};
-		*outFunctionNames = NOS_NAME_STATIC("TryUpdateChannel");
+
+		outFunctionNames[1] = NOS_NAME_STATIC("CheckChannelConfig");
+		outFunction[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+			{
+				auto* context = static_cast<ChannelNodeContext*>(ctx);
+				context->CheckChannelConfig();
+			};
 		return NOS_RESULT_SUCCESS; 
 	}
 

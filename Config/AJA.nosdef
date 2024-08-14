@@ -316,6 +316,10 @@
 							"show_as": "INPUT_PIN"
 						}
 					]
+				},
+				{
+					"class_name": "CheckChannelConfig",
+					"contents_type": "Job"
 				}
 			]
 		}
