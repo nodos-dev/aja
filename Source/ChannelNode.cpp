@@ -16,7 +16,6 @@ NOS_REGISTER_NAME(QuadLinkInputMode);
 NOS_REGISTER_NAME(QuadLinkOutputMode);
 NOS_REGISTER_NAME(IsOpen);
 NOS_REGISTER_NAME(FrameBufferFormat);
-NOS_REGISTER_NAME(QuadMode);
 NOS_REGISTER_NAME(ForceInterlaced);
 
 enum class AJAChangedPinType
@@ -172,17 +171,18 @@ struct ChannelNodeContext : NodeContext
 			ReferenceSourcePinValue = InterpretPinValue<const char>(newVal);
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher(NSN_QuadMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			auto newQuadMode = *InterpretPinValue<AJADevice::Mode>(newVal);
-			auto info = CurrentChannel.Info;
-			info.output_quad_link_mode = static_cast<QuadLinkMode>(newQuadMode);
-			CurrentChannel.Update(std::move(info), true);
+		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			Mode = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_QuadLinkInputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			Mode = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ForceInterlaced = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();
 		});
-
 	}
 
 	~ChannelNodeContext() override
