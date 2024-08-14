@@ -70,7 +70,7 @@ struct AJADevice : CNTV2Card
     static std::map<std::string, uint64_t>  EnumerateDevices();
     static std::unordered_map<std::string, std::set<NTV2VideoFormat>> StringToFormat();
 
-    inline static const auto AvailableDevices = EnumerateDevices();
+    static std::map<std::string, uint64_t> AvailableDevices;
 
     inline static NTV2VideoFormat GetMatchingFormat(std::string const& fmt, bool multiLink)
     {

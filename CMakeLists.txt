@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.24.2)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 20)
 
+message("------------------------------DEBUG FLAGS: ${CMAKE_CXX_FLAGS_DEBUG}")
+
 if (NOT WITH_NODOS_WORKSPACE)
     message(FATAL_ERROR "This repo currently does not support builds without Nodos workspace. "
     "Place this repo under nodos-workspace/Module folder and run cmake -S ./Toolchain/CMake -B Build from workspace root.")
@@ -26,8 +28,9 @@ set(AJANTV2_DISABLE_DEMOS ON)
 set(AJANTV2_DISABLE_DRIVER ON)
 set(AJANTV2_DISABLE_TESTS ON)
 set(AJANTV2_DISABLE_TOOLS ON)
-set(AJANTV2_DISABLE_PLUGINS ON)
+set(AJANTV2_DISABLE_PLUGIN_LOAD ON)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 #if(WIN32)
 	remove_definitions(-DNOMINMAX)
 #endif()

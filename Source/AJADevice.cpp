@@ -12,13 +12,16 @@
 #undef min
 #undef max
 
+std::map<std::string, uint64_t> AJADevice::AvailableDevices;
+
 std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
 {
-    CNTV2DeviceScanner scanner;
+    CNTV2DeviceScanner scanner{};
     std::map<std::string, uint64_t>  re;
-    for(auto& dev: scanner.GetDeviceInfoList())
+    CNTV2Card dev;
+    for (size_t i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
     {
-        re[dev.deviceIdentifier] = dev.deviceSerialNumber;
+        re[dev.GetDisplayName()] = dev.GetSerialNumber();
     }
     return re;
 }
@@ -74,8 +77,9 @@ void AJADevice::Init()
     }
     
     CNTV2DeviceScanner scanner;
-    for(auto& dev: scanner.GetDeviceInfoList())
-        Devices[dev.deviceSerialNumber] = (std::make_shared<AJADevice>(dev.deviceSerialNumber)); // TODO: Error check on AJADevice ctor.
+    CNTV2Card dev;
+    for (size_t i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
+        Devices[dev.GetSerialNumber()] = (std::make_shared<AJADevice>(dev.GetSerialNumber())); // TODO: Error check on AJADevice ctor.
 }
 
 void AJADevice::Deinit()

@@ -57,6 +57,8 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 	if (!outList)
 		return NOS_RESULT_SUCCESS;
 
+	AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
+
 	NOS_RETURN_ON_FAILURE(RequestVulkanSubsystem());
 	
 	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
