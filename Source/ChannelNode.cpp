@@ -216,7 +216,9 @@ struct ChannelNodeContext : NodeContext
 			NTV2ReferenceSource curRef{};
 			if (Device->GetReference(curRef) && curRef != ReferenceSource)
 				Device->SetReference(ReferenceSource);
-			auto refStatusText = NTV2ReferenceSourceToString(ReferenceSource, true);
+			NTV2FrameRate refFrameRate{};
+			Device->GetReferenceAndFrameRate(curRef, refFrameRate);
+			auto refStatusText = NTV2ReferenceSourceToString(ReferenceSource, true) + " (" + NTV2FrameRateToString(refFrameRate, true) + ")";
 			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::INFO, "Reference: " + refStatusText);
 		}
 		else
