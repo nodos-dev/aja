@@ -74,15 +74,24 @@ bool Channel::Open()
 		auto channelName = [&]()
 		{
 			std::string ch = NTV2ChannelToString(channel, true);
+
+			assert(!Info.is_quad || (Info.is_quad && !Info.is_interlaced));
+
 			if (Info.is_quad)
 			{
 				for (int i = channel + 1; i < channel + 4; ++i)
 					ch += i + '1';
-				ch += " 4x";
 			}
-			else ch += ' ';
-			return ch + NTV2VideoFormatToString(fmt, true);
+			
+			ch += ' ' + NTV2VideoFormatToString(fmt, true);
+
+			if (Info.is_quad && !NTV2_IS_QUAD_FRAME_FORMAT(fmt))
+			{
+				ch.replace(ch.find("1080p"), 5, "UHDp");
+			}
+			return ch;
 		};
+
 		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, channelName());
 		IsOpen = true;
 		return true;
