@@ -17,15 +17,15 @@ struct WaitVBLNodeContext : NodeContext
 	{
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
-		NodeExecuteArgs args = execArgs;
-		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(args[NOS_NAME_STATIC("Channel")].Data->Data);
-		nosUUID const* outId = &args[NOS_NAME_STATIC("VBL")].Id;
-		nosUUID const* outVBLCountId = &args[NOS_NAME_STATIC("CurrentVBL")].Id;
-		nosUUID inId = args[NOS_NAME_STATIC("Run")].Id;
-		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(args[NOS_NAME("WaitField")].Data->Data);
-		nosUUID outFieldPinId = args[NOS_NAME("FieldType")].Id;
+		NodeExecuteParams params = execParams;
+		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data);
+		nosUUID const* outId = &params[NOS_NAME_STATIC("VBL")].Id;
+		nosUUID const* outVBLCountId = &params[NOS_NAME_STATIC("CurrentVBL")].Id;
+		nosUUID inId = params[NOS_NAME_STATIC("Run")].Id;
+		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
+		nosUUID outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
 		auto device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
@@ -79,7 +79,7 @@ struct WaitVBLNodeContext : NodeContext
 		if (channelInfo->is_input() && !VBLState.LastVBLCount)
 		{
 			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel);
-			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLNanoseconds = nanoseconds };
+			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLTimestampNs = nanoseconds };
 			nosEngine.SendPathCommand(*outId, firstVblAfterStart);
 		}
 		ChannelStr = channelInfo->channel_name()->c_str();
@@ -139,22 +139,16 @@ struct WaitVBLNodeContext : NodeContext
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
 	{
-		*outCount = 2;
+		*outCount = 1;
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
 
-		outFunctionNames[0] = NSN_VBLFailed;
-		outFunction[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
-		{
-			NodeExecuteArgs funcArgs(functionArgs);
-			nosEngine.SetPinDirty(funcArgs[NOS_NAME("Propagate")].Id);
-		};
-
-		outFunctionNames[1] = NOS_NAME("Drop");
-		outFunction[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		outFunctionNames[0] = NOS_NAME("Drop");
+		outFunction[0] = [](void* ctx, nosFunctionExecuteParams* params)
 		{
 			WaitVBLNodeContext* context = reinterpret_cast<WaitVBLNodeContext*>(ctx);
 			context->FrameDropped(1, false);
+			return NOS_RESULT_SUCCESS;
 		};
 
 		return NOS_RESULT_SUCCESS; 

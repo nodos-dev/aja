@@ -39,14 +39,6 @@ extern nos::Name NSN_AJA_AJAOut;
 
 namespace nos::aja
 {
-inline auto GenerateID() 
-{
-	struct {
-		nos::fb::UUID id; operator nos::fb::UUID *() { return &id;}
-	} re {nos::GenerateUUID()}; 
-	return re;
-}
-
 inline nosVec2u GetDeltaSeconds(NTV2VideoFormat format, bool interlaced)
 {
 	NTV2FrameRate frameRate = GetNTV2FrameRateFromVideoFormat(format);

@@ -10,6 +10,10 @@ using namespace nos;
 NOS_INIT_WITH_MIN_REQUIRED_MINOR(10);
 NOS_VULKAN_INIT();
 
+NOS_BEGIN_IMPORT_DEPS
+	NOS_VULKAN_IMPORT
+NOS_END_IMPORT_DEPS
+
 NOS_REGISTER_NAME(Device);
 NOS_REGISTER_NAME(ReferenceSource);
 NOS_REGISTER_NAME(Debug);
@@ -58,8 +62,6 @@ NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNod
 		return NOS_RESULT_SUCCESS;
 
 	AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
-
-	NOS_RETURN_ON_FAILURE(RequestVulkanSubsystem());
 	
 	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
 	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))

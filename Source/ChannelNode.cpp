@@ -641,7 +641,7 @@ struct ChannelNodeContext : NodeContext
 
 	std::atomic_bool TryFindChannel = false;
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* execArgs) override
+	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		if(!Device)
 			return NOS_RESULT_FAILED;
@@ -658,7 +658,7 @@ struct ChannelNodeContext : NodeContext
 				if (CurrentChannel.Info.video_format_idx == static_cast<int>(format))
 				{
 					auto deltaSec = GetDeltaSeconds(format, !IsProgressivePicture(format));
-					bool deltaSecCompatible = memcmp(&execArgs->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
+					bool deltaSecCompatible = memcmp(&execParams->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
 					if (deltaSecCompatible != DeltaSecondCompatible)
 					{
 						DeltaSecondCompatible = deltaSecCompatible;
@@ -688,19 +688,21 @@ struct ChannelNodeContext : NodeContext
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
 		outFunctionNames[0] = NOS_NAME_STATIC("TryUpdateChannel");
-		outFunction[0] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		outFunction[0] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
 				auto* context = static_cast<ChannelNodeContext*>(ctx);
 				context->TryFindChannel = true;
 				nosEngine.SendPathRestart(context->NodeId);
 				nosEngine.LogW("Input signal lost.");
+				return NOS_RESULT_SUCCESS;
 			};
 
 		outFunctionNames[1] = NOS_NAME_STATIC("CheckChannelConfig");
-		outFunction[1] = [](void* ctx, const nosNodeExecuteArgs* nodeArgs, const nosNodeExecuteArgs* functionArgs)
+		outFunction[1] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
 				auto* context = static_cast<ChannelNodeContext*>(ctx);
 				context->CheckChannelConfig();
+				return NOS_RESULT_SUCCESS;
 			};
 		return NOS_RESULT_SUCCESS; 
 	}
