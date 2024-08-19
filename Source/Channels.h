@@ -52,7 +52,8 @@ struct Channel
 	enum class StatusType
 	{
 		Channel,
-		Reference
+		Reference,
+		DeltaSecondsCompatible
 	};
 
 	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text);

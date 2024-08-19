@@ -1,6 +1,8 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "Channels.h"
+#include "AJAMain.h"
+
 // TODO: Remove this node once things settle down.
 namespace nos::aja
 {
@@ -654,7 +656,19 @@ struct ChannelNodeContext : NodeContext
 		{
 			if (CurrentChannel.IsOpen)
 				if (CurrentChannel.Info.video_format_idx == static_cast<int>(format))
+				{
+					auto deltaSec = GetDeltaSeconds(format, !IsProgressivePicture(format));
+					bool deltaSecCompatible = memcmp(&execArgs->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
+					if (deltaSecCompatible != DeltaSecondCompatible)
+					{
+						DeltaSecondCompatible = deltaSecCompatible;
+						if (!DeltaSecondCompatible)
+							CurrentChannel.SetStatus(aja::Channel::StatusType::DeltaSecondsCompatible, fb::NodeStatusMessageType::WARNING, "Frame rate is incompatible with output.");
+						else
+							CurrentChannel.ClearStatus(aja::Channel::StatusType::DeltaSecondsCompatible);
+					}
 					return NOS_RESULT_SUCCESS;
+				}
 			TryFindChannel = true;
 		}
 		TryUpdateChannel();
@@ -704,6 +718,7 @@ struct ChannelNodeContext : NodeContext
 	std::string InterlacedPinValue = "NONE";
 	std::string ReferenceSourcePinValue = "NONE";
 	
+
 	AJADevice* Device{};
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
 	NTV2FrameGeometry Resolution = NTV2_FG_INVALID;
@@ -720,6 +735,8 @@ struct ChannelNodeContext : NodeContext
 
 	QuadLinkInputMode QuadLinkInputMode = QuadLinkInputMode::Tsi;
 	QuadLinkMode QuadLinkOutputMode = QuadLinkMode::Tsi;
+	
+	bool DeltaSecondCompatible = true;
 };
 
 nosResult RegisterChannelNode(nosNodeFunctions* functions)
