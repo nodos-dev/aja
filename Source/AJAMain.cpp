@@ -5,10 +5,8 @@
 
 #include <Nodos/PluginAPI.h>
 
-using namespace nos;
-
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(0);
-NOS_VULKAN_INIT();
+NOS_INIT()
+NOS_VULKAN_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
@@ -26,12 +24,8 @@ NOS_REGISTER_NAME(Interlaced);
 NOS_REGISTER_NAME(ssbo);
 NOS_REGISTER_NAME(Output);
 
-namespace nos
+namespace nos::aja
 {
-
-namespace aja
-{
-
 enum class Nodes : int
 {
 	DMAWrite,
@@ -70,6 +64,5 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	}
 
 };
-
-}
-} // namespace nos
+NOS_EXPORT_PLUGIN_FUNCTIONS(AJAPluginFunctions)
+} // namespace nos::aja
