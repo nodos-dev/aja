@@ -46,31 +46,30 @@ nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
 
-extern "C"
+struct AJAPluginFunctions : nos::PluginFunctions
 {
+	nosResult ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outList) override
+	{
+		outSize = static_cast<size_t>(Nodes::Count);
+		if (!outList)
+			return NOS_RESULT_SUCCESS;
 
+		AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
 
-NOSAPI_ATTR void NOSAPI_CALL nosUnloadPlugin()
-{
-	AJADevice::Deinit();
-}
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
-{
-	*outSize = static_cast<size_t>(Nodes::Count);
-	if (!outList)
+		NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
+		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
+		NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
+		NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
 		return NOS_RESULT_SUCCESS;
+	}
 
-	AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
-	
-	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
-	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
-	NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
-	NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
-	return NOS_RESULT_SUCCESS;
-}
+	nosResult OnPreUnloadPlugin() override
+	{
+		AJADevice::Deinit();
+		return NOS_RESULT_SUCCESS;
+	}
+
+};
 
 }
-}
-
 } // namespace nos
