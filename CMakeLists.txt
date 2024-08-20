@@ -4,8 +4,6 @@ cmake_minimum_required(VERSION 3.24.2)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(CMAKE_CXX_STANDARD 20)
 
-message("------------------------------DEBUG FLAGS: ${CMAKE_CXX_FLAGS_DEBUG}")
-
 if (NOT WITH_NODOS_WORKSPACE)
     message(FATAL_ERROR "This repo currently does not support builds without Nodos workspace. "
     "Place this repo under nodos-workspace/Module folder and run cmake -S ./Toolchain/CMake -B Build from workspace root.")
@@ -14,10 +12,6 @@ endif()
 # Nodos SDK
 nos_find_sdk("1.2.0" NOS_PLUGIN_SDK_TARGET NOS_SUBSYSTEM_SDK_TARGET NOS_SDK_DIR)
 set(FLATC_EXECUTABLE ${NOS_SDK_DIR}/bin/flatc${CMAKE_EXECUTABLE_SUFFIX})
-
-# Dependencies
-# ------------
-nos_get_module("nos.sys.vulkan" "5.7" NOS_SYS_VULKAN_TARGET_5_7)
 
 # AJA
 # ---
@@ -44,24 +38,24 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_DEBUG_POSTFIX "")
 
 # nos.sys.vulkan
-nos_get_module("nos.sys.vulkan" "5.7" NOS_SYS_VULKAN_TARGET_5_7)
+nos_get_module("nos.sys.vulkan" "5.8" NOS_SYS_VULKAN_TARGET_5_8)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "1.3" NOS_MEDIAIO_TARGET_1_3)
-nos_find_module_path("nos.mediaio" "1.3" NOS_MEDIAIO_PATH_1_3)
-nos_generate_flatbuffers("${NOS_MEDIAIO_PATH_1_3}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH_1_3};${NOS_SDK_DIR}/types" nosMediaIO_1_3_generated)
+nos_get_module("nos.mediaio" "1.4" NOS_MEDIAIO_TARGET_1_4)
+nos_find_module_path("nos.mediaio" "1.4" NOS_MEDIAIO_PATH_1_4)
+nos_generate_flatbuffers("${NOS_MEDIAIO_PATH_1_4}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH_1_4};${NOS_SDK_DIR}/types" nosMediaIO_1_4_generated)
 
 # nos.utilities
-nos_get_module("nos.utilities" "2.3" NOS_UTILITIES_TARGET_2_3)
-nos_find_module_path("nos.utilities" "2.3" NOS_UTILITIES_PATH_2_3)
-nos_generate_flatbuffers("${NOS_UTILITIES_PATH_2_3}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH_2_3};${NOS_SDK_DIR}/types" nosUtilities_2_3_generated)
+nos_get_module("nos.utilities" "2.5" NOS_UTILITIES_TARGET_2_5)
+nos_find_module_path("nos.utilities" "2.5" NOS_UTILITIES_PATH_2_5)
+nos_generate_flatbuffers("${NOS_UTILITIES_PATH_2_5}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH_2_5};${NOS_SDK_DIR}/types" nosUtilities_2_5_generated)
 
 # AJA Plugin
 # ----------
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" 
-    "${NOS_UTILITIES_PATH_2_3};${NOS_MEDIAIO_PATH_1_3};${NOS_SDK_DIR}/types" nosAJA_generated)
+    "${NOS_UTILITIES_PATH_2_5};${NOS_MEDIAIO_PATH_1_4};${NOS_SDK_DIR}/types" nosAJA_generated)
 
-list(APPEND DEPENDENCIES nosMediaIO_1_3_generated nosUtilities_2_3_generated nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_7} ${NOS_PLUGIN_SDK_TARGET})
+list(APPEND DEPENDENCIES nosMediaIO_1_4_generated nosUtilities_2_5_generated nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_8} ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Source
