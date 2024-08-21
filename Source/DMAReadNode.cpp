@@ -20,13 +20,13 @@ struct DMAReadNodeContext : DMANodeBase
 	{
 	}
 
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		NodeExecuteArgs execArgs = args;
-		nosResourceShareInfo bufferToWrite = vkss:: ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execArgs[NOS_NAME_STATIC("BufferToWrite")].Data));
-		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execArgs[NOS_NAME_STATIC("FieldType")].Data);
-		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execArgs[NOS_NAME_STATIC("Channel")].Data);
-		uint32_t curVBLCount = *InterpretPinValue<uint32_t>(*execArgs[NOS_NAME_STATIC("CurrentVBL")].Data);
+		NodeExecuteParams execParams = params;
+		nosResourceShareInfo bufferToWrite = vkss:: ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execParams[NOS_NAME_STATIC("BufferToWrite")].Data));
+		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execParams[NOS_NAME_STATIC("FieldType")].Data);
+		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execParams[NOS_NAME_STATIC("Channel")].Data);
+		uint32_t curVBLCount = *InterpretPinValue<uint32_t>(*execParams[NOS_NAME_STATIC("CurrentVBL")].Data);
 
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
@@ -70,7 +70,7 @@ struct DMAReadNodeContext : DMANodeBase
 
 		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
 
-		nosEngine.SetPinValue(execArgs[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
+		nosEngine.SetPinValue(execParams[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
 
 		return NOS_RESULT_SUCCESS;
 	}

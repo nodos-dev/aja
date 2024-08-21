@@ -5,10 +5,12 @@
 
 #include <Nodos/PluginAPI.h>
 
-using namespace nos;
+NOS_INIT()
+NOS_VULKAN_INIT()
 
-NOS_INIT_WITH_MIN_REQUIRED_MINOR(10);
-NOS_VULKAN_INIT();
+NOS_BEGIN_IMPORT_DEPS()
+	NOS_VULKAN_IMPORT()
+NOS_END_IMPORT_DEPS()
 
 NOS_REGISTER_NAME(Device);
 NOS_REGISTER_NAME(ReferenceSource);
@@ -22,12 +24,8 @@ NOS_REGISTER_NAME(Interlaced);
 NOS_REGISTER_NAME(ssbo);
 NOS_REGISTER_NAME(Output);
 
-namespace nos
+namespace nos::aja
 {
-
-namespace aja
-{
-
 enum class Nodes : int
 {
 	DMAWrite,
@@ -42,33 +40,29 @@ nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
 
-extern "C"
+struct AJAPluginFunctions : nos::PluginFunctions
 {
+	nosResult ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outList) override
+	{
+		outSize = static_cast<size_t>(Nodes::Count);
+		if (!outList)
+			return NOS_RESULT_SUCCESS;
 
+		AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
 
-NOSAPI_ATTR void NOSAPI_CALL nosUnloadPlugin()
-{
-	AJADevice::Deinit();
-}
-
-NOSAPI_ATTR nosResult NOSAPI_CALL nosExportNodeFunctions(size_t* outSize, nosNodeFunctions** outList)
-{
-	*outSize = static_cast<size_t>(Nodes::Count);
-	if (!outList)
+		NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
+		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
+		NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
+		NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
 		return NOS_RESULT_SUCCESS;
+	}
 
-	AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
+	nosResult OnPreUnloadPlugin() override
+	{
+		AJADevice::Deinit();
+		return NOS_RESULT_SUCCESS;
+	}
 
-	NOS_RETURN_ON_FAILURE(RequestVulkanSubsystem());
-	
-	NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
-	NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
-	NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
-	NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
-	return NOS_RESULT_SUCCESS;
-}
-
-}
-}
-
-} // namespace nos
+};
+NOS_EXPORT_PLUGIN_FUNCTIONS(AJAPluginFunctions)
+} // namespace nos::aja

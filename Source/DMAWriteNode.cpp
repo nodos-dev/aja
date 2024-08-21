@@ -59,14 +59,14 @@ struct DMAWriteNodeContext : DMANodeBase
 		}
 	}
 	
-	nosResult ExecuteNode(const nosNodeExecuteArgs* args) override
+	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		nosResourceShareInfo inputBuffer{};
 		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
 		uint32_t curVBLCount = 0;
-		for (size_t i = 0; i < args->PinCount; ++i)
+		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			auto& pin = args->Pins[i];
+			auto& pin = params->Pins[i];
 			if (pin.Name == NOS_NAME_STATIC("Input"))
 				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 			if (pin.Name == NOS_NAME("FieldType"))
