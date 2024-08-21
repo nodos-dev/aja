@@ -77,6 +77,11 @@ struct DMANodeBase : NodeContext
 
 	std::unordered_map<NTV2Channel, std::unordered_map<uint8_t, size_t>> FrameBufferOffsets;
 
+	void OnPathStop() override
+	{
+		FrameBufferOffsets.clear();
+	}
+
 	size_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
 		auto it = FrameBufferOffsets.find(channel);
