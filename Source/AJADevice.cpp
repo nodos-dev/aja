@@ -646,13 +646,25 @@ bool AJADevice::RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt
     // Validate channel
     // AJA_ASSERT(ChannelCanInput(channel));
     bool re = true;
+    
+
+    
     re &= (EnableChannel(channel));
     re &= (EnableInputInterrupt(channel));
     re &= (SubscribeInputVerticalEvent(channel));
     re &= (SetSDITransmitEnable(channel, false));
     re &= (SetEnableVANCData(false, false, channel));
     re &= (SetMode(channel, NTV2_MODE_INPUT));
-    re &= (SetVideoFormat(videoFmt, false, false, channel));
+    NTV2VideoFormat effectiveFormat = videoFmt;
+    if (NTV2_VIDEO_FORMAT_IS_B(videoFmt))
+    {
+        re &= SetSDIInLevelBtoLevelAConversion(channel, true);
+        //Find the corresponding A format
+        effectiveFormat = GetFirstMatchingVideoFormat(GetNTV2FrameRateFromVideoFormat(videoFmt), GetDisplayHeight(videoFmt), GetDisplayWidth(videoFmt), IsProgressiveTransport(videoFmt), IsPSF(videoFmt), false);
+    }
+    else
+        re &= SetSDIInLevelBtoLevelAConversion(channel, false);
+    re &= (SetVideoFormat(effectiveFormat, false, false, channel));
     re &= (SetFrameBufferFormat(channel, fbFmt));
     re &= (Connect(GetFrameBufferInputXptFromChannel(channel), GetInputSourceOutputXpt(src)));
     // re &= (SetReference(NTV2InputSourceToReferenceSource(src)));
