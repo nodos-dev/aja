@@ -11,7 +11,9 @@
 
 #undef min
 #undef max
-
+#if !defined(_WIN32)
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
+#endif
 std::map<std::string, uint64_t> AJADevice::AvailableDevices;
 
 std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
