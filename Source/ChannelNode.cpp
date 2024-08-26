@@ -518,7 +518,7 @@ struct ChannelNodeContext : NodeContext
 	}
 	std::vector<std::string> GetPossibleFrameRates() 
 	{
-		if (Resolution == NTV2_FG_INVALID)
+		if (!Device || Resolution == NTV2_FG_INVALID)
 			return {"NONE"};
 		std::set<NTV2FrameRate> frameRates;
 		for (int i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
@@ -540,7 +540,7 @@ struct ChannelNodeContext : NodeContext
 	}
 	std::vector<std::string> GetPossibleInterlaced()
 	{
-		if (FrameRate == NTV2_FRAMERATE_INVALID)
+		if (!Device || FrameRate == NTV2_FRAMERATE_INVALID)
 			return {"NONE"};
 		std::set<bool> interlaced;
 		for (int i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
