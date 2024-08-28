@@ -17,6 +17,33 @@ struct WaitVBLNodeContext : NodeContext
 	{
 	}
 
+	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
+	{
+		if (!isInterlaced)
+		{
+			if (isInput)
+				return device->WaitForInputVerticalInterrupt(channel);
+			else
+				return device->WaitForOutputVerticalInterrupt(channel);
+		}
+		else
+		{
+			if (waitField == sys::vulkan::FieldType::UNKNOWN || waitField == sys::vulkan::FieldType::PROGRESSIVE)
+			{
+				InterlacedWaitField = InterlacedWaitField == sys::vulkan::FieldType::EVEN ? sys::vulkan::FieldType::ODD :
+					sys::vulkan::FieldType::EVEN;
+			}
+			else
+			{
+				InterlacedWaitField = waitField;
+			}
+			if (isInput)
+				return device->WaitForInputFieldID(GetFieldId(InterlacedWaitField), channel);
+			else
+				return device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
+		}
+	}
+
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		NodeExecuteParams params = execParams;
@@ -35,36 +62,13 @@ struct WaitVBLNodeContext : NodeContext
 		if (!channelStr)
 			return NOS_RESULT_FAILED;
 		auto channel = ParseChannel(channelStr->string_view());
-		
 
 		auto videoFormat = static_cast<NTV2VideoFormat>(channelInfo->video_format_idx());
 		bool isInterlaced = !IsProgressivePicture(videoFormat);
 		bool vblSuccess = false;
-		if (!isInterlaced)
-		{
-			if (channelInfo->is_input())
-				vblSuccess = device->WaitForInputVerticalInterrupt(channel);
-			else
-				vblSuccess = device->WaitForOutputVerticalInterrupt(channel);
-			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(sys::vulkan::FieldType::PROGRESSIVE));
-		}
-		else
-		{
-			if (waitField == sys::vulkan::FieldType::UNKNOWN || waitField == sys::vulkan::FieldType::PROGRESSIVE)
-			{
-				InterlacedWaitField = InterlacedWaitField == sys::vulkan::FieldType::EVEN ? sys::vulkan::FieldType::ODD :
-					sys::vulkan::FieldType::EVEN;
-			}
-			else
-			{
-				InterlacedWaitField = waitField;
-			}
-			if (channelInfo->is_input())
-				vblSuccess = device->WaitForInputFieldID(GetFieldId(InterlacedWaitField), channel);
-			else
-				vblSuccess = device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
-			nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(InterlacedWaitField));
-		}
+		for (int i = 0; i < (VBLState.LastVBLCount == 0 ? 2 : 1); ++i) // Wait one more VBL after restart so that we don't start DMA in the middle of a frame.
+			vblSuccess = WaitVBL(device.get(), channel, channelInfo->is_input(), isInterlaced, waitField);
+		nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(isInterlaced ? InterlacedWaitField : sys::vulkan::FieldType::PROGRESSIVE));
 		ULWord curVBLCount = 0;
 		if (channelInfo->is_input())
 			device->GetInputVerticalInterruptCount(curVBLCount, channel);
