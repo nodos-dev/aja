@@ -850,6 +850,24 @@ std::unordered_set<NTV2Channel> AJADevice::GetFilteredChannels(bool isInput)
 	return re;
 }
 
+bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
+{
+    if (fieldId == NTV2_FIELD_INVALID) // Progressive
+    {
+        if (isInput)
+            return WaitForInputVerticalInterrupt(channel);
+        else
+            return WaitForOutputVerticalInterrupt(channel);
+    }
+    else // Interlaced
+    {
+        if (isInput)
+            return WaitForInputFieldID(fieldId, channel);
+        else
+            return WaitForOutputFieldID(fieldId, channel);
+    }
+}
+
 void AJADevice::RegisterNode(nosUUID id)
 {
     std::unique_lock lock(RegisteredNodesMutex);

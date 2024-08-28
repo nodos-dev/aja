@@ -19,29 +19,14 @@ struct WaitVBLNodeContext : NodeContext
 
 	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
 	{
-		if (!isInterlaced)
-		{
-			if (isInput)
-				return device->WaitForInputVerticalInterrupt(channel);
-			else
-				return device->WaitForOutputVerticalInterrupt(channel);
-		}
-		else
+		if (isInterlaced)
 		{
 			if (waitField == sys::vulkan::FieldType::UNKNOWN || waitField == sys::vulkan::FieldType::PROGRESSIVE)
-			{
-				InterlacedWaitField = InterlacedWaitField == sys::vulkan::FieldType::EVEN ? sys::vulkan::FieldType::ODD :
-					sys::vulkan::FieldType::EVEN;
-			}
+				InterlacedWaitField = InterlacedWaitField == sys::vulkan::FieldType::EVEN ? sys::vulkan::FieldType::ODD : sys::vulkan::FieldType::EVEN; // Progressive <-> interlaced, keep track of field type
 			else
-			{
-				InterlacedWaitField = waitField;
-			}
-			if (isInput)
-				return device->WaitForInputFieldID(GetFieldId(InterlacedWaitField), channel);
-			else
-				return device->WaitForOutputFieldID(GetFieldId(InterlacedWaitField), channel);
+				InterlacedWaitField = waitField; // Use field type from pin
 		}
+		return device->WaitVBL(channel, isInput, isInterlaced ? GetFieldId(InterlacedWaitField) : NTV2_FIELD_INVALID);
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
@@ -50,7 +35,6 @@ struct WaitVBLNodeContext : NodeContext
 		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data);
 		nosUUID const* outId = &params[NOS_NAME_STATIC("VBL")].Id;
 		nosUUID const* outVBLCountId = &params[NOS_NAME_STATIC("CurrentVBL")].Id;
-		nosUUID inId = params[NOS_NAME_STATIC("Run")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
 		nosUUID outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		if (!channelInfo->device())
