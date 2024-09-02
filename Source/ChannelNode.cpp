@@ -315,6 +315,23 @@ struct ChannelNodeContext : NodeContext
 		}
 	}
 
+	void CheckChannelStatus()
+	{
+		if (!Device || !IsInput)
+			return;
+		if (CurrentChannel.IsOpen)
+		{
+			auto format = Device->GetSDIInputVideoFormat(Channel);
+			if (ForceInterlaced)
+				format = Device->ForceInterlace(format);
+			if (format == CurrentChannel.Info.video_format_idx)
+				return;
+		}
+		TryUpdateChannel();
+		if(CurrentChannel.IsOpen)
+			nosEngine.LogI("Input signal reconnected.");
+	}
+
 	void UpdateVisualizer(nos::Name pinName, std::string stringListName)
 	{ 
 		SetPinVisualizer(pinName, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = stringListName});
@@ -538,6 +555,7 @@ struct ChannelNodeContext : NodeContext
 		}
 		return possibleFrameRates;
 	}
+
 	std::vector<std::string> GetPossibleInterlaced()
 	{
 		if (!Device || FrameRate == NTV2_FRAMERATE_INVALID)
@@ -682,9 +700,9 @@ struct ChannelNodeContext : NodeContext
 		return NOS_RESULT_PENDING;
 	}
 
-	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
+	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction)
 	{
-		*outCount = 2;
+		*outCount = 3;
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
 		outFunctionNames[0] = NOS_NAME_STATIC("TryUpdateChannel");
@@ -704,7 +722,16 @@ struct ChannelNodeContext : NodeContext
 				context->CheckChannelConfig();
 				return NOS_RESULT_SUCCESS;
 			};
-		return NOS_RESULT_SUCCESS; 
+
+		outFunctionNames[2] = NOS_NAME_STATIC("CheckChannelStatus");
+		outFunction[2] = [](void* ctx, nosFunctionExecuteParams* params)
+			{
+				auto* context = static_cast<ChannelNodeContext*>(ctx);
+				context->CheckChannelStatus();
+				return NOS_RESULT_SUCCESS;
+			};
+
+		return NOS_RESULT_SUCCESS;
 	}
 
 	Channel CurrentChannel;

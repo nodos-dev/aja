@@ -320,6 +320,18 @@
 				{
 					"class_name": "CheckChannelConfig",
 					"contents_type": "Job"
+				},
+				{
+					"class_name": "CheckChannelStatus",
+					"contents_type": "Job",
+				  "pins": [
+            {
+              "name": "Tick",
+              "type_name": "nos.exe",
+							"show_as": "INPUT_PIN",
+							"can_show_as":  "INPUT_PIN_OR_PROPERTY"
+            }
+          ]
 				}
 			]
 		}
