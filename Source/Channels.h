@@ -53,6 +53,7 @@ struct Channel
 	{
 		Channel,
 		Reference,
+		ReferenceInvalid,
 		DeltaSecondsCompatible
 	};
 
