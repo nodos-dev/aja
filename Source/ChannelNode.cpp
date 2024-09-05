@@ -676,7 +676,7 @@ struct ChannelNodeContext : NodeContext
 				if (CurrentChannel.Info.video_format_idx == static_cast<int>(format))
 				{
 					auto deltaSec = GetDeltaSeconds(format, !IsProgressivePicture(format));
-					bool deltaSecCompatible = execParams->DeltaSeconds.x == 0 /* Do not check for delta sec diff if free running */ || memcmp(&execParams->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
+					bool deltaSecCompatible = execParams->IsFreeRun /* Do not check for delta sec diff if free running */ || memcmp(&execParams->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
 					if (deltaSecCompatible != DeltaSecondCompatible)
 					{
 						DeltaSecondCompatible = deltaSecCompatible;
