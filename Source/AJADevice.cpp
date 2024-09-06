@@ -9,6 +9,8 @@
 #include <ranges>
 #include <system/process.h>
 
+#include "firmware.hpp"
+
 #undef min
 #undef max
 #if !defined(_WIN32)
@@ -878,4 +880,22 @@ void AJADevice::UnregisterNode(nosUUID id)
 {
 	std::unique_lock lock(RegisteredNodesMutex);
 	RegisteredNodes.erase(id);
+}
+
+bool AJADevice::CheckFirmware(std::string& msg)
+{
+    std::string date, time;
+    auto re = GetRunningFirmwareDate(date, time);
+    std::string model = GetModelName();
+    if (auto it = firmware_list.find(model); it != firmware_list.end())
+    {
+        if (it->second > date)
+        {
+            msg = "Installed firmware (" + date + ") is out of date. Recommended firmware date is " + it->second + ". Please update your device.";
+            return false;
+        }
+        return true;
+    }
+    msg = "Firmware (" + date + ") for device (" + model + ") has not been tested.";
+    return false;
 }

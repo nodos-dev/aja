@@ -74,6 +74,14 @@ struct ChannelNodeContext : NodeContext
 			DevicePinValue = InterpretPinValue<const char>(newVal);
 			auto oldDevice = Device;
 			Device = AJADevice::GetDevice(DevicePinValue).get();
+
+			std::string msg;
+			if (Device && !Device->CheckFirmware(msg))
+			{
+				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg);
+                // nosEngine.LogW("Firmware check failed: %s",  msg.c_str());
+			}
+
 			if (oldDevice != Device)
 			{
 				if (oldDevice)

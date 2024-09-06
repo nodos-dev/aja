@@ -138,8 +138,8 @@ struct AJADevice : CNTV2Card
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
 
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
-
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);
+    bool CheckFirmware(std::string& msg);
 private:
     bool RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
     bool RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);

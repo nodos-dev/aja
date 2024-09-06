@@ -54,7 +54,8 @@ struct Channel
 		Channel,
 		Reference,
 		ReferenceInvalid,
-		DeltaSecondsCompatible
+		DeltaSecondsCompatible,
+        Firmware
 	};
 
 	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text);
