@@ -1,11 +1,11 @@
 { "nodes": [
     {
-      "id": "902fae96-5a6b-426f-a9c6-1b927f7a53ed",
+      "id": "a096e5ee-58aa-47cb-bca7-a3f1b2b0e234",
       "name": "AJAOut",
       "class_name": "nos.aja.Output",
       "pins": [
         {
-          "id": "f08550ff-42f0-48ef-95ad-45a26ceaaa22",
+          "id": "20381463-1d4b-4a33-a651-01b777f0fbd2",
           "name": "Source",
           "type_name": "nos.sys.vulkan.Texture",
           "show_as": "INPUT_PIN",
@@ -14,11 +14,11 @@
           "visualizer": { },
           "data": {
             "external_memory": { "handle_type": 2 },
+            "resolution": "HD",
             "width": 1920,
             "height": 1080,
-            "format": "R16G16B16A16_UNORM",
-            "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-            "unscaled": true
+            "format": "R16G16B16A16_SFLOAT",
+            "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
           },
           "referred_by": [],
           "def": {
@@ -33,12 +33,12 @@
             { "key": "OrphanPortal", "value": "/Channel.Channel" }
           ],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "4a2460b6-2d5b-419d-b6e4-179fe24b51db" },
+          "contents": { "source_id": "ea0ab93d-5b6f-4ea0-8824-09db9b894f2e" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "20957f48-dcf4-4904-a841-c1c2b4718965",
+          "id": "fca311fc-e9bd-4504-990c-1063a66d3b46",
           "name": "GammaCurve",
           "type_name": "nos.mediaio.GammaCurve",
           "show_as": "PROPERTY",
@@ -50,12 +50,12 @@
           "def": "REC709",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "78f2fc1b-916e-4ff9-ab32-a8981b40cc77" },
+          "contents": { "source_id": "3fccad25-24c0-481e-a3bd-bc4f501b699a" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "20188d85-0a1d-495f-84a8-e335ffe43903",
+          "id": "7b61ace0-9268-412d-aedd-7a01db75c85a",
           "name": "ColorSpace",
           "type_name": "nos.mediaio.ColorSpace",
           "show_as": "PROPERTY",
@@ -67,12 +67,12 @@
           "def": "REC709",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "1b31bb29-1a47-4f54-bcdc-18c5f9e1a038" },
+          "contents": { "source_id": "11e4f93f-384a-47cf-81b1-c6214cde8503" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "7d9e4ff5-7266-4a04-b7b6-463cc2e3d41a",
+          "id": "62663944-e16b-4f96-80db-c81298a205fc",
           "name": "Size",
           "type_name": "uint",
           "show_as": "PROPERTY",
@@ -87,12 +87,12 @@
           "step": 1.19,
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "c3a30316-0958-4800-b2be-3dee2cf4c5f1" },
+          "contents": { "source_id": "49aa878e-5e50-4053-8c97-2683e2db8574" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "0c6845a2-9f17-4bff-81bf-368e66f975e4",
+          "id": "4754b97a-f05d-46c5-adf0-bf1b45f63d0e",
           "name": "Spare",
           "type_name": "uint",
           "show_as": "PROPERTY",
@@ -104,12 +104,12 @@
           "def": 0,
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "90ad213e-9954-4553-8d2f-0cca684e7489" },
+          "contents": { "source_id": "dd4b03f1-a4d7-4628-b2ab-f1198fe37818" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "c0e72686-aac6-4861-8eca-e77f03acccd8",
+          "id": "c42a40e6-72bd-4b5e-92db-986498fa36f9",
           "name": "IsOpen",
           "type_name": "bool",
           "show_as": "PROPERTY",
@@ -121,12 +121,12 @@
           "def": true,
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "3b0e8af3-8d2f-4832-96c9-4ae337d7e0a2" },
+          "contents": { "source_id": "09423d99-784d-4816-93a6-208be9f32440" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "0206cb4f-c2b2-4b56-851d-b6de75fd5df2",
+          "id": "7bc6b38b-693b-4ce3-9708-050256791a10",
           "name": "Device",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -138,12 +138,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "1f82f3a6-ece7-4ce8-bbbd-a1eb5c869b16" },
+          "contents": { "source_id": "2046df7f-e2d3-4b21-aef3-d595ca381b1e" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "be2de727-12b7-4555-a544-8644f10e41d3",
+          "id": "a60a34c5-5169-476f-8ef2-cfe02edb45d4",
           "name": "ChannelName",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -155,12 +155,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "9ecbbba6-1dc5-47e0-b839-54235e7d2174" },
+          "contents": { "source_id": "7ebfc035-b235-41b5-850a-449af65bf92c" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "4917ada5-40d7-4435-bc87-919fbcc703a9",
+          "id": "f1f7d537-bf3f-4b69-8c28-088f404044e1",
           "name": "Resolution",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -172,12 +172,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "d2d959bf-fac8-434a-9068-2a53e04f8c68" },
+          "contents": { "source_id": "187688ff-88e6-407b-ba52-93e92179d9c4" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "22ffeaf4-3ce3-445c-baf9-8255513b4c49",
+          "id": "6972f3f4-dca8-4da2-b2aa-04b686e439a0",
           "name": "FrameRate",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -189,12 +189,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "af9edf9f-be3e-4c87-ad39-50e008c4648c" },
+          "contents": { "source_id": "07fec9d5-5982-4839-b7dc-337068a63a80" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "19baa86c-6169-4a36-b193-e1e307984fcf",
+          "id": "88f621b2-e381-4d47-ba06-69c2536d6921",
           "name": "IsInterlaced",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -206,12 +206,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "8e4f1b2a-28e8-436a-831b-9e0411d22c9a" },
+          "contents": { "source_id": "95cd7966-3677-412e-9a01-e79c654b3ea2" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "969c3d82-ff12-4e28-b24c-a16bb0a49147",
+          "id": "eb9afe24-5c2d-4b96-abef-7a69b62ded62",
           "name": "FrameBufferFormat",
           "type_name": "nos.mediaio.YCbCrPixelFormat",
           "show_as": "PROPERTY",
@@ -223,13 +223,13 @@
           "def": "YUV8",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "caccbe6b-d4e2-4ad1-9083-7db23b89dd85" },
+          "contents": { "source_id": "c343f6b5-a5b3-469a-b4e4-b885d5461a6b" },
           "orphan_state": { },
           "description": "",
           "display_name": "AJA Channel.Frame Buffer Format"
         },
         {
-          "id": "efca3314-9091-4df5-ba55-2d2fc91c92ce",
+          "id": "4527cfc6-2516-4309-9214-7d3c5a25ed9d",
           "name": "ReferenceSource",
           "type_name": "string",
           "show_as": "PROPERTY",
@@ -241,12 +241,12 @@
           "def": "",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "a6236a80-3c3d-47ea-a4c3-2e8d3ab1ceed" },
+          "contents": { "source_id": "f9a0123a-9ffd-429f-a989-f2bbedd65281" },
           "orphan_state": { },
           "description": ""
         },
         {
-          "id": "be47669c-6e48-46fe-b1e2-08c333725860",
+          "id": "04fd237d-b018-45de-b81a-402263a24950",
           "name": "QuadLinkOutputMode",
           "type_name": "nos.aja.QuadLinkMode",
           "show_as": "PROPERTY",
@@ -258,7 +258,7 @@
           "def": "Tsi",
           "meta_data_map": [],
           "contents_type": "PortalPin",
-          "contents": { "source_id": "b6afe3ca-e7a0-41fe-a959-c0f01326f694" },
+          "contents": { "source_id": "54d3efa1-2e17-4ab0-be44-545e0b2e71e6" },
           "orphan_state": { },
           "description": ""
         }
@@ -267,12 +267,12 @@
       "contents_type": "Graph",
       "contents": { "nodes": [
           {
-            "id": "475df5f7-428a-4956-95e5-318bdd34d120",
+            "id": "be214043-bb1f-4296-b100-0bc7e2993786",
             "name": "BufferRing",
             "class_name": "nos.mediaio.BufferRing",
             "pins": [
               {
-                "id": "7692fc02-db5e-4388-a6ce-953f3a0ac727",
+                "id": "94a03f1e-7417-40ad-82f9-a95ece0df020",
                 "name": "Thread",
                 "type_name": "nos.exe",
                 "show_as": "INPUT_PIN",
@@ -289,7 +289,7 @@
                 "description": ""
               },
               {
-                "id": "d5fef253-84e4-4b35-8faf-555e78da2517",
+                "id": "6cec71d7-3c39-4373-b528-5ca31d775705",
                 "name": "Size",
                 "type_name": "uint",
                 "show_as": "INPUT_PIN",
@@ -309,7 +309,7 @@
                 "description": ""
               },
               {
-                "id": "e9c84676-b362-4945-bd5c-188c798d57be",
+                "id": "7d1d0930-c69a-408d-9dc5-7fcfeed975f2",
                 "name": "Spare",
                 "type_name": "uint",
                 "show_as": "INPUT_PIN",
@@ -329,7 +329,7 @@
                 "description": ""
               },
               {
-                "id": "044fd212-0370-439d-9033-87cff3d37105",
+                "id": "ba4d918a-814b-4851-aff8-9d3967fdec3c",
                 "name": "Alignment",
                 "type_name": "uint",
                 "show_as": "PROPERTY",
@@ -346,7 +346,7 @@
                 "description": ""
               },
               {
-                "id": "9d8a25db-8366-464f-a632-2e0a888e7054",
+                "id": "93a60fec-082c-4dd0-ab9c-0c0a3371a31a",
                 "name": "Input",
                 "type_name": "nos.sys.vulkan.Buffer",
                 "show_as": "INPUT_PIN",
@@ -377,7 +377,7 @@
                 "description": ""
               },
               {
-                "id": "d96928e0-25b8-4192-b743-6e273abdfba6",
+                "id": "09a472bc-df6f-4740-a0b9-e494cc35e513",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Buffer",
                 "show_as": "OUTPUT_PIN",
@@ -425,12 +425,12 @@
             "template_parameters": []
           },
           {
-            "id": "659f103f-4eea-4f91-baf8-1cfc6531180b",
+            "id": "fc66f9e2-54e1-4a56-b84c-fa7dc2b2012f",
             "name": "Source",
             "class_name": "nos.internal.GraphInput",
             "pins": [
               {
-                "id": "b882d3a9-34e8-4d88-bb9c-0e64a6830447",
+                "id": "5e9ac6b1-9075-48be-b55f-207828efdbb5",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Texture",
                 "show_as": "OUTPUT_PIN",
@@ -439,11 +439,11 @@
                 "visualizer": { },
                 "data": {
                   "external_memory": { "handle_type": 2 },
+                  "resolution": "HD",
                   "width": 1920,
                   "height": 1080,
-                  "format": "R16G16B16A16_UNORM",
-                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                  "unscaled": true
+                  "format": "R16G16B16A16_SFLOAT",
+                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                 },
                 "referred_by": [],
                 "def": {
@@ -461,7 +461,7 @@
                 "description": ""
               },
               {
-                "id": "4a2460b6-2d5b-419d-b6e4-179fe24b51db",
+                "id": "ea0ab93d-5b6f-4ea0-8824-09db9b894f2e",
                 "name": "Input",
                 "type_name": "nos.sys.vulkan.Texture",
                 "show_as": "INPUT_PIN",
@@ -470,14 +470,14 @@
                 "visualizer": { },
                 "data": {
                   "external_memory": { "handle_type": 2 },
+                  "resolution": "HD",
                   "width": 1920,
                   "height": 1080,
-                  "format": "R16G16B16A16_UNORM",
-                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                  "unscaled": true
+                  "format": "R16G16B16A16_SFLOAT",
+                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                 },
                 "referred_by": [
-                  "f08550ff-42f0-48ef-95ad-45a26ceaaa22"
+                  "20381463-1d4b-4a33-a651-01b777f0fbd2"
                 ],
                 "def": {
                   "resolution": "HD",
@@ -509,12 +509,12 @@
             "template_parameters": []
           },
           {
-            "id": "ab8200af-683e-48f9-9897-e96b28713a63",
+            "id": "2e11e992-40ad-4459-a930-9ef0b916101c",
             "name": "Spare",
             "class_name": "nos.internal.GraphInput",
             "pins": [
               {
-                "id": "b837eba4-6db3-44d5-a557-2bbd32ba5e2d",
+                "id": "161baf94-1dce-426d-bd5f-6ad987dc499b",
                 "name": "Output",
                 "type_name": "uint",
                 "show_as": "OUTPUT_PIN",
@@ -531,7 +531,7 @@
                 "description": ""
               },
               {
-                "id": "90ad213e-9954-4553-8d2f-0cca684e7489",
+                "id": "dd4b03f1-a4d7-4628-b2ab-f1198fe37818",
                 "name": "Input",
                 "type_name": "uint",
                 "show_as": "INPUT_PIN",
@@ -540,7 +540,7 @@
                 "visualizer": { },
                 "data": 0,
                 "referred_by": [
-                  "0c6845a2-9f17-4bff-81bf-368e66f975e4"
+                  "4754b97a-f05d-46c5-adf0-bf1b45f63d0e"
                 ],
                 "def": 0,
                 "meta_data_map": [
@@ -565,64 +565,24 @@
             "template_parameters": []
           },
           {
-            "id": "c001a787-9d3b-4cc7-aaee-32706f5ec6de",
-            "name": "Portal",
-            "class_name": "nos.internal.Portal",
+            "id": "a472b2e0-38a7-4182-88a6-5845e6b4baf9",
+            "name": "GetFieldType",
+            "class_name": "nos.reflect.Break",
             "pins": [
               {
-                "id": "5cdc3bc7-e7aa-400d-838a-278cdadff182",
-                "name": "Channel",
-                "type_name": "nos.aja.ChannelInfo",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": {
-                },
-                "referred_by": [],
-                "def": {
-                  "device": { "name": "" },
-                  "channel_name": "",
-                  "video_format": ""
-                },
-                "meta_data_map": [],
-                "contents_type": "PortalPin",
-                "contents": { "source_id": "ba67e641-8c7a-465d-8e0c-3b24e504e042" },
-                "orphan_state": { },
-                "description": ""
-              }
-            ],
-            "pos": { "x": -838.0, "y": 1103.0 },
-            "contents_type": "Graph",
-            "contents": { "nodes": [], "comments": [], "connections": [], "expandable": false },
-            "app_key": "",
-            "functions": [],
-            "function_category": "Default Node",
-            "status_messages": [],
-            "meta_data_map": [],
-            "orphan_state": { },
-            "description": "",
-            "template_parameters": []
-          },
-          {
-            "id": "66454ab4-6abe-4768-b263-f0e3579e6b71",
-            "name": "GammaLUT",
-            "class_name": "nos.mediaio.GammaLUT",
-            "pins": [
-              {
-                "id": "0705064d-7e22-4973-96d7-79611359f98f",
-                "name": "LUT",
+                "id": "c7e9d801-1f94-4b00-8c7c-faf5831a339c",
+                "name": "Input",
                 "type_name": "nos.sys.vulkan.Buffer",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_ONLY",
+                "show_as": "INPUT_PIN",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
                 "pin_category": "",
                 "visualizer": { },
                 "data": {
-                  "size_in_bytes": 2048,
+                  "size_in_bytes": 5529600,
                   "alignment": 0,
                   "external_memory": { "handle_type": 2 },
-                  "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
-                  "memory_flags": "DEVICE_MEMORY",
+                  "usage": "TRANSFER_SRC TRANSFER_DST",
+                  "memory_flags": "HOST_VISIBLE DOWNLOAD",
                   "element_type": "ELEMENT_TYPE_UNDEFINED"
                 },
                 "referred_by": [],
@@ -641,7 +601,292 @@
                 "description": ""
               },
               {
-                "id": "fdf82512-6785-40e8-a16f-57395121c1df",
+                "id": "85e0570c-b5a5-419d-9b3c-f2ee3efa853f",
+                "name": "handle",
+                "type_name": "ulong",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": 2264737090896,
+                "referred_by": [],
+                "def": 0,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "28d82c44-bf55-4f49-adfb-08a2838c2bf2",
+                "name": "offset",
+                "type_name": "ulong",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": 23691268,
+                "referred_by": [],
+                "def": 0,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "bae8869d-7cc4-4628-8392-bacd29837861",
+                "name": "size_in_bytes",
+                "type_name": "ulong",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": 5529600,
+                "referred_by": [],
+                "def": 0,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "6079fd41-37aa-4f77-8ab4-47a43ad50ab9",
+                "name": "alignment",
+                "type_name": "uint",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": 0,
+                "referred_by": [],
+                "def": 0,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "9231a413-e3ca-4e30-9ff7-d0bbc872580f",
+                "name": "external_memory",
+                "type_name": "nos.sys.vulkan.ExternalMemory",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": { "handle_type": 2 },
+                "referred_by": [],
+                "def": { "handle_type": 0 },
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "bd381783-26c3-4fa0-b563-5e53cc372f13",
+                "name": "usage",
+                "type_name": "nos.sys.vulkan.BufferUsage",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "TRANSFER_SRC TRANSFER_DST",
+                "referred_by": [],
+                "def": "NONE",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "0567627a-900d-4964-b438-ab7f50ff1cd2",
+                "name": "memory_flags",
+                "type_name": "nos.sys.vulkan.MemoryFlags",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "HOST_VISIBLE DOWNLOAD",
+                "referred_by": [],
+                "def": "NONE",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "3f5ac218-4303-4118-9bbc-3ec10972a1e3",
+                "name": "element_type",
+                "type_name": "nos.sys.vulkan.BufferElementType",
+                "show_as": "PROPERTY",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "ELEMENT_TYPE_UNDEFINED",
+                "referred_by": [],
+                "def": "ELEMENT_TYPE_UNDEFINED",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "be77720a-cdb2-4daa-9f1b-d6462cca8020",
+                "name": "field_type",
+                "type_name": "nos.sys.vulkan.FieldType",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "PROGRESSIVE",
+                "referred_by": [],
+                "def": "UNKNOWN",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              }
+            ],
+            "pos": { "x": 828.0, "y": 721.0 },
+            "contents_type": "Job",
+            "contents": { "type": "" },
+            "app_key": "",
+            "functions": [],
+            "function_category": "Default Node",
+            "status_messages": [],
+            "meta_data_map": [
+              { "key": "PluginVersion", "value": "1.1.0" }
+            ],
+            "orphan_state": { },
+            "description": "",
+            "display_name": "Get Field Type",
+            "template_parameters": []
+          },
+          {
+            "id": "749e3720-c510-418c-8360-db634e8d8577",
+            "name": "Portal",
+            "class_name": "nos.internal.Portal",
+            "pins": [
+              {
+                "id": "2e5d4504-527b-4660-9bac-45974f513d97",
+                "name": "Channel",
+                "type_name": "nos.aja.ChannelInfo",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": {
+                },
+                "referred_by": [],
+                "def": {
+                  "device": { "name": "" },
+                  "channel_name": "",
+                  "video_format": ""
+                },
+                "meta_data_map": [],
+                "contents_type": "PortalPin",
+                "contents": { "source_id": "af44546d-3729-40af-80a5-a6374e5afabf" },
+                "orphan_state": { },
+                "description": ""
+              }
+            ],
+            "pos": { "x": -838.0, "y": 1103.0 },
+            "contents_type": "Graph",
+            "contents": { "nodes": [], "comments": [], "connections": [], "expandable": false },
+            "app_key": "",
+            "functions": [],
+            "function_category": "Default Node",
+            "status_messages": [],
+            "meta_data_map": [],
+            "orphan_state": { },
+            "description": "",
+            "template_parameters": []
+          },
+          {
+            "id": "9b976a2e-45b2-42cb-ad60-2a5f960544e8",
+            "name": "ColorSpaceMatrix",
+            "class_name": "nos.mediaio.ColorSpaceMatrix",
+            "pins": [
+              {
+                "id": "3e890e1c-3945-45fb-9dd2-5832d5b14792",
+                "name": "Output",
+                "type_name": "nos.fb.mat4",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_ONLY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": { "x": { "x": 0.18205, "y": -0.100349, "z": 0.437928, "w": 0.0 }, "y": { "x": 0.612429, "y": -0.337579, "z": -0.397772, "w": 0.0 }, "z": { "x": 0.061825, "y": 0.437928, "z": -0.040155, "w": 0.0 }, "w": { "x": 0.062561, "y": 0.500489, "z": 0.500489, "w": 1.0 } },
+                "referred_by": [],
+                "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "8ef6d13e-e384-4c34-93dd-996e2746986c",
+                "name": "ColorSpace",
+                "type_name": "nos.mediaio.ColorSpace",
+                "show_as": "INPUT_PIN",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "REC709",
+                "referred_by": [],
+                "def": "REC709",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": "",
+                "display_name": "Color Space"
+              },
+              {
+                "id": "1be0e6a3-9a58-4fb9-8df1-23c92282adeb",
+                "name": "NarrowRange",
+                "type_name": "bool",
+                "show_as": "PROPERTY",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": true,
+                "referred_by": [],
+                "def": true,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": "",
+                "display_name": "Use Narrow Range Encoding"
+              },
+              {
+                "id": "c2af9dc3-0443-4d46-9116-80f0e16dd875",
+                "name": "PixelFormat",
+                "type_name": "nos.mediaio.YCbCrPixelFormat",
+                "show_as": "INPUT_PIN",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "V210",
+                "referred_by": [],
+                "def": "YUV8",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": "",
+                "display_name": "Pixel Format"
+              },
+              {
+                "id": "31563d42-75a0-499d-ba65-d1f1757e4ff7",
                 "name": "Type",
                 "type_name": "nos.mediaio.GammaConversionType",
                 "show_as": "PROPERTY",
@@ -656,26 +901,9 @@
                 "contents": { },
                 "orphan_state": { },
                 "description": ""
-              },
-              {
-                "id": "a7d5a30a-e892-4822-b63e-6055ce0ca431",
-                "name": "GammaCurve",
-                "type_name": "nos.mediaio.GammaCurve",
-                "show_as": "INPUT_PIN",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "REC709",
-                "referred_by": [],
-                "def": "REC709",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
               }
             ],
-            "pos": { "x": -423.0, "y": 830.0 },
+            "pos": { "x": -375.0, "y": 983.0 },
             "contents_type": "Job",
             "contents": { "type": "" },
             "app_key": "",
@@ -686,16 +914,17 @@
               { "key": "PluginVersion", "value": "1.4.0" }
             ],
             "orphan_state": { "message": "Node is not present in TypeLibrary" },
-            "description": "Provides a lookup table for Gamma conversions",
+            "description": "",
+            "display_name": "Color Space Matrix",
             "template_parameters": []
           },
           {
-            "id": "f1f43a9b-07cf-442e-91ba-c1b4e4f78c5f",
+            "id": "6a4a0ba4-1159-4822-87e9-6b100f084101",
             "name": "Size",
             "class_name": "nos.internal.GraphInput",
             "pins": [
               {
-                "id": "915da800-6697-4be5-b14e-02ee13ce398f",
+                "id": "351e30f2-a596-4ca9-a739-45b3e4953d09",
                 "name": "Output",
                 "type_name": "uint",
                 "show_as": "OUTPUT_PIN",
@@ -712,7 +941,7 @@
                 "description": ""
               },
               {
-                "id": "c3a30316-0958-4800-b2be-3dee2cf4c5f1",
+                "id": "49aa878e-5e50-4053-8c97-2683e2db8574",
                 "name": "Input",
                 "type_name": "uint",
                 "show_as": "INPUT_PIN",
@@ -721,7 +950,7 @@
                 "visualizer": { },
                 "data": 2,
                 "referred_by": [
-                  "7d9e4ff5-7266-4a04-b7b6-463cc2e3d41a"
+                  "62663944-e16b-4f96-80db-c81298a205fc"
                 ],
                 "min": 1,
                 "max": 120,
@@ -749,12 +978,12 @@
             "template_parameters": []
           },
           {
-            "id": "b8aaf624-69c2-443c-8afc-7cd9148ba177",
+            "id": "21d9886e-2d1b-4897-bd21-fabe69a19aa8",
             "name": "RGB2YCbCr",
             "class_name": "nos.mediaio.RGB2YCbCr",
             "pins": [
               {
-                "id": "801ef6aa-9c10-44ea-961c-0d10b6c1e453",
+                "id": "d13bf057-56fb-4a83-9539-af3200bec7e1",
                 "name": "Source",
                 "type_name": "nos.sys.vulkan.Texture",
                 "show_as": "INPUT_PIN",
@@ -763,11 +992,11 @@
                 "visualizer": { },
                 "data": {
                   "external_memory": { "handle_type": 2 },
+                  "resolution": "HD",
                   "width": 1920,
                   "height": 1080,
-                  "format": "R16G16B16A16_UNORM",
-                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                  "unscaled": true
+                  "format": "R16G16B16A16_SFLOAT",
+                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                 },
                 "referred_by": [],
                 "def": {
@@ -785,7 +1014,7 @@
                 "description": ""
               },
               {
-                "id": "f2d0479b-cafd-4ea6-b60f-2b3876697af7",
+                "id": "d9d47f0e-ee5a-4bd2-945a-5c7813c3198a",
                 "name": "GammaLUT",
                 "type_name": "nos.sys.vulkan.Buffer",
                 "show_as": "INPUT_PIN",
@@ -816,7 +1045,7 @@
                 "description": ""
               },
               {
-                "id": "408db7c1-7795-4b25-be9a-4597c6c795f2",
+                "id": "718f91f5-0d58-4eaa-81fa-7e5101fe71aa",
                 "name": "Colorspace",
                 "type_name": "nos.fb.mat4",
                 "show_as": "INPUT_PIN",
@@ -834,7 +1063,7 @@
                 "display_name": "Colorspace Matrix"
               },
               {
-                "id": "a3cdacf9-c993-49e6-b69b-6ff2754cb53c",
+                "id": "e1277c3e-14c6-4f92-bd68-d8de29272230",
                 "name": "DispatchSize",
                 "type_name": "nos.fb.vec2u",
                 "show_as": "PROPERTY",
@@ -851,7 +1080,7 @@
                 "description": ""
               },
               {
-                "id": "60a66a4e-ccea-4501-abc9-9dcf4c2a61f4",
+                "id": "1a348381-a4f4-42f8-90bb-96782d2f6ab0",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Buffer",
                 "show_as": "OUTPUT_PIN",
@@ -882,7 +1111,7 @@
                 "description": ""
               },
               {
-                "id": "bb0e3e58-8ecb-47fe-b484-2235626552a6",
+                "id": "fc171896-915e-46ee-b2fd-06cdb25a2c3b",
                 "name": "PixelFormat",
                 "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "INPUT_PIN",
@@ -900,7 +1129,7 @@
                 "display_name": "Pixel Format"
               },
               {
-                "id": "445d712b-16c9-4930-872e-3b6a62a4582c",
+                "id": "64d08d4d-baf8-4012-93e3-33d2d234756e",
                 "name": "FieldType",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "PROPERTY",
@@ -919,7 +1148,7 @@
                 "display_name": "Input Field Type"
               },
               {
-                "id": "371eac0d-ed00-4da5-9625-4d5a376d03ff",
+                "id": "14303ecf-88ad-4873-91a2-f92beedb4da4",
                 "name": "IsOutputInterlaced",
                 "type_name": "bool",
                 "show_as": "INPUT_PIN",
@@ -937,7 +1166,7 @@
                 "display_name": "Is Output Interlaced"
               },
               {
-                "id": "f148b2a0-7432-41ce-9c85-18cf055b823e",
+                "id": "7ee40a39-e12d-468f-8330-d266e956a183",
                 "name": "InputFieldType",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "PROPERTY",
@@ -956,7 +1185,7 @@
                 "display_name": "Input Field Type"
               },
               {
-                "id": "6ee64d06-7b1a-4d9a-b76d-46cc8cdd22bc",
+                "id": "40b682b0-9fee-490e-b096-8d5009b796a7",
                 "name": "OutputFieldType",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "PROPERTY",
@@ -990,12 +1219,12 @@
             "template_parameters": []
           },
           {
-            "id": "44b46c86-842b-4f43-a944-0a281afcd2b0",
+            "id": "88eccc76-4e6b-4f53-a168-23d6c384f03c",
             "name": "DMAWrite",
             "class_name": "nos.aja.DMAWrite",
             "pins": [
               {
-                "id": "eea32ac8-0c6d-4cae-a8fc-0a32ff75bd8c",
+                "id": "a4b41a8b-ff22-4bed-b8b7-43e9586e0777",
                 "name": "Run",
                 "type_name": "nos.exe",
                 "show_as": "INPUT_PIN",
@@ -1012,7 +1241,7 @@
                 "description": ""
               },
               {
-                "id": "e35bed03-1768-4380-baef-da59505ae395",
+                "id": "17a5a37e-b463-4fff-9b4e-61bd3b7b80e1",
                 "name": "FieldType",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "INPUT_PIN",
@@ -1030,7 +1259,7 @@
                 "display_name": "Field Type"
               },
               {
-                "id": "9bfacc54-aff7-434c-b52d-28fc3007cf0f",
+                "id": "a76494ac-9a8d-44b9-a460-0390b10309ac",
                 "name": "Channel",
                 "type_name": "nos.aja.ChannelInfo",
                 "show_as": "INPUT_PIN",
@@ -1059,7 +1288,7 @@
                 "description": ""
               },
               {
-                "id": "6d0306a8-bb47-4188-a44e-cd28c3efbb76",
+                "id": "1b38e410-83a6-4a73-a904-456c5670ce50",
                 "name": "Input",
                 "type_name": "nos.sys.vulkan.Buffer",
                 "show_as": "INPUT_PIN",
@@ -1090,14 +1319,14 @@
                 "description": ""
               },
               {
-                "id": "cd1bb7c4-edff-4df4-a482-be5d83eff9b5",
+                "id": "1fea0e27-5876-4540-bfed-50ac75d39e50",
                 "name": "CurrentVBL",
                 "type_name": "uint",
                 "show_as": "INPUT_PIN",
                 "can_show_as": "INPUT_PIN_ONLY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": 16850508,
+                "data": 16922726,
                 "referred_by": [],
                 "def": 0,
                 "meta_data_map": [],
@@ -1113,12 +1342,12 @@
             "app_key": "",
             "functions": [
               {
-                "id": "54f68c42-722f-446a-961e-c3d78fd9e80e",
+                "id": "13c332d4-2371-4b60-8021-533935ae0a09",
                 "name": "Drop",
                 "class_name": "Drop",
                 "pins": [
                   {
-                    "id": "9146f886-3e49-4de3-818a-c788ac94e295",
+                    "id": "b15bc6a5-4241-48c5-aafd-a0367d464e69",
                     "name": "Propagate",
                     "type_name": "nos.exe",
                     "show_as": "OUTPUT_PIN",
@@ -1127,7 +1356,7 @@
                     "visualizer": { },
                     "data": { },
                     "referred_by": [
-                      "7b6d30f2-3e7d-4eba-89b1-7e02d8a32221"
+                      "5452063b-b615-409f-ad18-b727dc3bd4c1"
                     ],
                     "def": { },
                     "meta_data_map": [],
@@ -1137,7 +1366,7 @@
                     "description": ""
                   },
                   {
-                    "id": "2eb70936-70c2-49ec-8de8-0b781db8ad71",
+                    "id": "06b64874-5978-4134-ae93-a960476284e9",
                     "name": "InExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1170,7 +1399,7 @@
             "function_category": "Default Node",
             "status_messages": [],
             "meta_data_map": [
-              { "key": "PluginVersion", "value": "2.1.0" }
+              { "key": "PluginVersion", "value": "2.2.0" }
             ],
             "orphan_state": { },
             "description": "Sends YCbCr frames to the specified channel",
@@ -1178,12 +1407,151 @@
             "template_parameters": []
           },
           {
-            "id": "396e7374-f9d8-4f97-a7a4-c26244026602",
+            "id": "eedc5704-a160-48b6-8b17-11424d8eb6a9",
+            "name": "GammaLUT",
+            "class_name": "nos.mediaio.GammaLUT",
+            "pins": [
+              {
+                "id": "b24475f3-a782-4c57-aa96-9c1b7cd4d898",
+                "name": "LUT",
+                "type_name": "nos.sys.vulkan.Buffer",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_ONLY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": {
+                  "size_in_bytes": 2048,
+                  "alignment": 0,
+                  "external_memory": { "handle_type": 2 },
+                  "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
+                  "memory_flags": "DEVICE_MEMORY",
+                  "element_type": "ELEMENT_TYPE_UNDEFINED"
+                },
+                "referred_by": [],
+                "def": {
+                  "size_in_bytes": 0,
+                  "alignment": 0,
+                  "external_memory": { "handle_type": 0 },
+                  "usage": "NONE",
+                  "memory_flags": "NONE",
+                  "element_type": "ELEMENT_TYPE_UNDEFINED"
+                },
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "78709beb-2382-40c0-b738-9eb06fdf9414",
+                "name": "Type",
+                "type_name": "nos.mediaio.GammaConversionType",
+                "show_as": "PROPERTY",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "ENCODE",
+                "referred_by": [],
+                "def": "ENCODE",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "2154bcba-b91d-495a-b656-08091886e2e2",
+                "name": "GammaCurve",
+                "type_name": "nos.mediaio.GammaCurve",
+                "show_as": "INPUT_PIN",
+                "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": "REC709",
+                "referred_by": [],
+                "def": "REC709",
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              }
+            ],
+            "pos": { "x": -423.0, "y": 830.0 },
+            "contents_type": "Job",
+            "contents": { "type": "" },
+            "app_key": "",
+            "functions": [],
+            "function_category": "Default Node",
+            "status_messages": [],
+            "meta_data_map": [
+              { "key": "PluginVersion", "value": "1.4.0" }
+            ],
+            "orphan_state": { "message": "Node is not present in TypeLibrary" },
+            "description": "Provides a lookup table for Gamma conversions",
+            "template_parameters": []
+          },
+          {
+            "id": "b69773ff-a275-4c91-a7fa-4f29e125d348",
+            "name": "DMA Thread",
+            "class_name": "nos.Thread",
+            "always_execute": true,
+            "pins": [
+              {
+                "id": "6d951da0-e70c-4e1d-b5e9-665172597271",
+                "name": "Run",
+                "type_name": "nos.exe",
+                "show_as": "OUTPUT_PIN",
+                "can_show_as": "OUTPUT_PIN_ONLY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": { },
+                "referred_by": [],
+                "def": { },
+                "meta_data_map": [],
+                "live": true,
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              },
+              {
+                "id": "93da0ef0-8fc9-4897-8bf4-aa79b576c992",
+                "name": "Importance",
+                "type_name": "ulong",
+                "show_as": "PROPERTY",
+                "can_show_as": "PROPERTY_ONLY",
+                "pin_category": "",
+                "visualizer": { },
+                "data": 0,
+                "referred_by": [],
+                "def": 0,
+                "meta_data_map": [],
+                "contents_type": "JobPin",
+                "contents": { },
+                "orphan_state": { },
+                "description": ""
+              }
+            ],
+            "pos": { "x": 730.0, "y": 468.0 },
+            "contents_type": "Job",
+            "contents": { "type": "" },
+            "app_key": "",
+            "functions": [],
+            "function_category": "Default Node",
+            "status_messages": [],
+            "meta_data_map": [],
+            "orphan_state": { },
+            "description": "",
+            "template_parameters": []
+          },
+          {
+            "id": "99cd6d91-d7c8-41a2-b165-7b11456007fb",
             "name": "Channel",
             "class_name": "nos.aja.Channel",
             "pins": [
               {
-                "id": "aeb01569-a09c-4d2b-a3ab-e65802a13323",
+                "id": "0edf2c36-e237-44a6-968e-2f2bc60e1858",
                 "name": "Run",
                 "type_name": "nos.exe",
                 "show_as": "INPUT_PIN",
@@ -1200,7 +1568,7 @@
                 "description": ""
               },
               {
-                "id": "5b5f2ea7-49e4-467d-b8bb-23248a9d4519",
+                "id": "c80b5e62-3034-4ae7-af83-111ea936bc48",
                 "name": "Continue",
                 "type_name": "nos.exe",
                 "show_as": "OUTPUT_PIN",
@@ -1217,7 +1585,7 @@
                 "description": ""
               },
               {
-                "id": "ba67e641-8c7a-465d-8e0c-3b24e504e042",
+                "id": "af44546d-3729-40af-80a5-a6374e5afabf",
                 "name": "Channel",
                 "type_name": "nos.aja.ChannelInfo",
                 "show_as": "OUTPUT_PIN",
@@ -1227,7 +1595,7 @@
                 "data": {
                 },
                 "referred_by": [
-                  "5cdc3bc7-e7aa-400d-838a-278cdadff182"
+                  "2e5d4504-527b-4660-9bac-45974f513d97"
                 ],
                 "def": {
                   "device": { "name": "" },
@@ -1241,7 +1609,7 @@
                 "description": ""
               },
               {
-                "id": "3b0e8af3-8d2f-4832-96c9-4ae337d7e0a2",
+                "id": "09423d99-784d-4816-93a6-208be9f32440",
                 "name": "IsOpen",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1250,7 +1618,7 @@
                 "visualizer": { },
                 "data": true,
                 "referred_by": [
-                  "c0e72686-aac6-4861-8eca-e77f03acccd8"
+                  "c42a40e6-72bd-4b5e-92db-986498fa36f9"
                 ],
                 "def": true,
                 "meta_data_map": [],
@@ -1260,7 +1628,7 @@
                 "description": ""
               },
               {
-                "id": "b116e1dc-c055-4302-8b8a-0b18d356398b",
+                "id": "5802e7f9-e09c-4e4d-afca-53ac5ba46fa6",
                 "name": "IsInput",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1277,16 +1645,16 @@
                 "description": ""
               },
               {
-                "id": "1f82f3a6-ece7-4ce8-bbbd-a1eb5c869b16",
+                "id": "2046df7f-e2d3-4b21-aef3-d595ca381b1e",
                 "name": "Device",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.DeviceList.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.DeviceList.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "0206cb4f-c2b2-4b56-851d-b6de75fd5df2"
+                  "7bc6b38b-693b-4ce3-9708-050256791a10"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1296,16 +1664,16 @@
                 "description": ""
               },
               {
-                "id": "9ecbbba6-1dc5-47e0-b839-54235e7d2174",
+                "id": "7ebfc035-b235-41b5-850a-449af65bf92c",
                 "name": "ChannelName",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.ChannelList.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.ChannelList.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "be2de727-12b7-4555-a544-8644f10e41d3"
+                  "a60a34c5-5169-476f-8ef2-cfe02edb45d4"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1315,16 +1683,16 @@
                 "description": ""
               },
               {
-                "id": "d2d959bf-fac8-434a-9068-2a53e04f8c68",
+                "id": "187688ff-88e6-407b-ba52-93e92179d9c4",
                 "name": "Resolution",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.ResolutionList.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.ResolutionList.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "4917ada5-40d7-4435-bc87-919fbcc703a9"
+                  "f1f7d537-bf3f-4b69-8c28-088f404044e1"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1334,16 +1702,16 @@
                 "description": ""
               },
               {
-                "id": "af9edf9f-be3e-4c87-ad39-50e008c4648c",
+                "id": "07fec9d5-5982-4839-b7dc-337068a63a80",
                 "name": "FrameRate",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.FrameRateList.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.FrameRateList.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "22ffeaf4-3ce3-445c-baf9-8255513b4c49"
+                  "6972f3f4-dca8-4da2-b2aa-04b686e439a0"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1353,16 +1721,16 @@
                 "description": ""
               },
               {
-                "id": "8e4f1b2a-28e8-436a-831b-9e0411d22c9a",
+                "id": "95cd7966-3677-412e-9a01-e79c654b3ea2",
                 "name": "IsInterlaced",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.InterlacedList.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.InterlacedList.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "19baa86c-6169-4a36-b193-e1e307984fcf"
+                  "88f621b2-e381-4d47-ba06-69c2536d6921"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1372,7 +1740,7 @@
                 "description": ""
               },
               {
-                "id": "caccbe6b-d4e2-4ad1-9083-7db23b89dd85",
+                "id": "c343f6b5-a5b3-469a-b4e4-b885d5461a6b",
                 "name": "FrameBufferFormat",
                 "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "PROPERTY",
@@ -1381,7 +1749,7 @@
                 "visualizer": { },
                 "data": "V210",
                 "referred_by": [
-                  "969c3d82-ff12-4e28-b24c-a16bb0a49147"
+                  "eb9afe24-5c2d-4b96-abef-7a69b62ded62"
                 ],
                 "def": "YUV8",
                 "meta_data_map": [],
@@ -1392,16 +1760,16 @@
                 "display_name": "Frame Buffer Format"
               },
               {
-                "id": "a6236a80-3c3d-47ea-a4c3-2e8d3ab1ceed",
+                "id": "f9a0123a-9ffd-429f-a989-f2bbedd65281",
                 "name": "ReferenceSource",
                 "type_name": "string",
                 "show_as": "PROPERTY",
                 "can_show_as": "PROPERTY_ONLY",
                 "pin_category": "",
-                "visualizer": { "type": "COMBO_BOX", "name": "aja.ReferenceSource.396e7374-f9d8-4f97-a7a4-c26244026602" },
+                "visualizer": { "type": "COMBO_BOX", "name": "aja.ReferenceSource.99cd6d91-d7c8-41a2-b165-7b11456007fb" },
                 "data": "NONE",
                 "referred_by": [
-                  "efca3314-9091-4df5-ba55-2d2fc91c92ce"
+                  "4527cfc6-2516-4309-9214-7d3c5a25ed9d"
                 ],
                 "def": "",
                 "meta_data_map": [],
@@ -1411,7 +1779,7 @@
                 "description": ""
               },
               {
-                "id": "3ea210e6-7468-428f-a4a2-6bb387b3ba3e",
+                "id": "f9f1dbd0-0dbe-4f3b-ad2c-2d9d91f0a0ce",
                 "name": "IsQuad",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1428,7 +1796,7 @@
                 "description": ""
               },
               {
-                "id": "871425df-bbee-4fe8-932b-87c744c6a34c",
+                "id": "44eedeb8-56b2-4741-a3c6-1b6474551fc4",
                 "name": "QuadLinkInputMode",
                 "type_name": "nos.aja.QuadLinkInputMode",
                 "show_as": "PROPERTY",
@@ -1445,7 +1813,7 @@
                 "description": ""
               },
               {
-                "id": "b6afe3ca-e7a0-41fe-a959-c0f01326f694",
+                "id": "54d3efa1-2e17-4ab0-be44-545e0b2e71e6",
                 "name": "QuadLinkOutputMode",
                 "type_name": "nos.aja.QuadLinkMode",
                 "show_as": "PROPERTY",
@@ -1454,7 +1822,7 @@
                 "visualizer": { },
                 "data": "Squares",
                 "referred_by": [
-                  "be47669c-6e48-46fe-b1e2-08c333725860"
+                  "04fd237d-b018-45de-b81a-402263a24950"
                 ],
                 "def": "Tsi",
                 "meta_data_map": [],
@@ -1464,7 +1832,7 @@
                 "description": ""
               },
               {
-                "id": "9f025fbc-0d96-42e0-9446-651bc162ef40",
+                "id": "6af13fce-a914-4f84-9ccd-e049141a1fe9",
                 "name": "ForceInterlaced",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1487,12 +1855,12 @@
             "app_key": "",
             "functions": [
               {
-                "id": "9b2643cd-7ac5-4d10-bf14-7003e6753335",
+                "id": "9497b2d8-b9c2-4698-951a-d3147b74d728",
                 "name": "CheckChannelConfig",
                 "class_name": "CheckChannelConfig",
                 "pins": [
                   {
-                    "id": "3979c5f0-4e80-451b-b3c5-c275dacd9087",
+                    "id": "b6728ffb-6457-44ba-b270-f5763f74ae59",
                     "name": "InExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1509,7 +1877,7 @@
                     "description": ""
                   },
                   {
-                    "id": "e52d9b78-9392-4ea1-9f2b-196c2236666f",
+                    "id": "5b943a58-2275-4c3e-aced-e5e319501d4e",
                     "name": "OutExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1539,12 +1907,12 @@
                 "template_parameters": []
               },
               {
-                "id": "5c7f8154-1271-4574-9ff2-1bcef5d2882e",
+                "id": "3ee2fbf5-846b-4572-968b-6c096272cdea",
                 "name": "CheckChannelStatus",
                 "class_name": "CheckChannelStatus",
                 "pins": [
                   {
-                    "id": "128930ca-d52b-48ed-a536-23c89a388bb2",
+                    "id": "ed2c52a6-4da9-4ac4-9806-1ca043c9f2ed",
                     "name": "Tick",
                     "type_name": "nos.exe",
                     "show_as": "INPUT_PIN",
@@ -1561,7 +1929,7 @@
                     "description": ""
                   },
                   {
-                    "id": "eb7760b8-adcf-47cf-bba2-3a021535cf5f",
+                    "id": "72eed068-a68b-4376-994b-f25fe023d777",
                     "name": "OutExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1591,12 +1959,12 @@
                 "template_parameters": []
               },
               {
-                "id": "0489c417-39b2-4dff-b755-c3ea75ef777a",
+                "id": "7f8df69a-4486-44f5-9ddc-17186f880536",
                 "name": "Drop",
                 "class_name": "Drop",
                 "pins": [
                   {
-                    "id": "d4bdff69-503b-485a-9cfc-b3b1987d572e",
+                    "id": "c8343f07-c132-47f4-8789-d0e990debd1c",
                     "name": "Trigger",
                     "type_name": "nos.exe",
                     "show_as": "INPUT_PIN",
@@ -1613,7 +1981,7 @@
                     "description": ""
                   },
                   {
-                    "id": "b3397f2a-449c-482a-8765-44c7f06ea4f2",
+                    "id": "1128495f-deff-46ce-a5d1-0cf5b766e35f",
                     "name": "OutExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1643,12 +2011,12 @@
                 "template_parameters": []
               },
               {
-                "id": "f8c21b12-bfd2-437b-9b30-1b798f0be4b6",
+                "id": "611cfdc4-1e13-4497-bc3c-162554b8fa8c",
                 "name": "TryUpdateChannel",
                 "class_name": "TryUpdateChannel",
                 "pins": [
                   {
-                    "id": "39466337-f868-46c3-8d7c-4a7c82fdf869",
+                    "id": "512ca8ab-cbbf-4856-98e0-c29fc4dbf5f9",
                     "name": "InTrigger",
                     "type_name": "nos.exe",
                     "show_as": "INPUT_PIN",
@@ -1665,7 +2033,7 @@
                     "description": ""
                   },
                   {
-                    "id": "d363d7f4-2783-48b3-a4a4-7853f3100fcc",
+                    "id": "9370e74a-f3bd-434b-b6d4-6efacf084a9a",
                     "name": "OutExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -1698,7 +2066,7 @@
             "function_category": "Default Node",
             "status_messages": [],
             "meta_data_map": [
-              { "key": "PluginVersion", "value": "2.1.0" }
+              { "key": "PluginVersion", "value": "2.2.0" }
             ],
             "orphan_state": { },
             "description": "Debugging/test node for opening channels",
@@ -1706,12 +2074,12 @@
             "template_parameters": []
           },
           {
-            "id": "250805e1-7ce2-4280-8ec8-99586b4ba918",
+            "id": "42bd511c-7fd6-447f-91d4-01f9a91749bc",
             "name": "ColorSpace",
             "class_name": "nos.internal.GraphInput",
             "pins": [
               {
-                "id": "f3a08759-e85f-4d36-81f3-b22e21a07256",
+                "id": "a22a2b05-46ba-4655-9592-ab18ce22cd19",
                 "name": "Output",
                 "type_name": "nos.mediaio.ColorSpace",
                 "show_as": "OUTPUT_PIN",
@@ -1728,7 +2096,7 @@
                 "description": ""
               },
               {
-                "id": "1b31bb29-1a47-4f54-bcdc-18c5f9e1a038",
+                "id": "11e4f93f-384a-47cf-81b1-c6214cde8503",
                 "name": "Input",
                 "type_name": "nos.mediaio.ColorSpace",
                 "show_as": "INPUT_PIN",
@@ -1737,7 +2105,7 @@
                 "visualizer": { },
                 "data": "REC709",
                 "referred_by": [
-                  "20188d85-0a1d-495f-84a8-e335ffe43903"
+                  "7b61ace0-9268-412d-aedd-7a01db75c85a"
                 ],
                 "def": "REC709",
                 "meta_data_map": [
@@ -1762,12 +2130,12 @@
             "template_parameters": []
           },
           {
-            "id": "56999ef2-2ee9-4f3a-8715-0cc573b6f688",
+            "id": "bd9bf384-f930-42de-b26d-e5b068c0634a",
             "name": "BreakChannelInfo",
             "class_name": "nos.reflect.Break",
             "pins": [
               {
-                "id": "109a5313-88d6-4d26-8fb0-aa222eef1745",
+                "id": "ac681d84-f8b3-4a50-936c-d8fa42fdbea9",
                 "name": "Input",
                 "type_name": "nos.aja.ChannelInfo",
                 "show_as": "INPUT_PIN",
@@ -1796,7 +2164,7 @@
                 "description": ""
               },
               {
-                "id": "48900fe2-fd6b-43ff-8409-2b1f27d0f849",
+                "id": "b71acc73-1bee-4f59-be6e-52864d9e4b87",
                 "name": "device",
                 "type_name": "nos.aja.Device",
                 "show_as": "PROPERTY",
@@ -1813,7 +2181,7 @@
                 "description": ""
               },
               {
-                "id": "3d6108da-161f-4f9b-ad7d-c8b48b5c5ff6",
+                "id": "71dd9fd8-3b2f-4327-805b-c1b0f2975378",
                 "name": "channel_name",
                 "type_name": "string",
                 "show_as": "PROPERTY",
@@ -1830,7 +2198,7 @@
                 "description": ""
               },
               {
-                "id": "79beb211-f3b4-4c0e-962d-68e0491cd6e9",
+                "id": "db1b4ee5-047d-4947-9a5c-468b8631a7a3",
                 "name": "is_input",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1847,7 +2215,7 @@
                 "description": ""
               },
               {
-                "id": "7d773b82-c1b8-4031-8ac3-31d21692d5f3",
+                "id": "c4fbe8fe-9871-4933-bcc1-d98eedd34505",
                 "name": "video_format",
                 "type_name": "string",
                 "show_as": "PROPERTY",
@@ -1864,7 +2232,7 @@
                 "description": ""
               },
               {
-                "id": "838e107f-40e4-4a50-a9d8-1aca38b3edc8",
+                "id": "3085acd6-1e28-4cf8-bbc9-79f27939dbdb",
                 "name": "video_format_idx",
                 "type_name": "int",
                 "show_as": "PROPERTY",
@@ -1881,7 +2249,7 @@
                 "description": ""
               },
               {
-                "id": "53b8c90a-98f8-4e06-87af-235090f5d4cc",
+                "id": "1e5884d9-5b44-4302-97e9-31d267de30cb",
                 "name": "frame_buffer_format",
                 "type_name": "nos.mediaio.YCbCrPixelFormat",
                 "show_as": "OUTPUT_PIN",
@@ -1898,7 +2266,7 @@
                 "description": ""
               },
               {
-                "id": "d7b305a6-c8d8-4632-b886-9e1d18758bcc",
+                "id": "9c09ec99-b460-4a00-8ac8-2f7016119f89",
                 "name": "is_quad",
                 "type_name": "bool",
                 "show_as": "PROPERTY",
@@ -1915,7 +2283,7 @@
                 "description": ""
               },
               {
-                "id": "94dbeae1-6b7e-4581-a327-ec0094d61529",
+                "id": "0ca2a09a-ceb0-4c42-ad61-947c18be2823",
                 "name": "input_quad_link_mode",
                 "type_name": "nos.aja.QuadLinkInputMode",
                 "show_as": "PROPERTY",
@@ -1932,7 +2300,7 @@
                 "description": ""
               },
               {
-                "id": "f6f2e61f-c1e0-4777-8a84-85790cc18365",
+                "id": "35c618f1-6f17-4ce8-aedf-12c3d1c00741",
                 "name": "output_quad_link_mode",
                 "type_name": "nos.aja.QuadLinkMode",
                 "show_as": "PROPERTY",
@@ -1949,7 +2317,7 @@
                 "description": ""
               },
               {
-                "id": "5676fd00-0fad-4433-8b55-a5dca1c61e46",
+                "id": "2cceba77-0d55-4726-9d2e-ac77d5db7781",
                 "name": "resolution",
                 "type_name": "nos.fb.vec2u",
                 "show_as": "OUTPUT_PIN",
@@ -1966,7 +2334,7 @@
                 "description": ""
               },
               {
-                "id": "01233c76-1504-424e-8a1b-93850d27561d",
+                "id": "4588245a-7002-4682-a8b3-114ff0ff03e3",
                 "name": "is_interlaced",
                 "type_name": "bool",
                 "show_as": "OUTPUT_PIN",
@@ -1999,176 +2367,13 @@
             "template_parameters": []
           },
           {
-            "id": "944104b9-5885-422b-ab2d-498def5b346d",
-            "name": "ColorSpaceMatrix",
-            "class_name": "nos.mediaio.ColorSpaceMatrix",
-            "pins": [
-              {
-                "id": "e6834883-48e9-48c6-b938-6db37b780d67",
-                "name": "Output",
-                "type_name": "nos.fb.mat4",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_ONLY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": { "x": { "x": 0.18205, "y": -0.100349, "z": 0.437928, "w": 0.0 }, "y": { "x": 0.612429, "y": -0.337579, "z": -0.397772, "w": 0.0 }, "z": { "x": 0.061825, "y": 0.437928, "z": -0.040155, "w": 0.0 }, "w": { "x": 0.062561, "y": 0.500489, "z": 0.500489, "w": 1.0 } },
-                "referred_by": [],
-                "def": { "x": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "y": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "z": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 }, "w": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 0.0 } },
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "95b03ff3-c1f4-49e4-ab96-5472603fe8e6",
-                "name": "ColorSpace",
-                "type_name": "nos.mediaio.ColorSpace",
-                "show_as": "INPUT_PIN",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "REC709",
-                "referred_by": [],
-                "def": "REC709",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": "",
-                "display_name": "Color Space"
-              },
-              {
-                "id": "16b74aa8-4c08-42dc-8d09-8fbad30300dc",
-                "name": "NarrowRange",
-                "type_name": "bool",
-                "show_as": "PROPERTY",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": true,
-                "referred_by": [],
-                "def": true,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": "",
-                "display_name": "Use Narrow Range Encoding"
-              },
-              {
-                "id": "bc9bb8fe-1a8c-4c40-9b03-efa260311c8d",
-                "name": "PixelFormat",
-                "type_name": "nos.mediaio.YCbCrPixelFormat",
-                "show_as": "INPUT_PIN",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "V210",
-                "referred_by": [],
-                "def": "YUV8",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": "",
-                "display_name": "Pixel Format"
-              },
-              {
-                "id": "da5b3512-0369-42a5-929d-5738d65901bf",
-                "name": "Type",
-                "type_name": "nos.mediaio.GammaConversionType",
-                "show_as": "PROPERTY",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "ENCODE",
-                "referred_by": [],
-                "def": "ENCODE",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              }
-            ],
-            "pos": { "x": -375.0, "y": 983.0 },
-            "contents_type": "Job",
-            "contents": { "type": "" },
-            "app_key": "",
-            "functions": [],
-            "function_category": "Default Node",
-            "status_messages": [],
-            "meta_data_map": [
-              { "key": "PluginVersion", "value": "1.4.0" }
-            ],
-            "orphan_state": { "message": "Node is not present in TypeLibrary" },
-            "description": "",
-            "display_name": "Color Space Matrix",
-            "template_parameters": []
-          },
-          {
-            "id": "7bb9ea39-76b1-4f4e-8af9-0fe40f2381df",
-            "name": "DMA Thread",
-            "class_name": "nos.Thread",
-            "always_execute": true,
-            "pins": [
-              {
-                "id": "7615a242-7597-497b-ba88-f566d820b85c",
-                "name": "Run",
-                "type_name": "nos.exe",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_ONLY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": { },
-                "referred_by": [],
-                "def": { },
-                "meta_data_map": [],
-                "live": true,
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "16365cc1-c326-4342-acb1-346edfbcc90e",
-                "name": "Importance",
-                "type_name": "ulong",
-                "show_as": "PROPERTY",
-                "can_show_as": "PROPERTY_ONLY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": 0,
-                "referred_by": [],
-                "def": 0,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              }
-            ],
-            "pos": { "x": 730.0, "y": 468.0 },
-            "contents_type": "Job",
-            "contents": { "type": "" },
-            "app_key": "",
-            "functions": [],
-            "function_category": "Default Node",
-            "status_messages": [],
-            "meta_data_map": [],
-            "orphan_state": { },
-            "description": "",
-            "template_parameters": []
-          },
-          {
-            "id": "7d23c1d2-03aa-40cb-9448-273355feed31",
+            "id": "05de3e04-cd68-4b68-b55c-594c684c9294",
             "name": "Main Thread",
             "class_name": "nos.Thread",
             "always_execute": true,
             "pins": [
               {
-                "id": "a9f2182e-17b3-4537-8779-e08bd73cb7be",
+                "id": "dd80b69b-8a3e-4168-bb39-14d62d6f174b",
                 "name": "Run",
                 "type_name": "nos.exe",
                 "show_as": "OUTPUT_PIN",
@@ -2186,7 +2391,7 @@
                 "description": ""
               },
               {
-                "id": "84c5218b-a3fe-4ed0-8a4f-85982f5df154",
+                "id": "84869a23-4caa-4024-894b-f7bb87ee25ae",
                 "name": "Importance",
                 "type_name": "ulong",
                 "show_as": "PROPERTY",
@@ -2216,217 +2421,12 @@
             "template_parameters": []
           },
           {
-            "id": "2aa2de27-a4bd-4222-9dca-af7fdfd5a1ab",
-            "name": "GetFieldType",
-            "class_name": "nos.reflect.Break",
-            "pins": [
-              {
-                "id": "1bbb97d8-3836-4ac1-a35d-554b55a120b1",
-                "name": "Input",
-                "type_name": "nos.sys.vulkan.Buffer",
-                "show_as": "INPUT_PIN",
-                "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": {
-                  "size_in_bytes": 5529600,
-                  "alignment": 0,
-                  "external_memory": { "handle_type": 2 },
-                  "usage": "TRANSFER_SRC TRANSFER_DST",
-                  "memory_flags": "HOST_VISIBLE DOWNLOAD",
-                  "element_type": "ELEMENT_TYPE_UNDEFINED"
-                },
-                "referred_by": [],
-                "def": {
-                  "size_in_bytes": 0,
-                  "alignment": 0,
-                  "external_memory": { "handle_type": 0 },
-                  "usage": "NONE",
-                  "memory_flags": "NONE",
-                  "element_type": "ELEMENT_TYPE_UNDEFINED"
-                },
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "82c42d47-6956-4563-912e-d1b155dad930",
-                "name": "handle",
-                "type_name": "ulong",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": 2263764412352,
-                "referred_by": [],
-                "def": 0,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "098b0cd8-5128-4302-8246-ec2cc82b7991",
-                "name": "offset",
-                "type_name": "ulong",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": 22308864,
-                "referred_by": [],
-                "def": 0,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "44e13864-0118-4bb2-b596-bbb7122adfee",
-                "name": "size_in_bytes",
-                "type_name": "ulong",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": 5529600,
-                "referred_by": [],
-                "def": 0,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "ba2fa954-4636-4b16-ba50-5836a5751677",
-                "name": "alignment",
-                "type_name": "uint",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": 0,
-                "referred_by": [],
-                "def": 0,
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "7ebf1d5e-b8fa-48b8-acab-04a418235d58",
-                "name": "external_memory",
-                "type_name": "nos.sys.vulkan.ExternalMemory",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": { "handle_type": 2 },
-                "referred_by": [],
-                "def": { "handle_type": 0 },
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "c0535c9b-c44c-4604-b0cd-6e3ab94e465e",
-                "name": "usage",
-                "type_name": "nos.sys.vulkan.BufferUsage",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "TRANSFER_SRC TRANSFER_DST",
-                "referred_by": [],
-                "def": "NONE",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "020aa1c3-8618-4649-a083-8ca30dce50db",
-                "name": "memory_flags",
-                "type_name": "nos.sys.vulkan.MemoryFlags",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "HOST_VISIBLE DOWNLOAD",
-                "referred_by": [],
-                "def": "NONE",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "9376a788-2311-466a-b62f-905577afbe67",
-                "name": "element_type",
-                "type_name": "nos.sys.vulkan.BufferElementType",
-                "show_as": "PROPERTY",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "ELEMENT_TYPE_UNDEFINED",
-                "referred_by": [],
-                "def": "ELEMENT_TYPE_UNDEFINED",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              },
-              {
-                "id": "8a3e9bd8-331c-4d49-861e-f48e9c334b02",
-                "name": "field_type",
-                "type_name": "nos.sys.vulkan.FieldType",
-                "show_as": "OUTPUT_PIN",
-                "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                "pin_category": "",
-                "visualizer": { },
-                "data": "PROGRESSIVE",
-                "referred_by": [],
-                "def": "UNKNOWN",
-                "meta_data_map": [],
-                "contents_type": "JobPin",
-                "contents": { },
-                "orphan_state": { },
-                "description": ""
-              }
-            ],
-            "pos": { "x": 828.0, "y": 721.0 },
-            "contents_type": "Job",
-            "contents": { "type": "" },
-            "app_key": "",
-            "functions": [],
-            "function_category": "Default Node",
-            "status_messages": [],
-            "meta_data_map": [
-              { "key": "PluginVersion", "value": "1.1.0" }
-            ],
-            "orphan_state": { },
-            "description": "",
-            "display_name": "Get Field Type",
-            "template_parameters": []
-          },
-          {
-            "id": "2fe71857-5470-485f-be9b-c556499bfdf5",
+            "id": "46ccbbe4-ce5e-4564-a92e-caf2a0ba08fa",
             "name": "GammaCurve",
             "class_name": "nos.internal.GraphInput",
             "pins": [
               {
-                "id": "24cfa5e1-8690-4dc4-95d6-9f61cf41a2dd",
+                "id": "62895819-e5bf-415b-899d-eb94f0b6ebd4",
                 "name": "Output",
                 "type_name": "nos.mediaio.GammaCurve",
                 "show_as": "OUTPUT_PIN",
@@ -2443,7 +2443,7 @@
                 "description": ""
               },
               {
-                "id": "78f2fc1b-916e-4ff9-ab32-a8981b40cc77",
+                "id": "3fccad25-24c0-481e-a3bd-bc4f501b699a",
                 "name": "Input",
                 "type_name": "nos.mediaio.GammaCurve",
                 "show_as": "INPUT_PIN",
@@ -2452,7 +2452,7 @@
                 "visualizer": { },
                 "data": "REC709",
                 "referred_by": [
-                  "20957f48-dcf4-4904-a841-c1c2b4718965"
+                  "fca311fc-e9bd-4504-990c-1063a66d3b46"
                 ],
                 "def": "REC709",
                 "meta_data_map": [
@@ -2477,12 +2477,12 @@
             "template_parameters": []
           },
           {
-            "id": "1340e7ae-52a3-4a4f-8f55-65af643f72f7",
+            "id": "d4bcb23d-e97b-4ac6-b52d-3e9c724e5793",
             "name": "Auto Resize",
             "class_name": "",
             "pins": [
               {
-                "id": "3cecccdf-5577-477b-accf-e4e2aad85f76",
+                "id": "6a9daf12-42a5-40cc-a0ab-ac7a052345f8",
                 "name": "Continue",
                 "type_name": "nos.exe",
                 "show_as": "OUTPUT_PIN",
@@ -2494,12 +2494,12 @@
                 "def": { },
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "545a51ab-c191-447e-8e05-64164e8b5fae" },
+                "contents": { "source_id": "d6e06e29-e20a-43e6-be98-16c012ebc9b2" },
                 "orphan_state": { },
                 "description": ""
               },
               {
-                "id": "1af8a07d-534b-4ddd-bd38-67d00d34b57a",
+                "id": "53a0367e-26d3-4223-adeb-4677961e224f",
                 "name": "Run",
                 "type_name": "nos.exe",
                 "show_as": "INPUT_PIN",
@@ -2511,12 +2511,12 @@
                 "def": { },
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "de15f7ee-70fb-4e14-871c-758a110608de" },
+                "contents": { "source_id": "e77769a1-6b54-404d-914d-f07f654b4637" },
                 "orphan_state": { },
                 "description": ""
               },
               {
-                "id": "16a7de7e-d781-4059-992c-45350a0f898b",
+                "id": "01cccd6e-433e-4d64-bc04-c5aa68d7db85",
                 "name": "Input",
                 "type_name": "nos.fb.vec2u",
                 "show_as": "INPUT_PIN",
@@ -2528,12 +2528,12 @@
                 "def": { "x": 0, "y": 0 },
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "ab8b8128-c197-4671-bf01-8c07bc22d9ce" },
+                "contents": { "source_id": "8c0925cc-e9fc-48bc-975e-ae7e177e342f" },
                 "orphan_state": { },
                 "description": ""
               },
               {
-                "id": "d4d04992-a420-4999-90ce-3741be39168c",
+                "id": "522f03ea-2e56-498b-9a89-765b4d4e1ac6",
                 "name": "Input (1)",
                 "type_name": "nos.sys.vulkan.Texture",
                 "show_as": "INPUT_PIN",
@@ -2542,11 +2542,11 @@
                 "visualizer": { },
                 "data": {
                   "external_memory": { "handle_type": 2 },
+                  "resolution": "HD",
                   "width": 1920,
                   "height": 1080,
-                  "format": "R16G16B16A16_UNORM",
-                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                  "unscaled": true
+                  "format": "R16G16B16A16_SFLOAT",
+                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                 },
                 "referred_by": [],
                 "def": {
@@ -2560,12 +2560,12 @@
                 "advanced_property": true,
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "525adf8a-cba4-487b-bd58-42d41904003d" },
+                "contents": { "source_id": "36577c0d-c6c1-4cd1-892a-839f9ff5a489" },
                 "orphan_state": { },
                 "description": ""
               },
               {
-                "id": "bc7f9c00-ba79-4dc8-916f-bc863a14b690",
+                "id": "1dd05044-5536-42cf-a694-83442be61cd1",
                 "name": "Output",
                 "type_name": "nos.sys.vulkan.Texture",
                 "show_as": "OUTPUT_PIN",
@@ -2574,11 +2574,11 @@
                 "visualizer": { },
                 "data": {
                   "external_memory": { "handle_type": 2 },
+                  "resolution": "HD",
                   "width": 1920,
                   "height": 1080,
-                  "format": "R16G16B16A16_UNORM",
-                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                  "unscaled": true
+                  "format": "R16G16B16A16_SFLOAT",
+                  "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                 },
                 "referred_by": [],
                 "def": {
@@ -2592,7 +2592,7 @@
                 "advanced_property": true,
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "e06d1e1b-762d-4344-81ca-93af2ef8c1bd" },
+                "contents": { "source_id": "d1a5a6a7-ee7c-4ea5-8618-3946bc0d4db8" },
                 "orphan_state": { },
                 "description": ""
               }
@@ -2601,82 +2601,31 @@
             "contents_type": "Graph",
             "contents": { "nodes": [
                 {
-                  "id": "dee8e462-46cd-4552-80c3-89195011f592",
-                  "name": "Switch (1)",
-                  "class_name": "nos.engine.Switch",
+                  "id": "4a2e0c4a-eba8-48ca-8aae-0f5f82cb4b08",
+                  "name": "Portal (1)",
+                  "class_name": "nos.internal.Portal",
                   "pins": [
                     {
-                      "id": "be50b0a9-d1a8-47b0-9325-5666d544109f",
-                      "name": "Case",
+                      "id": "1ab5113c-cbb1-432d-9254-e056f9abc817",
+                      "name": "bool",
                       "type_name": "bool",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_ONLY",
                       "pin_category": "",
                       "visualizer": { },
                       "data": false,
                       "referred_by": [],
                       "def": false,
                       "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "9354e179-58f7-4566-b421-acf252e198ff",
-                      "name": "True",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "Auto resize active",
-                      "referred_by": [],
-                      "def": "",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "106ec8c9-58fd-485d-af76-356c838a47f0",
-                      "name": "False",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "",
-                      "referred_by": [],
-                      "def": "",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "0e953b41-8385-440b-8c96-b934c3437ef3",
-                      "name": "Output",
-                      "type_name": "string",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "",
-                      "referred_by": [],
-                      "def": "",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
+                      "contents_type": "PortalPin",
+                      "contents": { "source_id": "63bc85ae-41fa-486a-bb39-198aa8d1513f" },
                       "orphan_state": { },
                       "description": ""
                     }
                   ],
-                  "pos": { "x": 612.0, "y": 1567.0 },
-                  "contents_type": "Job",
-                  "contents": { "type": "" },
+                  "pos": { "x": 408.0, "y": 1506.0 },
+                  "contents_type": "Graph",
+                  "contents": { "nodes": [], "comments": [], "connections": [], "expandable": false },
                   "app_key": "",
                   "functions": [],
                   "function_category": "Default Node",
@@ -2687,50 +2636,46 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "a5c22d3d-9c89-4c1a-9dc6-319353e4dad2",
-                  "name": "Input",
-                  "class_name": "nos.internal.GraphInput",
+                  "id": "dedaf422-7723-4f0d-93f2-56c9abac38df",
+                  "name": "uint to double",
+                  "class_name": "cast.uint-double",
                   "pins": [
                     {
-                      "id": "02cff94d-98fd-4388-b2ab-26cc4fb107d3",
-                      "name": "Output",
-                      "type_name": "nos.fb.vec2u",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": { "x": 1920, "y": 1080 },
-                      "referred_by": [],
-                      "def": { "x": 0, "y": 0 },
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "ab8b8128-c197-4671-bf01-8c07bc22d9ce",
-                      "name": "Input",
-                      "type_name": "nos.fb.vec2u",
+                      "id": "cbdb7ba3-9824-466b-8cdb-04111dc792cf",
+                      "name": "uint",
+                      "type_name": "uint",
                       "show_as": "INPUT_PIN",
                       "can_show_as": "INPUT_PIN_OR_PROPERTY",
                       "pin_category": "",
                       "visualizer": { },
-                      "data": { "x": 1920, "y": 1080 },
-                      "referred_by": [
-                        "16a7de7e-d781-4059-992c-45350a0f898b"
-                      ],
-                      "def": { "x": 0, "y": 0 },
-                      "meta_data_map": [
-                        { "key": "PinHidden", "value": "true" }
-                      ],
+                      "data": 1920,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "37547d69-23a3-4e4a-9d2e-aa24f5ae9786",
+                      "name": "double",
+                      "type_name": "double",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 1920.0,
+                      "referred_by": [],
+                      "def": 0.0,
+                      "meta_data_map": [],
                       "contents_type": "JobPin",
                       "contents": { },
                       "orphan_state": { },
                       "description": ""
                     }
                   ],
-                  "pos": { "x": -60.0, "y": 1233.0 },
+                  "pos": { "x": 516.0, "y": 1153.0 },
                   "contents_type": "Job",
                   "contents": { "type": "" },
                   "app_key": "",
@@ -2740,16 +2685,15 @@
                   "meta_data_map": [],
                   "orphan_state": { },
                   "description": "",
-                  "display_name": "Out Resolution",
                   "template_parameters": []
                 },
                 {
-                  "id": "8b394af1-38e4-46b7-860a-74c90f0fc93f",
+                  "id": "1f018566-6848-43a1-a855-8d3b041a4f73",
                   "name": "MakeDynamic",
                   "class_name": "nos.reflect.MakeDynamic",
                   "pins": [
                     {
-                      "id": "403c724f-e181-416f-8543-13f14dd81a3c",
+                      "id": "af56833c-fcaf-431c-b930-864a5c8eec44",
                       "name": "Output",
                       "type_name": "string",
                       "show_as": "OUTPUT_PIN",
@@ -2767,7 +2711,7 @@
                       "display_name": "string"
                     },
                     {
-                      "id": "98c1bdb3-5f30-4ce6-b67b-aeb2e397f968",
+                      "id": "46497aba-4d52-4384-b420-ddf2a1414756",
                       "name": "Value",
                       "type_name": "string",
                       "show_as": "INPUT_PIN",
@@ -2802,12 +2746,155 @@
                   ]
                 },
                 {
-                  "id": "17f2dc16-d6c0-48fc-9f6a-c51357045733",
+                  "id": "40937d8a-1c16-4a48-b778-2fb18fff3d52",
+                  "name": "Input",
+                  "class_name": "nos.internal.GraphInput",
+                  "pins": [
+                    {
+                      "id": "9d97deaf-8eec-4adb-9663-8a83d9df0f50",
+                      "name": "Output",
+                      "type_name": "nos.fb.vec2u",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": { "x": 1920, "y": 1080 },
+                      "referred_by": [],
+                      "def": { "x": 0, "y": 0 },
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "8c0925cc-e9fc-48bc-975e-ae7e177e342f",
+                      "name": "Input",
+                      "type_name": "nos.fb.vec2u",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": { "x": 1920, "y": 1080 },
+                      "referred_by": [
+                        "01cccd6e-433e-4d64-bc04-c5aa68d7db85"
+                      ],
+                      "def": { "x": 0, "y": 0 },
+                      "meta_data_map": [
+                        { "key": "PinHidden", "value": "true" }
+                      ],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    }
+                  ],
+                  "pos": { "x": -60.0, "y": 1233.0 },
+                  "contents_type": "Job",
+                  "contents": { "type": "" },
+                  "app_key": "",
+                  "functions": [],
+                  "function_category": "Default Node",
+                  "status_messages": [],
+                  "meta_data_map": [],
+                  "orphan_state": { },
+                  "description": "",
+                  "display_name": "Out Resolution",
+                  "template_parameters": []
+                },
+                {
+                  "id": "83e9f6d0-1577-4d9e-ae32-f1b8c7442f22",
+                  "name": "Switch (1)",
+                  "class_name": "nos.engine.Switch",
+                  "pins": [
+                    {
+                      "id": "d2bb213f-7c0a-442a-bd80-12888e338e6f",
+                      "name": "Case",
+                      "type_name": "bool",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": false,
+                      "referred_by": [],
+                      "def": false,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "81715c27-7785-4642-905c-f9980f3ca049",
+                      "name": "True",
+                      "type_name": "string",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "Auto resize active",
+                      "referred_by": [],
+                      "def": "",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "9231abf1-ecaf-4c97-be72-e60ae10c9f3a",
+                      "name": "False",
+                      "type_name": "string",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "",
+                      "referred_by": [],
+                      "def": "",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "98b66f20-b14c-4bae-997e-c93ac184cfe8",
+                      "name": "Output",
+                      "type_name": "string",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "",
+                      "referred_by": [],
+                      "def": "",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    }
+                  ],
+                  "pos": { "x": 612.0, "y": 1567.0 },
+                  "contents_type": "Job",
+                  "contents": { "type": "" },
+                  "app_key": "",
+                  "functions": [],
+                  "function_category": "Default Node",
+                  "status_messages": [],
+                  "meta_data_map": [],
+                  "orphan_state": { },
+                  "description": "",
+                  "template_parameters": []
+                },
+                {
+                  "id": "c0638107-124a-4ac6-8e60-99b711fbad08",
                   "name": "uint to double (2)",
                   "class_name": "cast.uint-double",
                   "pins": [
                     {
-                      "id": "93f53109-3621-4078-9fcb-10b73393dea8",
+                      "id": "5ebec4ee-16e8-4c28-bf94-68a5cf71ccd9",
                       "name": "uint",
                       "type_name": "uint",
                       "show_as": "INPUT_PIN",
@@ -2824,7 +2911,7 @@
                       "description": ""
                     },
                     {
-                      "id": "bd58d6f2-6c74-424d-af33-110153b02193",
+                      "id": "4aa7d249-5eed-4528-9a0f-97471eed5847",
                       "name": "double",
                       "type_name": "double",
                       "show_as": "OUTPUT_PIN",
@@ -2854,100 +2941,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "c1fa7172-51e9-4dbf-88da-fc5b0e3c83f8",
-                  "name": "ShowStatus",
-                  "class_name": "nos.utilities.ShowStatus",
-                  "pins": [
-                    {
-                      "id": "af2bbc44-87aa-40b6-958a-736a93fdf982",
-                      "name": "Run",
-                      "type_name": "nos.exe",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": { },
-                      "referred_by": [],
-                      "def": { },
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "625b0a9d-3912-4c0a-8bd2-438ff38af556",
-                      "name": "Continue",
-                      "type_name": "nos.exe",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": { },
-                      "referred_by": [],
-                      "def": { },
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "5c74eefd-271a-4849-add0-ed4beef6ff06",
-                      "name": "Status",
-                      "type_name": "string",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "",
-                      "referred_by": [],
-                      "def": "",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "2ffe5e1f-f28a-4239-a33e-805d0d628aae",
-                      "name": "StatusType",
-                      "type_name": "nos.fb.NodeStatusMessageType",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "WARNING",
-                      "referred_by": [],
-                      "def": "WARNING",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    }
-                  ],
-                  "pos": { "x": 898.0, "y": 1479.0 },
-                  "contents_type": "Job",
-                  "contents": { "type": "" },
-                  "app_key": "",
-                  "functions": [],
-                  "function_category": "Default Node",
-                  "status_messages": [],
-                  "meta_data_map": [
-                    { "key": "PluginVersion", "value": "2.8.0" }
-                  ],
-                  "orphan_state": { },
-                  "description": "Displays value in status as node status.",
-                  "template_parameters": []
-                },
-                {
-                  "id": "b1c15e68-97ca-4b1b-85c1-39272c92c222",
+                  "id": "2d417cf0-6149-42b5-b962-6ace62db7bbb",
                   "name": "Eval",
                   "class_name": "nos.math.Eval",
                   "pins": [
                     {
-                      "id": "66b51cd7-61d0-47a2-b90e-83deeaa228e5",
+                      "id": "02871e91-924d-4451-aab3-dff21d0977a7",
                       "name": "Expression",
                       "type_name": "string",
                       "show_as": "PROPERTY",
@@ -2964,7 +2963,7 @@
                       "description": ""
                     },
                     {
-                      "id": "d008ebda-5108-4267-9cdb-79b4c74dd4f3",
+                      "id": "a365eaae-3d53-45af-bd37-bf6d71137e1c",
                       "name": "Result",
                       "type_name": "double",
                       "show_as": "OUTPUT_PIN",
@@ -2981,7 +2980,7 @@
                       "description": ""
                     },
                     {
-                      "id": "e530030d-9941-4b9f-827e-a46db12c21a0",
+                      "id": "81f1f25e-5943-428b-8b5f-03ff475daeb6",
                       "name": "A",
                       "type_name": "double",
                       "show_as": "INPUT_PIN",
@@ -2999,7 +2998,7 @@
                       "display_name": "srcWidth"
                     },
                     {
-                      "id": "f73a5753-27fc-40cc-b782-4b892f1f8ea1",
+                      "id": "fba84480-681c-4b2d-a90e-9aa034c30923",
                       "name": "B",
                       "type_name": "double",
                       "show_as": "INPUT_PIN",
@@ -3017,7 +3016,7 @@
                       "display_name": "srcHeight"
                     },
                     {
-                      "id": "145aaec5-dc86-4feb-9eea-df82b2a1bdcb",
+                      "id": "02e3fda0-d04a-4ba2-ac32-c7b3943945e6",
                       "name": "C",
                       "type_name": "double",
                       "show_as": "INPUT_PIN",
@@ -3035,7 +3034,7 @@
                       "display_name": "outWidth"
                     },
                     {
-                      "id": "e29ad2bf-da6a-4bd0-b841-98c431bf4559",
+                      "id": "88f47a36-082d-47ab-bd67-53f896c56bec",
                       "name": "D",
                       "type_name": "double",
                       "show_as": "INPUT_PIN",
@@ -3053,7 +3052,7 @@
                       "display_name": "outHeight"
                     },
                     {
-                      "id": "7abfa2eb-2cf8-4a8d-ac25-3563028bf669",
+                      "id": "f1e3051f-d5f6-4518-9e44-53c9e86afd7c",
                       "name": "Show_Expression",
                       "type_name": "bool",
                       "show_as": "PROPERTY",
@@ -3088,47 +3087,100 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "e91e68eb-78ea-4a55-af26-7358c349bafc",
-                  "name": "Portal (1)",
-                  "class_name": "nos.internal.Portal",
+                  "id": "5257d7cc-0ebe-49f9-b504-d7dff578895f",
+                  "name": "ShowStatus",
+                  "class_name": "nos.utilities.ShowStatus",
                   "pins": [
                     {
-                      "id": "384448ce-e4d3-4722-827b-7f2efb4bad22",
-                      "name": "bool",
-                      "type_name": "bool",
+                      "id": "960dcd4d-3a4b-49dc-980e-b5c10c11bbed",
+                      "name": "Run",
+                      "type_name": "nos.exe",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": { },
+                      "referred_by": [],
+                      "def": { },
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "8820683b-7749-406c-9be4-4dedfd654aa4",
+                      "name": "Continue",
+                      "type_name": "nos.exe",
                       "show_as": "OUTPUT_PIN",
                       "can_show_as": "OUTPUT_PIN_ONLY",
                       "pin_category": "",
                       "visualizer": { },
-                      "data": false,
+                      "data": { },
                       "referred_by": [],
-                      "def": false,
+                      "def": { },
                       "meta_data_map": [],
-                      "contents_type": "PortalPin",
-                      "contents": { "source_id": "0045f06e-9acb-4d25-b579-7e455ee96ea1" },
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "2008fc98-e61f-4c34-891f-9fe9fd083cc4",
+                      "name": "Status",
+                      "type_name": "string",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "",
+                      "referred_by": [],
+                      "def": "",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "a8f3639c-e1d2-4dc1-95e5-2daa2677ae1f",
+                      "name": "StatusType",
+                      "type_name": "nos.fb.NodeStatusMessageType",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "WARNING",
+                      "referred_by": [],
+                      "def": "WARNING",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
                       "orphan_state": { },
                       "description": ""
                     }
                   ],
-                  "pos": { "x": 408.0, "y": 1506.0 },
-                  "contents_type": "Graph",
-                  "contents": { "nodes": [], "comments": [], "connections": [], "expandable": false },
+                  "pos": { "x": 898.0, "y": 1479.0 },
+                  "contents_type": "Job",
+                  "contents": { "type": "" },
                   "app_key": "",
                   "functions": [],
                   "function_category": "Default Node",
                   "status_messages": [],
-                  "meta_data_map": [],
+                  "meta_data_map": [
+                    { "key": "PluginVersion", "value": "2.8.0" }
+                  ],
                   "orphan_state": { },
-                  "description": "",
+                  "description": "Displays value in status as node status.",
                   "template_parameters": []
                 },
                 {
-                  "id": "925d55cc-ff9b-4c93-8d39-9ffd90eb277a",
+                  "id": "d1181cc9-eadb-480c-b5f6-4c4af55a7fe3",
                   "name": "Switch",
                   "class_name": "nos.engine.Switch",
                   "pins": [
                     {
-                      "id": "f0604235-b23e-4065-898d-cdcac2bac51f",
+                      "id": "8ad63216-3c4c-4075-8454-004f857f8c54",
                       "name": "Case",
                       "type_name": "bool",
                       "show_as": "INPUT_PIN",
@@ -3145,7 +3197,7 @@
                       "description": ""
                     },
                     {
-                      "id": "6c6a9a35-4bc9-4315-80ea-f9e0a31956a9",
+                      "id": "90b0b181-e26d-4c77-8095-37439be7137a",
                       "name": "True",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "INPUT_PIN",
@@ -3178,7 +3230,7 @@
                       "description": ""
                     },
                     {
-                      "id": "2c23c63a-dbd4-474a-a19f-a34de9daca99",
+                      "id": "003e7f8a-1c2d-45b3-a237-32f565c5617f",
                       "name": "False",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "INPUT_PIN",
@@ -3190,8 +3242,9 @@
                         "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_SFLOAT",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        "format": "R16G16B16A16_UNORM",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                        "unscaled": true
                       },
                       "referred_by": [],
                       "def": {
@@ -3210,7 +3263,7 @@
                       "description": ""
                     },
                     {
-                      "id": "0b535a1f-9a82-4342-9e8e-d59aac7d1598",
+                      "id": "7c67f24c-127e-455a-a63e-54a17a866f36",
                       "name": "Output",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "OUTPUT_PIN",
@@ -3255,12 +3308,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "dc15ad52-3312-4936-851c-062aad19ace0",
+                  "id": "65a3f4dc-e923-453e-a452-31453cbecf97",
                   "name": "MakeDynamic (1)",
                   "class_name": "nos.reflect.MakeDynamic",
                   "pins": [
                     {
-                      "id": "db1be42e-758f-4963-836d-d559a6b72fa0",
+                      "id": "bc18f8ba-cbe7-4383-9b45-34085972cde5",
                       "name": "Output",
                       "type_name": "string",
                       "show_as": "OUTPUT_PIN",
@@ -3278,7 +3331,7 @@
                       "display_name": "string"
                     },
                     {
-                      "id": "13f86c6a-ffee-49d9-ac8e-fb8519d3e49a",
+                      "id": "f0a43d2b-c4e2-42ae-8f0e-81d2fa585eec",
                       "name": "Value",
                       "type_name": "string",
                       "show_as": "INPUT_PIN",
@@ -3313,12 +3366,12 @@
                   ]
                 },
                 {
-                  "id": "f8b15d30-76ea-4719-b027-780f0de8893a",
+                  "id": "f8af95a1-a84c-4845-8902-79f35db244b0",
                   "name": "Output",
                   "class_name": "nos.internal.GraphOutput",
                   "pins": [
                     {
-                      "id": "d51c78cd-1ef0-4aa3-81d3-4297a6412707",
+                      "id": "64dd6aab-3bc6-40a1-8248-76b445db9743",
                       "name": "Input",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "INPUT_PIN",
@@ -3327,11 +3380,11 @@
                       "visualizer": { },
                       "data": {
                         "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_UNORM",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "unscaled": true
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                       },
                       "referred_by": [],
                       "def": {
@@ -3350,7 +3403,7 @@
                       "description": ""
                     },
                     {
-                      "id": "e06d1e1b-762d-4344-81ca-93af2ef8c1bd",
+                      "id": "d1a5a6a7-ee7c-4ea5-8618-3946bc0d4db8",
                       "name": "Output",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "OUTPUT_PIN",
@@ -3359,14 +3412,14 @@
                       "visualizer": { },
                       "data": {
                         "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_UNORM",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "unscaled": true
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                       },
                       "referred_by": [
-                        "bc7f9c00-ba79-4dc8-916f-bc863a14b690"
+                        "1dd05044-5536-42cf-a694-83442be61cd1"
                       ],
                       "def": {
                         "external_memory": { "handle_type": 2 },
@@ -3399,12 +3452,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "770786b8-d4db-4220-a442-07018aa1208d",
+                  "id": "9240d749-29de-42ef-9cb3-6f891a3bacde",
                   "name": "Resize",
                   "class_name": "nos.utilities.Resize",
                   "pins": [
                     {
-                      "id": "52b36b72-7712-4df3-a513-c98fbbde9dc4",
+                      "id": "58184f1a-ce3c-4632-85f2-22103bca58ff",
                       "name": "Input",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "INPUT_PIN",
@@ -3416,8 +3469,9 @@
                         "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_SFLOAT",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                        "format": "R16G16B16A16_UNORM",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                        "unscaled": true
                       },
                       "referred_by": [],
                       "def": {
@@ -3436,7 +3490,7 @@
                       "description": ""
                     },
                     {
-                      "id": "225dee0e-80d4-4a4c-bc87-3c85dab35a35",
+                      "id": "2e2b627f-a5cf-4abb-a958-27cb8cc58eb0",
                       "name": "Output",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "OUTPUT_PIN",
@@ -3464,7 +3518,7 @@
                       "description": ""
                     },
                     {
-                      "id": "8fe230d6-2809-406d-9a8c-626fedcbb3bd",
+                      "id": "2a5efd83-f50e-43ae-a409-7cbcffa95aca",
                       "name": "Method",
                       "type_name": "nos.fb.ResizeMethod",
                       "show_as": "PROPERTY",
@@ -3481,7 +3535,7 @@
                       "description": "Scaling filter algorithm. Supported algorithms:\nNearest, bilinear, bicubic, directional blur, lanczos3, gaussian unsharp mask"
                     },
                     {
-                      "id": "541ad045-9646-46d8-bfe9-76d0fbab1499",
+                      "id": "809a1365-1b7f-4047-8293-dc2255bdc0ae",
                       "name": "Size",
                       "type_name": "nos.fb.vec2u",
                       "show_as": "INPUT_PIN",
@@ -3513,64 +3567,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "5ef07ca2-570f-46dc-afbe-44c2624cc1b9",
-                  "name": "uint to double",
-                  "class_name": "cast.uint-double",
-                  "pins": [
-                    {
-                      "id": "18ebebd4-6c4d-4476-86b9-e42e4e0132e7",
-                      "name": "uint",
-                      "type_name": "uint",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1920,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "2a04813a-a374-4700-ad11-fe31b229f444",
-                      "name": "double",
-                      "type_name": "double",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1920.0,
-                      "referred_by": [],
-                      "def": 0.0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    }
-                  ],
-                  "pos": { "x": 516.0, "y": 1153.0 },
-                  "contents_type": "Job",
-                  "contents": { "type": "" },
-                  "app_key": "",
-                  "functions": [],
-                  "function_category": "Default Node",
-                  "status_messages": [],
-                  "meta_data_map": [],
-                  "orphan_state": { },
-                  "description": "",
-                  "template_parameters": []
-                },
-                {
-                  "id": "62ad4c9a-7897-4a1a-9616-fa129b02b645",
+                  "id": "2fc707f0-3795-4719-8c03-ab551622f364",
                   "name": "Break",
                   "class_name": "nos.reflect.Break",
                   "pins": [
                     {
-                      "id": "716d29fc-3fb7-4227-9517-4fae4c331cb9",
+                      "id": "e15b2aea-f9f7-4e51-95d8-72a38d385533",
                       "name": "Input",
                       "type_name": "nos.fb.vec2u",
                       "show_as": "INPUT_PIN",
@@ -3588,7 +3590,7 @@
                       "display_name": "Out Resolution"
                     },
                     {
-                      "id": "6bc3906d-d8d0-4932-95be-a751fa6da7a4",
+                      "id": "971c5c6a-0ede-473e-b345-588cd74f2a64",
                       "name": "x",
                       "type_name": "uint",
                       "show_as": "OUTPUT_PIN",
@@ -3606,7 +3608,7 @@
                       "display_name": "width"
                     },
                     {
-                      "id": "ff5793a5-add9-4e2b-ae6a-3535abfbf823",
+                      "id": "ce429df3-b8ca-4754-ad41-3a80aa1a6ecd",
                       "name": "y",
                       "type_name": "uint",
                       "show_as": "OUTPUT_PIN",
@@ -3640,12 +3642,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "d05f6f61-ced6-4ebe-832e-11e5747c2d2b",
+                  "id": "a4c3fbc4-280d-4138-8e8b-13c2c628260b",
                   "name": "uint to double (3)",
                   "class_name": "cast.uint-double",
                   "pins": [
                     {
-                      "id": "5d51b6f1-ec0f-445e-80fe-29496b0c4249",
+                      "id": "c720e9c3-86cb-41b9-8c89-32319673171f",
                       "name": "uint",
                       "type_name": "uint",
                       "show_as": "INPUT_PIN",
@@ -3662,7 +3664,7 @@
                       "description": ""
                     },
                     {
-                      "id": "63d78a7c-1730-4924-ac21-9b52c2889dd7",
+                      "id": "8ea5082e-3c65-4e61-8764-acbcf6af0042",
                       "name": "double",
                       "type_name": "double",
                       "show_as": "OUTPUT_PIN",
@@ -3692,356 +3694,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "6e697ca2-f6d4-4a40-be02-d114cdf1e0af",
-                  "name": "Break (1)",
-                  "class_name": "nos.reflect.Break",
-                  "pins": [
-                    {
-                      "id": "3b90ea68-7516-46dd-86d7-bba56a73666c",
-                      "name": "Input",
-                      "type_name": "nos.sys.vulkan.Texture",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": {
-                        "external_memory": { "handle_type": 2 },
-                        "width": 1920,
-                        "height": 1080,
-                        "format": "R16G16B16A16_UNORM",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "unscaled": true
-                      },
-                      "referred_by": [],
-                      "def": {
-                        "external_memory": { "handle_type": 2 },
-                        "resolution": "HD",
-                        "width": 1920,
-                        "height": 1080,
-                        "format": "R16G16B16A16_SFLOAT",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
-                      },
-                      "advanced_property": true,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": "",
-                      "display_name": "Input"
-                    },
-                    {
-                      "id": "57274c3f-7b68-4349-afd2-80fa02a4d6f5",
-                      "name": "handle",
-                      "type_name": "ulong",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 2264354061760,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "8e4bd5fb-17c3-4ef0-89ae-936b7e03e5f4",
-                      "name": "offset",
-                      "type_name": "ulong",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 17694720,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "40de7fe1-a73c-4add-aaa9-f2a95dcf4327",
-                      "name": "size_in_bytes",
-                      "type_name": "ulong",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 17694720,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "a0d99524-3a48-484a-ac14-6d8163cec78e",
-                      "name": "external_memory",
-                      "type_name": "nos.sys.vulkan.ExternalMemory",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": { "handle_type": 2 },
-                      "referred_by": [],
-                      "def": { "handle_type": 0 },
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "d86343e1-463a-42d7-8b9a-bd30566a7731",
-                      "name": "resolution",
-                      "type_name": "nos.sys.vulkan.SizePreset",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "CUSTOM",
-                      "referred_by": [],
-                      "def": "CUSTOM",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "2571dbe0-4a3c-4084-a1ed-e212ae1e31b7",
-                      "name": "width",
-                      "type_name": "uint",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1920,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "cb562617-8d09-487c-baa7-32f8fc06b5b2",
-                      "name": "height",
-                      "type_name": "uint",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1080,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "8a8fe2fd-0e69-4b15-8b9a-1c1ca5430ecf",
-                      "name": "format",
-                      "type_name": "nos.sys.vulkan.Format",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "R16G16B16A16_UNORM",
-                      "referred_by": [],
-                      "def": "NONE",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "7c011dee-faff-4afd-96dc-ffe66c7fc0d3",
-                      "name": "usage",
-                      "type_name": "nos.sys.vulkan.ImageUsage",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                      "referred_by": [],
-                      "def": "NONE",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "420d0024-8aa0-42fb-a654-a626cdd4554d",
-                      "name": "filtering",
-                      "type_name": "nos.sys.vulkan.Filtering",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "NEAREST",
-                      "referred_by": [],
-                      "def": "NEAREST",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "272a086a-cfe2-404f-ab62-b46a5dae1959",
-                      "name": "unscaled",
-                      "type_name": "bool",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": true,
-                      "referred_by": [],
-                      "def": false,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "24148d8e-1aa6-4f80-a0e5-99435550e4d0",
-                      "name": "unmanaged",
-                      "type_name": "bool",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": false,
-                      "referred_by": [],
-                      "def": false,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "c92f4909-bee2-46e8-82ab-c99b0ba0f916",
-                      "name": "field_type",
-                      "type_name": "nos.sys.vulkan.FieldType",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "PROGRESSIVE",
-                      "referred_by": [],
-                      "def": "UNKNOWN",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "b5c1b0ce-e93a-4b35-9c5b-f92e2cdb1cf4",
-                      "name": "stock_texture",
-                      "type_name": "nos.sys.vulkan.StockTexture",
-                      "show_as": "PROPERTY",
-                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": "NOSNOVIDEO",
-                      "referred_by": [],
-                      "def": "NOSNOVIDEO",
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    }
-                  ],
-                  "pos": { "x": 271.0, "y": 1261.0 },
-                  "contents_type": "Job",
-                  "contents": { "type": "" },
-                  "app_key": "",
-                  "functions": [],
-                  "function_category": "Default Node",
-                  "status_messages": [],
-                  "meta_data_map": [
-                    { "key": "PluginVersion", "value": "1.1.0" }
-                  ],
-                  "orphan_state": { },
-                  "description": "",
-                  "display_name": "Break nos.sys.vulkan.Texture",
-                  "template_parameters": []
-                },
-                {
-                  "id": "51c41415-ef16-4a16-94bc-9b106bd13020",
-                  "name": "uint to double (1)",
-                  "class_name": "cast.uint-double",
-                  "pins": [
-                    {
-                      "id": "c84e6775-a7f9-4ee1-ae73-156f28e2bb87",
-                      "name": "uint",
-                      "type_name": "uint",
-                      "show_as": "INPUT_PIN",
-                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1080,
-                      "referred_by": [],
-                      "def": 0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    },
-                    {
-                      "id": "ad24ed90-a436-4060-bb8c-d049ceaa28ed",
-                      "name": "double",
-                      "type_name": "double",
-                      "show_as": "OUTPUT_PIN",
-                      "can_show_as": "OUTPUT_PIN_ONLY",
-                      "pin_category": "",
-                      "visualizer": { },
-                      "data": 1080.0,
-                      "referred_by": [],
-                      "def": 0.0,
-                      "meta_data_map": [],
-                      "contents_type": "JobPin",
-                      "contents": { },
-                      "orphan_state": { },
-                      "description": ""
-                    }
-                  ],
-                  "pos": { "x": 512.0, "y": 1189.0 },
-                  "contents_type": "Job",
-                  "contents": { "type": "" },
-                  "app_key": "",
-                  "functions": [],
-                  "function_category": "Default Node",
-                  "status_messages": [],
-                  "meta_data_map": [],
-                  "orphan_state": { },
-                  "description": "",
-                  "template_parameters": []
-                },
-                {
-                  "id": "b1905140-142c-45ad-bebf-d755822438ca",
+                  "id": "66a1788d-9f7a-442a-bfe7-74ad5dca789c",
                   "name": "Input (1)",
                   "class_name": "nos.internal.GraphInput",
                   "pins": [
                     {
-                      "id": "26574871-f74c-4864-88f0-d2cc1327c65e",
+                      "id": "17ab5391-5c4d-469f-b3ae-e41a2d2ed92d",
                       "name": "Output",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "OUTPUT_PIN",
@@ -4050,11 +3708,11 @@
                       "visualizer": { },
                       "data": {
                         "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_UNORM",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "unscaled": true
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                       },
                       "referred_by": [],
                       "def": {
@@ -4073,7 +3731,7 @@
                       "description": ""
                     },
                     {
-                      "id": "525adf8a-cba4-487b-bd58-42d41904003d",
+                      "id": "36577c0d-c6c1-4cd1-892a-839f9ff5a489",
                       "name": "Input",
                       "type_name": "nos.sys.vulkan.Texture",
                       "show_as": "INPUT_PIN",
@@ -4082,14 +3740,14 @@
                       "visualizer": { },
                       "data": {
                         "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
                         "width": 1920,
                         "height": 1080,
-                        "format": "R16G16B16A16_UNORM",
-                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED",
-                        "unscaled": true
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
                       },
                       "referred_by": [
-                        "d4d04992-a420-4999-90ce-3741be39168c"
+                        "522f03ea-2e56-498b-9a89-765b4d4e1ac6"
                       ],
                       "def": {
                         "external_memory": { "handle_type": 2 },
@@ -4123,12 +3781,356 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "c82df150-d87b-44ca-b36e-b8bf1a6e964c",
+                  "id": "ced12fb6-12f3-41e6-b201-f3a4638a0190",
+                  "name": "Break (1)",
+                  "class_name": "nos.reflect.Break",
+                  "pins": [
+                    {
+                      "id": "45afb127-fc65-4a1d-a749-05b8ca9fc4eb",
+                      "name": "Input",
+                      "type_name": "nos.sys.vulkan.Texture",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": {
+                        "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
+                        "width": 1920,
+                        "height": 1080,
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED"
+                      },
+                      "referred_by": [],
+                      "def": {
+                        "external_memory": { "handle_type": 2 },
+                        "resolution": "HD",
+                        "width": 1920,
+                        "height": 1080,
+                        "format": "R16G16B16A16_SFLOAT",
+                        "usage": "TRANSFER_SRC TRANSFER_DST SAMPLED STORAGE RENDER_TARGET"
+                      },
+                      "advanced_property": true,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": "",
+                      "display_name": "Input"
+                    },
+                    {
+                      "id": "fe983e07-fb9d-464d-9738-ff86e3880cc2",
+                      "name": "handle",
+                      "type_name": "ulong",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 2264354064096,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "8c285325-5713-49e2-bdaf-b6e5e112dbe0",
+                      "name": "offset",
+                      "type_name": "ulong",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 88473600,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "3e8eb964-df5f-444e-bab8-ef7e3227c5e8",
+                      "name": "size_in_bytes",
+                      "type_name": "ulong",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 17694720,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "0534ddae-8acd-47a3-b2e7-42886b18bb53",
+                      "name": "external_memory",
+                      "type_name": "nos.sys.vulkan.ExternalMemory",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": { "handle_type": 2 },
+                      "referred_by": [],
+                      "def": { "handle_type": 0 },
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "3fd86919-6743-45e8-8fa3-1a3cb70a09e1",
+                      "name": "resolution",
+                      "type_name": "nos.sys.vulkan.SizePreset",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "HD",
+                      "referred_by": [],
+                      "def": "CUSTOM",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "135dd69d-4c36-4549-bf6f-e32aff7b5b2c",
+                      "name": "width",
+                      "type_name": "uint",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 1920,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "4451e80b-3482-40c8-9d23-608774205d50",
+                      "name": "height",
+                      "type_name": "uint",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 1080,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "d57405fe-d684-4f5b-ac47-de65b31137e3",
+                      "name": "format",
+                      "type_name": "nos.sys.vulkan.Format",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "R16G16B16A16_SFLOAT",
+                      "referred_by": [],
+                      "def": "NONE",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "46492f55-3843-4257-85ad-8036115faceb",
+                      "name": "usage",
+                      "type_name": "nos.sys.vulkan.ImageUsage",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "TRANSFER_SRC TRANSFER_DST SAMPLED",
+                      "referred_by": [],
+                      "def": "NONE",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "4996fc8e-3478-43a9-8e3d-a10f0be99daf",
+                      "name": "filtering",
+                      "type_name": "nos.sys.vulkan.Filtering",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "NEAREST",
+                      "referred_by": [],
+                      "def": "NEAREST",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "39e6cb88-de6e-46c4-a742-7f6902f218d7",
+                      "name": "unscaled",
+                      "type_name": "bool",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": false,
+                      "referred_by": [],
+                      "def": false,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "6b8e3b7b-4d47-43c9-ad9b-0ca24a7ae09a",
+                      "name": "unmanaged",
+                      "type_name": "bool",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": false,
+                      "referred_by": [],
+                      "def": false,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "88d1913b-7bd6-47de-b4f5-d33f2e6496a5",
+                      "name": "field_type",
+                      "type_name": "nos.sys.vulkan.FieldType",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "PROGRESSIVE",
+                      "referred_by": [],
+                      "def": "UNKNOWN",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "19a98a84-9798-4fb8-9817-78e34fd1ec19",
+                      "name": "stock_texture",
+                      "type_name": "nos.sys.vulkan.StockTexture",
+                      "show_as": "PROPERTY",
+                      "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": "NOSNOVIDEO",
+                      "referred_by": [],
+                      "def": "NOSNOVIDEO",
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    }
+                  ],
+                  "pos": { "x": 271.0, "y": 1261.0 },
+                  "contents_type": "Job",
+                  "contents": { "type": "" },
+                  "app_key": "",
+                  "functions": [],
+                  "function_category": "Default Node",
+                  "status_messages": [],
+                  "meta_data_map": [
+                    { "key": "PluginVersion", "value": "1.1.0" }
+                  ],
+                  "orphan_state": { },
+                  "description": "",
+                  "display_name": "Break nos.sys.vulkan.Texture",
+                  "template_parameters": []
+                },
+                {
+                  "id": "b5873a46-853d-4e89-9637-2d5524adc528",
+                  "name": "uint to double (1)",
+                  "class_name": "cast.uint-double",
+                  "pins": [
+                    {
+                      "id": "58851378-2c49-40e4-89d3-e7cac9e19f38",
+                      "name": "uint",
+                      "type_name": "uint",
+                      "show_as": "INPUT_PIN",
+                      "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 1080,
+                      "referred_by": [],
+                      "def": 0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    },
+                    {
+                      "id": "7b188f29-4d9b-4b82-a071-f94387abb12d",
+                      "name": "double",
+                      "type_name": "double",
+                      "show_as": "OUTPUT_PIN",
+                      "can_show_as": "OUTPUT_PIN_ONLY",
+                      "pin_category": "",
+                      "visualizer": { },
+                      "data": 1080.0,
+                      "referred_by": [],
+                      "def": 0.0,
+                      "meta_data_map": [],
+                      "contents_type": "JobPin",
+                      "contents": { },
+                      "orphan_state": { },
+                      "description": ""
+                    }
+                  ],
+                  "pos": { "x": 512.0, "y": 1189.0 },
+                  "contents_type": "Job",
+                  "contents": { "type": "" },
+                  "app_key": "",
+                  "functions": [],
+                  "function_category": "Default Node",
+                  "status_messages": [],
+                  "meta_data_map": [],
+                  "orphan_state": { },
+                  "description": "",
+                  "template_parameters": []
+                },
+                {
+                  "id": "8d1966a7-9181-492d-991f-a2ce7ce64547",
                   "name": "Run",
                   "class_name": "nos.internal.GraphInput",
                   "pins": [
                     {
-                      "id": "a65fa494-2473-40c5-acd9-a865df56e04e",
+                      "id": "570e121d-be96-45ef-b5d2-349b0890b51e",
                       "name": "Output",
                       "type_name": "nos.exe",
                       "show_as": "OUTPUT_PIN",
@@ -4145,7 +4147,7 @@
                       "description": ""
                     },
                     {
-                      "id": "de15f7ee-70fb-4e14-871c-758a110608de",
+                      "id": "e77769a1-6b54-404d-914d-f07f654b4637",
                       "name": "Input",
                       "type_name": "nos.exe",
                       "show_as": "INPUT_PIN",
@@ -4154,7 +4156,7 @@
                       "visualizer": { },
                       "data": { },
                       "referred_by": [
-                        "1af8a07d-534b-4ddd-bd38-67d00d34b57a"
+                        "53a0367e-26d3-4223-adeb-4677961e224f"
                       ],
                       "def": { },
                       "meta_data_map": [
@@ -4179,12 +4181,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "7c6fa2ad-fae5-43ab-8dd6-9e683d9e3741",
+                  "id": "2eedbf4e-36d1-4eb5-b627-7c4081cf48bf",
                   "name": "double to bool",
                   "class_name": "cast.double-bool",
                   "pins": [
                     {
-                      "id": "b35a988c-927e-4af9-baa5-8966eaffbee5",
+                      "id": "05850c7d-ee97-40f5-93f5-172c07609b2e",
                       "name": "double",
                       "type_name": "double",
                       "show_as": "INPUT_PIN",
@@ -4201,7 +4203,7 @@
                       "description": ""
                     },
                     {
-                      "id": "0045f06e-9acb-4d25-b579-7e455ee96ea1",
+                      "id": "63bc85ae-41fa-486a-bb39-198aa8d1513f",
                       "name": "bool",
                       "type_name": "bool",
                       "show_as": "OUTPUT_PIN",
@@ -4210,7 +4212,7 @@
                       "visualizer": { },
                       "data": false,
                       "referred_by": [
-                        "384448ce-e4d3-4722-827b-7f2efb4bad22"
+                        "1ab5113c-cbb1-432d-9254-e056f9abc817"
                       ],
                       "def": false,
                       "meta_data_map": [],
@@ -4233,12 +4235,12 @@
                   "template_parameters": []
                 },
                 {
-                  "id": "120040fb-9aaa-4ab3-b52d-210267e973ed",
+                  "id": "dffd131e-366e-4ed5-9296-4586667132b8",
                   "name": "Continue",
                   "class_name": "nos.internal.GraphOutput",
                   "pins": [
                     {
-                      "id": "01f50796-1480-4ac8-a45f-d644aaa7c34e",
+                      "id": "759efdf2-c540-405a-80c4-58dca5a19d65",
                       "name": "Input",
                       "type_name": "nos.exe",
                       "show_as": "INPUT_PIN",
@@ -4255,7 +4257,7 @@
                       "description": ""
                     },
                     {
-                      "id": "545a51ab-c191-447e-8e05-64164e8b5fae",
+                      "id": "d6e06e29-e20a-43e6-be98-16c012ebc9b2",
                       "name": "Output",
                       "type_name": "nos.exe",
                       "show_as": "OUTPUT_PIN",
@@ -4264,7 +4266,7 @@
                       "visualizer": { },
                       "data": { },
                       "referred_by": [
-                        "3cecccdf-5577-477b-accf-e4e2aad85f76"
+                        "6a9daf12-42a5-40cc-a0ab-ac7a052345f8"
                       ],
                       "def": { },
                       "meta_data_map": [
@@ -4289,29 +4291,29 @@
                   "template_parameters": []
                 }
               ], "comments": [], "connections": [
-                { "from": "2571dbe0-4a3c-4084-a1ed-e212ae1e31b7", "to": "93f53109-3621-4078-9fcb-10b73393dea8", "id": "e11fc197-1bbf-4420-8aea-8380ce0cdce5" },
-                { "from": "26574871-f74c-4864-88f0-d2cc1327c65e", "to": "3b90ea68-7516-46dd-86d7-bba56a73666c", "id": "eb924be4-3ade-4a61-a3ea-e2d61c924405" },
-                { "from": "63d78a7c-1730-4924-ac21-9b52c2889dd7", "to": "e29ad2bf-da6a-4bd0-b841-98c431bf4559", "id": "b679b613-05ea-4b21-b22a-8a2cb960b225" },
-                { "from": "0045f06e-9acb-4d25-b579-7e455ee96ea1", "to": "f0604235-b23e-4065-898d-cdcac2bac51f", "id": "b22736cd-0826-49c7-966a-b8994d312e43" },
-                { "from": "02cff94d-98fd-4388-b2ab-26cc4fb107d3", "to": "541ad045-9646-46d8-bfe9-76d0fbab1499", "id": "f12649a6-5b74-45fc-ae04-4a498ab0f478" },
-                { "from": "a65fa494-2473-40c5-acd9-a865df56e04e", "to": "af2bbc44-87aa-40b6-958a-736a93fdf982", "id": "7f588fec-ee8c-4a6b-bf34-281ebb23b9a9" },
-                { "from": "0b535a1f-9a82-4342-9e8e-d59aac7d1598", "to": "d51c78cd-1ef0-4aa3-81d3-4297a6412707", "id": "f65bf417-d61b-4e8c-b294-0a37867e93d5" },
-                { "from": "0e953b41-8385-440b-8c96-b934c3437ef3", "to": "5c74eefd-271a-4849-add0-ed4beef6ff06", "id": "56da05f3-2bcd-4d4a-8078-b60dc4271b93" },
-                { "from": "bd58d6f2-6c74-424d-af33-110153b02193", "to": "145aaec5-dc86-4feb-9eea-df82b2a1bdcb", "id": "570fe895-9392-4139-b6e6-3478aae9ea10" },
-                { "from": "26574871-f74c-4864-88f0-d2cc1327c65e", "to": "52b36b72-7712-4df3-a513-c98fbbde9dc4", "id": "ba9a232c-ecfe-44fd-b38a-25cb746c984b" },
-                { "from": "db1be42e-758f-4963-836d-d559a6b72fa0", "to": "106ec8c9-58fd-485d-af76-356c838a47f0", "id": "7ae7c4f1-f746-43df-a2de-640b9d11caec" },
-                { "from": "d008ebda-5108-4267-9cdb-79b4c74dd4f3", "to": "b35a988c-927e-4af9-baa5-8966eaffbee5", "id": "8c66cba7-6c03-450d-b0f3-04dd6a531283" },
-                { "from": "6bc3906d-d8d0-4932-95be-a751fa6da7a4", "to": "18ebebd4-6c4d-4476-86b9-e42e4e0132e7", "id": "4b8c47e0-902e-44a7-81ef-acc5b8326559" },
-                { "from": "cb562617-8d09-487c-baa7-32f8fc06b5b2", "to": "5d51b6f1-ec0f-445e-80fe-29496b0c4249", "id": "34d60722-ae55-42ce-b5f1-5a40661e2d30" },
-                { "from": "ad24ed90-a436-4060-bb8c-d049ceaa28ed", "to": "f73a5753-27fc-40cc-b782-4b892f1f8ea1", "id": "6a41af48-8408-41ff-9eab-07b2b2bed9fe" },
-                { "from": "625b0a9d-3912-4c0a-8bd2-438ff38af556", "to": "01f50796-1480-4ac8-a45f-d644aaa7c34e", "id": "fccb94f5-40e4-4fb2-a240-fb68a8cb978b" },
-                { "from": "26574871-f74c-4864-88f0-d2cc1327c65e", "to": "2c23c63a-dbd4-474a-a19f-a34de9daca99", "id": "1e86cdb1-9007-47d4-a4ca-29d67f61fadb" },
-                { "from": "225dee0e-80d4-4a4c-bc87-3c85dab35a35", "to": "6c6a9a35-4bc9-4315-80ea-f9e0a31956a9", "id": "cbb49a77-7f66-4e00-976e-4273ea26954f" },
-                { "from": "ff5793a5-add9-4e2b-ae6a-3535abfbf823", "to": "c84e6775-a7f9-4ee1-ae73-156f28e2bb87", "id": "6b8358d3-ed00-49e8-bcca-45dd43c6427c" },
-                { "from": "2a04813a-a374-4700-ad11-fe31b229f444", "to": "e530030d-9941-4b9f-827e-a46db12c21a0", "id": "866cdbc0-ce94-42d0-b605-bb3559bd3358" },
-                { "from": "02cff94d-98fd-4388-b2ab-26cc4fb107d3", "to": "716d29fc-3fb7-4227-9517-4fae4c331cb9", "id": "d0490e6a-e5e3-414b-8273-07383b9da59d" },
-                { "from": "403c724f-e181-416f-8543-13f14dd81a3c", "to": "9354e179-58f7-4566-b421-acf252e198ff", "id": "8287cbe8-f1f8-4501-90d7-19befd108964" },
-                { "from": "384448ce-e4d3-4722-827b-7f2efb4bad22", "to": "be50b0a9-d1a8-47b0-9325-5666d544109f", "id": "c29bfda0-5591-4d3f-9153-af725643e36e" }
+                { "from": "17ab5391-5c4d-469f-b3ae-e41a2d2ed92d", "to": "003e7f8a-1c2d-45b3-a237-32f565c5617f", "id": "5b67185f-c41f-4b5e-b791-51f79151f303" },
+                { "from": "9d97deaf-8eec-4adb-9663-8a83d9df0f50", "to": "809a1365-1b7f-4047-8293-dc2255bdc0ae", "id": "33406347-e048-47da-8dc3-5592e7a7bb47" },
+                { "from": "135dd69d-4c36-4549-bf6f-e32aff7b5b2c", "to": "5ebec4ee-16e8-4c28-bf94-68a5cf71ccd9", "id": "07065325-c1a2-483b-a86a-cec58531e75e" },
+                { "from": "17ab5391-5c4d-469f-b3ae-e41a2d2ed92d", "to": "45afb127-fc65-4a1d-a749-05b8ca9fc4eb", "id": "ec398486-997f-4d78-b01f-a8e2d2766aa4" },
+                { "from": "8ea5082e-3c65-4e61-8764-acbcf6af0042", "to": "88f47a36-082d-47ab-bd67-53f896c56bec", "id": "3efb4978-0fce-483d-bc8c-22577117d4f9" },
+                { "from": "4aa7d249-5eed-4528-9a0f-97471eed5847", "to": "02e3fda0-d04a-4ba2-ac32-c7b3943945e6", "id": "55f636c8-a91d-4f62-9a9c-564d07597b60" },
+                { "from": "63bc85ae-41fa-486a-bb39-198aa8d1513f", "to": "8ad63216-3c4c-4075-8454-004f857f8c54", "id": "bb0c0d6c-7a8b-40d4-a7c9-fcc435bca216" },
+                { "from": "7b188f29-4d9b-4b82-a071-f94387abb12d", "to": "fba84480-681c-4b2d-a90e-9aa034c30923", "id": "9a48ca95-3c56-4e69-ab28-45921499de62" },
+                { "from": "570e121d-be96-45ef-b5d2-349b0890b51e", "to": "960dcd4d-3a4b-49dc-980e-b5c10c11bbed", "id": "c5f24cd1-762b-4c30-8c26-14d8956c13bb" },
+                { "from": "8820683b-7749-406c-9be4-4dedfd654aa4", "to": "759efdf2-c540-405a-80c4-58dca5a19d65", "id": "3cb5ba9f-ddba-4469-987f-a53eb25ed2c8" },
+                { "from": "7c67f24c-127e-455a-a63e-54a17a866f36", "to": "64dd6aab-3bc6-40a1-8248-76b445db9743", "id": "e21f47d0-a7b6-47d3-9c8f-7496500513f2" },
+                { "from": "98b66f20-b14c-4bae-997e-c93ac184cfe8", "to": "2008fc98-e61f-4c34-891f-9fe9fd083cc4", "id": "59a02dc6-d7f6-465b-8f74-21f4c567b6fd" },
+                { "from": "17ab5391-5c4d-469f-b3ae-e41a2d2ed92d", "to": "58184f1a-ce3c-4632-85f2-22103bca58ff", "id": "35a4bbef-58b3-42c1-8812-e1faf4e9c463" },
+                { "from": "bc18f8ba-cbe7-4383-9b45-34085972cde5", "to": "9231abf1-ecaf-4c97-be72-e60ae10c9f3a", "id": "528c07a7-7658-4118-a625-ffbe97dab075" },
+                { "from": "9d97deaf-8eec-4adb-9663-8a83d9df0f50", "to": "e15b2aea-f9f7-4e51-95d8-72a38d385533", "id": "06534688-ca95-4afb-886f-35a6eca559ca" },
+                { "from": "a365eaae-3d53-45af-bd37-bf6d71137e1c", "to": "05850c7d-ee97-40f5-93f5-172c07609b2e", "id": "e4e341cf-00e4-4b54-81d3-39a9b883fe65" },
+                { "from": "4451e80b-3482-40c8-9d23-608774205d50", "to": "c720e9c3-86cb-41b9-8c89-32319673171f", "id": "840aa2a3-7c71-4e59-bece-eb7a2c1fc4c9" },
+                { "from": "971c5c6a-0ede-473e-b345-588cd74f2a64", "to": "cbdb7ba3-9824-466b-8cdb-04111dc792cf", "id": "39647922-460a-4968-830e-1a42bb0d9b9b" },
+                { "from": "2e2b627f-a5cf-4abb-a958-27cb8cc58eb0", "to": "90b0b181-e26d-4c77-8095-37439be7137a", "id": "b254d7d8-5f6e-42a7-80dd-0d7c5ad6f558" },
+                { "from": "ce429df3-b8ca-4754-ad41-3a80aa1a6ecd", "to": "58851378-2c49-40e4-89d3-e7cac9e19f38", "id": "0d4b0e7a-fa40-4e55-b4f3-6d39ad31c301" },
+                { "from": "37547d69-23a3-4e4a-9d2e-aa24f5ae9786", "to": "81f1f25e-5943-428b-8b5f-03ff475daeb6", "id": "3a2a181a-785a-49bd-9b43-c8972ea0a924" },
+                { "from": "af56833c-fcaf-431c-b930-864a5c8eec44", "to": "81715c27-7785-4642-905c-f9980f3ca049", "id": "82982b37-1fb1-4713-b741-d5003c2d4f92" },
+                { "from": "1ab5113c-cbb1-432d-9254-e056f9abc817", "to": "d2bb213f-7c0a-442a-bd80-12888e338e6f", "id": "8c145726-86ef-48ce-ad56-dd302ccf6b07" }
               ] },
             "app_key": "",
             "functions": [],
@@ -4323,12 +4325,12 @@
             "template_parameters": []
           },
           {
-            "id": "73c29417-074d-4bbe-82d3-bb1b220a6bd5",
+            "id": "577bf42f-b98e-475d-9a61-d1f89db4d923",
             "name": "WaitVBL",
             "class_name": "nos.aja.WaitVBL",
             "pins": [
               {
-                "id": "b56b6826-3773-4d67-9b58-3da89fbf1249",
+                "id": "6189f640-1c06-40db-9af2-e84cb312bfb7",
                 "name": "Run",
                 "type_name": "nos.exe",
                 "show_as": "INPUT_PIN",
@@ -4345,7 +4347,7 @@
                 "description": ""
               },
               {
-                "id": "2a934ffd-72af-4807-8d44-e6f8906584aa",
+                "id": "06d63bb7-9a95-4219-b29f-c378b982edef",
                 "name": "VBL",
                 "type_name": "nos.exe",
                 "show_as": "OUTPUT_PIN",
@@ -4362,7 +4364,7 @@
                 "description": ""
               },
               {
-                "id": "2deb440c-39b6-4e45-88fe-82a7cb12b6de",
+                "id": "f4c7c890-e4c8-4ecf-bd8b-0ce04d9fd462",
                 "name": "WaitField",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "INPUT_PIN",
@@ -4380,7 +4382,7 @@
                 "display_name": "Wait Field"
               },
               {
-                "id": "34137cdd-0206-4d6a-b906-4fc0b443e1fa",
+                "id": "0e82553e-6567-4f6c-a77b-4be6862efe3f",
                 "name": "FieldType",
                 "type_name": "nos.sys.vulkan.FieldType",
                 "show_as": "OUTPUT_PIN",
@@ -4399,7 +4401,7 @@
                 "display_name": "Field Type"
               },
               {
-                "id": "da83a01c-57e3-4983-9f35-e69243cd6dc0",
+                "id": "f3b6e432-7f83-4ba7-a3b8-1fe7df0d9624",
                 "name": "Channel",
                 "type_name": "nos.aja.ChannelInfo",
                 "show_as": "INPUT_PIN",
@@ -4428,14 +4430,14 @@
                 "description": ""
               },
               {
-                "id": "a8a2874f-d39e-4576-99da-aef3496be3e2",
+                "id": "24b5a19d-6b80-4828-834f-afd207a03d03",
                 "name": "CurrentVBL",
                 "type_name": "uint",
                 "show_as": "OUTPUT_PIN",
                 "can_show_as": "OUTPUT_PIN_ONLY",
                 "pin_category": "",
                 "visualizer": { },
-                "data": 16850508,
+                "data": 16922726,
                 "referred_by": [],
                 "def": 0,
                 "meta_data_map": [],
@@ -4451,12 +4453,12 @@
             "app_key": "",
             "functions": [
               {
-                "id": "6a6ad776-3d6c-4812-8ff9-39da84642e07",
+                "id": "5be2270e-277a-4991-a54e-079bd9ab3c1e",
                 "name": "Drop",
                 "class_name": "Drop",
                 "pins": [
                   {
-                    "id": "a7793ec2-f2e6-40c4-9fa3-c753ccf6f120",
+                    "id": "43225db8-d7d6-43ad-8301-913eeadca32f",
                     "name": "Trigger",
                     "type_name": "nos.exe",
                     "show_as": "INPUT_PIN",
@@ -4473,7 +4475,7 @@
                     "description": ""
                   },
                   {
-                    "id": "831e5ea4-fd44-40da-aff1-547c5dbe3092",
+                    "id": "19a31bd5-9413-4755-a1be-c0d9e09e8d04",
                     "name": "OutExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -4503,12 +4505,12 @@
                 "template_parameters": []
               },
               {
-                "id": "d4b464bb-98cf-4b44-a416-80d5d58b0cf3",
+                "id": "1091993b-a18d-4610-9486-8c59bdc5534d",
                 "name": "VBLFailed",
                 "class_name": "VBLFailed",
                 "pins": [
                   {
-                    "id": "542a9bb1-e5da-497c-887a-0ef59d26934f",
+                    "id": "e9057508-9f96-4cf9-9538-5df34fd35703",
                     "name": "Propagate",
                     "type_name": "nos.exe",
                     "show_as": "OUTPUT_PIN",
@@ -4525,7 +4527,7 @@
                     "description": ""
                   },
                   {
-                    "id": "3faacda4-a2d6-4631-9e4e-ac2d07463053",
+                    "id": "4b8505dc-6da5-4192-8f41-1d16db9a60eb",
                     "name": "InExe",
                     "type_name": "nos.exe",
                     "show_as": "PROPERTY",
@@ -4558,7 +4560,7 @@
             "function_category": "Default Node",
             "status_messages": [],
             "meta_data_map": [
-              { "key": "PluginVersion", "value": "2.1.0" }
+              { "key": "PluginVersion", "value": "2.2.0" }
             ],
             "orphan_state": { },
             "description": "",
@@ -4566,12 +4568,12 @@
             "template_parameters": []
           },
           {
-            "id": "ab731103-3b02-4571-87b2-9e308b48e336",
+            "id": "d989a097-7361-4350-a284-3c641ee8c6a5",
             "name": "Portal (1)",
             "class_name": "nos.internal.Portal",
             "pins": [
               {
-                "id": "7b6d30f2-3e7d-4eba-89b1-7e02d8a32221",
+                "id": "5452063b-b615-409f-ad18-b727dc3bd4c1",
                 "name": "Propagate",
                 "type_name": "nos.exe",
                 "show_as": "OUTPUT_PIN",
@@ -4583,7 +4585,7 @@
                 "def": { },
                 "meta_data_map": [],
                 "contents_type": "PortalPin",
-                "contents": { "source_id": "9146f886-3e49-4de3-818a-c788ac94e295" },
+                "contents": { "source_id": "b15bc6a5-4241-48c5-aafd-a0367d464e69" },
                 "orphan_state": { },
                 "description": ""
               }
@@ -4602,61 +4604,7 @@
           }
         ], "comments": [
           {
-            "id": "369a3063-cd2f-4590-989b-33be013bc81f",
-            "name": "Comment (4)",
-            "hint": "Hint",
-            "content": "Convert Linear RGB texture to YCbCr UYVY8 or V210\nformat using input 1DLUT and 3x3 Colorspace Matrix",
-            "pos": { "x": 314.0, "y": 882.0 },
-            "size": { "x": 341.0, "y": 233.0 },
-            "bg_color": { "x": 0.0, "y": 0.659292, "z": 0.344232, "w": 0.3 }
-          },
-          {
-            "id": "583ebe97-1dd8-4435-af5c-ba04c6b7b1db",
-            "name": "Comment (7)",
-            "hint": "Hint",
-            "content": "Resize input to AJA resolution\nOnly if they are not the same resolution",
-            "pos": { "x": -75.0, "y": 752.0 },
-            "size": { "x": 269.0, "y": 150.0 },
-            "bg_color": { "x": 0.375441, "y": 0.623894, "z": 0.498568, "w": 0.3 }
-          },
-          {
-            "id": "d9ea0dae-6db1-40d7-a303-c6f9eaaf2513",
-            "name": "Comment (2)",
-            "hint": "Hint",
-            "content": "Generate the selected 1DLUT to be used with the Compute shader",
-            "pos": { "x": -531.0, "y": 806.0 },
-            "size": { "x": 418.0, "y": 113.0 },
-            "bg_color": { "x": 0.0, "y": 0.348657, "z": 0.743363, "w": 0.3 }
-          },
-          {
-            "id": "0b21d72d-5383-42b2-9ece-f1954aae5d33",
-            "name": "Comment (1)",
-            "hint": "Hint",
-            "content": "Read from host memory and write to\nAJA framebuffer (with AJA DMA engines)\nover PCIe interface using AJA driver",
-            "pos": { "x": 1615.0, "y": 607.0 },
-            "size": { "x": 250.0, "y": 198.0 },
-            "bg_color": { "x": 1.0, "y": 0.345133, "z": 0.0, "w": 0.3 }
-          },
-          {
-            "id": "fe122e1b-e7f4-4a79-94a2-6b1cfb425293",
-            "name": "Comment (5)",
-            "hint": "Hint",
-            "content": "Transfer the buffer in VRAM to host memory (over the PCIe bus a.k.a Readback)\nand try to fill the ring buffer in a thread, while there is at least one empty slot\nin the ring buffer.",
-            "pos": { "x": 386.0, "y": 594.0 },
-            "size": { "x": 484.0, "y": 201.0 },
-            "bg_color": { "x": 0.884955, "y": 0.0, "z": 1.0, "w": 0.3 }
-          },
-          {
-            "id": "44a60565-d8ea-4202-8622-c355729f6b1f",
-            "name": "Comment (6)",
-            "hint": "Hint",
-            "content": "Input Texture from Nodegraph",
-            "pos": { "x": -414.0, "y": 675.0 },
-            "size": { "x": 189.0, "y": 72.0 },
-            "bg_color": { "x": 0.646018, "y": 1.0, "z": 0.0, "w": 0.3 }
-          },
-          {
-            "id": "6bcbc0ff-b22a-4ebb-8ec0-cf79d17c500e",
+            "id": "891d27b6-c8a5-45e4-bfa1-35f50012e0eb",
             "name": "Comment",
             "hint": "Hint",
             "content": "Wait on a thread for the VBL event to happen (provided through AJA API)\nfor the provided channel.",
@@ -4665,7 +4613,61 @@
             "bg_color": { "x": 0.0, "y": 0.946903, "z": 1.0, "w": 0.3 }
           },
           {
-            "id": "defecdf0-05a2-4667-8316-2725e19d37bf",
+            "id": "86f8e1b2-bf57-4536-88b1-60364800b7d1",
+            "name": "Comment (4)",
+            "hint": "Hint",
+            "content": "Convert Linear RGB texture to YCbCr UYVY8 or V210\nformat using input 1DLUT and 3x3 Colorspace Matrix",
+            "pos": { "x": 314.0, "y": 882.0 },
+            "size": { "x": 341.0, "y": 233.0 },
+            "bg_color": { "x": 0.0, "y": 0.659292, "z": 0.344232, "w": 0.3 }
+          },
+          {
+            "id": "b8b06d31-1211-4aa0-80a4-af6b86d1dbdb",
+            "name": "Comment (7)",
+            "hint": "Hint",
+            "content": "Resize input to AJA resolution\nOnly if they are not the same resolution",
+            "pos": { "x": -75.0, "y": 752.0 },
+            "size": { "x": 269.0, "y": 150.0 },
+            "bg_color": { "x": 0.375441, "y": 0.623894, "z": 0.498568, "w": 0.3 }
+          },
+          {
+            "id": "15dcf9e5-f000-4aa5-9b18-7e5e1b35ad58",
+            "name": "Comment (2)",
+            "hint": "Hint",
+            "content": "Generate the selected 1DLUT to be used with the Compute shader",
+            "pos": { "x": -531.0, "y": 806.0 },
+            "size": { "x": 418.0, "y": 113.0 },
+            "bg_color": { "x": 0.0, "y": 0.348657, "z": 0.743363, "w": 0.3 }
+          },
+          {
+            "id": "5befde8c-cff6-4c36-baed-8ecf4d036ec2",
+            "name": "Comment (1)",
+            "hint": "Hint",
+            "content": "Read from host memory and write to\nAJA framebuffer (with AJA DMA engines)\nover PCIe interface using AJA driver",
+            "pos": { "x": 1615.0, "y": 607.0 },
+            "size": { "x": 250.0, "y": 198.0 },
+            "bg_color": { "x": 1.0, "y": 0.345133, "z": 0.0, "w": 0.3 }
+          },
+          {
+            "id": "153a3836-76a2-4b0d-9415-941e0e03fc15",
+            "name": "Comment (5)",
+            "hint": "Hint",
+            "content": "Transfer the buffer in VRAM to host memory (over the PCIe bus a.k.a Readback)\nand try to fill the ring buffer in a thread, while there is at least one empty slot\nin the ring buffer.",
+            "pos": { "x": 386.0, "y": 594.0 },
+            "size": { "x": 484.0, "y": 201.0 },
+            "bg_color": { "x": 0.884955, "y": 0.0, "z": 1.0, "w": 0.3 }
+          },
+          {
+            "id": "9edbd080-77ac-4b5f-9aef-6ea43e19cd65",
+            "name": "Comment (6)",
+            "hint": "Hint",
+            "content": "Input Texture from Nodegraph",
+            "pos": { "x": -414.0, "y": 675.0 },
+            "size": { "x": 189.0, "y": 72.0 },
+            "bg_color": { "x": 0.646018, "y": 1.0, "z": 0.0, "w": 0.3 }
+          },
+          {
+            "id": "c58e7d43-0941-4e88-ba33-8985dc59ebce",
             "name": "Comment (3)",
             "hint": "Hint",
             "content": "Generate 3x3 matrix for the RGB to YCbCr conversion for the selected Colorspace",
@@ -4674,34 +4676,34 @@
             "bg_color": { "x": 1.0, "y": 0.663717, "z": 0.0, "w": 0.3 }
           }
         ], "connections": [
-          { "from": "f3a08759-e85f-4d36-81f3-b22e21a07256", "to": "95b03ff3-c1f4-49e4-ab96-5472603fe8e6", "id": "e6b96ce2-e254-44b2-adef-e0f8109c7897" },
-          { "from": "60a66a4e-ccea-4501-abc9-9dcf4c2a61f4", "to": "9d8a25db-8366-464f-a632-2e0a888e7054", "id": "9aa0a51b-2085-42a1-b874-bc4f6469f804" },
-          { "from": "5676fd00-0fad-4433-8b55-a5dca1c61e46", "to": "16a7de7e-d781-4059-992c-45350a0f898b", "id": "c6067c15-004f-4883-a7c1-d4648a5e061e" },
-          { "from": "0705064d-7e22-4973-96d7-79611359f98f", "to": "f2d0479b-cafd-4ea6-b60f-2b3876697af7", "id": "962952a5-1560-403c-902c-531633262b73" },
-          { "from": "915da800-6697-4be5-b14e-02ee13ce398f", "to": "d5fef253-84e4-4b35-8faf-555e78da2517", "id": "5ca5d6be-d83f-42b3-b2d1-8a27f503a819" },
-          { "from": "01233c76-1504-424e-8a1b-93850d27561d", "to": "371eac0d-ed00-4da5-9625-4d5a376d03ff", "id": "99f5a16a-0e86-446d-89ee-0e8e180708a9" },
-          { "from": "7615a242-7597-497b-ba88-f566d820b85c", "to": "aeb01569-a09c-4d2b-a3ab-e65802a13323", "id": "12bbe95d-6782-438b-b22f-38a8a3af316d" },
-          { "from": "53b8c90a-98f8-4e06-87af-235090f5d4cc", "to": "bc9bb8fe-1a8c-4c40-9b03-efa260311c8d", "id": "85ee8c52-87ab-4dc1-bc59-d41254255da7" },
-          { "from": "24cfa5e1-8690-4dc4-95d6-9f61cf41a2dd", "to": "a7d5a30a-e892-4822-b63e-6055ce0ca431", "id": "441f45b4-0ffd-4dba-bc77-94edd3860343" },
-          { "from": "b837eba4-6db3-44d5-a557-2bbd32ba5e2d", "to": "e9c84676-b362-4945-bd5c-188c798d57be", "id": "41752dbf-7493-471a-8cc7-1d20d89dce33" },
-          { "from": "d96928e0-25b8-4192-b743-6e273abdfba6", "to": "1bbb97d8-3836-4ac1-a35d-554b55a120b1", "id": "7a7167a5-38aa-4453-b705-46f3fbeae8fc" },
-          { "from": "a8a2874f-d39e-4576-99da-aef3496be3e2", "to": "cd1bb7c4-edff-4df4-a482-be5d83eff9b5", "id": "c0af4a60-5a1e-44c7-8202-2fcf3eb82ec9" },
-          { "from": "ba67e641-8c7a-465d-8e0c-3b24e504e042", "to": "da83a01c-57e3-4983-9f35-e69243cd6dc0", "id": "3668db88-297c-48fe-b38c-3b0b98d95d0e" },
-          { "from": "34137cdd-0206-4d6a-b906-4fc0b443e1fa", "to": "e35bed03-1768-4380-baef-da59505ae395", "id": "f253a2ea-e992-4544-8556-1c36de562fd5" },
-          { "from": "5b5f2ea7-49e4-467d-b8bb-23248a9d4519", "to": "b56b6826-3773-4d67-9b58-3da89fbf1249", "id": "ab9a3948-2ed8-4c0a-8d1c-14c8333b0074" },
-          { "from": "2a934ffd-72af-4807-8d44-e6f8906584aa", "to": "eea32ac8-0c6d-4cae-a8fc-0a32ff75bd8c", "id": "3a265749-8c9c-46ce-b781-7b00bb83245b" },
-          { "from": "3cecccdf-5577-477b-accf-e4e2aad85f76", "to": "7692fc02-db5e-4388-a6ce-953f3a0ac727", "id": "11739a46-01bf-41a4-944c-74db58c654de" },
-          { "from": "8a3e9bd8-331c-4d49-861e-f48e9c334b02", "to": "2deb440c-39b6-4e45-88fe-82a7cb12b6de", "id": "a4c9d7df-ed1f-4ae1-87f3-b2061ebfee29" },
-          { "from": "e6834883-48e9-48c6-b938-6db37b780d67", "to": "408db7c1-7795-4b25-be9a-4597c6c795f2", "id": "69ff1350-ca49-4133-8431-aa5e238955c6" },
-          { "from": "bc7f9c00-ba79-4dc8-916f-bc863a14b690", "to": "801ef6aa-9c10-44ea-961c-0d10b6c1e453", "id": "3508bdc7-0f08-40ec-afa7-a7ab24404d26" },
-          { "from": "53b8c90a-98f8-4e06-87af-235090f5d4cc", "to": "bb0e3e58-8ecb-47fe-b484-2235626552a6", "id": "c7ebccae-296b-44a4-86d2-8d5d4db99bbe" },
-          { "from": "5cdc3bc7-e7aa-400d-838a-278cdadff182", "to": "109a5313-88d6-4d26-8fb0-aa222eef1745", "id": "2a28afa7-c728-48f5-8ba8-ded54af18223" },
-          { "from": "a9f2182e-17b3-4537-8779-e08bd73cb7be", "to": "1af8a07d-534b-4ddd-bd38-67d00d34b57a", "id": "639924b0-70b8-4610-8282-813f70e66ec9" },
-          { "from": "ba67e641-8c7a-465d-8e0c-3b24e504e042", "to": "9bfacc54-aff7-434c-b52d-28fc3007cf0f", "id": "9ba544b6-8c7f-4a79-82f5-8e574f86f817" },
-          { "from": "b882d3a9-34e8-4d88-bb9c-0e64a6830447", "to": "d4d04992-a420-4999-90ce-3741be39168c", "id": "0037dd6e-4e99-4b1a-9185-c9c054b3877b" },
-          { "from": "d96928e0-25b8-4192-b743-6e273abdfba6", "to": "6d0306a8-bb47-4188-a44e-cd28c3efbb76", "id": "ff8c0830-90d4-4078-933c-9f5e53567fc0" },
-          { "from": "7b6d30f2-3e7d-4eba-89b1-7e02d8a32221", "to": "d4bdff69-503b-485a-9cfc-b3b1987d572e", "id": "50b53138-827c-43f9-92ae-2f7942df7b9b" },
-          { "from": "7b6d30f2-3e7d-4eba-89b1-7e02d8a32221", "to": "a7793ec2-f2e6-40c4-9fa3-c753ccf6f120", "id": "d705be1a-c699-4544-95c4-9db6f1499ef8" }
+          { "from": "6d951da0-e70c-4e1d-b5e9-665172597271", "to": "0edf2c36-e237-44a6-968e-2f2bc60e1858", "id": "024edfe1-5517-4c18-9c50-993b158453ce" },
+          { "from": "2cceba77-0d55-4726-9d2e-ac77d5db7781", "to": "01cccd6e-433e-4d64-bc04-c5aa68d7db85", "id": "782da710-c932-41cc-b418-688094d08342" },
+          { "from": "4588245a-7002-4682-a8b3-114ff0ff03e3", "to": "14303ecf-88ad-4873-91a2-f92beedb4da4", "id": "4edb0b07-3ab4-4613-aa15-eb2ff492b09d" },
+          { "from": "1a348381-a4f4-42f8-90bb-96782d2f6ab0", "to": "93a60fec-082c-4dd0-ab9c-0c0a3371a31a", "id": "4b5d0265-a9a0-4c29-82ef-ccd5b7e99aaf" },
+          { "from": "09a472bc-df6f-4740-a0b9-e494cc35e513", "to": "c7e9d801-1f94-4b00-8c7c-faf5831a339c", "id": "4e249e7f-d94a-4fb4-88f1-ee68e6e8fa7c" },
+          { "from": "a22a2b05-46ba-4655-9592-ab18ce22cd19", "to": "8ef6d13e-e384-4c34-93dd-996e2746986c", "id": "d18cb9b3-f7f1-421f-8240-cb19a0c1ae17" },
+          { "from": "b24475f3-a782-4c57-aa96-9c1b7cd4d898", "to": "d9d47f0e-ee5a-4bd2-945a-5c7813c3198a", "id": "2f4834cb-a283-4d36-b898-dc4be712fb2d" },
+          { "from": "351e30f2-a596-4ca9-a739-45b3e4953d09", "to": "6cec71d7-3c39-4373-b528-5ca31d775705", "id": "1058a7ef-9905-4b29-8eae-21f91d485a2e" },
+          { "from": "6a9daf12-42a5-40cc-a0ab-ac7a052345f8", "to": "94a03f1e-7417-40ad-82f9-a95ece0df020", "id": "1c6cba33-fb3f-49be-b5a3-ff06f565207f" },
+          { "from": "1e5884d9-5b44-4302-97e9-31d267de30cb", "to": "c2af9dc3-0443-4d46-9116-80f0e16dd875", "id": "376474ef-3cff-49cc-ab5f-fbed18d1dc0d" },
+          { "from": "be77720a-cdb2-4daa-9f1b-d6462cca8020", "to": "f4c7c890-e4c8-4ecf-bd8b-0ce04d9fd462", "id": "a5415e7f-c528-48db-b638-6e5e96ecdd22" },
+          { "from": "62895819-e5bf-415b-899d-eb94f0b6ebd4", "to": "2154bcba-b91d-495a-b656-08091886e2e2", "id": "fe921e3c-9716-4318-b6c2-54a96594e421" },
+          { "from": "dd80b69b-8a3e-4168-bb39-14d62d6f174b", "to": "53a0367e-26d3-4223-adeb-4677961e224f", "id": "1d4f97d4-7766-4a0f-a88d-d21b9a43c4b0" },
+          { "from": "161baf94-1dce-426d-bd5f-6ad987dc499b", "to": "7d1d0930-c69a-408d-9dc5-7fcfeed975f2", "id": "aee2cd03-5dbc-4127-8424-a1f166b6a598" },
+          { "from": "24b5a19d-6b80-4828-834f-afd207a03d03", "to": "1fea0e27-5876-4540-bfed-50ac75d39e50", "id": "2b0ef4a5-71a4-4293-9418-039f58877bb0" },
+          { "from": "af44546d-3729-40af-80a5-a6374e5afabf", "to": "f3b6e432-7f83-4ba7-a3b8-1fe7df0d9624", "id": "3a460aa8-8c11-469a-a902-684f60c73791" },
+          { "from": "0e82553e-6567-4f6c-a77b-4be6862efe3f", "to": "17a5a37e-b463-4fff-9b4e-61bd3b7b80e1", "id": "684b3084-50e9-41d8-b9dc-95f118eea930" },
+          { "from": "c80b5e62-3034-4ae7-af83-111ea936bc48", "to": "6189f640-1c06-40db-9af2-e84cb312bfb7", "id": "79b96220-e9ed-4b46-9e3a-9bdfb0d8af0f" },
+          { "from": "06d63bb7-9a95-4219-b29f-c378b982edef", "to": "a4b41a8b-ff22-4bed-b8b7-43e9586e0777", "id": "fe79c8a7-217f-425e-9546-e0c34b07c991" },
+          { "from": "3e890e1c-3945-45fb-9dd2-5832d5b14792", "to": "718f91f5-0d58-4eaa-81fa-7e5101fe71aa", "id": "5468b9ab-b005-4ce7-8fb3-90b156758af4" },
+          { "from": "1dd05044-5536-42cf-a694-83442be61cd1", "to": "d13bf057-56fb-4a83-9539-af3200bec7e1", "id": "a9e9e5d4-44b4-4e2d-8c35-314e82c7bb7f" },
+          { "from": "5e9ac6b1-9075-48be-b55f-207828efdbb5", "to": "522f03ea-2e56-498b-9a89-765b4d4e1ac6", "id": "4255e9ff-8226-4c2d-a4c0-9ece635c00c6" },
+          { "from": "1e5884d9-5b44-4302-97e9-31d267de30cb", "to": "fc171896-915e-46ee-b2fd-06cdb25a2c3b", "id": "cbd4f664-69e2-49a4-9b60-27ab8429858f" },
+          { "from": "2e5d4504-527b-4660-9bac-45974f513d97", "to": "ac681d84-f8b3-4a50-936c-d8fa42fdbea9", "id": "3bf4bdba-1e3d-4c7c-b475-edaca9bd278b" },
+          { "from": "af44546d-3729-40af-80a5-a6374e5afabf", "to": "a76494ac-9a8d-44b9-a460-0390b10309ac", "id": "2800a01f-84b4-4c1f-9082-531f14d549ea" },
+          { "from": "09a472bc-df6f-4740-a0b9-e494cc35e513", "to": "1b38e410-83a6-4a73-a904-456c5670ce50", "id": "893ec8fe-4d9d-49c2-8a3a-fcef9503f393" },
+          { "from": "5452063b-b615-409f-ad18-b727dc3bd4c1", "to": "c8343f07-c132-47f4-8789-d0e990debd1c", "id": "41d4b6ce-332d-417d-bad4-e12dff7e3f77" },
+          { "from": "5452063b-b615-409f-ad18-b727dc3bd4c1", "to": "43225db8-d7d6-43ad-8301-913eeadca32f", "id": "2258cc5e-93a6-40de-9111-de5d4fadd16a" }
         ] },
       "app_key": "",
       "functions": [],
@@ -4709,7 +4711,7 @@
       "status_messages": [],
       "meta_data_map": [
         { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel" },
-        { "key": "PluginVersion", "value": "2.1.0" }
+        { "key": "PluginVersion", "value": "2.2.0" }
       ],
       "orphan_state": { },
       "description": "",
