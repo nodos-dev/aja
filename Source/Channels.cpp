@@ -34,6 +34,8 @@ AJADevice::Mode Channel::GetMode() const
 
 bool Channel::Open()
 {
+	DropCount = 0;
+	ClearStatus(StatusType::DropCount);
 	auto device = GetDevice();
 	auto channel = GetChannel();
 	if (!device || channel == NTV2_CHANNEL_INVALID)
@@ -103,6 +105,7 @@ bool Channel::Open()
 void Channel::Close()
 {
 	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, "Channel closed");
+	ClearStatus(StatusType::DropCount);
 	auto device = GetDevice();
 	if (!device)
 		return;

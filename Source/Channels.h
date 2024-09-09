@@ -29,6 +29,13 @@ struct Channel
 	nosUUID ChannelPinId;
 	NodeContext* Context;
 
+	size_t DropCount = 0;
+
+	void IncrementDropCount()
+	{
+		SetStatus(StatusType::DropCount, fb::NodeStatusMessageType::WARNING, "Drop Count: " + std::to_string(++DropCount));
+	}
+	
 	Channel(NodeContext* context) : Context(context) {}
 
 	TChannelInfo Info{};
@@ -55,7 +62,8 @@ struct Channel
 		Reference,
 		ReferenceInvalid,
 		DeltaSecondsCompatible,
-        Firmware
+        Firmware,
+		DropCount,
 	};
 
 	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text);

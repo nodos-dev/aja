@@ -32,6 +32,7 @@ enum class AJAChangedPinType
 struct ChannelNodeContext : NodeContext
 {
 	uint32_t RefListenerId = 0;
+	size_t DropCount = 0;
 	ChannelNodeContext(const nosFbNode* node) : NodeContext(node), CurrentChannel(this)
 	{
 		AJADevice::Init();
@@ -79,7 +80,6 @@ struct ChannelNodeContext : NodeContext
 			if (Device && !Device->CheckFirmware(msg))
 			{
 				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg);
-                // nosEngine.LogW("Firmware check failed: %s",  msg.c_str());
 			}
 
 			if (oldDevice != Device)
@@ -717,7 +717,7 @@ struct ChannelNodeContext : NodeContext
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction)
 	{
-		*outCount = 3;
+		*outCount = 4;
 		if (!outFunctionNames || !outFunction)
 			return NOS_RESULT_SUCCESS;
 		outFunctionNames[0] = NOS_NAME_STATIC("TryUpdateChannel");
@@ -746,6 +746,14 @@ struct ChannelNodeContext : NodeContext
 				return NOS_RESULT_SUCCESS;
 			};
 
+		outFunctionNames[3] = NOS_NAME_STATIC("Drop");
+		outFunction[3] = [](void* ctx, nosFunctionExecuteParams* params)
+			{
+				auto* context = static_cast<ChannelNodeContext*>(ctx);
+				context->CurrentChannel.IncrementDropCount();
+				return NOS_RESULT_SUCCESS;
+			};
+		
 		return NOS_RESULT_SUCCESS;
 	}
 
