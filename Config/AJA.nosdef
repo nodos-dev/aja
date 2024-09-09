@@ -318,6 +318,17 @@
 					]
 				},
 				{
+					"class_name": "Drop",
+					"contents_type": "Job",
+					"pins": [
+						{
+							"name": "Trigger",
+							"type_name": "nos.exe",
+							"show_as": "INPUT_PIN"
+						}
+					]
+				},
+				{
 					"class_name": "CheckChannelConfig",
 					"contents_type": "Job"
 				},
