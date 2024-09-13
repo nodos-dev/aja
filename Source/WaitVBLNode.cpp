@@ -51,7 +51,10 @@ struct WaitVBLNodeContext : NodeContext
 		bool isInterlaced = !IsProgressivePicture(videoFormat);
 		bool vblSuccess = false;
 		for (int i = 0; i < (VBLState.LastVBLCount == 0 ? 2 : 1); ++i) // Wait one more VBL after restart so that we don't start DMA in the middle of a frame.
+		{
+			ScopedProfilerEvent _(channelInfo->channel_name()->str() + " Wait VBL");
 			vblSuccess = WaitVBL(device.get(), channel, channelInfo->is_input(), isInterlaced, waitField);
+		}
 		nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(isInterlaced ? InterlacedWaitField : sys::vulkan::FieldType::PROGRESSIVE));
 		ULWord curVBLCount = 0;
 		if (channelInfo->is_input())

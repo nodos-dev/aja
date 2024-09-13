@@ -125,32 +125,35 @@ struct DMANodeBase : NodeContext
 			return;
 		
 		auto offset =  GetFrameBufferOffset(Channel, DoubleBufferIdx);
-		if (IsInterlaced())
 		{
-			auto pitch = compressedExt.x * 4;
-			auto segments = compressedExt.y;
-			auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
-			util::Stopwatch sw;
-			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0,
-				const_cast<ULWord*>((u32*)buffer), // target CPU buffer address
-				offset + fieldId * pitch, // source AJA buffer address
-				pitch, // length of one line
-				segments, // number of lines
-				pitch, // increment target buffer one line on CPU memory
-				pitch * 2, // increment AJA card source buffer double the size of one line
-				true);
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
-				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
-		}
-		else
-		{
-			util::Stopwatch sw;
-			Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0, const_cast<ULWord*>((u32*)buffer),
-				offset, bufferSize, true);
-			auto elapsed = sw.Elapsed();
-			nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
-				nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+			ScopedProfilerEvent _("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write"));
+			if (IsInterlaced())
+			{
+				auto pitch = compressedExt.x * 4;
+				auto segments = compressedExt.y;
+				auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
+				util::Stopwatch sw;
+				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0,
+					const_cast<ULWord*>((u32*)buffer), // target CPU buffer address
+					offset + fieldId * pitch, // source AJA buffer address
+					pitch, // length of one line
+					segments, // number of lines
+					pitch, // increment target buffer one line on CPU memory
+					pitch * 2, // increment AJA card source buffer double the size of one line
+					true);
+				auto elapsed = sw.Elapsed();
+				nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
+					nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+			}
+			else
+			{
+				util::Stopwatch sw;
+				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0, const_cast<ULWord*>((u32*)buffer),
+					offset, bufferSize, true);
+				auto elapsed = sw.Elapsed();
+				nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
+					nos::util::Stopwatch::ElapsedString(elapsed).c_str());
+			}
 		}
 
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
