@@ -235,7 +235,6 @@ struct ChannelNodeContext : NodeContext
 	
 	void TryUpdateChannel() 
 	{ 
-		CurrentChannel.ClearStatus(aja::Channel::StatusType::ReferenceInvalid);
 		CurrentChannel.Update({}, true);
 		if (!ShouldOpen)
 			return;
