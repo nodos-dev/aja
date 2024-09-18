@@ -675,43 +675,7 @@ struct ChannelNodeContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
-		if(!Device)
-			return NOS_RESULT_FAILED;
-		if (!IsInput)
-			return NOS_RESULT_SUCCESS;
-		if (!ShouldOpen)
-			return NOS_RESULT_FAILED;
-		auto format = Device->GetSDIInputVideoFormat(Channel);
-		if (ForceInterlaced)
-			format = Device->ForceInterlace(format);
-		if (!TryFindChannel)
-		{
-			if (CurrentChannel.IsOpen)
-				if (CurrentChannel.Info.video_format_idx == static_cast<int>(format))
-				{
-					auto deltaSec = GetDeltaSeconds(format, !IsProgressivePicture(format));
-					bool deltaSecCompatible = execParams->IsFreeRun /* Do not check for delta sec diff if free running */ || memcmp(&execParams->DeltaSeconds, &deltaSec, sizeof(nosVec2u)) == 0;
-					if (deltaSecCompatible != DeltaSecondCompatible)
-					{
-						DeltaSecondCompatible = deltaSecCompatible;
-						if (!DeltaSecondCompatible)
-							CurrentChannel.SetStatus(aja::Channel::StatusType::DeltaSecondsCompatible, fb::NodeStatusMessageType::WARNING, "Frame rate is incompatible with output.");
-						else
-							CurrentChannel.ClearStatus(aja::Channel::StatusType::DeltaSecondsCompatible);
-					}
-					return NOS_RESULT_SUCCESS;
-				}
-			TryFindChannel = true;
-		}
-		TryUpdateChannel();
-		if (format != NTV2_FORMAT_UNKNOWN)
-		{
-			nosEngine.LogI("Input signal reconnected.");
-			TryFindChannel = false;
-			return NOS_RESULT_SUCCESS;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-		return NOS_RESULT_PENDING;
+		return CurrentChannel.IsOpen ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction)
