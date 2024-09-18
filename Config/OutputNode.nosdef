@@ -3520,7 +3520,7 @@
                     {
                       "id": "2a5efd83-f50e-43ae-a409-7cbcffa95aca",
                       "name": "Method",
-                      "type_name": "nos.fb.ResizeMethod",
+                      "type_name": "nos.utilities.ResizeMethod",
                       "show_as": "PROPERTY",
                       "can_show_as": "INPUT_OUTPUT_PROPERTY",
                       "pin_category": "",
