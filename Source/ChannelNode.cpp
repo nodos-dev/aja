@@ -182,11 +182,11 @@ struct ChannelNodeContext : NodeContext
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			ModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_QuadLinkInputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			ModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
@@ -668,7 +668,7 @@ struct ChannelNodeContext : NodeContext
 	{
 		if(IsSingleLink)
 			return AJADevice::SL;
-		return ModePin;
+		return IsInput ? InputModePin : OutputModePin;
 	}
 
 	std::atomic_bool TryFindChannel = false;
@@ -745,7 +745,7 @@ struct ChannelNodeContext : NodeContext
 		PROGRESSIVE
 	} InterlacedState = InterlacedState::NONE;
 	NTV2ReferenceSource ReferenceSource = NTV2_REFERENCE_INVALID;
-	AJADevice::Mode ModePin = AJADevice::SL;
+	AJADevice::Mode InputModePin = AJADevice::SL, OutputModePin = AJADevice::SL;
 	bool IsSingleLink = true;
 
 	QuadLinkInputMode QuadLinkInputMode = QuadLinkInputMode::Tsi;

@@ -225,13 +225,13 @@ AJADevice::AJADevice(uint64_t serial)
     //	Open the device...
     if (!CNTV2DeviceScanner::GetDeviceWithSerial (serial, *this))
     {
-        std::cerr << "## ERROR:  Device '" << serial << "' not found\n";
+        nosEngine.LogE("## ERROR:  Device '%ull' not found", serial);
         return;
     }
 
     if (!IsDeviceReady(false))
     {
-        std::cerr << "## ERROR:  Device '" << serial << "' not ready\n";
+        nosEngine.LogE("## ERROR:  Device '%ull' not ready", serial);
         return;
     }
 
@@ -239,7 +239,7 @@ AJADevice::AJADevice(uint64_t serial)
 
     if (!::NTV2DeviceCanDoCapture(ID))
     {
-        std::cerr << "## ERROR:  Device '" << serial << "' cannot capture\n";
+        nosEngine.LogE("## ERROR:  Device '%ull' cannot capture", serial);
         return;
     }
 
@@ -519,9 +519,7 @@ bool AJADevice::RouteQuadInputSignal(NTV2Channel channel, NTV2VideoFormat videoF
     }
     
     if (((mode == TSI) != isTsi) || ((mode == SQD) != !isTsi))
-    {
-        std::cerr << "Warning: Detected signal is " << (isTsi ? "TSI" : "Squares") << " but requested config is " << ((mode == TSI) ? "TSI" : "Squares") << "\n";
-    }
+        nosEngine.LogE("Warning: Detected signal is %s but requested config is %s", isTsi ? "TSI" : "Squares", (mode == TSI) ? "TSI" : "Squares");;
     
     bool re = SetQuadFrameEnable(true, channel);
 
