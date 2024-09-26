@@ -23,7 +23,7 @@ std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
     CNTV2DeviceScanner scanner{};
     std::map<std::string, uint64_t>  re;
     CNTV2Card dev;
-    for (size_t i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
+    for (ULWord i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
     {
         re[dev.GetDisplayName()] = dev.GetSerialNumber();
     }
@@ -82,7 +82,7 @@ void AJADevice::Init()
     
     CNTV2DeviceScanner scanner;
     CNTV2Card dev;
-    for (size_t i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
+    for (ULWord i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
         Devices[dev.GetSerialNumber()] = (std::make_shared<AJADevice>(dev.GetSerialNumber())); // TODO: Error check on AJADevice ctor.
 }
 
@@ -214,7 +214,8 @@ u32 AJADevice::GetFBSize(NTV2Channel channel)
 AJADevice::~AJADevice()
 {
     ClearState();
-    ReleaseStreamForApplication(NTV2_FOURCC('M', 'Z', 'M', 'Z'), AJAProcess::GetPid());
+	int32_t processId = static_cast<int32_t>(AJAProcess::GetPid());
+    ReleaseStreamForApplication(NTV2_FOURCC('M', 'Z', 'M', 'Z'), processId);
     Close();
 }
 

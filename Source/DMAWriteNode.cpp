@@ -81,8 +81,6 @@ struct DMAWriteNodeContext : DMANodeBase
 		auto buffer = nosVulkan->Map(&inputBuffer);
 		auto inputSize = inputBuffer.Memory.Size;
 
-		nosCmd cmd;
-		nosGPUEvent event;
 		//nosVulkan->Begin("Flush before AJA DMA Write", &cmd);
 		//nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &event};
 		//nosVulkan->End(cmd, &end);

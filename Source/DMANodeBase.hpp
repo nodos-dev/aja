@@ -46,7 +46,7 @@ struct DMANodeBase : NodeContext
 		IsInput() ? Device->SetInputFrame(Channel, frameIndex)
 			: Device->SetOutputFrame(Channel, frameIndex);
 		if (IsQuad())
-			for (u32 i = Channel + 1; i < Channel + 4; ++i)
+			for (u32 i = Channel + 1; i < Channel + 4u; ++i)
 				IsInput() ? Device->SetInputFrame(NTV2Channel(i), frameIndex)
 				: Device->SetOutputFrame(NTV2Channel(i), frameIndex);
 	}
@@ -82,7 +82,7 @@ struct DMANodeBase : NodeContext
 		FrameBufferOffsets.clear();
 	}
 
-	size_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
+	u32 GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
 		auto it = FrameBufferOffsets.find(channel);
 		if (it == FrameBufferOffsets.end())
@@ -90,7 +90,8 @@ struct DMANodeBase : NodeContext
 		auto offsetIt = it->second.find(frame);
 		if (offsetIt == it->second.end())
 			offsetIt = it->second.insert({ frame, GetMaxFrameBufferSize() * 2 * channel + (uint32_t(frame) & 1) * Device->GetFBSize(channel) }).first;
-		return offsetIt->second;
+		assert(offsetIt->second <= UINT32_MAX);
+		return u32(offsetIt->second);
 	}
 
 	struct DMAInfo {
@@ -111,6 +112,7 @@ struct DMANodeBase : NodeContext
 	void DMATransfer(nos::sys::vulkan::FieldType fieldType, uint32_t curVBLCount, uint8_t* buffer, uint64_t inputBufferSize)
 	{
 		auto [compressedExt, bufferSize] = GetDMAInfo();
+		assert(bufferSize <= UINT32_MAX);
 
 		if (bufferSize != inputBufferSize)
 			return nosEngine.LogE("DMATransfer buffer size mismatch");
@@ -149,7 +151,7 @@ struct DMANodeBase : NodeContext
 			{
 				util::Stopwatch sw;
 				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0, const_cast<ULWord*>((u32*)buffer),
-					offset, bufferSize, true);
+					offset, u32(bufferSize), true);
 				auto elapsed = sw.Elapsed();
 				nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
 					nos::util::Stopwatch::ElapsedString(elapsed).c_str());

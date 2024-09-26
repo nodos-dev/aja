@@ -81,7 +81,8 @@ struct WaitVBLNodeContext : NodeContext
 			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(VBLState.LastVBLCount + 1 + isInterlaced);
 			if (vblDiff > 0)
 			{
-				FrameDropped(vblDiff, true);
+				assert(vblDiff <= UINT32_MAX);
+				FrameDropped(static_cast<uint32_t>(vblDiff), true);
 			} 
 			else
 			{
