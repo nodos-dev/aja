@@ -711,7 +711,7 @@
           {
             "id": "db47df0d-2de0-4923-a4fc-e2b717ab8a90",
             "name": "UploadBufferProvider",
-            "class_name": "nos.mediaio.UploadBufferProvider",
+            "class_name": "nos.utilities.UploadBufferProvider",
             "pins": [
               {
                 "id": "e2471bbc-3e7e-42f1-adab-79881a0ec01b",
