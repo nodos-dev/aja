@@ -19,3 +19,6 @@ cmake -S ./Toolchain/CMake -B Build
 cmake --build Build
 ```
 
+### On Ubuntu
+You need `libudev-dev` package in order to build AJA SDK.
+
