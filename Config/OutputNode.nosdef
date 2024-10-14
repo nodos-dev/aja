@@ -38,23 +38,6 @@
           "description": ""
         },
         {
-          "id": "fca311fc-e9bd-4504-990c-1063a66d3b46",
-          "name": "GammaCurve",
-          "type_name": "nos.mediaio.GammaCurve",
-          "show_as": "PROPERTY",
-          "can_show_as": "INPUT_PIN_OR_PROPERTY",
-          "pin_category": "",
-          "visualizer": { },
-          "data": "REC709",
-          "referred_by": [],
-          "def": "REC709",
-          "meta_data_map": [],
-          "contents_type": "PortalPin",
-          "contents": { "source_id": "3fccad25-24c0-481e-a3bd-bc4f501b699a" },
-          "orphan_state": { },
-          "description": ""
-        },
-        {
           "id": "7b61ace0-9268-412d-aedd-7a01db75c85a",
           "name": "ColorSpace",
           "type_name": "nos.mediaio.ColorSpace",
@@ -68,6 +51,23 @@
           "meta_data_map": [],
           "contents_type": "PortalPin",
           "contents": { "source_id": "11e4f93f-384a-47cf-81b1-c6214cde8503" },
+          "orphan_state": { },
+          "description": ""
+        },
+        {
+          "id": "fca311fc-e9bd-4504-990c-1063a66d3b46",
+          "name": "GammaCurve",
+          "type_name": "nos.mediaio.GammaCurve",
+          "show_as": "PROPERTY",
+          "can_show_as": "INPUT_PIN_OR_PROPERTY",
+          "pin_category": "",
+          "visualizer": { },
+          "data": "REC709",
+          "referred_by": [],
+          "def": "REC709",
+          "meta_data_map": [],
+          "contents_type": "PortalPin",
+          "contents": { "source_id": "3fccad25-24c0-481e-a3bd-bc4f501b699a" },
           "orphan_state": { },
           "description": ""
         },
