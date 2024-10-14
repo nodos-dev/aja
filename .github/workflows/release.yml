@@ -42,7 +42,7 @@ jobs:
   call-release-modules:
     name: Release Modules
     needs: set-build-number
-    uses: nodos-dev/actions/.github/workflows/release-modules.yml@main
+    uses: nodos-dev/actions/.github/workflows/release-modules.yml@windows-only
     with:
       ref_name: ${{ github.ref_name }}
       build_all: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.build_all) || false }}
