@@ -46,25 +46,6 @@
                     "description": ""
                 },
                 {
-                    "id": "220ff7b0-4bb0-4e50-9f0b-c3cfe7caa3cc",
-                    "name": "GammaCurve",
-                    "type_name": "nos.mediaio.GammaCurve",
-                    "show_as": "PROPERTY",
-                    "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                    "pin_category": "",
-                    "visualizer": {},
-                    "data": "REC709",
-                    "referred_by": [],
-                    "def": "REC709",
-                    "meta_data_map": [],
-                    "contents_type": "PortalPin",
-                    "contents": {
-                        "source_id": "075375d7-381b-4cae-bc30-eb5d787a9194"
-                    },
-                    "orphan_state": {},
-                    "description": ""
-                },
-                {
                     "id": "400272f4-c092-45bf-b058-900443bffd77",
                     "name": "ColorSpace",
                     "type_name": "nos.mediaio.ColorSpace",
@@ -79,6 +60,25 @@
                     "contents_type": "PortalPin",
                     "contents": {
                         "source_id": "71f1d71f-32c7-4f90-8b27-d34ed52d881e"
+                    },
+                    "orphan_state": {},
+                    "description": ""
+                },
+                {
+                    "id": "220ff7b0-4bb0-4e50-9f0b-c3cfe7caa3cc",
+                    "name": "GammaCurve",
+                    "type_name": "nos.mediaio.GammaCurve",
+                    "show_as": "PROPERTY",
+                    "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                    "pin_category": "",
+                    "visualizer": {},
+                    "data": "REC709",
+                    "referred_by": [],
+                    "def": "REC709",
+                    "meta_data_map": [],
+                    "contents_type": "PortalPin",
+                    "contents": {
+                        "source_id": "075375d7-381b-4cae-bc30-eb5d787a9194"
                     },
                     "orphan_state": {},
                     "description": ""
