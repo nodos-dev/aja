@@ -41,21 +41,21 @@ set(CMAKE_DEBUG_POSTFIX "")
 nos_get_module("nos.sys.vulkan" "5.8" NOS_SYS_VULKAN_TARGET_5_8)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "1.4" NOS_MEDIAIO_TARGET_1_4)
-nos_find_module_path("nos.mediaio" "1.4" NOS_MEDIAIO_PATH_1_4)
-nos_generate_flatbuffers("${NOS_MEDIAIO_PATH_1_4}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH_1_4};${NOS_SDK_DIR}/types" nosMediaIO_1_4_generated)
+nos_get_module("nos.mediaio" "2.0" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "2.0" NOS_MEDIAIO_PATH)
+nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
-nos_get_module("nos.utilities" "2.8" NOS_UTILITIES_TARGET_2_8)
-nos_find_module_path("nos.utilities" "2.8" NOS_UTILITIES_PATH_2_8)
-nos_generate_flatbuffers("${NOS_UTILITIES_PATH_2_8}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH_2_8};${NOS_SDK_DIR}/types" nosUtilities_2_5_generated)
+nos_get_module("nos.utilities" "2.9" NOS_UTILITIES_TARGET)
+nos_find_module_path("nos.utilities" "2.9" NOS_UTILITIES_PATH)
+nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
 # AJA Plugin
 # ----------
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" 
-    "${NOS_UTILITIES_PATH_2_8};${NOS_MEDIAIO_PATH_1_4};${NOS_SDK_DIR}/types" nosAJA_generated)
+    "${NOS_UTILITIES_PATH};${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" nosAJA_generated)
 
-list(APPEND DEPENDENCIES nosMediaIO_1_4_generated nosUtilities_2_5_generated nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_8} ${NOS_PLUGIN_SDK_TARGET})
+list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_8} ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Source
