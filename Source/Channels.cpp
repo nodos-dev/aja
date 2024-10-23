@@ -87,7 +87,8 @@ bool Channel::Open()
 
 			if (Info.is_quad && !NTV2_IS_QUAD_FRAME_FORMAT(fmt))
 			{
-				ch.replace(ch.find("1080p"), 5, "UHDp");
+				if(auto it = ch.find("1080p"); it != string::npos)
+					ch.replace(it, 5, "UHDp");
 			}
 			return ch;
 		};
