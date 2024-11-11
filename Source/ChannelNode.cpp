@@ -87,7 +87,7 @@ struct ChannelNodeContext : NodeContext
 					RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
 						auto refStr = NTV2ReferenceSourceToString(ref, true);
 						SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
-						});
+					});
 				}
 				else
 					RefListenerId = 0;
@@ -171,7 +171,14 @@ struct ChannelNodeContext : NodeContext
 		});
 		AddPinValueWatcher(NSN_ReferenceSource, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ReferenceSourcePinValue = InterpretPinValue<const char>(newVal);
-			TryUpdateChannel();
+			NTV2ReferenceSource curRef;
+			if (ReferenceSourcePinValue == "NONE" && Device && Device->GetReference(curRef))
+			{
+				auto refStr = NTV2ReferenceSourceToString(curRef, true);
+				SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
+			}
+			else
+				TryUpdateChannel();
 		});
 		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
@@ -382,7 +389,7 @@ struct ChannelNodeContext : NodeContext
 				for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(Device->ID); ++i)
 					list.push_back("SDI In " + std::to_string(i));
 				UpdateStringList(GetReferenceStringListName(), list);
-				if (Device->GetReference(ReferenceSource))
+				if (!first && Device->GetReference(ReferenceSource))
 				{
 					auto refStr = NTV2ReferenceSourceToString(ReferenceSource, true);
 					SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
