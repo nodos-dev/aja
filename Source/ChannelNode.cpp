@@ -675,6 +675,7 @@ struct ChannelNodeContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
+		execParams->MarkAllOutsDirty = false;
 		return CurrentChannel.IsOpen ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
 	}
 
