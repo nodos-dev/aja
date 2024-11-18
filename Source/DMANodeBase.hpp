@@ -40,13 +40,13 @@ struct DMANodeBase : NodeContext
 
 	virtual void OnPathStart() { NeedsFrameSet = true; DoubleBufferIdx = 0; NextVBL = 0; }
 
-	void SetFrame(u32 doubleBufferIndex)
+	void SetFrame(uint32_t doubleBufferIndex)
 	{
-		u32 frameIndex = GetFrameBufferOffset(Channel, doubleBufferIndex) / Device->GetFBSize(Channel);
+		uint32_t frameIndex = GetFrameBufferOffset(Channel, doubleBufferIndex) / Device->GetFBSize(Channel);
 		IsInput() ? Device->SetInputFrame(Channel, frameIndex)
 			: Device->SetOutputFrame(Channel, frameIndex);
 		if (IsQuad())
-			for (u32 i = Channel + 1; i < Channel + 4u; ++i)
+			for (uint32_t i = Channel + 1; i < Channel + 4u; ++i)
 				IsInput() ? Device->SetInputFrame(NTV2Channel(i), frameIndex)
 				: Device->SetOutputFrame(NTV2Channel(i), frameIndex);
 	}
@@ -82,7 +82,7 @@ struct DMANodeBase : NodeContext
 		FrameBufferOffsets.clear();
 	}
 
-	u32 GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
+	uint32_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
 		auto it = FrameBufferOffsets.find(channel);
 		if (it == FrameBufferOffsets.end())
@@ -91,7 +91,7 @@ struct DMANodeBase : NodeContext
 		if (offsetIt == it->second.end())
 			offsetIt = it->second.insert({ frame, GetMaxFrameBufferSize() * 2 * channel + (uint32_t(frame) & 1) * Device->GetFBSize(channel) }).first;
 		assert(offsetIt->second <= UINT32_MAX);
-		return u32(offsetIt->second);
+		return uint32_t(offsetIt->second);
 	}
 
 	struct DMAInfo {
@@ -101,10 +101,10 @@ struct DMANodeBase : NodeContext
 
 	DMAInfo GetDMAInfo()
 	{
-		u32 width, height;
+		uint32_t width, height;
 		Device->GetExtent(Format, Mode, width, height);
 		int BitWidth = PixelFormat == mediaio::YCbCrPixelFormat::YUV8 ? 8 : 10;
-		nosVec2u compressedExt((10 == BitWidth) ? ((width + (48 - width % 48) % 48) / 3) << 1 : width >> 1, height >> u32(IsInterlaced()));
+		nosVec2u compressedExt((10 == BitWidth) ? ((width + (48 - width % 48) % 48) / 3) << 1 : width >> 1, height >> uint32_t(IsInterlaced()));
 		uint32_t bufferSize = compressedExt.x * compressedExt.y * 4;
 		return {compressedExt, bufferSize};
 	}
@@ -136,7 +136,7 @@ struct DMANodeBase : NodeContext
 				auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
 				util::Stopwatch sw;
 				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0,
-					const_cast<ULWord*>((u32*)buffer), // target CPU buffer address
+					const_cast<ULWord*>((uint32_t*)buffer), // target CPU buffer address
 					offset + fieldId * pitch, // source AJA buffer address
 					pitch, // length of one line
 					segments, // number of lines
@@ -150,8 +150,8 @@ struct DMANodeBase : NodeContext
 			else
 			{
 				util::Stopwatch sw;
-				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0, const_cast<ULWord*>((u32*)buffer),
-					offset, u32(bufferSize), true);
+				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0, const_cast<ULWord*>((uint32_t*)buffer),
+					offset, uint32_t(bufferSize), true);
 				auto elapsed = sw.Elapsed();
 				nosEngine.WatchLog(("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write")).c_str(),
 					nos::util::Stopwatch::ElapsedString(elapsed).c_str());

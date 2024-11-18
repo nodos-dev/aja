@@ -60,7 +60,7 @@ struct DMAReadNodeContext : DMANodeBase
 			return NOS_RESULT_FAILED;
 		}
 
-		u8* buffer = nosVulkan->Map(&bufferToWrite);
+		uint8_t* buffer = nosVulkan->Map(&bufferToWrite);
 		auto inputBufferSize = bufferToWrite.Memory.Size;
 
 		if (curVBLCount == 0)

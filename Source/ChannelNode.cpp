@@ -499,7 +499,7 @@ struct ChannelNodeContext : NodeContext
 		std::vector<std::string> channels = {"NONE"};
 		if (!Device)
 			return channels;
-		for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
+		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
 			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
 			for (auto mode : modes)
@@ -639,7 +639,7 @@ struct ChannelNodeContext : NodeContext
 
 	std::pair<NTV2Channel, AJADevice::Mode> GetChannelFromString(const std::string& str)
 	{
-		for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
+		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
 			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
 			for (auto mode : modes)

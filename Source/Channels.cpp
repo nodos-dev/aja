@@ -169,20 +169,20 @@ auto EnumerateFormats()
 	{
 		NTV2VideoFormat Format;
 		NTV2FrameRate FPS;
-		u32 Width, Height;
-		u8 Interlaced : 1;
-		u8 ALevel : 1;
-		u8 BLevel : 1;
+		uint32_t Width, Height;
+		uint8_t Interlaced : 1;
+		uint8_t ALevel : 1;
+		uint8_t BLevel : 1;
 	};
 
-	std::map<u64, std::map<NTV2FrameRate, std::vector<FormatDescriptor>>> re;
+	std::map<uint64_t, std::map<NTV2FrameRate, std::vector<FormatDescriptor>>> re;
 
 	for (auto fmt = NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT; fmt < NTV2_MAX_NUM_VIDEO_FORMATS; fmt = NTV2VideoFormat(fmt + 1))
 	{
 		if (IsPSF(fmt))
 			continue;
-		u32 w = GetDisplayWidth(fmt);
-		u32 h = GetDisplayHeight(fmt);
+		uint32_t w = GetDisplayWidth(fmt);
+		uint32_t h = GetDisplayHeight(fmt);
 		NTV2FrameRate fps = GetNTV2FrameRateFromVideoFormat(fmt);
 		auto desc = FormatDescriptor{
 			.Format = fmt,
@@ -194,16 +194,16 @@ auto EnumerateFormats()
 			.BLevel = NTV2_VIDEO_FORMAT_IS_B(fmt),
 		};
 
-		u64 extent = ((u64(w) << u64(32)) | u64(h));
+		uint64_t extent = ((uint64_t(w) << uint64_t(32)) | uint64_t(h));
 		re[extent][fps].push_back(desc);
 	}
 
-	SeqMap<fb::vec2u, SeqMap<f64, std::vector<FormatDescriptor>>> re2;
+	SeqMap<fb::vec2u, SeqMap<double, std::vector<FormatDescriptor>>> re2;
 
 	std::transform(re.begin(), re.end(), std::back_inserter(re2), [](auto &p) {
 		auto extent = p.first;
 		auto &container = p.second;
-		SeqMap<f64, std::vector<FormatDescriptor>> XX;
+		SeqMap<double, std::vector<FormatDescriptor>> XX;
 		std::transform(container.begin(), container.end(), std::back_inserter(XX),
 					   [](auto &p) { return std::pair(GetFramesPerSecond(p.first), std::move(p.second)); });
 		std::sort(XX.begin(), XX.end(), [](auto &a, auto &b) {
@@ -232,7 +232,7 @@ void EnumerateOutputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<fl
 	{
 		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> channels;
 		static auto Descriptors = EnumerateFormats();
-		for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
+		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
 			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
 			std::vector<flatbuffers::Offset<nos::ContextMenuItem>> outs;
@@ -298,7 +298,7 @@ void EnumerateInputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<fla
 	{
 		std::vector<flatbuffers::Offset<nos::ContextMenuItem>> channels;
 		static auto Descriptors = EnumerateFormats();
-		for (u32 i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
+		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
 			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
 			std::vector<flatbuffers::Offset<nos::ContextMenuItem>> outs;
