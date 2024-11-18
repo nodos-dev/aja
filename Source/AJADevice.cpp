@@ -268,7 +268,7 @@ bool AJADevice::CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoF
 	if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
 		return false;
 
-	return NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode || NTV2_IS_QUAD_FRAME_FORMAT(fmt));
+	return NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode ^ NTV2_IS_QUAD_FRAME_FORMAT(fmt));
 }
 
 bool AJADevice::ChannelCanInput(NTV2Channel channel)
