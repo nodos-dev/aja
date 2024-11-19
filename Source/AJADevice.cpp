@@ -33,7 +33,7 @@ std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
 std::unordered_map<std::string, std::set<NTV2VideoFormat>> AJADevice::StringToFormat()
 {
     std::unordered_map<std::string, std::set<NTV2VideoFormat>> re;
-    for (u32 i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
+    for (uint32_t i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
     {
         re[NTV2VideoFormatToString(NTV2VideoFormat(i), true)].insert(NTV2VideoFormat(i));
     }
@@ -202,7 +202,7 @@ void AJADevice::ClearState()
     SetReference(NTV2_REFERENCE_EXTERNAL);
 }
 
-u32 AJADevice::GetFBSize(NTV2Channel channel)
+uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 {
     NTV2Framesize fsz = NTV2_FRAMESIZE_INVALID;
     bool quad = false;
@@ -273,7 +273,7 @@ bool AJADevice::CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoF
 	if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
 		return false;
 
-	return NTV2DeviceCanDoVideoFormat(ID, fmt) && (SL == mode ^ NTV2_IS_QUAD_FRAME_FORMAT(fmt));
+    return NTV2DeviceCanDoVideoFormat(ID, fmt) && ((SL == mode) ^ NTV2_IS_QUAD_FRAME_FORMAT(fmt));
 }
 
 bool AJADevice::ChannelCanInput(NTV2Channel channel)
@@ -781,7 +781,7 @@ bool AJADevice::RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool 
         videoFmt = GetInputVideoFormat(channel);
         if (mode != SL && !NTV2_IS_QUAD_FRAME_FORMAT(videoFmt))
         {
-            u32 w, h;
+            uint32_t w, h;
             GetExtent(channel, mode, w, h);
             videoFmt = GetFirstMatchingVideoFormat(GetNTV2FrameRateFromVideoFormat(videoFmt), h, w, false, false, false);
         }
