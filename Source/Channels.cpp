@@ -132,7 +132,7 @@ bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
 		else
 		{
 			IsOpen = false;
-			nosOrphanState orphanState{.IsOrphan = true, .Message = "Invalid channel"};
+			nosOrphanState orphanState{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Invalid channel"};
 			nosEngine.SetItemOrphanState(ChannelPinId, &orphanState);
 			return false;
 		}
