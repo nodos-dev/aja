@@ -48,7 +48,7 @@ struct Channel
 
 	AJADevice::Mode GetMode() const;
 
-	bool Open();
+	std::pair<bool, std::string> Open();
 
 	void Close();
 

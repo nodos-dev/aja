@@ -47,6 +47,9 @@ struct ChannelNodeContext : NodeContext
 			}
 		}
 
+		nosOrphanState orphan{ .Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel is not open" };
+		nosEngine.SetItemOrphanState(CurrentChannel.ChannelPinId, &orphan);
+
 		UpdateStringList(GetReferenceStringListName(), {"NONE"});
 		UpdateStringList(GetDeviceStringListName(), {"NONE"});
 		UpdateStringList(GetChannelStringListName(), {"NONE"});
@@ -249,10 +252,14 @@ struct ChannelNodeContext : NodeContext
 	}
 	
 	void TryUpdateChannel() 
-	{ 
-		CurrentChannel.Update({}, true);
+	{
 		if (!ShouldOpen)
+		{
+			if (CurrentChannel.IsOpen)
+				CurrentChannel.Close();
 			return;
+		}
+		CurrentChannel.Update({}, true);
 		auto format = GetVideoFormat();
 		if (format == NTV2_FORMAT_UNKNOWN)
 			return;

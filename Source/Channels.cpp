@@ -32,7 +32,7 @@ AJADevice::Mode Channel::GetMode() const
 	return static_cast<AJADevice::Mode>(Info.output_quad_link_mode);
 }
 
-bool Channel::Open()
+std::pair<bool, std::string> Channel::Open()
 {
 	DropCount = 0;
 	ClearStatus(StatusType::DropCount);
@@ -40,14 +40,9 @@ bool Channel::Open()
 	auto channel = GetChannel();
 	if (!device || channel == NTV2_CHANNEL_INVALID)
 	{
-		std::stringstream text;
-		text << "Invalid channel";
-		if (!device)
-			text << ": Device not found";
-		else if (channel == NTV2_CHANNEL_INVALID)
-			text << "!";
-		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, text.str());
-		return false;
+		std::string message = "Invalid channel";
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, message);
+		return {false, std::move(message)};
 	}
 	NTV2VideoFormat fmt = static_cast<NTV2VideoFormat>(Info.video_format_idx); //AJADevice::GetMatchingFormat(Info.video_format, AJADevice::IsQuad(GetMode()));
 	if (Info.is_input)
@@ -97,15 +92,16 @@ bool Channel::Open()
 
 		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, channelName());
 		IsOpen = true;
-		return true;
+		return {true, ""};
 	}
-	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, "Unable to open channel " + NTV2ChannelToString(channel, true));
-	return false;
+	std::string msg = "Unable to open channel " + NTV2ChannelToString(channel, true);
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, msg);
+	return {false, msg};
 }
 
 void Channel::Close()
 {
-	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, "Channel closed");
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::WARNING, "Channel closed");
 	ClearStatus(StatusType::DropCount);
 	auto device = GetDevice();
 	if (!device)
@@ -113,6 +109,8 @@ void Channel::Close()
 	auto channel = GetChannel();
 	device->CloseChannel(channel, Info.is_input, AJADevice::IsQuad(GetMode()));
 	IsOpen = false;
+	nosOrphanState orphanState{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel closed"};
+	nosEngine.SetItemOrphanState(ChannelPinId, &orphanState);
 }
 
 bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
@@ -124,18 +122,10 @@ bool Channel::Update(TChannelInfo newChannelInfo, bool setPinValue)
 		if (setPinValue)
 			nosEngine.SetPinValue(ChannelPinId, Buffer::From(Info));
 		nosEngine.SendPathRestart(ChannelPinId);
-		if (Open())
-		{
-			nosEngine.SetItemOrphanState(ChannelPinId, nullptr);
-			return true;
-		}
-		else
-		{
-			IsOpen = false;
-			nosOrphanState orphanState{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Invalid channel"};
-			nosEngine.SetItemOrphanState(ChannelPinId, &orphanState);
-			return false;
-		}
+		auto [success, message] = Open();
+		IsOpen = success;
+		nosOrphanState orphanState{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = message.c_str()};
+		nosEngine.SetItemOrphanState(ChannelPinId, success ? nullptr : &orphanState);
 	}
 	return IsOpen;
 }
@@ -152,7 +142,7 @@ void Channel::UpdateStatus()
 
 void Channel::SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
 {
-	StatusMessages[statusType] = fb::TNodeStatusMessage{{}, text, msgType};
+	StatusMessages[statusType] = fb::TNodeStatusMessage{{}, std::move(text), msgType};
 	UpdateStatus();
 }
 
