@@ -43,7 +43,7 @@
         {
             "category": "Device|AJA",
             "class_name": "DMAWrite",
-            "display_name": "DMA Write"
+          "display_name": "DMA Write"
         },
         {
             "category": "Device|AJA",
@@ -60,16 +60,54 @@
             "class_name": "Channel",
             "display_name": "Channel"
         },
-        {
-            "category": "Device|AJA",
-            "class_name": "Output",
-            "display_name": "AJA Out"
-        },
-        {
-            "category": "Device|AJA",
-            "class_name": "Input",
-            "display_name": "AJA In"
-        }
+      {
+        "category": "Device|AJA",
+        "class_name": "Output",
+        "display_name": "AJA Out",
+        "name_aliases": [
+          "video",
+          "camera",
+          "SDI",
+          "SMPTE 259M",
+          "SMPTE 292M",
+          "SMPTE 344M",
+          "SMPTE 372M",
+          "SMPTE ST 424M",
+          "SMPTE ST 2083",
+          "SMPTE ST 2082",
+          "SMPTE ST 2081",
+          "HD",
+          "QHD",
+          "4K",
+          "3840",
+          "BT.656",
+          "DSLR"
+        ]
+      },
+      {
+        "category": "Device|AJA",
+        "class_name": "Input",
+        "display_name": "AJA In",
+        "name_aliases": [
+          "video",
+          "camera",
+          "SDI",
+          "SMPTE 259M",
+          "SMPTE 292M",
+          "SMPTE 344M",
+          "SMPTE 372M",
+          "SMPTE ST 424M",
+          "SMPTE ST 2083",
+          "SMPTE ST 2082",
+          "SMPTE ST 2081",
+          "HD",
+          "QHD",
+          "4K",
+          "3840",
+          "BT.656",
+          "DSLR"
+        ]
+      }
     ],
     "third_party_software": ["./Config/Licenses.json"]
 }
