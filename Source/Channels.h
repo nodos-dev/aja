@@ -13,17 +13,6 @@
 
 namespace nos::aja
 {
-struct AJASelectChannelCommand
-{
-	uint32_t DeviceIndex : 4;
-	NTV2Channel Channel : 5;
-	NTV2VideoFormat Format : 12;
-	uint32_t Input : 1;
-	uint32_t IsQuad : 1;
-	operator uint32_t() const { return *(uint32_t*)this; }
-};
-static_assert(sizeof(AJASelectChannelCommand) == sizeof(uint32_t));
-
 struct Channel
 {
 	nosUUID ChannelPinId;
@@ -70,7 +59,4 @@ struct Channel
 	void ClearStatus(StatusType statusType);
 	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
 };
-
-void EnumerateOutputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>& devices);
-void EnumerateInputChannels(flatbuffers::FlatBufferBuilder& fbb, std::vector<flatbuffers::Offset<nos::ContextMenuItem>>& devices);
 }

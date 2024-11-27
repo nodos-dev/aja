@@ -747,7 +747,6 @@ struct ChannelNodeContext : NodeContext
 	std::string FrameRatePinValue = "NONE";
 	std::string InterlacedPinValue = "NONE";
 	std::string ReferenceSourcePinValue = "NONE";
-	
 
 	AJADevice* Device{};
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
