@@ -268,12 +268,24 @@ bool AJADevice::ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoForma
 
 bool AJADevice::CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
 {
-	if (isInput)
-		return true;
-	if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
-		return false;
+    if (isInput)
+        return true;
+    if ((NTV2_FRAMERATE_INVALID != FPSFamily) && (GetFrameRateFamily(GetNTV2FrameRateFromVideoFormat(fmt)) != GetFrameRateFamily(FPSFamily)))
+        return false;
 
-    return NTV2DeviceCanDoVideoFormat(ID, fmt) && ((SL == mode) ^ NTV2_IS_QUAD_FRAME_FORMAT(fmt));
+    if (mode == SL)
+    {
+        if ((NTV2_IS_QUAD_FRAME_FORMAT(fmt) || NTV2_IS_QUAD_QUAD_FORMAT(fmt)) && !(
+            fmt >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT && fmt <= NTV2_FORMAT_END_4K_TSI_DEF_FORMATS))
+            return false;
+    }
+    else
+    {
+        if (!(NTV2_IS_QUAD_FRAME_FORMAT(fmt) || NTV2_IS_QUAD_QUAD_FORMAT(fmt)))
+			return false;
+    }
+
+    return NTV2DeviceCanDoVideoFormat(ID, fmt);
 }
 
 bool AJADevice::ChannelCanInput(NTV2Channel channel)
