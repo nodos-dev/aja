@@ -208,7 +208,9 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
     bool quad = false;
     GetFrameBufferSize(channel, fsz);
     GetQuadFrameEnable(quad, channel);
-    return NTV2FramesizeToByteCount(fsz) * (quad ? 4 : 1);
+    bool quadquad = false;
+    GetQuadQuadFrameEnable(quadquad, channel);
+    return NTV2FramesizeToByteCount(fsz) * (quad ? 4 : 1) * (quadquad ? 4 : 1);
 }
 
 AJADevice::~AJADevice()
@@ -611,7 +613,7 @@ bool AJADevice::RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat fmt, 
     {
         mode = TSI;
     }
-    
+
     bool re = SetQuadFrameEnable(true, channel);
 
     for(int i = 0; i < ARRAYSIZE(channels); ++i)
@@ -778,7 +780,7 @@ bool AJADevice::GetExtent(NTV2VideoFormat fmt, Mode mode, uint32_t& width, uint3
 
     // we do this because input is most likely quad squares
     // and vpid can't tell us if the channel is a part of a multilink
-    if (IsQuad(mode) && !NTV2_IS_QUAD_FRAME_FORMAT(fmt))
+    if (IsQuad(mode) && !(NTV2_IS_QUAD_FRAME_FORMAT(fmt) || NTV2_IS_QUAD_QUAD_FORMAT(fmt)))
     {
         width  *= 2;
         height *= 2;
