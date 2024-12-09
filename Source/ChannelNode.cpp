@@ -555,7 +555,7 @@ struct ChannelNodeContext : NodeContext
 		{
 			if (GetNTV2FrameGeometryFromVideoFormat(NTV2VideoFormat(i)) != Resolution)
 				continue;
-				NTV2VideoFormat format = NTV2VideoFormat(i);
+			NTV2VideoFormat format = NTV2VideoFormat(i);
 			if (Device->CanChannelDoFormat(Channel, IsInput, format, GetEffectiveQuadMode()))
 			{
 				frameRates.insert(GetNTV2FrameRateFromVideoFormat(format));
