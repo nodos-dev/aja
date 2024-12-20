@@ -5,8 +5,8 @@ on:
     branches: [ dev ]
   workflow_dispatch:
     inputs:
-      build_all:
-        description: 'Build all modules'
+      release_all:
+        description: 'Force release all modules'
         required: false
         default: false
         type: boolean
@@ -17,6 +17,11 @@ on:
         type: string
       clean:
         description: 'Clean build'
+        required: false
+        default: false
+        type: boolean
+      sign_binaries:
+        description: 'Sign binaries'
         required: false
         default: false
         type: boolean
@@ -45,7 +50,8 @@ jobs:
     uses: nodos-dev/actions/.github/workflows/release-modules.yml@main
     with:
       ref_name: ${{ github.ref_name }}
-      build_all: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.build_all) || false }}
+      release_all: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.release_all) || false }}
       nodos_sdk_version: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_sdk_version || '' }}
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
+      sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
