@@ -6,8 +6,6 @@
 // TODO: Remove this node once things settle down.
 namespace nos::aja
 {
-NOS_REGISTER_NAME(ReferenceSource);
-NOS_REGISTER_NAME(Device);
 NOS_REGISTER_NAME(ChannelName);
 NOS_REGISTER_NAME(IsInput);
 NOS_REGISTER_NAME(Resolution);

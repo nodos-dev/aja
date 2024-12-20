@@ -12,17 +12,6 @@ NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 NOS_END_IMPORT_DEPS()
 
-NOS_REGISTER_NAME(Device);
-NOS_REGISTER_NAME(ReferenceSource);
-NOS_REGISTER_NAME(Debug);
-NOS_REGISTER_NAME_SPACED(Dispatch_Size, "Dispatch Size");
-NOS_REGISTER_NAME_SPACED(Shader_Type, "Shader Type");
-
-NOS_REGISTER_NAME(Colorspace);
-NOS_REGISTER_NAME(Source);
-NOS_REGISTER_NAME(Interlaced);
-NOS_REGISTER_NAME(ssbo);
-NOS_REGISTER_NAME(Output);
 
 namespace nos::aja
 {
