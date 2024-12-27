@@ -18,6 +18,46 @@
 #endif
 std::map<std::string, uint64_t> AJADevice::AvailableDevices;
 
+DeviceLock::DeviceLock(AJADevice* card) : Card(card)
+{
+    Acquired = Card->AcquireStreamForApplicationWithReference(NTV2_FOURCC('N', 'O', 'S', '.'), static_cast<int32_t>(AJAProcess::GetPid()));
+    
+    if (!Acquired)
+    {
+        ULWord   curAppFourCC(AJA_FOURCC('?', '?', '?', '?'));
+        int32_t outPid;
+        
+        if (!Card->GetStreamingApplication(curAppFourCC, outPid))
+        {
+            nosEngine.LogE("Cannot acquire streaming application for device %s", Card->GetDisplayName().c_str());
+            return;
+        }
+        char fourCCBuf[5];
+#if defined(AJA_LITTLE_ENDIAN)
+        fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[3];
+        fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[2];
+        fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[1];
+        fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[0];
+#else
+        fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[0];
+        fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[1];
+        fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[2];
+        fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[3];
+#endif
+        fourCCBuf[4] = '\0';
+        nosEngine.LogE("Device %s is already acquired by application %s (PID %d)", Card->GetDisplayName().c_str(), fourCCBuf, outPid);
+        return;
+    }
+}
+
+DeviceLock::~DeviceLock()
+{
+    if (Acquired)
+    {
+        Card->ReleaseStreamForApplicationWithReference(NTV2_FOURCC('N', 'O', 'S', '.'), static_cast<int32_t>(AJAProcess::GetPid()));
+    }
+}
+
 std::map<std::string, uint64_t> AJADevice::EnumerateDevices()
 {
     CNTV2DeviceScanner scanner{};
@@ -215,9 +255,8 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 
 AJADevice::~AJADevice()
 {
+    DeviceLock lock(this);
     ClearState();
-	int32_t processId = static_cast<int32_t>(AJAProcess::GetPid());
-    ReleaseStreamForApplication(NTV2_FOURCC('M', 'Z', 'M', 'Z'), processId);
     Close();
 }
 
@@ -246,7 +285,7 @@ AJADevice::AJADevice(uint64_t serial)
         return;
     }
 
-    std::thread([this]{ AcquireStreamForApplicationWithReference(NTV2_FOURCC('M','Z','M','Z'), static_cast<int32_t>(AJAProcess::GetPid())); }).detach();
+    DeviceLock(this);
     
     AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
     AJA_ASSERT(SetMultiFormatMode(true));

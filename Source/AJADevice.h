@@ -33,6 +33,15 @@ struct RestartParams {
     uint32_t RingSize;
 };
 
+
+struct DeviceLock
+{
+    DeviceLock(struct AJADevice* card);
+    ~DeviceLock();
+    bool Acquired = false;
+    AJADevice* Card;
+};
+
 struct AJADevice : CNTV2Card
 {
     enum Mode: uint32_t

@@ -44,6 +44,7 @@ std::pair<bool, std::string> Channel::Open()
 		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, message);
 		return {false, std::move(message)};
 	}
+	DeviceLock lock(device.get());
 	NTV2VideoFormat fmt = static_cast<NTV2VideoFormat>(Info.video_format_idx); //AJADevice::GetMatchingFormat(Info.video_format, AJADevice::IsQuad(GetMode()));
 	if (Info.is_input)
 	{
@@ -106,6 +107,7 @@ void Channel::Close()
 	auto device = GetDevice();
 	if (!device)
 		return;
+	DeviceLock lock(device.get());
 	auto channel = GetChannel();
 	device->CloseChannel(channel, Info.is_input, AJADevice::IsQuad(GetMode()));
 	IsOpen = false;
