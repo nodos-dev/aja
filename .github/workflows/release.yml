@@ -59,7 +59,7 @@ jobs:
           echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
 
   call-release-modules:
-    name: Release Modules
+    name: Modules
     needs: set-build-number
     uses: nodos-dev/actions/.github/workflows/modules.yml@main
     with:
