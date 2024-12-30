@@ -6,14 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       publish_mode:
-        type: choice
         description: 'Publish Mode'
+        required: true
+        default: 'Only Changed'
+        type: choice
         options:
           - Only Changed
           - All Modules
           - None
-        required: false
-        default: 'Only Changed'
       nodos_sdk_version:
         description: 'Nodos SDK Version'
         required: false
