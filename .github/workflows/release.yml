@@ -64,7 +64,7 @@ jobs:
     uses: nodos-dev/actions/.github/workflows/modules.yml@main
     with:
       ref_name: ${{ github.ref_name }}
-      publish_mode: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.publish_mode) || 'None' }}
+      publish_mode: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_mode || 'None' }}
       nodos_sdk_version: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_sdk_version || '' }}
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
