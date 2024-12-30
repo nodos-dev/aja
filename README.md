@@ -1,6 +1,6 @@
 # AJA Modules for Nodos
 
-![build-badge](https://github.com/nodos-dev/aja/actions/workflows/release.yml/badge.svg)
+![build-badge](https://github.com/nodos-dev/aja/actions/workflows/build.yml/badge.svg)
 
 This folder contains the Nodos modules for AJA SDI I/O boards.
 
