@@ -11,7 +11,7 @@ on:
       nodos_sdk_version:
         description: 'Nodos SDK Version'
         required: false
-        default: ''
+        default: '1.2'
         type: string
       clean:
         description: 'Clean build'
