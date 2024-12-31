@@ -69,5 +69,5 @@ jobs:
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
-      linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || true }}
-      windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || true }}
+      linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push'}}
+      windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
