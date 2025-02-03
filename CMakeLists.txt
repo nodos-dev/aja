@@ -38,16 +38,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_DEBUG_POSTFIX "")
 
 # nos.sys.vulkan
-nos_get_module("nos.sys.vulkan" "5.8" NOS_SYS_VULKAN_TARGET_5_8)
+nos_get_module("nos.sys.vulkan" "5.25" NOS_SYS_VULKAN_TARGET_5_25)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "2.0" NOS_MEDIAIO_TARGET)
-nos_find_module_path("nos.mediaio" "2.0" NOS_MEDIAIO_PATH)
+nos_get_module("nos.mediaio" "2.4" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "2.4" NOS_MEDIAIO_PATH)
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
-nos_get_module("nos.utilities" "2.9" NOS_UTILITIES_TARGET)
-nos_find_module_path("nos.utilities" "2.9" NOS_UTILITIES_PATH)
+nos_get_module("nos.utilities" "3.2" NOS_UTILITIES_TARGET)
+nos_find_module_path("nos.utilities" "3.2" NOS_UTILITIES_PATH)
 nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
 # AJA Plugin
@@ -55,7 +55,7 @@ nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${CMAKE_CURRENT_SOURCE_
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" 
     "${NOS_UTILITIES_PATH};${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" nosAJA_generated)
 
-list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_8} ${NOS_PLUGIN_SDK_TARGET})
+list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_25} ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/Source
