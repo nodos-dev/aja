@@ -37,28 +37,36 @@ nos_group_targets("${NOSAJA_EXTERNAL_TARGETS}" "External")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_DEBUG_POSTFIX "")
 
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
+
 # nos.sys.vulkan
 nos_get_module("nos.sys.vulkan" "5.25" NOS_SYS_VULKAN_TARGET_5_25)
 
 # nos.mediaio
 nos_get_module("nos.mediaio" "2.4" NOS_MEDIAIO_TARGET)
 nos_find_module_path("nos.mediaio" "2.4" NOS_MEDIAIO_PATH)
-nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
+set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
+nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
 nos_get_module("nos.utilities" "3.2" NOS_UTILITIES_TARGET)
 nos_find_module_path("nos.utilities" "3.2" NOS_UTILITIES_PATH)
-nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
+set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
+nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
 # AJA Plugin
 # ----------
-nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${CMAKE_CURRENT_SOURCE_DIR}/Source" "cpp" 
+set(GENERATED_DIR "${SOURCE_DIR}/__generated__")
+nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${GENERATED_DIR}" "cpp" 
     "${NOS_UTILITIES_PATH};${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" nosAJA_generated)
 
 list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2 ${NOS_SYS_VULKAN_TARGET_5_25} ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/Source
+    ${SOURCE_DIR}
+    ${GENERATED_DIR}
+    ${NOS_UTILITIES_GENERATED_DIR}
+    ${NOS_MEDIAIO_GENERATED_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
 #   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win
