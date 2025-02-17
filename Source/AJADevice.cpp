@@ -922,13 +922,13 @@ bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
     }
 }
 
-void AJADevice::RegisterNode(nosUUID id)
+void AJADevice::RegisterNode(nos::uuid id)
 {
     std::unique_lock lock(RegisteredNodesMutex);
 	RegisteredNodes.insert(id);
 }
 
-void AJADevice::UnregisterNode(nosUUID id)
+void AJADevice::UnregisterNode(nos::uuid id)
 {
 	std::unique_lock lock(RegisteredNodesMutex);
 	RegisteredNodes.erase(id);

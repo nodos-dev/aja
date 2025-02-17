@@ -31,7 +31,7 @@ struct ChannelNodeContext : NodeContext
 {
 	uint32_t RefListenerId = 0;
 	size_t DropCount = 0;
-	ChannelNodeContext(const nosFbNode* node) : NodeContext(node), CurrentChannel(this)
+	ChannelNodeContext(nosFbNodePtr node) : NodeContext(node), CurrentChannel(this)
 	{
 		AJADevice::Init();
 
@@ -482,12 +482,12 @@ struct ChannelNodeContext : NodeContext
 		SetPinValue(NSN_IsInterlaced, nosBuffer{.Data = (void*)"NONE", .Size = 5});
 	}
 
-	std::string GetReferenceStringListName() { return "aja.ReferenceSource." + UUID2STR(NodeId); }
-	std::string GetDeviceStringListName() { return "aja.DeviceList." + UUID2STR(NodeId); }
-	std::string GetChannelStringListName() { return "aja.ChannelList." + UUID2STR(NodeId); }
-	std::string GetResolutionStringListName() { return "aja.ResolutionList." + UUID2STR(NodeId); }
-	std::string GetFrameRateStringListName() { return "aja.FrameRateList." + UUID2STR(NodeId); }
-	std::string GetInterlacedStringListName() { return "aja.InterlacedList." + UUID2STR(NodeId); }
+	std::string GetReferenceStringListName() { return "aja.ReferenceSource." + std::string(NodeId); }
+	std::string GetDeviceStringListName() { return "aja.DeviceList." + std::string(NodeId); }
+	std::string GetChannelStringListName() { return "aja.ChannelList." + std::string(NodeId); }
+	std::string GetResolutionStringListName() { return "aja.ResolutionList." + std::string(NodeId); }
+	std::string GetFrameRateStringListName() { return "aja.FrameRateList." + std::string(NodeId); }
+	std::string GetInterlacedStringListName() { return "aja.InterlacedList." + std::string(NodeId); }
 
 	std::vector<std::string> GetPossibleDeviceNames()
 	{
@@ -735,7 +735,7 @@ struct ChannelNodeContext : NodeContext
 
 	Channel CurrentChannel;
 
-	std::optional<nosUUID> QuadLinkModePinId = std::nullopt;
+	std::optional<uuid> QuadLinkModePinId = std::nullopt;
 	bool ShouldOpen = false;
 	bool IsInput = false;
 	bool ForceInterlaced = false;

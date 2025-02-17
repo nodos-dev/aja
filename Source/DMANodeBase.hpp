@@ -8,7 +8,7 @@ namespace nos::aja
     
 struct DMANodeBase : NodeContext
 {
-	DMANodeBase(const nosFbNode* node, DMADirection dir) : NodeContext(node), Direction(dir)
+	DMANodeBase(nosFbNodePtr node, DMADirection dir) : NodeContext(node), Direction(dir)
 	{
 	}
 

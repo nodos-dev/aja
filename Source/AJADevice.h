@@ -141,8 +141,8 @@ struct AJADevice : CNTV2Card
     uint32_t AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener);
     void RemoveReferenceSourceListener(uint32_t id);
 
-    void RegisterNode(nosUUID id);
-    void UnregisterNode(nosUUID id);
+    void RegisterNode(nos::uuid id);
+	void UnregisterNode(nos::uuid id);
 
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
 
@@ -178,7 +178,7 @@ private:
     } ReferenceListeners;
 
     std::mutex RegisteredNodesMutex;
-    std::unordered_set<nosUUID> RegisteredNodes;
+    std::unordered_set<nos::uuid> RegisteredNodes;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

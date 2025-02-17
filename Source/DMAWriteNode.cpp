@@ -17,7 +17,7 @@ namespace nos::aja
 
 struct DMAWriteNodeContext : DMANodeBase
 {
-	DMAWriteNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_WRITE)
+	DMAWriteNodeContext(nosFbNodePtr node) : DMANodeBase(node, DMA_WRITE)
 	{
 	}
 
@@ -32,7 +32,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		};
 	}
  
-	void OnPinValueChanged(nos::Name pinName, nosUUID pinId, nosBuffer value) override
+	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{ 
 		if (pinName == NOS_NAME_STATIC("Channel"))
 		{

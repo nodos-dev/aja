@@ -16,14 +16,14 @@ namespace nos::aja
 {
 struct DMAReadNodeContext : DMANodeBase
 {
-	DMAReadNodeContext(const nosFbNode* node) : DMANodeBase(node, DMA_READ)
+	DMAReadNodeContext(nosFbNodePtr node) : DMANodeBase(node, DMA_READ)
 	{
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
 		NodeExecuteParams execParams = params;
-		nosResourceShareInfo bufferToWrite = vkss:: ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execParams[NOS_NAME_STATIC("BufferToWrite")].Data));
+		nosResourceShareInfo bufferToWrite = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execParams[NOS_NAME_STATIC("BufferToWrite")].Data));
 		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execParams[NOS_NAME_STATIC("FieldType")].Data);
 		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execParams[NOS_NAME_STATIC("Channel")].Data);
 		uint32_t curVBLCount = *InterpretPinValue<uint32_t>(*execParams[NOS_NAME_STATIC("CurrentVBL")].Data);

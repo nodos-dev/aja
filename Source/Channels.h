@@ -15,7 +15,7 @@ namespace nos::aja
 {
 struct Channel
 {
-	nosUUID ChannelPinId;
+	uuid ChannelPinId;
 	NodeContext* Context;
 
 	size_t DropCount = 0;

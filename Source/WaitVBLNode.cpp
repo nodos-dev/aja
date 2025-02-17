@@ -13,7 +13,7 @@ NOS_REGISTER_NAME(VBLFailed)
 
 struct WaitVBLNodeContext : NodeContext
 {
-	WaitVBLNodeContext(const nosFbNode* node) : NodeContext(node)
+	WaitVBLNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
 	}
 
@@ -33,10 +33,10 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		NodeExecuteParams params = execParams;
 		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data);
-		nosUUID const* outId = &params[NOS_NAME_STATIC("VBL")].Id;
-		nosUUID const* outVBLCountId = &params[NOS_NAME_STATIC("CurrentVBL")].Id;
+		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
+		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
-		nosUUID outFieldPinId = params[NOS_NAME("FieldType")].Id;
+		uuid outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
 		auto device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
@@ -71,7 +71,7 @@ struct WaitVBLNodeContext : NodeContext
 		{
 			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel);
 			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLTimestampNs = nanoseconds };
-			nosEngine.SendPathCommand(*outId, firstVblAfterStart);
+			nosEngine.SendPathCommand(outId, firstVblAfterStart);
 		}
 		ChannelStr = channelInfo->channel_name()->c_str();
 		IsInput = channelInfo->is_input();
@@ -92,15 +92,15 @@ struct WaitVBLNodeContext : NodeContext
 					{
 						VBLState.Dropped = false;
 						VBLState.FramesSinceLastDrop = 0;
-						nosEngine.SendPathRestart(*outId);
+						nosEngine.SendPathRestart(outId);
 					}
 				}
 			}
 		}
 		VBLState.LastVBLCount = curVBLCount;
 		
-		nosEngine.SetPinDirty(*outId); // This is unnecessary for now, but when we remove automatically setting outputs dirty on execute, this will be required.
-		nosEngine.SetPinValue(*outVBLCountId, nos::Buffer::From(curVBLCount));
+		nosEngine.SetPinDirty(outId); // This is unnecessary for now, but when we remove automatically setting outputs dirty on execute, this will be required.
+		nosEngine.SetPinValue(outVBLCountId, nos::Buffer::From(curVBLCount));
 		return NOS_RESULT_SUCCESS;
 	}
 

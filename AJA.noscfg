@@ -9,23 +9,23 @@
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "5.8.0"
+                "version": "6.0.0"
             },
             {
                 "name": "nos.mediaio",
-                "version": "2.0.0"
+                "version": "2.5.0"
             },
 			{
 				"name": "nos.utilities",
-				"version": "3.0.0"
+				"version": "3.7.0"
 			},
 			{
 				"name": "nos.math",
-				"version": "1.3.0"
+				"version": "1.9.0"
 			},
 			{
 				"name": "nos.reflect",
-				"version": "1.1.0"
+				"version": "1.5.0"
 			}
         ],
         "category": "Media I/O"
@@ -39,75 +39,5 @@
       "Config/AJA.fbs"
     ],
     "binary_path": "Binaries/nosAJA",
-    "associated_nodes": [
-        {
-            "category": "Device|AJA",
-            "class_name": "DMAWrite",
-          "display_name": "DMA Write"
-        },
-        {
-            "category": "Device|AJA",
-            "class_name": "DMARead",
-            "display_name": "DMA Read"
-        },
-        {
-            "category": "Device|AJA",
-            "class_name": "WaitVBL",
-            "display_name": "Wait VBL"
-        },
-        {
-            "category": "Device|AJA",
-            "class_name": "Channel",
-            "display_name": "Channel"
-        },
-      {
-        "category": "Device|AJA",
-        "class_name": "Output",
-        "display_name": "AJA Out",
-        "name_aliases": [
-          "video",
-          "camera",
-          "SDI",
-          "SMPTE 259M",
-          "SMPTE 292M",
-          "SMPTE 344M",
-          "SMPTE 372M",
-          "SMPTE ST 424M",
-          "SMPTE ST 2083",
-          "SMPTE ST 2082",
-          "SMPTE ST 2081",
-          "HD",
-          "QHD",
-          "4K",
-          "3840",
-          "BT.656",
-          "DSLR"
-        ]
-      },
-      {
-        "category": "Device|AJA",
-        "class_name": "Input",
-        "display_name": "AJA In",
-        "name_aliases": [
-          "video",
-          "camera",
-          "SDI",
-          "SMPTE 259M",
-          "SMPTE 292M",
-          "SMPTE 344M",
-          "SMPTE 372M",
-          "SMPTE ST 424M",
-          "SMPTE ST 2083",
-          "SMPTE ST 2082",
-          "SMPTE ST 2081",
-          "HD",
-          "QHD",
-          "4K",
-          "3840",
-          "BT.656",
-          "DSLR"
-        ]
-      }
-    ],
     "third_party_software": ["./Config/Licenses.json"]
 }
