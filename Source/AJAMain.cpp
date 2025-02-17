@@ -5,11 +5,15 @@
 
 #include <Nodos/PluginAPI.h>
 
+#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+
 NOS_INIT()
 NOS_VULKAN_INIT()
+NOS_DEVICE_SUBSYSTEM_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
+	NOS_DEVICE_SUBSYSTEM_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 
@@ -38,6 +42,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 			return NOS_RESULT_SUCCESS;
 
 		AJADevice::AvailableDevices = AJADevice::EnumerateDevices();
+		AJADevice::Init();
 
 		NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
 		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))

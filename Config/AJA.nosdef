@@ -262,13 +262,9 @@
 					},
 					{
 						"name": "Device",
-						"type_name": "string",
+						"type_name": "nos.sys.device.DeviceInfo",
 						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY",
-						"visualizer": {
-							"type": "COMBO_BOX",
-							"name": "aja.DeviceStringList"
-						}
+						"can_show_as": "PROPERTY_ONLY"
 					},
 					{
 						"name": "ChannelName",

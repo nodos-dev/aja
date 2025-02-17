@@ -67,42 +67,9 @@
 						"description": ""
 					},
 					{
-						"id": "54e5121e-7307-48d5-b289-b204ee461c2d",
-						"name": "ColorSpace",
-						"type_name": "nos.mediaio.ColorSpace",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"pin_category": "",
-						"visualizer": {},
-						"data": "REC709",
-						"referred_by": [],
-						"def": "REC709",
-						"meta_data_map": [],
-						"contents_type": "PortalPin",
-						"contents": { "source_id": "9df82c55-667a-40ad-a3f2-93b727b5a6f6" },
-						"orphan_state": {},
-						"description": ""
-					},
-					{
-						"id": "bf8ca74b-2c4b-42a0-9966-063d6b08bc4b",
-						"name": "GammaCurve",
-						"type_name": "nos.mediaio.GammaCurve",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"pin_category": "",
-						"visualizer": {},
-						"data": "REC709",
-						"referred_by": [],
-						"def": "REC709",
-						"meta_data_map": [],
-						"contents_type": "PortalPin",
-						"contents": { "source_id": "b19de34c-04bb-40ba-9821-ea0ffcdcd23c" },
-						"orphan_state": {},
-						"description": ""
-					},
-					{
 						"id": "99314a81-7968-4be7-b892-25d91efce033",
 						"name": "IsOpen",
+						"display_name": "Is Open",
 						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
@@ -120,17 +87,15 @@
 					{
 						"id": "c295ad7f-793d-4003-ab3f-e1fe77062bdd",
 						"name": "Device",
-						"type_name": "string",
+						"display_name": "Device",
+						"type_name": "nos.sys.device.DeviceInfo",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
 						"pin_category": "",
-						"visualizer": {
-							"type": "COMBO_BOX",
-							"name": "aja.DeviceList.b8f98d67-1487-440e-b45e-07475ded28e5"
-						},
-						"data": "NONE",
 						"referred_by": [],
-						"def": "",
+						"data": {
+							"vendor_name": "None"
+						},
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
 						"contents": { "source_id": "198b53ef-9c7b-48f8-8eae-032f499275f8" },
@@ -140,6 +105,7 @@
 					{
 						"id": "01526274-a4b1-45d9-a7d7-5f8ad022e2b2",
 						"name": "ChannelName",
+						"display_name": "Channel Name",
 						"type_name": "string",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
@@ -160,6 +126,7 @@
 					{
 						"id": "125f356b-87f0-43b4-a8f1-c757e14eddbc",
 						"name": "ForceInterlaced",
+						"display_name": "Force Interlaced",
 						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -177,6 +144,7 @@
 					{
 						"id": "85de0238-4db6-4fe4-a128-ac7a09453d09",
 						"name": "QuadLinkInputMode",
+						"display_name": "Quad Link Input Mode",
 						"type_name": "nos.aja.QuadLinkInputMode",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
@@ -194,6 +162,7 @@
 					{
 						"id": "8e1fdf47-d72c-4bd4-9fdd-4d7dc36109f5",
 						"name": "FrameBufferFormat",
+						"display_name": "Frame Buffer Format",
 						"type_name": "nos.mediaio.YCbCrPixelFormat",
 						"show_as": "PROPERTY",
 						"can_show_as": "PROPERTY_ONLY",
@@ -205,9 +174,43 @@
 						"meta_data_map": [],
 						"contents_type": "PortalPin",
 						"contents": { "source_id": "af207f45-9818-403a-ac7a-11d91ec47db5" },
+						"orphan_state": {}
+					},
+					{
+						"id": "54e5121e-7307-48d5-b289-b204ee461c2d",
+						"name": "ColorSpace",
+						"display_name": "Color Space",
+						"type_name": "nos.mediaio.ColorSpace",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"pin_category": "",
+						"visualizer": {},
+						"data": "REC709",
+						"referred_by": [],
+						"def": "REC709",
+						"meta_data_map": [],
+						"contents_type": "PortalPin",
+						"contents": { "source_id": "9df82c55-667a-40ad-a3f2-93b727b5a6f6" },
 						"orphan_state": {},
-						"description": "",
-						"display_name": "AJA Channel.Frame Buffer Format"
+						"description": ""
+					},
+					{
+						"id": "bf8ca74b-2c4b-42a0-9966-063d6b08bc4b",
+						"name": "GammaCurve",
+						"display_name": "Gamma Curve",
+						"type_name": "nos.mediaio.GammaCurve",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"pin_category": "",
+						"visualizer": {},
+						"data": "REC709",
+						"referred_by": [],
+						"def": "REC709",
+						"meta_data_map": [],
+						"contents_type": "PortalPin",
+						"contents": { "source_id": "b19de34c-04bb-40ba-9821-ea0ffcdcd23c" },
+						"orphan_state": {},
+						"description": ""
 					}
 				],
 				"pos": {
@@ -2810,19 +2813,16 @@
 								{
 									"id": "198b53ef-9c7b-48f8-8eae-032f499275f8",
 									"name": "Device",
-									"type_name": "string",
+									"type_name": "nos.sys.device.DeviceInfo",
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"pin_category": "",
-									"visualizer": {
-										"type": "COMBO_BOX",
-										"name": "aja.DeviceList.46cdbbeb-a7aa-44a1-8114-c3276b3a7999"
-									},
-									"data": "NONE",
 									"referred_by": [
 										"c295ad7f-793d-4003-ab3f-e1fe77062bdd"
 									],
-									"def": "",
+									"data": {
+										"vendor_name": "None"
+									},
 									"meta_data_map": [],
 									"contents_type": "JobPin",
 									"contents": {},

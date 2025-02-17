@@ -23,6 +23,8 @@
 
 #include <Nodos/PluginHelpers.hpp>
 
+#include "nosDeviceSubsystem/nosDeviceSubsystem.h"
+
 #define AJA_ASSERT(x) { if(!(x)) { printf("%s:%d\n", __FILE__, __LINE__); abort();} }
 
 struct RestartParams {
@@ -33,6 +35,7 @@ struct RestartParams {
     uint32_t RingSize;
 };
 
+NOS_REGISTER_NAME_SPACED(VendorName, "AJA Video Systems")
 
 struct DeviceLock
 {
@@ -67,6 +70,7 @@ struct AJADevice : CNTV2Card
     NTV2FrameRate FPSFamily = NTV2_FRAMERATE_INVALID;
 
     NTV2DeviceID ID;
+    nosDeviceId GlobalDeviceId;
 
     std::shared_mutex ChannelsMutex;
     //Channel To IsInput

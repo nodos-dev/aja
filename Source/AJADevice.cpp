@@ -11,6 +11,8 @@
 
 #include "firmware.hpp"
 
+#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+
 #undef min
 #undef max
 #if !defined(_WIN32)
@@ -255,6 +257,7 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 
 AJADevice::~AJADevice()
 {
+    nosDevice->UnregisterDevice(GlobalDeviceId);
     DeviceLock lock(this);
     ClearState();
     Close();
@@ -292,6 +295,24 @@ AJADevice::AJADevice(uint64_t serial)
     AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
 
     ClearState();
+
+    // Register to device subsys
+    ULWord pciDeviceId{};
+    uint64_t topologicalId{};
+    if (GetPCIDeviceID(pciDeviceId))
+        topologicalId = pciDeviceId;
+    nosRegisterDeviceParams params {
+        .Device = {
+            .VendorName = NSN_VendorName,
+            .ModelName = nos::Name(GetModelName()),
+            .TopologicalId = topologicalId,
+            .SerialNumber = nos::Name(std::to_string(serial)),
+            .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO),
+        },
+        .DisplayName = nos::Name(GetModelName()),
+        .Handle = serial
+    };
+    nosDevice->RegisterDevice(&params, &GlobalDeviceId);
 }
 
 bool AJADevice::ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
