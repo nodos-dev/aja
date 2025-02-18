@@ -229,6 +229,17 @@ struct ChannelNodeContext : NodeContext
 		}
 		CurrentChannel.Close();
 	}
+
+	static nosResult MigrateNode(nosFbNodePtr node, nosBuffer* outBuffer)
+	{
+		auto migrated = MigrateChannelNode(node);
+		if (!migrated)
+			return NOS_RESULT_SUCCESS;
+
+		auto nodeBuffer = nos::EngineBuffer::CopyFrom(*migrated);
+		*outBuffer = nodeBuffer.Release();
+		return NOS_RESULT_SUCCESS;
+	}
 	
 	mediaio::YCbCrPixelFormat CurrentPixelFormat = mediaio::YCbCrPixelFormat::YUV8;
 

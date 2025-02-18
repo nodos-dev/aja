@@ -24,6 +24,8 @@ NOS_REGISTER_NAME(Output);
 
 namespace nos::aja
 {
+std::optional<nos::fb::TNode> MigrateChannelNode(nosFbNodePtr node);
+
 inline nosVec2u GetDeltaSeconds(NTV2VideoFormat format, bool interlaced)
 {
 	NTV2FrameRate frameRate = GetNTV2FrameRateFromVideoFormat(format);

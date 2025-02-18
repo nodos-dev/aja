@@ -25,6 +25,8 @@ enum class Nodes : int
 	DMARead,
 	WaitVBL,
 	Channel,
+	Input,
+	Output,
 	Count
 };
 
@@ -48,6 +50,49 @@ struct AJAPluginFunctions : nos::PluginFunctions
 		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
 		NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
 		NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
+		
+		// TODO: Remove these when migration of class-named graphs become available in Nodos.
+		*outList[(int)Nodes::Input] = nosNodeFunctions {
+			.ClassName = NOS_NAME("nos.aja.Input"),
+			.MigrateNode = MigrateInOutNodes
+		};
+		*outList[(int)Nodes::Output] = nosNodeFunctions{
+			.ClassName = NOS_NAME("nos.aja.Output"),
+			.MigrateNode = MigrateInOutNodes
+		};
+		return NOS_RESULT_SUCCESS;
+	}
+
+	static nosResult MigrateInOutNodes(nosFbNodePtr node, nosBuffer* outBuffer)
+	{
+		auto pluginVersion = node->plugin_version();
+		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
+		if (!needsMigration)
+			return NOS_RESULT_SUCCESS;
+		// In child nodes, search for Device pin and migrate it
+		fb::TNode cur;
+		node->UnPackTo(&cur);
+		auto* graph = node->contents_as_Graph();
+		if (!graph)
+			return NOS_RESULT_SUCCESS;
+		int i = -1;
+		for (auto* childNode : *graph->nodes())
+		{
+			++i;
+			auto* className = childNode->class_name();
+			if (!className)
+				continue;
+			if (className->string_view().ends_with("aja.Channel"))
+			{
+				if (auto migrated = MigrateChannelNode(childNode))
+				{
+					cur.contents.AsGraph()->nodes[i] = std::make_unique<fb::TNode>(std::move(*migrated));
+					continue;
+				}
+			}
+		}
+		auto nodeBuffer = nos::EngineBuffer::CopyFrom(cur);
+		*outBuffer = nodeBuffer.Release();
 		return NOS_RESULT_SUCCESS;
 	}
 
