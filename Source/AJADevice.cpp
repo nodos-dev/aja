@@ -140,7 +140,7 @@ void AJADevice::Deinit()
     Devices.clear();
 }
 
-std::shared_ptr<AJADevice> AJADevice::GetDevice(std::string const& name)
+std::shared_ptr<AJADevice> AJADevice::GetDevice(std::string_view const& name)
 {
     for(auto& [_, dev]: Devices)
     {

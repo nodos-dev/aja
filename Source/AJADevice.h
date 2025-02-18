@@ -100,7 +100,7 @@ struct AJADevice : CNTV2Card
     static bool GetAvailableDevice(bool input, AJADevice** = 0);
     static void Init();
     static void Deinit();
-    static std::shared_ptr<AJADevice> GetDevice(std::string const& name);
+    static std::shared_ptr<AJADevice> GetDevice(std::string_view const& name);
     static std::shared_ptr<AJADevice> GetDevice(uint32_t index);
 	static std::shared_ptr<AJADevice> GetDeviceBySerialNumber(uint64_t serial);
 
