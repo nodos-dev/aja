@@ -17,6 +17,7 @@ NOS_REGISTER_NAME(QuadLinkOutputMode);
 NOS_REGISTER_NAME(IsOpen);
 NOS_REGISTER_NAME(FrameBufferFormat);
 NOS_REGISTER_NAME(ForceInterlaced);
+NOS_REGISTER_NAME(AcquireDevice);
 
 constexpr auto PIN_VALUE_NONE = "None";
 
@@ -81,7 +82,8 @@ struct ChannelNodeContext : NodeContext
 			auto res = nosDevice->GetSuitableDevice(&deviceInfoFromPin, &deviceId);
 			if (res != NOS_RESULT_SUCCESS)
 			{
-				nosEngine.LogE("Failed to get suitable device");
+				if (deviceInfoFromPin.VendorName != NOS_NAME("None"))
+					nosEngine.LogE("Failed to get suitable device");
 			}
 			else
 			{
@@ -105,6 +107,11 @@ struct ChannelNodeContext : NodeContext
 				{
 					oldDevice->UnregisterNode(NodeId);
 					oldDevice->RemoveReferenceSourceListener(RefListenerId);
+					if (DeviceAcquired)
+					{
+						oldDevice->ReleaseDevice();
+						DeviceAcquired = false;
+					}
 				}
 				if(Device)
 				{
@@ -113,6 +120,11 @@ struct ChannelNodeContext : NodeContext
 						auto refStr = NTV2ReferenceSourceToString(ref, true);
 						SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
 					});
+					if (!DeviceAcquired && ShouldAcquireDevice)
+					{
+						Device->AcquireDevice();
+						DeviceAcquired = true;
+					}
 				}
 				else
 					RefListenerId = 0;
@@ -127,6 +139,28 @@ struct ChannelNodeContext : NodeContext
 					AutoSelectIfSingle(NSN_Device, GetPossibleDevices());
 			}
 			UpdateAfter(AJAChangedPinType::Device, !oldValue);
+		});
+		AddPinValueWatcher(NSN_AcquireDevice, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			bool acquire = *newVal.As<bool>();
+			ShouldAcquireDevice = acquire;
+			if (!Device)
+				return;
+			if (ShouldAcquireDevice)
+			{
+				if (!DeviceAcquired)
+				{
+					Device->AcquireDevice();
+					DeviceAcquired = true;
+				}
+			}
+			else
+			{
+				if (DeviceAcquired)
+				{
+					Device->ReleaseDevice();
+					DeviceAcquired = false;
+				}
+			}
 		});
 		AddPinValueWatcher(NSN_ChannelName, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ChannelPinValue = InterpretPinValue<const char>(newVal);
@@ -226,6 +260,8 @@ struct ChannelNodeContext : NodeContext
 			Device->UnregisterNode(NodeId);
 			if(RefListenerId)
 				Device->RemoveReferenceSourceListener(RefListenerId);
+			if (DeviceAcquired)
+				Device->ReleaseDevice();
 		}
 		CurrentChannel.Close();
 	}
@@ -794,6 +830,9 @@ struct ChannelNodeContext : NodeContext
 	QuadLinkMode QuadLinkOutputMode = QuadLinkMode::Tsi;
 	
 	bool DeltaSecondCompatible = true;
+
+	bool DeviceAcquired = false;
+	bool ShouldAcquireDevice = true;
 };
 
 nosResult RegisterChannelNode(nosNodeFunctions* functions)

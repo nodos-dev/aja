@@ -65,7 +65,6 @@ struct AJADevice : CNTV2Card
     }
     
     inline static std::unordered_map<uint64_t, std::shared_ptr<AJADevice>> Devices;
-   
 
     NTV2FrameRate FPSFamily = NTV2_FRAMERATE_INVALID;
 
@@ -153,11 +152,14 @@ struct AJADevice : CNTV2Card
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);
     bool CheckFirmware(std::string& msg);
+
+    bool AcquireDevice();
+    void ReleaseDevice();
 private:
     bool RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
     bool RouteSLOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, NTV2FrameBufferFormat fbFmt);
 
-    bool RouteQuadInputSignal (NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt);
+    bool RouteQuadInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt);
     bool RouteQuadOutputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt);
 
     bool RouteInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, Mode mode, NTV2FrameBufferFormat fbFmt)
@@ -181,8 +183,9 @@ private:
         std::mutex Mutex;
     } ReferenceListeners;
 
-    std::mutex RegisteredNodesMutex;
+    std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
+    std::atomic_uint AcquiredCount = 0;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

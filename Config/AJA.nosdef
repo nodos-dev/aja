@@ -330,6 +330,14 @@
 						"type_name": "bool",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY"
+					},
+					{
+						"name": "AcquireDevice",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "If true, Nodos AJA plugin will lock the device for exclusive use.\nOther programs will not be able to use the device until Nodos is closed.",
+						"data": true
 					}
 				],
 				"functions": [
