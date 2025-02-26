@@ -63,7 +63,7 @@ struct WaitVBLNodeContext : NodeContext
 			device->GetOutputVerticalInterruptCount(curVBLCount, channel);
 		if (!vblSuccess)
 		{
-			nosEngine.CallNodeFunction(NodeId, NSN_VBLFailed);
+			nosEngine.TriggerNodeEvent(NodeId, NSN_VBLFailed);
 			return NOS_RESULT_FAILED;
 		}
 

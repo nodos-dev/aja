@@ -56,7 +56,8 @@
 								"type_name": "nos.exe",
 								"show_as": "OUTPUT_PIN"
 							}
-						]
+						],
+						"scheduling_type": "Event"
 					}
 				]
 			}
@@ -129,7 +130,8 @@
 								"type_name": "nos.exe",
 								"show_as": "OUTPUT_PIN"
 							}
-						]
+						],
+						"scheduling_type": "Event"
 					}
 				]
 			}
@@ -201,7 +203,8 @@
 								"type_name": "nos.exe",
 								"show_as": "OUTPUT_PIN"
 							}
-						]
+						],
+						"scheduling_type": "Event"
 					},
 					{
 						"class_name": "Drop",

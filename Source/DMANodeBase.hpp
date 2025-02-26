@@ -168,7 +168,7 @@ struct DMANodeBase : NodeContext
 
 		// DMA likely skipped a frame
 		if (curVBLCount != newVBLCount)
-			nosEngine.CallNodeFunction(NodeId, NOS_NAME("Drop"));
+			nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Drop"));
 
 		NextVBL = newVBLCount + 1;
 	}
