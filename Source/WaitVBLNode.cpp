@@ -106,7 +106,7 @@ struct WaitVBLNodeContext : NodeContext
 			(type == sys::vulkan::FieldType::ODD ? NTV2_FIELD0 : NTV2_FIELD_INVALID);
 	}
 	
-	sys::vulkan::FieldType InterlacedWaitField = sys::vulkan::FieldType::EVEN;
+	sys::vulkan::FieldType InterlacedWaitField;
 	struct {
 		ULWord LastVBLCount = 0;
 		bool Dropped = false;
@@ -116,6 +116,7 @@ struct WaitVBLNodeContext : NodeContext
 	void OnPathStart() override
 	{
 		VBLState = {};
+		InterlacedWaitField = sys::vulkan::FieldType::EVEN; // Field flipped first, so start with even
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
