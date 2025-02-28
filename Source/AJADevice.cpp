@@ -267,15 +267,11 @@ AJADevice::AJADevice(uint64_t serial)
     ClearState();
 
     // Register to device subsys
-    ULWord pciDeviceId{};
-    uint64_t topologicalId{};
-    if (GetPCIDeviceID(pciDeviceId))
-        topologicalId = pciDeviceId;
     nosRegisterDeviceParams params {
         .Device = {
             .VendorName = NSN_VendorName,
             .ModelName = nos::Name(GetModelName()),
-            .TopologicalId = topologicalId,
+            .TopologicalId = GetIndexNumber(),
             .SerialNumber = nos::Name(std::to_string(serial)),
             .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO),
         },
