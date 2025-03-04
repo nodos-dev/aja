@@ -37,7 +37,8 @@
     "node_definitions": [
         "Config/AJA.nosdef",
         "Config/OutputNode.nosdef",
-        "Config/InputNode.nosdef"
+        "Config/InputNode.nosdef",
+		"Config/FillKey.nosdef"
     ],
     "custom_types" :[
       "Config/AJA.fbs"
