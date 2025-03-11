@@ -29,35 +29,41 @@ struct WaitVBLNodeContext : NodeContext
 		return device->WaitVBL(channel, isInput, isInterlaced ? GetFieldId(InterlacedWaitField) : NTV2_FIELD_INVALID);
 	}
 
+	std::shared_ptr<AJADevice> GetDevice()
+	{
+		if (!ChannelInfo.device)
+			return nullptr;
+		return AJADevice::GetDeviceBySerialNumber(ChannelInfo.device->serial_number);
+	}
+
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		NodeExecuteParams params = execParams;
-		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data);
+		InterpretPinValue<aja::ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data)->UnPackTo(&ChannelInfo);
 		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
 		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
 		uuid outFieldPinId = params[NOS_NAME("FieldType")].Id;
-		if (!channelInfo->device())
+		if (!ChannelInfo.device)
 			return NOS_RESULT_FAILED;
-		auto device = AJADevice::GetDeviceBySerialNumber(channelInfo->device()->serial_number());
+		auto device = GetDevice();
 		if (!device)
 			return NOS_RESULT_FAILED;
-		auto channelStr = channelInfo->channel_name();
-		if (!channelStr)
+		auto channelStr = ChannelInfo.channel_name;
+		if (channelStr.empty())
 			return NOS_RESULT_FAILED;
-		auto channel = ParseChannel(channelStr->string_view());
-
-		auto videoFormat = static_cast<NTV2VideoFormat>(channelInfo->video_format_idx());
+		auto channel = ParseChannel(channelStr);
+		
+		auto videoFormat = static_cast<NTV2VideoFormat>(ChannelInfo.video_format_idx);
 		bool isInterlaced = !IsProgressivePicture(videoFormat);
 		bool vblSuccess = false;
-		for (int i = 0; i < (VBLState.LastVBLCount == 0 ? 2 : 1); ++i) // Wait one more VBL after restart so that we don't start DMA in the middle of a frame.
 		{
-			ScopedProfilerEvent _(channelInfo->channel_name()->str() + " Wait VBL");
-			vblSuccess = WaitVBL(device.get(), channel, channelInfo->is_input(), isInterlaced, waitField);
+			ScopedProfilerEvent _(ChannelInfo.channel_name + " Wait VBL");
+			vblSuccess = WaitVBL(device.get(), channel, ChannelInfo.is_input, isInterlaced, waitField);
 		}
 		nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(isInterlaced ? InterlacedWaitField : sys::vulkan::FieldType::PROGRESSIVE));
 		ULWord curVBLCount = 0;
-		if (channelInfo->is_input())
+		if (ChannelInfo.is_input)
 			device->GetInputVerticalInterruptCount(curVBLCount, channel);
 		else
 			device->GetOutputVerticalInterruptCount(curVBLCount, channel);
@@ -67,14 +73,12 @@ struct WaitVBLNodeContext : NodeContext
 			return NOS_RESULT_FAILED;
 		}
 
-		if (channelInfo->is_input() && !VBLState.LastVBLCount)
+		if (ChannelInfo.is_input && !VBLState.LastVBLCount)
 		{
 			uint64_t nanoseconds = device->GetLastInputVerticalInterruptTimestamp(channel);
 			nosPathCommand firstVblAfterStart{ .Event = NOS_FIRST_VBL_AFTER_START, .VBLTimestampNs = nanoseconds };
 			nosEngine.SendPathCommand(outId, firstVblAfterStart);
 		}
-		ChannelStr = channelInfo->channel_name()->c_str();
-		IsInput = channelInfo->is_input();
 
 		if (VBLState.LastVBLCount)
 		{
@@ -121,13 +125,18 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		VBLState = {};
 		InterlacedWaitField = sys::vulkan::FieldType::EVEN; // Field flipped first, so start with even
+		if (auto device = GetDevice())
+		{
+			auto channel = ParseChannel(ChannelInfo.channel_name);
+			WaitVBL(device.get(), channel, ChannelInfo.is_input, ChannelInfo.is_interlaced, InterlacedWaitField);
+		}
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
 	{
 		VBLState.Dropped = true;
 		VBLState.FramesSinceLastDrop = 0;
-		nosEngine.LogW("%s: %s dropped %lld frames (%s missed)", IsInput ? "In" : "Out", ChannelStr.c_str(), dropCount, vblMissed ? "VBL" : "DMA");
+		nosEngine.LogW("%s: %s dropped %lld frames (%s missed)", ChannelInfo.is_input ? "In" : "Out", ChannelInfo.channel_name.c_str(), dropCount, vblMissed ? "VBL" : "DMA");
 	}
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
@@ -147,8 +156,7 @@ struct WaitVBLNodeContext : NodeContext
 		return NOS_RESULT_SUCCESS; 
 	}
 
-	std::string ChannelStr;
-	bool IsInput = false;
+	TChannelInfo ChannelInfo{};
 };
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
