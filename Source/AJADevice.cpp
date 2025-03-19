@@ -919,7 +919,7 @@ void AJADevice::UnregisterNode(nos::uuid id)
 	RegisteredNodes.erase(id);
 }
 
-bool AJADevice::CheckFirmware(std::string& msg)
+bool AJADevice::CheckFirmware(std::string& msg, std::string& msgDetails)
 {
     std::string date, time;
     auto re = GetRunningFirmwareDate(date, time);
@@ -928,12 +928,14 @@ bool AJADevice::CheckFirmware(std::string& msg)
     {
         if (it->second > date)
         {
-            msg = "Installed firmware (" + date + ") is out of date. Recommended firmware date is " + it->second + ". Please update your device.";
+            msg = "Firmware out of date";
+            msgDetails = "Installed firmware (" + date + ") is out of date. Recommended firmware date is " + it->second + ". Please update your device.";
             return false;
         }
         return true;
     }
-    msg = "Firmware (" + date + ") for device (" + model + ") has not been tested.";
+    msg = "Not tested firmware";
+    msgDetails = "Firmware (" + date + ") for device (" + model + ") has not been tested.";
     return false;
 }
 

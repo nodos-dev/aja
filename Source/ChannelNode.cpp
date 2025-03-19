@@ -95,10 +95,10 @@ struct ChannelNodeContext : NodeContext
 			
 			Device = AJADevice::GetDeviceBySerialNumber(newDeviceSerial).get();
 
-			std::string msg;
-			if (Device && !Device->CheckFirmware(msg))
+			std::string msg, msgDetails;
+			if (Device && !Device->CheckFirmware(msg, msgDetails))
 			{
-				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg);
+				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg, msgDetails, 0, false);
 			}
 
 			if (oldDevice != Device)
@@ -301,15 +301,15 @@ struct ChannelNodeContext : NodeContext
 			Device->GetReferenceAndFrameRate(curRef, refFrameRate);
 			
 			if (GetFrameRateFamily(refFrameRate) != GetFrameRateFamily(FrameRate))
-				CurrentChannel.SetStatus(aja::Channel::StatusType::ReferenceInvalid, fb::NodeStatusMessageType::WARNING, "Reference incompatible with frame rate");
+				CurrentChannel.SetStatus(aja::Channel::StatusType::ReferenceInvalid, fb::NodeStatusMessageType::WARNING, "Reference incompatible with frame rate", "", 5, false);
 			else
 				CurrentChannel.ClearStatus(Channel::StatusType::ReferenceInvalid);
 			
 			auto refStatusText = NTV2ReferenceSourceToString(ReferenceSource, true) + " (" + NTV2FrameRateToString(refFrameRate, true) + ")";
-			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::INFO, "Reference: " + refStatusText);
+			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::INFO, "Reference: " + refStatusText, "", 5, false);
 		}
 		else
-			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::FAILURE, "Reference: None");
+			CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::FAILURE, "Reference: None", "", 5, false);
 	}
 	
 	void TryUpdateChannel() 

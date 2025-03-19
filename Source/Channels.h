@@ -22,7 +22,7 @@ struct Channel
 
 	void IncrementDropCount()
 	{
-		SetStatus(StatusType::DropCount, fb::NodeStatusMessageType::WARNING, "Drop Count: " + std::to_string(++DropCount));
+		SetStatus(StatusType::DropCount, fb::NodeStatusMessageType::WARNING, "Drop Count: " + std::to_string(++DropCount), "", 3, true);
 	}
 	
 	Channel(NodeContext* context) : Context(context) {}
@@ -55,7 +55,7 @@ struct Channel
 		DropCount,
 	};
 
-	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text);
+	void SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text, std::string details, uint64_t messageTimeout, bool popup);
 	void ClearStatus(StatusType statusType);
 	std::unordered_map<StatusType, fb::TNodeStatusMessage> StatusMessages;
 };

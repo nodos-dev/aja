@@ -41,7 +41,7 @@ std::pair<bool, std::string> Channel::Open()
 	if (!device || channel == NTV2_CHANNEL_INVALID)
 	{
 		std::string message = "Invalid channel";
-		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, message);
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, message, "", 0, false);
 		return {false, std::move(message)};
 	}
 	DeviceLock lock(device.get());
@@ -91,18 +91,18 @@ std::pair<bool, std::string> Channel::Open()
 			return ch;
 		};
 
-		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, channelName());
+		SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, channelName() + " opened", "", 4, true);
 		IsOpen = true;
 		return {true, ""};
 	}
-	std::string msg = "Unable to open channel " + NTV2ChannelToString(channel, true);
-	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, msg);
+	std::string msg = "Unable to open channel";
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::FAILURE, "Unable to open channel", "Failed channel is " + NTV2ChannelToString(channel, true), 4, false);
 	return {false, msg};
 }
 
 void Channel::Close()
 {
-	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::WARNING, "Channel closed");
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::WARNING, "Channel closed", "", 4, false);
 	ClearStatus(StatusType::DropCount);
 	auto device = GetDevice();
 	if (!device)
@@ -136,15 +136,15 @@ void Channel::UpdateStatus()
 {
 	std::vector<fb::TNodeStatusMessage> messages;
 	if (auto device = GetDevice())
-		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), fb::NodeStatusMessageType::INFO});
+		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), fb::NodeStatusMessageType::INFO, "", 5, true, false});
 	for (auto& [type, message] : StatusMessages)
 		messages.push_back(message);
 	Context->SetNodeStatusMessages(messages);
 }
 
-void Channel::SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text)
+void Channel::SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text, std::string details, uint64_t messageTimeout, bool popup)
 {
-	StatusMessages[statusType] = fb::TNodeStatusMessage{{}, std::move(text), msgType};
+	StatusMessages[statusType] = fb::TNodeStatusMessage{ {}, std::move(text), msgType, std::move(details), messageTimeout, true, popup};
 	UpdateStatus();
 }
 

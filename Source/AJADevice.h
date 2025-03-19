@@ -151,7 +151,7 @@ struct AJADevice : CNTV2Card
 
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);
-    bool CheckFirmware(std::string& msg);
+    bool CheckFirmware(std::string& msg, std::string& msgDetails);
 
     bool AcquireDevice();
     void ReleaseDevice();
