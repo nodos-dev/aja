@@ -41,7 +41,7 @@ set(CMAKE_DEBUG_POSTFIX "")
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 
 # nos.sys.vulkan
-nos_get_module("nos.sys.vulkan" "6.0" NOS_SYS_VULKAN_TARGET)
+nos_get_module("nos.sys.vulkan" "6.21" NOS_SYS_VULKAN_TARGET)
 
 # nos.mediaio
 nos_get_module("nos.mediaio" "2.5" NOS_MEDIAIO_TARGET)
