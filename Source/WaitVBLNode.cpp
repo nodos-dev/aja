@@ -11,6 +11,8 @@ namespace nos::aja
 
 NOS_REGISTER_NAME(VBLFailed)
 
+static uint64_t AJAStartupTimestamp = 0;
+
 struct WaitVBLNodeContext : NodeContext
 {
 	WaitVBLNodeContext(nosFbNodePtr node) : NodeContext(node)
@@ -89,16 +91,11 @@ struct WaitVBLNodeContext : NodeContext
 			{
 				timepoint = device->GetLastOutputVerticalInterruptTimestamp(channel);
 			}
-			if (!VBLState.SysClockTimeDiff)
-				VBLState.SysClockTimeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(
-							   std::chrono::system_clock::now().time_since_epoch())
-							   .count() -
-						   timepoint;
 			std::chrono::system_clock::duration time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
-				std::chrono::nanoseconds(timepoint + VBLState.SysClockTimeDiff));
+				std::chrono::nanoseconds(timepoint + AJAStartupTimestamp));
 			std::chrono::system_clock::duration startTime =
 				std::chrono::duration_cast<std::chrono::system_clock::duration>(
-					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp + VBLState.SysClockTimeDiff));
+					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp + AJAStartupTimestamp));
 
 			nosEngine.LogI("%s: %s VBL %lld at %s (Start: %s)",
 						   ChannelInfo.is_input ? "In " : "Out",
@@ -168,7 +165,6 @@ struct WaitVBLNodeContext : NodeContext
 #if NOS_AJA_DIAGNOSTICS
 		uint64_t FrameCountSincePathStart = 0;
 		uint64_t FirstVBLTimestamp = 0;
-		uint64_t SysClockTimeDiff = 0;
 #endif
 	} VBLState;
 
@@ -186,10 +182,25 @@ struct WaitVBLNodeContext : NodeContext
 					sys::vulkan::FieldType::PROGRESSIVE);
 			VBLState.LastVBLCount = GetVBLCount(*device, channel);
 #if NOS_AJA_DIAGNOSTICS
+			if (!AJAStartupTimestamp)
+			{
+				// Makes sure that wait actually waits
+				WaitVBL(device.get(),
+						channel,
+						ChannelInfo.is_input,
+						ChannelInfo.is_interlaced,
+						sys::vulkan::FieldType::PROGRESSIVE);
+			}
+			auto time = std::chrono::system_clock::now();
 			if (ChannelInfo.is_input)
 				VBLState.FirstVBLTimestamp = device->GetLastInputVerticalInterruptTimestamp(channel);
 			else
 				VBLState.FirstVBLTimestamp = device->GetLastOutputVerticalInterruptTimestamp(channel);
+			if (!AJAStartupTimestamp)
+				AJAStartupTimestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
+										  time.time_since_epoch())
+										  .count() -
+									  VBLState.FirstVBLTimestamp;
 #endif
 		}
 	}
