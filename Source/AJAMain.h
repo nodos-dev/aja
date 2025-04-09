@@ -11,6 +11,8 @@
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 
+#define NOS_AJA_DIAGNOSTICS 0
+
 extern nosVulkanSubsystem* nosVulkan;
 
 NOS_REGISTER_NAME(Device)
