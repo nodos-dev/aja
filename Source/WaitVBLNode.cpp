@@ -79,6 +79,35 @@ struct WaitVBLNodeContext : NodeContext
 		{
 			ScopedProfilerEvent _(ChannelInfo.channel_name + " Wait VBL");
 			vblSuccess = WaitVBL(device.get(), channel, ChannelInfo.is_input, isInterlaced, waitField);
+#if NOS_AJA_DIAGNOSTICS
+			uint64_t timepoint = 0;
+			if (ChannelInfo.is_input)
+			{
+				timepoint = device->GetLastInputVerticalInterruptTimestamp(channel);
+			}
+			else
+			{
+				timepoint = device->GetLastOutputVerticalInterruptTimestamp(channel);
+			}
+			if (!VBLState.SysClockTimeDiff)
+				VBLState.SysClockTimeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(
+							   std::chrono::system_clock::now().time_since_epoch())
+							   .count() -
+						   timepoint;
+			std::chrono::system_clock::duration time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
+				std::chrono::nanoseconds(timepoint + VBLState.SysClockTimeDiff));
+			std::chrono::system_clock::duration startTime =
+				std::chrono::duration_cast<std::chrono::system_clock::duration>(
+					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp + VBLState.SysClockTimeDiff));
+
+			nosEngine.LogI("%s: %s VBL %lld at %s (Start: %s)",
+						   ChannelInfo.is_input ? "In " : "Out",
+						   channelStr.c_str(),
+						   VBLState.FrameCountSincePathStart,
+						   std::format("{:%H:%M:%S}", time).c_str(),
+						   std::format("{:%H:%M:%S}", startTime).c_str());
+		VBLState.FrameCountSincePathStart++;
+#endif
 		}
 		nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(isInterlaced ? VBLState.InterlacedWaitField : sys::vulkan::FieldType::PROGRESSIVE));
 		ULWord curVBLCount = GetVBLCount(*device, channel);
@@ -136,6 +165,11 @@ struct WaitVBLNodeContext : NodeContext
 		bool Dropped = false;
 		int FramesSinceLastDrop = 0;
 		sys::vulkan::FieldType InterlacedWaitField = sys::vulkan::FieldType::EVEN; // Field flipped first, so start with even
+#if NOS_AJA_DIAGNOSTICS
+		uint64_t FrameCountSincePathStart = 0;
+		uint64_t FirstVBLTimestamp = 0;
+		uint64_t SysClockTimeDiff = 0;
+#endif
 	} VBLState;
 
 	void OnPathStart() override
@@ -151,6 +185,12 @@ struct WaitVBLNodeContext : NodeContext
 					ChannelInfo.is_interlaced,
 					sys::vulkan::FieldType::PROGRESSIVE);
 			VBLState.LastVBLCount = GetVBLCount(*device, channel);
+#if NOS_AJA_DIAGNOSTICS
+			if (ChannelInfo.is_input)
+				VBLState.FirstVBLTimestamp = device->GetLastInputVerticalInterruptTimestamp(channel);
+			else
+				VBLState.FirstVBLTimestamp = device->GetLastOutputVerticalInterruptTimestamp(channel);
+#endif
 		}
 	}
 
