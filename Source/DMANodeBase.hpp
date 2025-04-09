@@ -165,10 +165,14 @@ struct DMANodeBase : NodeContext
 			Device->GetInputVerticalInterruptCount(newVBLCount, Channel);
 		else
 			Device->GetOutputVerticalInterruptCount(newVBLCount, Channel);
-
 		// DMA likely skipped a frame
 		if (curVBLCount != newVBLCount)
+		{
+#if NOS_AJA_DIAGNOSTICS
+			nosEngine.LogI("AJA %s DMA Dropped", ChannelName.c_str());
+#endif
 			nosEngine.TriggerNodeEvent(NodeId, NOS_NAME("Drop"));
+		}
 
 		NextVBL = newVBLCount + 1;
 	}
