@@ -34,7 +34,9 @@ struct ChannelNodeContext : NodeContext
 {
 	uint32_t RefListenerId = 0;
 	size_t DropCount = 0;
-	ChannelNodeContext(nosFbNodePtr node) : NodeContext(node), CurrentChannel(this)
+	ChannelNodeContext() : NodeContext(), CurrentChannel(*this) {}
+
+	nosResult OnCreate(nosFbNodePtr node) override
 	{
 		if (auto* pins = node->pins())
 		{
@@ -46,7 +48,7 @@ struct ChannelNodeContext : NodeContext
 			}
 		}
 
-		nosOrphanState orphan{ .Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel is not open" };
+		nosOrphanState orphan{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel is not open"};
 		nosEngine.SetItemOrphanState(CurrentChannel.ChannelPinId, &orphan);
 
 		UpdateStringList(GetReferenceStringListName(), {PIN_VALUE_NONE});
@@ -54,13 +56,21 @@ struct ChannelNodeContext : NodeContext
 		UpdateStringList(GetResolutionStringListName(), {PIN_VALUE_NONE});
 		UpdateStringList(GetFrameRateStringListName(), {PIN_VALUE_NONE});
 		UpdateStringList(GetInterlacedStringListName(), {PIN_VALUE_NONE});
-		
-		SetPinVisualizer(NSN_ReferenceSource, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetReferenceStringListName()});
-		SetPinVisualizer(NSN_Device, {.type = nos::fb::VisualizerType::NAMED_VALUE, .name = sys::device::GetDeviceListNameForVendor(NSN_VendorName), .hide_value = true});
-		SetPinVisualizer(NSN_ChannelName, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetChannelStringListName()});
-		SetPinVisualizer(NSN_Resolution, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetResolutionStringListName()});
-		SetPinVisualizer(NSN_FrameRate, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetFrameRateStringListName()});
-		SetPinVisualizer(NSN_IsInterlaced, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
+
+		SetPinVisualizer(NSN_ReferenceSource,
+						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetReferenceStringListName()});
+		SetPinVisualizer(NSN_Device,
+						 {.type = nos::fb::VisualizerType::NAMED_VALUE,
+						  .name = sys::device::GetDeviceListNameForVendor(NSN_VendorName),
+						  .hide_value = true});
+		SetPinVisualizer(NSN_ChannelName,
+						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetChannelStringListName()});
+		SetPinVisualizer(NSN_Resolution,
+						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetResolutionStringListName()});
+		SetPinVisualizer(NSN_FrameRate,
+						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetFrameRateStringListName()});
+		SetPinVisualizer(NSN_IsInterlaced,
+						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
 
 		AddPinValueWatcher(NSN_IsOpen, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ShouldOpen = *InterpretPinValue<bool>(newVal);
@@ -92,13 +102,14 @@ struct ChannelNodeContext : NodeContext
 				assert(res == NOS_RESULT_SUCCESS);
 				newDeviceSerial = handle;
 			}
-			
+
 			Device = AJADevice::GetDeviceBySerialNumber(newDeviceSerial).get();
 
 			std::string msg, msgDetails;
 			if (Device && !Device->CheckFirmware(msg, msgDetails))
 			{
-				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg, msgDetails, 0, false);
+				CurrentChannel.SetStatus(
+					aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg, msgDetails, 0, false);
 			}
 
 			if (oldDevice != Device)
@@ -113,12 +124,13 @@ struct ChannelNodeContext : NodeContext
 						DeviceAcquired = false;
 					}
 				}
-				if(Device)
+				if (Device)
 				{
 					Device->RegisterNode(NodeId);
 					RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
 						auto refStr = NTV2ReferenceSourceToString(ref, true);
-						SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
+						SetPinValue(NSN_ReferenceSource,
+									nosBuffer{.Data = (void*)refStr.c_str(), .Size = refStr.size() + 1});
 					});
 					if (!DeviceAcquired && ShouldAcquireDevice)
 					{
@@ -224,33 +236,37 @@ struct ChannelNodeContext : NodeContext
 
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
-			TryUpdateChannel();
-		});
+		AddPinValueWatcher(NSN_FrameBufferFormat,
+						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+							   CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
+							   TryUpdateChannel();
+						   });
 		AddPinValueWatcher(NSN_ReferenceSource, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ReferenceSourcePinValue = InterpretPinValue<const char>(newVal);
 			NTV2ReferenceSource curRef;
 			if (ReferenceSourcePinValue == PIN_VALUE_NONE && Device && Device->GetReference(curRef))
 			{
 				auto refStr = NTV2ReferenceSourceToString(curRef, true);
-				SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
+				SetPinValue(NSN_ReferenceSource, nosBuffer{.Data = (void*)refStr.c_str(), .Size = refStr.size() + 1});
 			}
 			else
 				TryUpdateChannel();
 		});
-		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
-			TryUpdateChannel();
-		});
-		AddPinValueWatcher(NSN_QuadLinkInputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-			InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
-			TryUpdateChannel();
-		});
+		AddPinValueWatcher(NSN_QuadLinkOutputMode,
+						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+							   OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+							   TryUpdateChannel();
+						   });
+		AddPinValueWatcher(NSN_QuadLinkInputMode,
+						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+							   InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+							   TryUpdateChannel();
+						   });
 		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ForceInterlaced = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();
 		});
+		return NOS_RESULT_SUCCESS;
 	}
 
 	~ChannelNodeContext() override

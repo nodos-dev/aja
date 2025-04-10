@@ -15,10 +15,6 @@ static uint64_t AJAStartupTimestamp = 0;
 
 struct WaitVBLNodeContext : NodeContext
 {
-	WaitVBLNodeContext(nosFbNodePtr node) : NodeContext(node)
-	{
-	}
-
 	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
 	{
 		if (isInterlaced)

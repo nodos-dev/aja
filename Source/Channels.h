@@ -16,7 +16,7 @@ namespace nos::aja
 struct Channel
 {
 	uuid ChannelPinId;
-	NodeContext* Context;
+	NodeContext& Context;
 
 	size_t DropCount = 0;
 
@@ -25,7 +25,7 @@ struct Channel
 		SetStatus(StatusType::DropCount, fb::NodeStatusMessageType::WARNING, "Drop Count: " + std::to_string(++DropCount), "", 3, true);
 	}
 	
-	Channel(NodeContext* context) : Context(context) {}
+	Channel(NodeContext& context) : Context(context) {}
 
 	TChannelInfo Info{};
 

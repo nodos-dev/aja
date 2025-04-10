@@ -17,7 +17,7 @@ namespace nos::aja
 
 struct DMAWriteNodeContext : DMANodeBase
 {
-	DMAWriteNodeContext(nosFbNodePtr node) : DMANodeBase(node, DMA_WRITE)
+	DMAWriteNodeContext() : DMANodeBase(DMA_WRITE)
 	{
 	}
 

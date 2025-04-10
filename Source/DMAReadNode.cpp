@@ -16,7 +16,7 @@ namespace nos::aja
 {
 struct DMAReadNodeContext : DMANodeBase
 {
-	DMAReadNodeContext(nosFbNodePtr node) : DMANodeBase(node, DMA_READ)
+	DMAReadNodeContext() : DMANodeBase(DMA_READ)
 	{
 	}
 

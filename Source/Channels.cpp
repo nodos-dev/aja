@@ -139,7 +139,7 @@ void Channel::UpdateStatus()
 		messages.push_back(fb::TNodeStatusMessage{{}, device->GetDisplayName(), fb::NodeStatusMessageType::INFO, "", 5, true, false});
 	for (auto& [type, message] : StatusMessages)
 		messages.push_back(message);
-	Context->SetNodeStatusMessages(messages);
+	Context.SetNodeStatusMessages(messages);
 }
 
 void Channel::SetStatus(StatusType statusType, fb::NodeStatusMessageType msgType, std::string text, std::string details, uint64_t messageTimeout, bool popup)
