@@ -11,7 +11,7 @@ endif()
 
 add_compile_definitions(NOS_DISABLE_DEPRECATED)
 # Nodos SDK
-nos_find_sdk("1.3.0" NOS_PLUGIN_SDK_TARGET NOS_SUBSYSTEM_SDK_TARGET NOS_SDK_DIR)
+nos_find_plugin_sdk("38.0.0" NOS_PLUGIN_SDK_TARGET NOS_SDK_DIR)
 set(FLATC_EXECUTABLE ${NOS_SDK_DIR}/bin/flatc${CMAKE_EXECUTABLE_SUFFIX})
 
 # AJA
@@ -41,22 +41,22 @@ set(CMAKE_DEBUG_POSTFIX "")
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 
 # nos.sys.vulkan
-nos_get_module("nos.sys.vulkan" "6.21" NOS_SYS_VULKAN_TARGET)
+nos_get_module("nos.sys.vulkan" "6.22" NOS_SYS_VULKAN_TARGET)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "2.10" NOS_MEDIAIO_TARGET)
-nos_find_module_path("nos.mediaio" "2.10" NOS_MEDIAIO_PATH)
+nos_get_module("nos.mediaio" "2.11" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "2.11" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
-nos_get_module("nos.utilities" "3.20" NOS_UTILITIES_TARGET)
-nos_find_module_path("nos.utilities" "3.20" NOS_UTILITIES_PATH)
+nos_get_module("nos.utilities" "3.21" NOS_UTILITIES_TARGET)
+nos_find_module_path("nos.utilities" "3.21" NOS_UTILITIES_PATH)
 set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
 nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
 # nos.sys.device
-nos_get_module("nos.sys.device" "0.3" NOS_SYS_DEVICE_TARGET)
+nos_get_module("nos.sys.device" "0.10" NOS_SYS_DEVICE_TARGET)
 
 # AJA Plugin
 # ----------
