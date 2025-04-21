@@ -13,23 +13,23 @@
             },
             {
                 "name": "nos.mediaio",
-                "version": "2.11.0"
+                "version": "2.11"
             },
 			{
 				"name": "nos.utilities",
-				"version": "3.21.0"
+				"version": "3.21"
 			},
 			{
 				"name": "nos.math",
-				"version": "1.21.0"
+				"version": "1.21"
 			},
 			{
 				"name": "nos.reflect",
-				"version": "1.11.0"
+				"version": "1.11"
 			},
             {
                 "name": "nos.sys.device",
-                "version": "0.10.0"
+                "version": "0.10"
             }
         ],
         "category": "Media I/O"
