@@ -32,7 +32,7 @@ enum class AJAChangedPinType
 
 struct ChannelNodeContext : NodeContext
 {
-	uint32_t RefListenerId = 0;
+	std::optional<uint32_t> RefListenerId = 0;
 	size_t DropCount = 0;
 	ChannelNodeContext() : NodeContext(), CurrentChannel(*this) {}
 
@@ -117,7 +117,8 @@ struct ChannelNodeContext : NodeContext
 				if (oldDevice)
 				{
 					oldDevice->UnregisterNode(NodeId);
-					oldDevice->RemoveReferenceSourceListener(RefListenerId);
+					if(RefListenerId)
+						oldDevice->RemoveReferenceSourceListener(*RefListenerId);
 					if (DeviceAcquired)
 					{
 						oldDevice->ReleaseDevice();
@@ -139,7 +140,7 @@ struct ChannelNodeContext : NodeContext
 					}
 				}
 				else
-					RefListenerId = 0;
+					RefListenerId = std::nullopt;
 			}
 			if (DevicePinValue.vendor_name != PIN_VALUE_NONE && !Device)
 				ResetDevicePin();
@@ -275,7 +276,7 @@ struct ChannelNodeContext : NodeContext
 		{
 			Device->UnregisterNode(NodeId);
 			if(RefListenerId)
-				Device->RemoveReferenceSourceListener(RefListenerId);
+				Device->RemoveReferenceSourceListener(*RefListenerId);
 			if (DeviceAcquired)
 				Device->ReleaseDevice();
 		}
