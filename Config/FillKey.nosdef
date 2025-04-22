@@ -3,7 +3,7 @@
       "class_name": "nos.aja.FillKey",
 	  "menu_info": {
         "category": "Device|AJA",
-        "display_name": "AJAout Key+Fill",
+        "display_name": "AJA Out Key+Fill",
         "name_aliases": [
           "video",
           "camera",
@@ -10859,7 +10859,7 @@
           { "key": "PinCategoryPropertyPaneOrder_Key", "value": "1" }
         ],
         "description": "",
-        "display_name": "AJAout Key+Fill",
+        "display_name": "AJA Out Key+Fill",
         "template_parameters": [],
         "plugin_version": { "major": 2, "minor": 4, "patch": 2 }
       }
