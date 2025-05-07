@@ -10855,8 +10855,10 @@
         "function_category": "Default Node",
         "status_messages": [],
         "meta_data_map": [
-          { "key": "PinCategoryPropertyPaneOrder_Common", "value": "2" },
-          { "key": "PinCategoryPropertyPaneOrder_Key", "value": "1" }
+          {
+            "key": "CategoryPropertyPaneOrder",
+            "value": "{\n  \"Common\": 2,\n  \"Fill\": 0,\n  \"Key\": 1\n}"
+          }
         ],
         "description": "",
         "display_name": "AJA Out Key+Fill",
