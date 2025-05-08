@@ -66,7 +66,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		uint32_t curVBLCount = 0;
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
-			auto& pin = params->Pins[i];
+			auto& pin = *params->Pins[i];
 			if (pin.Name == NOS_NAME_STATIC("Input"))
 				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
 			if (pin.Name == NOS_NAME("FieldType"))
