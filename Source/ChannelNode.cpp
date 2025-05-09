@@ -697,6 +697,8 @@ struct ChannelNodeContext : NodeContext
 			}
 			return NTV2_FORMAT_UNKNOWN;
 		}
+		std::vector<NTV2VideoFormat> suitableFormats;
+
 		for (int i = 0; i < NTV2_MAX_NUM_VIDEO_FORMATS; ++i)
 		{
 			NTV2VideoFormat format = NTV2VideoFormat(i);
@@ -704,8 +706,16 @@ struct ChannelNodeContext : NodeContext
 				GetNTV2FrameRateFromVideoFormat(format) == FrameRate &&
 				(InterlacedState != InterlacedState::NONE && IsProgressiveTransport(format) == (InterlacedState == InterlacedState::PROGRESSIVE)) &&
 				Device->CanChannelDoFormat(Channel, IsInput, format, GetEffectiveQuadMode()))
-				return format;
+				suitableFormats.push_back(format);
 		}
+		
+		for (auto fmt : suitableFormats)
+			if (!IsPSF(fmt))
+				return fmt;
+
+		if (!suitableFormats.empty())
+			return suitableFormats.front();
+
 		return NTV2_FORMAT_UNKNOWN;
 	}
 
