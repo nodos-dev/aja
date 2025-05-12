@@ -227,10 +227,10 @@
             "pin_category": "Common",
             "visualizer": {
             },
-            "data": 2,
+            "data": 4,
             "min": 1,
             "max": 120,
-            "def": 2,
+            "def": 4,
             "step": 1.19,
             "meta_data_map": [
               { "key": "AdvancedProperty", "value": "false" },
@@ -486,14 +486,20 @@
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
-            "data": 2,
+            "data": 4,
             "min": 1,
             "max": 120,
-            "def": 2,
+            "def": 4,
             "step": 1.19,
             "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "false" },
-              { "key": "PinDeduplicationGroup", "value": "7" }
+              {
+                "key": "AdvancedProperty",
+                "value": "false"
+              },
+              {
+                "key": "PinDeduplicationGroup",
+                "value": "7"
+              }
             ],
             "contents_type": "PortalPin",
             "contents": { "source_id": "e18c4581-40fb-4d59-8fd9-0f01385ad3af" },
@@ -971,13 +977,16 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 2,
+                  "data": 4,
                   "min": 1,
                   "max": 120,
-                  "def": 2,
+                  "def": 4,
                   "step": 1.19,
                   "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "false" }
+                    {
+                      "key": "AdvancedProperty",
+                      "value": "false"
+                    }
                   ],
                   "contents_type": "PortalPin",
                   "contents": { "source_id": "e18c4581-40fb-4d59-8fd9-0f01385ad3af" },
@@ -1051,10 +1060,10 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 2,
+                        "data": 4,
                         "min": 1,
                         "max": 120,
-                        "def": 2,
+                        "def": 4,
                         "step": 1.19,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
@@ -1246,8 +1255,8 @@
                         "can_show_as": "OUTPUT_PIN_ONLY",
                         "visualizer": {
                         },
-                        "data": 2,
-                        "def": 2,
+                        "data": 4,
+                        "def": 4,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
                         ],
@@ -1262,14 +1271,14 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 2,
+                        "data": 4,
                         "referred_by": [
                           "1d01f17c-de7c-40b9-a32f-acd2ba0c3db7",
                           "b5e99fb7-fccb-42d3-a2df-395d174cec75"
                         ],
                         "min": 1,
                         "max": 120,
-                        "def": 2,
+                        "def": 4,
                         "step": 1.19,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" },
@@ -1686,7 +1695,7 @@
                         "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 24,
+                        "data": 44,
                         "def": 0,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
@@ -5263,13 +5272,16 @@
                   "pin_category": "Common",
                   "visualizer": {
                   },
-                  "data": 2,
+                  "data": 4,
                   "min": 1,
                   "max": 120,
-                  "def": 2,
+                  "def": 4,
                   "step": 1.19,
                   "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "false" }
+                    {
+                      "key": "AdvancedProperty",
+                      "value": "false"
+                    }
                   ],
                   "contents_type": "PortalPin",
                   "contents": { "source_id": "d1083778-f7c7-43d4-b69b-adf51d489217" },
@@ -5415,10 +5427,10 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 2,
+                        "data": 4,
                         "min": 1,
                         "max": 120,
-                        "def": 2,
+                        "def": 4,
                         "step": 1.19,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
@@ -5610,8 +5622,8 @@
                         "can_show_as": "OUTPUT_PIN_ONLY",
                         "visualizer": {
                         },
-                        "data": 2,
-                        "def": 2,
+                        "data": 4,
+                        "def": 4,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
                         ],
@@ -5626,14 +5638,14 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 2,
+                        "data": 4,
                         "referred_by": [
                           "d114e366-00bc-4f05-843c-efbc423e3533",
                           "15e1ffa2-6010-4855-871d-3498f1aa4628"
                         ],
                         "min": 1,
                         "max": 120,
-                        "def": 2,
+                        "def": 4,
                         "step": 1.19,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" },
@@ -6332,7 +6344,7 @@
                         "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": 24,
+                        "data": 44,
                         "def": 0,
                         "meta_data_map": [
                           { "key": "AdvancedProperty", "value": "false" }
