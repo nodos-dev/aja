@@ -282,11 +282,11 @@
             "pin_category": "",
             "visualizer": {
             },
-            "data": 2,
+            "data": 3,
             "referred_by": [],
             "min": 1,
             "max": 120,
-            "def": 2,
+            "def": 3,
             "step": 1.19,
             "meta_data_map": [],
             "contents_type": "PortalPin",
@@ -348,9 +348,9 @@
                   "pin_category": "",
                   "visualizer": {
                   },
-                  "data": 2,
+                  "data": 3,
                   "referred_by": [],
-                  "def": 2,
+                  "def": 3,
                   "meta_data_map": [],
                   "contents_type": "JobPin",
                   "contents": { },
@@ -365,13 +365,13 @@
                   "pin_category": "",
                   "visualizer": {
                   },
-                  "data": 2,
+                  "data": 3,
                   "referred_by": [
                     "094703a1-2ce1-45bf-ac39-7cf200218ffa"
                   ],
                   "min": 1,
                   "max": 120,
-                  "def": 2,
+                  "def": 3,
                   "step": 1.19,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
@@ -424,11 +424,11 @@
                   "pin_category": "",
                   "visualizer": {
                   },
-                  "data": 2,
+                  "data": 3,
                   "referred_by": [],
                   "min": 1,
                   "max": 120,
-                  "def": 2,
+                  "def": 3,
                   "step": 1.19,
                   "meta_data_map": [],
                   "contents_type": "JobPin",
@@ -536,22 +536,22 @@
                   "description": ""
                 },
                 {
-                  "id": "5e06f829-70b1-4e72-aec4-85fa8d57c11c",
-                  "name": "RepeatWhenFilling",
-                  "type_name": "bool",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "pin_category": "",
-                  "visualizer": {
-                  },
-                  "data": false,
-                  "referred_by": [],
-                  "def": false,
-                  "meta_data_map": [],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "description": "Serves the last value while the buffer is being filled instead of waiting",
-                  "display_name": "Repeat When Filling"
+                    "id": "5e06f829-70b1-4e72-aec4-85fa8d57c11c",
+                    "name": "RepeatWhenFilling",
+                    "type_name": "bool",
+                    "show_as": "PROPERTY",
+                    "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                    "pin_category": "",
+                    "visualizer": {
+                    },
+                    "data": true,
+                    "referred_by": [],
+                    "def": true,
+                    "meta_data_map": [],
+                    "contents_type": "JobPin",
+                    "contents": {},
+                    "description": "Serves the last value while the buffer is being filled instead of waiting",
+                    "display_name": "Repeat When Filling"
                 }
               ],
               "pos": { "x": 529.0, "y": 671.0 },
@@ -571,6 +571,7 @@
               "id": "8fd0d22b-132a-416c-9a4a-afa9395043fe",
               "name": "RGB2YCbCr",
               "class_name": "nos.mediaio.RGB2YCbCr",
+              "always_execute": true,
               "pins": [
                 {
                   "id": "eb64c8d3-52d0-469d-9ad6-8d3855aba6d0",
