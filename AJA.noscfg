@@ -30,6 +30,10 @@
             {
                 "name": "nos.sys.device",
                 "version": "0.2.0"
+            },
+            {
+                "name": "nos.sync",
+                "version": "0.1.0"
             }
         ],
         "category": "Media I/O"
@@ -44,5 +48,5 @@
       "Config/AJA.fbs"
     ],
     "binary_path": "Binaries/nosAJA",
-    "third_party_software": ["./Config/Licenses.json"]
+    "third_party_software": ["Config/Licenses.json"]
 }

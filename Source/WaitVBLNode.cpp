@@ -6,15 +6,39 @@
 #include "AJADevice.h"
 #include "AJAMain.h"
 
+#include <nosSync/nosSync.h>
+
 namespace nos::aja
 {
 
 NOS_REGISTER_NAME(VBLFailed)
 
+nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs);
+
 struct WaitVBLNodeContext : NodeContext
 {
 	WaitVBLNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
+	}
+
+	nosResult WaitVBL(uint64_t* outVblTimestampNs)
+	{
+		if (auto device = GetDevice())
+		{
+			auto channel = GetChannel();
+			WaitVBL(device.get(),
+				channel,
+				ChannelInfo.is_input,
+				ChannelInfo.is_interlaced,
+				VBLState.InterlacedWaitField);
+			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+		}
+		else
+		{
+			nosEngine.LogE("Tried to wait when channel not configured!");
+			nosEngine.SendPathRestart(NodeId);
+		}
+		return NOS_RESULT_SUCCESS;
 	}
 
 	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
@@ -172,26 +196,29 @@ struct WaitVBLNodeContext : NodeContext
 #endif
 	} VBLState;
 
-	void OnPathStart() override
+	void OnPathStartInitiated() override
 	{
 		VBLState = {};
+		// TODO: Pass path ID.
+		nosSync->RegisterEventWaiter(0, this, WaitVBLEvent, &WaitId);
+	}
 
+	void OnPathStart() override
+	{
+		nosSync->WaitForConsensus(0, 1000000);
 		if (auto device = GetDevice())
 		{
 			auto channel = GetChannel();
-			WaitVBL(device.get(),
-					channel,
-					ChannelInfo.is_input,
-					ChannelInfo.is_interlaced,
-					sys::vulkan::FieldType::PROGRESSIVE);
 			VBLState.LastVBLCount = GetVBLCount(*device, channel);
 #if NOS_AJA_DIAGNOSTICS
-			if (ChannelInfo.is_input)
-				VBLState.FirstVBLTimestamp = device->GetLastInputVerticalInterruptTimestamp(channel);
-			else
-				VBLState.FirstVBLTimestamp = device->GetLastOutputVerticalInterruptTimestamp(channel);
+			VBLState.FirstVBLTimestamp = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
 #endif
 		}
+	}
+
+	void OnPathStop() override
+	{
+		nosSync->UnregisterEventWaiter(WaitId);
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
@@ -219,7 +246,13 @@ struct WaitVBLNodeContext : NodeContext
 	}
 
 	TChannelInfo ChannelInfo{};
+	uint64_t WaitId = 0;
 };
+
+nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs)
+{
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->WaitVBL(outVblTimestampNs);
+}
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
 {

@@ -477,6 +477,7 @@ uint64_t AJADevice::GetLastInputVerticalInterruptTimestamp(NTV2Channel channel)
 	ReadRegister(VirtualRegisterNum(loRegisterNum+1), nanosecondsHi);
     return ((uint64_t(nanosecondsHi) << 32) | nanosecondsLo)*100;
 }
+
 uint64_t AJADevice::GetLastOutputVerticalInterruptTimestamp(NTV2Channel channel)
 {
 	VirtualRegisterNum loRegisterNum = kVRegTimeStampLastOutputVerticalLo;
@@ -501,6 +502,13 @@ uint64_t AJADevice::GetLastOutputVerticalInterruptTimestamp(NTV2Channel channel)
 	ReadRegister(loRegisterNum, nanosecondsLo);
 	ReadRegister(VirtualRegisterNum(loRegisterNum + 1), nanosecondsHi);
 	return ((uint64_t(nanosecondsHi) << 32) | nanosecondsLo) * 100;
+}
+
+uint64_t AJADevice::GetLastVBLTimestamp(NTV2Channel channel, bool isInput)
+{
+    if (isInput)
+        return GetLastInputVerticalInterruptTimestamp(channel);
+    return GetLastOutputVerticalInterruptTimestamp(channel);
 }
 
 static bool GetTSIMUXPins(NTV2Channel channel, NTV2InputCrosspointID& in, NTV2OutputCrosspointID& out)

@@ -58,6 +58,9 @@ nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERAT
 # nos.sys.device
 nos_get_module("nos.sys.device" "0.3" NOS_SYS_DEVICE_TARGET)
 
+# nos.sync
+nos_get_module("nos.sync" "0.1" NOS_SYNC_TARGET)
+
 # AJA Plugin
 # ----------
 set(GENERATED_DIR "${SOURCE_DIR}/__generated__")
@@ -67,6 +70,7 @@ nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${GENERATED_DIR}"
 list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2
     ${NOS_SYS_VULKAN_TARGET}
     ${NOS_SYS_DEVICE_TARGET}
+    ${NOS_SYNC_TARGET}
     ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
