@@ -34,7 +34,8 @@ struct WaitVBLNodeContext : NodeContext
 				ChannelInfo.is_input,
 				ChannelInfo.is_interlaced,
 				VBLState.InterlacedWaitField);
-			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			*outVblTimestampNs = device ->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			PendingPathRestart = false;
 			return NOS_RESULT_SUCCESS;
 		}
 		else
@@ -207,6 +208,7 @@ struct WaitVBLNodeContext : NodeContext
 	void OnPathStartInitiated() override
 	{
 		VBLState = {};
+		PendingPathRestart = false;
 		// TODO: Pass path ID.
 		nosSync->RegisterEvent(0, this, WaitVBLEvent, &WaitId);
 	}
@@ -255,7 +257,7 @@ struct WaitVBLNodeContext : NodeContext
 
 	TChannelInfo ChannelInfo{};
 	uint64_t WaitId = 0;
-	bool PendingPathRestart = false;
+	bool PendingPathRestart;
 };
 
 nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs)
