@@ -19,6 +19,9 @@ struct WaitVBLNodeContext : NodeContext
 {
 	WaitVBLNodeContext(nosFbNodePtr node) : NodeContext(node)
 	{
+		AddPinValueWatcher(NOS_NAME("Channel"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldValue) {
+			newVal.As<aja::ChannelInfo>()->UnPackTo(&ChannelInfo);
+		});
 	}
 
 	nosResult WaitVBL(uint64_t* outVblTimestampNs)
@@ -32,13 +35,14 @@ struct WaitVBLNodeContext : NodeContext
 				ChannelInfo.is_interlaced,
 				VBLState.InterlacedWaitField);
 			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			return NOS_RESULT_SUCCESS;
 		}
 		else
 		{
-			nosEngine.LogE("Tried to wait when channel not configured!");
-			nosEngine.SendPathRestart(NodeId);
+			// Tried to wait when channel not configured. Set pending path restart.
+			PendingPathRestart = true;
+			return NOS_RESULT_FAILED;
 		}
-		return NOS_RESULT_SUCCESS;
 	}
 
 	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
@@ -83,8 +87,12 @@ struct WaitVBLNodeContext : NodeContext
 
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
+		if (PendingPathRestart)
+		{
+			PendingPathRestart = false;
+			nosEngine.SendPathRestart(NodeId);
+		}
 		NodeExecuteParams params = execParams;
-		InterpretPinValue<aja::ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data)->UnPackTo(&ChannelInfo);
 		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
 		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
@@ -200,7 +208,7 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		VBLState = {};
 		// TODO: Pass path ID.
-		nosSync->RegisterEventWaiter(0, this, WaitVBLEvent, &WaitId);
+		nosSync->RegisterEvent(0, this, WaitVBLEvent, &WaitId);
 	}
 
 	void OnPathStart() override
@@ -218,7 +226,7 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnPathStop() override
 	{
-		nosSync->UnregisterEventWaiter(WaitId);
+		nosSync->UnregisterEvent(WaitId);
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
@@ -247,6 +255,7 @@ struct WaitVBLNodeContext : NodeContext
 
 	TChannelInfo ChannelInfo{};
 	uint64_t WaitId = 0;
+	bool PendingPathRestart = false;
 };
 
 nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs)
