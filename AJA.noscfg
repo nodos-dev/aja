@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.aja",
-            "version": "2.6.6"
+            "version": "2.6.8"
         },
         "display_name": "AJA",
         "description": "Video I/O plugin for AJA cards.",
