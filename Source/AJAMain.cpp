@@ -6,14 +6,17 @@
 #include <Nodos/PluginAPI.h>
 
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+#include <nosSync/nosSync.h>
 
 NOS_INIT()
 NOS_VULKAN_INIT()
 NOS_DEVICE_SUBSYSTEM_INIT()
+NOS_SYNC_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 	NOS_DEVICE_SUBSYSTEM_IMPORT()
+	NOS_SYNC_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 
@@ -37,6 +40,16 @@ nosResult RegisterChannelNode(nosNodeFunctions*);
 
 struct AJAPluginFunctions : nos::PluginFunctions
 {
+	nosResult Initialize() override
+	{
+		nosRegisterEventGroupParams params{
+			.Id = 1,
+			.Timeout = 10, // Allow 10 frames for sync
+			.Tolerance = 0.01f, // Allow 0.01 of a frame time for tolerance
+		};
+		nosSync->RegisterEventGroup(&params);
+		return NOS_RESULT_SUCCESS;
+	}
 	nosResult ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outList) override
 	{
 		outSize = static_cast<size_t>(Nodes::Count);
@@ -99,6 +112,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	nosResult OnPreUnloadPlugin() override
 	{
 		AJADevice::Deinit();
+		nosSync->UnregisterEventGroup(1);
 		return NOS_RESULT_SUCCESS;
 	}
 
