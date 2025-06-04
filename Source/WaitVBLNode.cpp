@@ -6,15 +6,47 @@
 #include "AJADevice.h"
 #include "AJAMain.h"
 
+#include <nosSync/nosSync.h>
+#include <nosMediaIO/nosMediaIO.h>
+
 namespace nos::aja
 {
 
 NOS_REGISTER_NAME(VBLFailed)
 
-static uint64_t AJAStartupTimestamp = 0;
-
+nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs, uint64_t* outVblCount);
+std::atomic_uint32_t WaitCount = 0;
 struct WaitVBLNodeContext : NodeContext
 {
+	WaitVBLNodeContext() : NodeContext()
+	{
+		AddPinValueWatcher(NOS_NAME("Channel"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldValue) {
+			newVal.As<aja::ChannelInfo>()->UnPackTo(&ChannelInfo);
+		});
+	}
+
+	nosResult WaitVBL(uint64_t* outVblTimestampNs, uint64_t* outVblCount)
+	{
+		if (auto device = GetDevice())
+		{
+			auto channel = GetChannel();
+			WaitVBL(device.get(),
+				channel,
+				ChannelInfo.is_input,
+				ChannelInfo.is_interlaced,
+				VBLState.InterlacedWaitField);
+			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			*outVblCount = GetVBLCount(*device, channel);
+			return NOS_RESULT_SUCCESS;
+		}
+		else
+		{
+			// Tried to wait when channel not configured. Set pending path restart.
+			PendingPathRestart = true;
+			return NOS_RESULT_FAILED;
+		}
+	}
+
 	bool WaitVBL(AJADevice* device, NTV2Channel channel, bool isInput, bool isInterlaced, sys::vulkan::FieldType waitField)
 	{
 		if (isInterlaced)
@@ -58,7 +90,6 @@ struct WaitVBLNodeContext : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		NodeExecuteParams params = execParams;
-		InterpretPinValue<aja::ChannelInfo>(params[NOS_NAME_STATIC("Channel")].Data->Data)->UnPackTo(&ChannelInfo);
 		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
 		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
 		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
@@ -70,7 +101,12 @@ struct WaitVBLNodeContext : NodeContext
 		if (channelStr.empty())
 			return NOS_RESULT_FAILED;
 		auto channel = ParseChannel(ChannelInfo.channel_name);
-
+		if (PendingPathRestart)
+		{
+			nosEngine.SendPathRestart(outId);
+			PendingPathRestart = false;
+			return NOS_RESULT_FAILED;
+		}
 		auto videoFormat = static_cast<NTV2VideoFormat>(ChannelInfo.video_format_idx);
 		bool isInterlaced = !IsProgressivePicture(videoFormat);
 		bool vblSuccess = false;
@@ -87,19 +123,24 @@ struct WaitVBLNodeContext : NodeContext
 			{
 				timepoint = device->GetLastOutputVerticalInterruptTimestamp(channel);
 			}
+			if (!VBLState.SysClockTimeDiff)
+				VBLState.SysClockTimeDiff = std::chrono::duration_cast<std::chrono::nanoseconds>(
+							   std::chrono::system_clock::now().time_since_epoch())
+							   .count() -
+						   timepoint;
 			std::chrono::system_clock::duration time = std::chrono::duration_cast<std::chrono::system_clock::duration>(
-				std::chrono::nanoseconds(timepoint + AJAStartupTimestamp));
+				std::chrono::nanoseconds(timepoint));
 			std::chrono::system_clock::duration startTime =
 				std::chrono::duration_cast<std::chrono::system_clock::duration>(
-					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp + AJAStartupTimestamp));
+					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp));
 
-			nosEngine.LogI("%s: %s VBL %lld at %s (Start: %s)",
-						   ChannelInfo.is_input ? "In " : "Out",
-						   channelStr.c_str(),
-						   VBLState.FrameCountSincePathStart,
-						   std::format("{:%H:%M:%S}", time).c_str(),
-						   std::format("{:%H:%M:%S}", startTime).c_str());
-		VBLState.FrameCountSincePathStart++;
+			//nosEngine.LogI("%s: %s VBL %lld at %s (Start: %s)",
+			//			   ChannelInfo.is_input ? "In " : "Out",
+			//			   channelStr.c_str(),
+			//			   VBLState.FrameCountSincePathStart,
+			//			   std::format("{:%H:%M:%S}", time).c_str(),
+			//			   std::format("{:%H:%M:%S}", startTime).c_str());
+			VBLState.FrameCountSincePathStart++;
 #endif
 		}
 		nosEngine.SetPinValue(outFieldPinId, nos::Buffer::From(isInterlaced ? VBLState.InterlacedWaitField : sys::vulkan::FieldType::PROGRESSIVE));
@@ -161,44 +202,70 @@ struct WaitVBLNodeContext : NodeContext
 #if NOS_AJA_DIAGNOSTICS
 		uint64_t FrameCountSincePathStart = 0;
 		uint64_t FirstVBLTimestamp = 0;
+		uint64_t SysClockTimeDiff = 0;
 #endif
 	} VBLState;
 
-	void OnPathStart() override
+	void OnPathStartInitiated() override
 	{
 		VBLState = {};
-
+		// TODO: Pass path ID.
+		nosUUID outNodeId{};
+		nosVec2u outDeltaSecs{};
+		nosEngine.GetCurrentRunnerPathInfo(&outNodeId, &outDeltaSecs);
+		if (outDeltaSecs.x == 0 || outDeltaSecs.y == 0)
+		{
+			PendingPathRestart = true;
+			return;
+		}
+		nosRegisterEventParams params{
+			.EventGroupId = NOS_MEDIAIO_VIDEO_SYNC_EVENT_GROUP,
+			.DeltaSeconds = outDeltaSecs,
+			.UserData = this,
+			.WaitFn = WaitVBLEvent,
+			.OutEventId = &WaitId,
+		};
+		nosSync->RegisterEvent(&params);
+	}
+	void OnPathStart() override
+	{
+		uint64_t vblTimestampNs = 0, vblCount = 0;
+		auto res = nosSync->WaitForConsensus(WaitId, &vblTimestampNs, &vblCount);
+		if (res != NOS_RESULT_SUCCESS)
+		{
+			PendingPathRestart = true;
+			return;
+		}
 		if (auto device = GetDevice())
 		{
 			auto channel = GetChannel();
-			WaitVBL(device.get(),
-					channel,
-					ChannelInfo.is_input,
-					ChannelInfo.is_interlaced,
-					sys::vulkan::FieldType::PROGRESSIVE);
 			VBLState.LastVBLCount = GetVBLCount(*device, channel);
-#if NOS_AJA_DIAGNOSTICS
-			if (!AJAStartupTimestamp)
+			if (vblCount != VBLState.LastVBLCount)
 			{
-				// Makes sure that wait actually waits
-				WaitVBL(device.get(),
-						channel,
-						ChannelInfo.is_input,
-						ChannelInfo.is_interlaced,
-						sys::vulkan::FieldType::PROGRESSIVE);
+				nosEngine.LogW("%s: %s VBL count mismatch: expected %lld, got %lld",
+					ChannelInfo.is_input ? "In" : "Out",
+					ChannelInfo.channel_name.c_str(),
+					VBLState.LastVBLCount,
+					vblCount);
+				FrameDropped(static_cast<uint32_t>(VBLState.LastVBLCount - vblCount), true);
 			}
-			auto time = std::chrono::system_clock::now();
-			if (ChannelInfo.is_input)
-				VBLState.FirstVBLTimestamp = device->GetLastInputVerticalInterruptTimestamp(channel);
-			else
-				VBLState.FirstVBLTimestamp = device->GetLastOutputVerticalInterruptTimestamp(channel);
-			if (!AJAStartupTimestamp)
-				AJAStartupTimestamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
-										  time.time_since_epoch())
-										  .count() -
-									  VBLState.FirstVBLTimestamp;
+#if NOS_AJA_DIAGNOSTICS
+			VBLState.FirstVBLTimestamp = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			std::chrono::system_clock::duration startTime =
+				std::chrono::duration_cast<std::chrono::system_clock::duration>(
+					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp));
+			nosEngine.LogI("%s: %s VBL %lld started at %s",
+				ChannelInfo.is_input ? "In " : "Out",
+				ChannelInfo.channel_name.c_str(),
+				VBLState.FrameCountSincePathStart,
+				std::format("{:%H:%M:%S}", startTime).c_str());
 #endif
 		}
+	}
+
+	void OnPathStop() override
+	{
+		nosSync->UnregisterEvent(WaitId);
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
@@ -226,7 +293,14 @@ struct WaitVBLNodeContext : NodeContext
 	}
 
 	TChannelInfo ChannelInfo{};
+	uint64_t WaitId = 0;
+	bool PendingPathRestart = false;
 };
+
+nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs, uint64_t* outVblCount)
+{
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->WaitVBL(outVblTimestampNs, outVblCount);
+}
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
 {

@@ -11,7 +11,7 @@
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 
-#define NOS_AJA_DIAGNOSTICS 0
+#define NOS_AJA_DIAGNOSTICS 1
 
 extern nosVulkanSubsystem* nosVulkan;
 

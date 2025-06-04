@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.aja",
-            "version": "2.11.3"
+            "version": "2.11.4"
         },
         "display_name": "AJA",
         "description": "Video I/O plugin for AJA cards.",
@@ -13,7 +13,7 @@
             },
             {
                 "name": "nos.mediaio",
-                "version": "2.11"
+                "version": "2.13"
             },
 			{
 				"name": "nos.utilities",
@@ -27,10 +27,14 @@
 				"name": "nos.reflect",
 				"version": "1.11"
 			},
-            {
-                "name": "nos.sys.device",
-                "version": "0.10"
-            }
+          {
+            "name": "nos.sys.device",
+            "version": "0.10"
+          },
+          {
+            "name": "nos.sync",
+            "version": "2.0"
+          }
         ],
         "category": "Media I/O"
     },
