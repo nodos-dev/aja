@@ -228,16 +228,16 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 
 AJADevice::~AJADevice()
 {
-	DeviceLock lock(this);
-    nosDevice->UnregisterDevice(GlobalDeviceId);
-    ClearState();
+    {
+        DeviceLock lock(this);
+        nosDevice->UnregisterDevice(GlobalDeviceId);
+        ClearState();
+    }
     Close();
 }
 
 AJADevice::AJADevice(uint64_t serial)
 {
-	DeviceLock lock(this);
-
     AJAStatus	status	(AJA_STATUS_SUCCESS);
 
     //	Open the device...
@@ -260,11 +260,16 @@ AJADevice::AJADevice(uint64_t serial)
         nosEngine.LogE("## ERROR:  Device '%ull' cannot capture", serial);
         return;
     }
-    AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
-    AJA_ASSERT(SetMultiFormatMode(true));
-    AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
 
-    ClearState();
+    {
+        DeviceLock lock(this);
+
+        AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
+        AJA_ASSERT(SetMultiFormatMode(true));
+        AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
+
+        ClearState();
+    }
 
     // Register to device subsys
     nosRegisterDeviceParams params {
@@ -970,51 +975,72 @@ bool AJADevice::CheckFirmware(std::string& msg, std::string& msgDetails)
     return false;
 }
 
+#define NOS_FOURCC NTV2_FOURCC('N', 'O', 'S', '.')
+
+std::string FourCCToString(ULWord& curAppFourCC)
+{
+    char fourCCBuf[5];
+#if defined(AJA_LITTLE_ENDIAN)
+    fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[3];
+    fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[2];
+    fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[1];
+    fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[0];
+#else
+    fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[0];
+    fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[1];
+    fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[2];
+    fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[3];
+#endif
+    fourCCBuf[4] = '\0';
+    return fourCCBuf;
+}
+
 bool AJADevice::AcquireDevice()
 {
-    bool acquired = AcquireStreamForApplicationWithReference(NTV2_FOURCC('N', 'O', 'S', '.'), static_cast<int32_t>(AJAProcess::GetPid()));
-    
-    if (!acquired)
+    int32_t nosPid = static_cast<int32_t>(AJAProcess::GetPid());
+
+    ULWord   curAppFourCC(AJA_FOURCC('?', '?', '?', '?'));
+    int32_t curPid{};
+    if (GetStreamingApplication(curAppFourCC, curPid))
     {
-        ULWord   curAppFourCC(AJA_FOURCC('?', '?', '?', '?'));
-        int32_t outPid;
-        
-        if (!GetStreamingApplication(curAppFourCC, outPid))
-        {
-            nosEngine.LogE("Cannot acquire streaming application for device %s", GetDisplayName().c_str());
-            return false;
-        }
-        char fourCCBuf[5];
-#if defined(AJA_LITTLE_ENDIAN)
-        fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[3];
-        fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[2];
-        fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[1];
-        fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[0];
-#else
-        fourCCBuf[0] = reinterpret_cast<const char*>(&curAppFourCC)[0];
-        fourCCBuf[1] = reinterpret_cast<const char*>(&curAppFourCC)[1];
-        fourCCBuf[2] = reinterpret_cast<const char*>(&curAppFourCC)[2];
-        fourCCBuf[3] = reinterpret_cast<const char*>(&curAppFourCC)[3];
-#endif
-        fourCCBuf[4] = '\0';
-        nosEngine.LogE("Device %s is already acquired by application %s (PID %d)", GetDisplayName().c_str(), fourCCBuf, outPid);
-        return false;
+        if (curPid == nosPid)
+            return true;
+		auto curApp = FourCCToString(curAppFourCC);
+        if (curPid != 0)
+		    nosEngine.LogW("Device %s is already acquired by application %s (PID %d). Trying to reclaim it.", GetDisplayName().c_str(), curApp.c_str(), curPid);
     }
-    auto count = AcquiredCount.fetch_add(1);
-    nosEngine.LogD("Device %s acquired by Nodos. Reference count: %d", GetDisplayName().c_str(), count + 1);
+
+    if (!AcquireStreamForApplication(NOS_FOURCC, nosPid))
+    {
+		nosEngine.LogE("Failed to acquire device %s for Nodos.", GetDisplayName().c_str());
+		return false;
+    }
+    nosEngine.LogD("Device %s acquired by Nodos.", GetDisplayName().c_str());
     return true;
 }
 
+
 void AJADevice::ReleaseDevice()
 {
-    auto count = AcquiredCount.load();
-    assert(count > 0);
-    if (count == 0)
+    ULWord   curAppFourCC(AJA_FOURCC('?', '?', '?', '?'));
+    int32_t curPid;
+
+    if (!GetStreamingApplication(curAppFourCC, curPid))
     {
-        nosEngine.LogW("Device %s is already released by Nodos", GetDisplayName().c_str());
+        nosEngine.LogE("Cannot acquire streaming application for device %s", GetDisplayName().c_str());
         return;
     }
-	ReleaseStreamForApplicationWithReference(NTV2_FOURCC('N', 'O', 'S', '.'), static_cast<int32_t>(AJAProcess::GetPid()));
-	--AcquiredCount;
-    nosEngine.LogD("Device %s released by Nodos. Reference count: %d", GetDisplayName().c_str(), AcquiredCount.load());
+
+	auto nosPid = static_cast<int32_t>(AJAProcess::GetPid());
+    if (nosPid != curPid)
+    {
+        auto curApp = FourCCToString(curAppFourCC);
+		nosEngine.LogD("Device %s is acquired by another application (%s, PID %d).", GetDisplayName().c_str(), curApp.c_str(), curPid);
+		return;
+    }
+
+    if (ReleaseStreamForApplication(NOS_FOURCC, nosPid))
+        nosEngine.LogD("Device %s released by Nodos", GetDisplayName().c_str());
+    else
+        nosEngine.LogE("Failed to release device %s", GetDisplayName().c_str());
 }
