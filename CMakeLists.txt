@@ -59,7 +59,7 @@ nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERAT
 nos_get_module("nos.sys.device" "0.3" NOS_SYS_DEVICE_TARGET)
 
 # nos.sync
-nos_get_module("nos.sync" "1.0" NOS_SYNC_TARGET)
+nos_get_module("nos.sync" "2.0" NOS_SYNC_TARGET)
 
 # AJA Plugin
 # ----------
