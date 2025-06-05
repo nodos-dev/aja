@@ -255,8 +255,7 @@ struct WaitVBLNodeContext : NodeContext
 					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp));
 
 			std::chrono::system_clock::duration realStartTime =
-				std::chrono::duration_cast<std::chrono::system_clock::duration>(
-					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp));
+				std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(realStartVBL));
 			nosEngine.LogI("%s: %s VBL %lld started at %s (real %s)",
 				ChannelInfo.is_input ? "In " : "Out",
 				ChannelInfo.channel_name.c_str(),
