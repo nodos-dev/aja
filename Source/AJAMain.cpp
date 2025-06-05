@@ -44,7 +44,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	{
 		nosRegisterEventGroupParams params{
 			.Id = 1,
-			.Timeout = 10, // Allow 10 frames for sync
+			.Timeout = 10.0, // Allow 10 frames for sync
 			.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
 		};
 		nosSync->RegisterEventGroup(&params);
