@@ -76,6 +76,13 @@ struct WaitVBLNodeContext : NodeContext
 		return ParseChannel(ChannelInfo.channel_name);
 	}
 
+	NTV2VideoFormat GetVideoFormat() const
+	{
+		if (ChannelInfo.video_format_idx < 0 || ChannelInfo.video_format_idx >= NTV2_MAX_NUM_VIDEO_FORMATS)
+			return NTV2_FORMAT_UNKNOWN;
+		return static_cast<NTV2VideoFormat>(ChannelInfo.video_format_idx);
+	}
+
 	ULWord GetVBLCount(AJADevice& device, NTV2Channel channel)
 	{
 		ULWord curVBLCount = 0;
@@ -208,38 +215,39 @@ struct WaitVBLNodeContext : NodeContext
 	void OnPathStartInitiated() override
 	{
 		VBLState = {};
-		// TODO: Pass path ID.
-		nosUUID outNodeId{};
-		nosVec2u outDeltaSecs{};
-		nosEngine.GetCurrentRunnerPathInfo(&outNodeId, &outDeltaSecs);
-		if (outDeltaSecs.x == 0 || outDeltaSecs.y == 0)
+		if (auto device = GetDevice())
 		{
-			PendingPathRestart = true;
-			return;
+			auto fmt = GetVideoFormat();
+			if (fmt == NTV2_FORMAT_UNKNOWN)
+				return;
+			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
+			nosRegisterEventParams params{
+				.EventGroupId = 1,
+				.DeltaSeconds = deltaSecs,
+				.UserData = this,
+				.WaitFn = WaitVBLEvent,
+				.OutEventId = &WaitId,
+			};
+			nosSync->RegisterEvent(&params);
 		}
-		nosRegisterEventParams params{
-			.EventGroupId = 1,
-			.DeltaSeconds = outDeltaSecs,
-			.UserData = this,
-			.WaitFn = WaitVBLEvent,
-			.OutEventId = &WaitId,
-		};
-		nosSync->RegisterEvent(&params);
 	}
 	void OnPathStart() override
 	{
-		uint64_t vblTimestampNs = 0, vblCount = 0;
-		auto res = nosSync->WaitForConsensus(WaitId, &vblTimestampNs, &vblCount);
-		if (res != NOS_RESULT_SUCCESS)
-		{
-			PendingPathRestart = true;
-			return;
-		}
 		if (auto device = GetDevice())
 		{
+			uint64_t vblTimestampNs = 0, vblCount = 0;
+			if (WaitId)
+			{
+				auto res = nosSync->WaitForConsensus(WaitId, &vblTimestampNs, &vblCount);
+				if (res != NOS_RESULT_SUCCESS)
+				{
+					PendingPathRestart = true;
+					return;
+				}
+			}
 			auto channel = GetChannel();
 			VBLState.LastVBLCount = GetVBLCount(*device, channel);
-			if (vblCount != VBLState.LastVBLCount)
+			if (WaitId && vblCount != VBLState.LastVBLCount)
 			{
 				nosEngine.LogW("%s: %s VBL count mismatch: expected %lld, got %lld",
 					ChannelInfo.is_input ? "In" : "Out",
@@ -265,6 +273,7 @@ struct WaitVBLNodeContext : NodeContext
 	void OnPathStop() override
 	{
 		nosSync->UnregisterEvent(WaitId);
+		WaitId = 0;
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
