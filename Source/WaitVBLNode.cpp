@@ -240,26 +240,22 @@ struct WaitVBLNodeContext : NodeContext
 				}
 			}
 			auto channel = GetChannel();
-			VBLState.LastVBLCount = GetVBLCount(*device, channel);
-			if (WaitId && vblCount != VBLState.LastVBLCount)
-			{
-				nosEngine.LogW("%s: %s VBL count mismatch: expected %lld, got %lld",
-					ChannelInfo.is_input ? "In" : "Out",
-					ChannelInfo.channel_name.c_str(),
-					VBLState.LastVBLCount,
-					vblCount);
-				FrameDropped(static_cast<uint32_t>(VBLState.LastVBLCount - vblCount), true);
-			}
+			VBLState.LastVBLCount = vblCount;
 #if NOS_AJA_DIAGNOSTICS
-			VBLState.FirstVBLTimestamp = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
+			VBLState.FirstVBLTimestamp = vblTimestampNs;
+			auto realStartVBL = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
 			std::chrono::system_clock::duration startTime =
 				std::chrono::duration_cast<std::chrono::system_clock::duration>(
 					std::chrono::nanoseconds(VBLState.FirstVBLTimestamp));
-			nosEngine.LogI("%s: %s VBL %lld started at %s",
+
+			std::chrono::system_clock::duration realStartTime =
+				std::chrono::duration_cast<std::chrono::system_clock::duration>(std::chrono::nanoseconds(realStartVBL));
+			nosEngine.LogI("%s: %s VBL %lld started at %s (real %s)",
 				ChannelInfo.is_input ? "In " : "Out",
 				ChannelInfo.channel_name.c_str(),
 				VBLState.FrameCountSincePathStart,
-				std::format("{:%H:%M:%S}", startTime).c_str());
+						   std::format("{:%H:%M:%S}", startTime).c_str(),
+						   std::format("{:%H:%M:%S}", realStartTime).c_str());
 #endif
 		}
 	}
