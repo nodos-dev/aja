@@ -187,7 +187,6 @@ private:
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
-    std::atomic_uint AcquiredCount = 0;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)
