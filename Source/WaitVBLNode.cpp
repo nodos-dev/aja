@@ -33,7 +33,7 @@ struct WaitVBLNodeContext : NodeContext
 				channel,
 				ChannelInfo.is_input,
 				ChannelInfo.is_interlaced,
-				VBLState.InterlacedWaitField);
+				sys::vulkan::FieldType::ODD); // GetLastVBLTimestamp only updated on odd field for interlaced.
 			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
 			*outVblCount = GetVBLCount(*device, channel);
 			return NOS_RESULT_SUCCESS;
