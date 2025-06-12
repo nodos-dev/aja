@@ -92,7 +92,7 @@ struct ChannelNodeContext : NodeContext
 			}
 			auto oldDevice = Device;
 
-			nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfo(DevicePinValue);
+			nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfoWithoutProperties(DevicePinValue);
 			nosDeviceId deviceId{};
 			uint64_t newDeviceSerial = -1;
 			auto res = nosDevice->GetSuitableDevice(&deviceInfoFromPin, &deviceId);
@@ -110,13 +110,6 @@ struct ChannelNodeContext : NodeContext
 			}
 
 			Device = AJADevice::GetDeviceBySerialNumber(newDeviceSerial).get();
-
-			std::string msg, msgDetails;
-			if (Device && !Device->CheckFirmware(msg, msgDetails))
-			{
-				CurrentChannel.SetStatus(
-					aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg, msgDetails, 0, false);
-			}
 
 			if (oldDevice != Device)
 			{

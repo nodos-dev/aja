@@ -228,11 +228,9 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 
 AJADevice::~AJADevice()
 {
-    {
-        DeviceLock lock(this);
-        nosDevice->UnregisterDevice(GlobalDeviceId);
-        ClearState();
-    }
+	DeviceLock lock(this);
+    nosDevice->UnregisterDevice(GlobalDeviceId);
+    ClearState();
     Close();
 }
 
@@ -260,25 +258,25 @@ AJADevice::AJADevice(uint64_t serial)
         nosEngine.LogE("## ERROR:  Device '%ull' cannot capture", serial);
         return;
     }
+    AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
+    AJA_ASSERT(SetMultiFormatMode(true));
+    AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
 
-    {
-        DeviceLock lock(this);
-
-        AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
-        AJA_ASSERT(SetMultiFormatMode(true));
-        AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
-
-        ClearState();
-    }
-
+    ClearState();
+    std::string firmwareMsg, firmwareMsgDetails;
+    CheckFirmware(firmwareMsg, firmwareMsgDetails);
+	std::string driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
+    nosDeviceProperty driverProp = {.Name = nos::Name("Firmware Info"), .Value = driverPropMessage.c_str()};
     // Register to device subsys
-    nosRegisterDeviceParams params {
+    nosRegisterDeviceParams params{
         .Device = {
             .VendorName = NSN_VendorName,
             .ModelName = nos::Name(GetModelName()),
             .TopologicalId = GetIndexNumber(),
             .SerialNumber = nos::Name(std::to_string(serial)),
             .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO),
+        .Properties = &driverProp,
+        .PropertyCount = 1
         },
         .DisplayName = nos::Name(GetModelName()),
         .Handle = serial
