@@ -888,30 +888,9 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
     }
 }
 
-uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener)
-{
-    std::unique_lock lock(ReferenceListeners.Mutex);
-    auto id = ReferenceListeners.NextID++;
-    ReferenceListeners.Map[id] = std::move(listener);
-    return id;
-}
-
-void AJADevice::RemoveReferenceSourceListener(uint32_t id)
-{
-    std::unique_lock lock(ReferenceListeners.Mutex);
-    ReferenceListeners.Map.erase(id);
-}
-
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
-    auto ret = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
-    if (ret)
-    {
-        std::unique_lock lock(ReferenceListeners.Mutex);
-        for (auto& listener : ReferenceListeners.Map | std::views::values)
-            listener(inRefSource);
-    }
-    return ret;
+    return CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
 }
 
 std::unordered_set<NTV2Channel> AJADevice::GetFilteredChannels(bool isInput)

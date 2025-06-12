@@ -179,12 +179,6 @@ private:
 
     void SendCheckConfigurationToNodes();
 
-    struct {
-        std::unordered_map<uint32_t, std::function<void(NTV2ReferenceSource)>> Map;
-        uint32_t NextID = 0;
-        std::mutex Mutex;
-    } ReferenceListeners;
-
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
 };

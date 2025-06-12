@@ -32,7 +32,6 @@ enum class AJAChangedPinType
 
 struct ChannelNodeContext : NodeContext
 {
-	std::optional<uint32_t> RefListenerId = 0;
 	size_t DropCount = 0;
 	bool OnlyUpdateDevicePinValue = false;
 	ChannelNodeContext() : NodeContext(), CurrentChannel(*this) {}
@@ -116,8 +115,6 @@ struct ChannelNodeContext : NodeContext
 				if (oldDevice)
 				{
 					oldDevice->UnregisterNode(NodeId);
-					if(RefListenerId)
-						oldDevice->RemoveReferenceSourceListener(*RefListenerId);
 					if (DeviceAcquired)
 					{
 						oldDevice->ReleaseDevice();
@@ -127,19 +124,12 @@ struct ChannelNodeContext : NodeContext
 				if (Device)
 				{
 					Device->RegisterNode(NodeId);
-					RefListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource ref) {
-						auto refStr = NTV2ReferenceSourceToString(ref, true);
-						SetPinValue(NSN_ReferenceSource,
-									nosBuffer{.Data = (void*)refStr.c_str(), .Size = refStr.size() + 1});
-					});
 					if (!DeviceAcquired && ShouldAcquireDevice)
 					{
 						Device->AcquireDevice();
 						DeviceAcquired = true;
 					}
 				}
-				else
-					RefListenerId = std::nullopt;
 			}
 			if (DevicePinValue.vendor_name != PIN_VALUE_NONE && !Device)
 				ResetDevicePin();
@@ -289,8 +279,6 @@ struct ChannelNodeContext : NodeContext
 		if (Device)
 		{
 			Device->UnregisterNode(NodeId);
-			if(RefListenerId)
-				Device->RemoveReferenceSourceListener(*RefListenerId);
 			if (DeviceAcquired)
 				Device->ReleaseDevice();
 		}
@@ -472,6 +460,13 @@ struct ChannelNodeContext : NodeContext
 		}
 	}
 
+	void UpdateReferenceNamedValueList() {
+		std::vector<std::string> list{ "Reference In", "Free Run" };
+		for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(Device->ID); ++i)
+			list.push_back("SDI In " + std::to_string(i));
+		UpdateStringList(GetReferenceStringListName(), list);
+	}
+
 	void UpdateAfter(AJAChangedPinType pin, bool first)
 	{
 		switch (pin)
@@ -480,7 +475,6 @@ struct ChannelNodeContext : NodeContext
 			ChangePinReadOnly(NSN_Resolution, IsInput);
 			ChangePinReadOnly(NSN_FrameRate, IsInput);
 			ChangePinReadOnly(NSN_IsInterlaced, IsInput);
-			ChangePinReadOnly(NSN_ReferenceSource, IsInput);
 
 			if (!first)
 			{
@@ -494,23 +488,6 @@ struct ChannelNodeContext : NodeContext
 			UpdateStringList(GetChannelStringListName(), channelList);
 			if (!first)
 				AutoSelectIfSingle(NSN_ChannelName, channelList);
-			if (IsInput || !Device)
-			{
-				UpdateStringList(GetReferenceStringListName(), { PIN_VALUE_NONE });
-				SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)PIN_VALUE_NONE, .Size = 5 });
-			}
-			else
-			{
-				std::vector<std::string> list{"Reference In", "Free Run"};
-				for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(Device->ID); ++i)
-					list.push_back("SDI In " + std::to_string(i));
-				UpdateStringList(GetReferenceStringListName(), list);
-				if (!first && Device->GetReference(ReferenceSource))
-				{
-					auto refStr = NTV2ReferenceSourceToString(ReferenceSource, true);
-					SetPinValue(NSN_ReferenceSource, nosBuffer{ .Data = (void*)refStr.c_str(), .Size = refStr.size() + 1 });
-				}
-			}
 			break;
 		}
 		case AJAChangedPinType::ChannelName: {
@@ -851,7 +828,6 @@ struct ChannelNodeContext : NodeContext
 	std::string ResolutionPinValue = PIN_VALUE_NONE;
 	std::string FrameRatePinValue = PIN_VALUE_NONE;
 	std::string InterlacedPinValue = PIN_VALUE_NONE;
-	std::string ReferenceSourcePinValue = PIN_VALUE_NONE;
 
 	AJADevice* Device{};
 	NTV2Channel Channel = NTV2_CHANNEL_INVALID;
@@ -863,7 +839,6 @@ struct ChannelNodeContext : NodeContext
 		INTERLACED,
 		PROGRESSIVE
 	} InterlacedState = InterlacedState::NONE;
-	NTV2ReferenceSource ReferenceSource = NTV2_REFERENCE_INVALID;
 	AJADevice::Mode InputModePin = AJADevice::SL, OutputModePin = AJADevice::SL;
 	bool IsSingleLink = true;
 

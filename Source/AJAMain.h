@@ -16,7 +16,6 @@
 extern nosVulkanSubsystem* nosVulkan;
 
 NOS_REGISTER_NAME(Device)
-NOS_REGISTER_NAME(ReferenceSource)
 
 NOS_REGISTER_NAME(Colorspace);
 NOS_REGISTER_NAME(Source);
