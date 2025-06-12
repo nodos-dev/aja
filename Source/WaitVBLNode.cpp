@@ -161,7 +161,7 @@ struct WaitVBLNodeContext : NodeContext
 
 		if (VBLState.LastVBLCount)
 		{
-			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(VBLState.LastVBLCount + 1 + isInterlaced);
+			int64_t vblDiff = (int64_t)curVBLCount - (int64_t)(VBLState.LastVBLCount + 1);
 			if (vblDiff > 0)
 			{
 				assert(vblDiff <= UINT32_MAX);
