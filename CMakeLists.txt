@@ -43,6 +43,9 @@ set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 # nos.sys.vulkan
 nos_get_module("nos.sys.vulkan" "6.22" NOS_SYS_VULKAN_TARGET)
 
+# nos.sys.settings
+nos_get_module("nos.sys.settings" "1.0" NOS_SYS_SETTINGS_TARGET_NAME)
+
 # nos.mediaio
 nos_get_module("nos.mediaio" "2.11" NOS_MEDIAIO_TARGET)
 nos_find_module_path("nos.mediaio" "2.11" NOS_MEDIAIO_PATH)
@@ -71,6 +74,7 @@ list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_no
     ${NOS_SYS_VULKAN_TARGET}
     ${NOS_SYS_DEVICE_TARGET}
     ${NOS_SYNC_TARGET}
+    ${NOS_SYS_SETTINGS_TARGET_NAME}
     ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}

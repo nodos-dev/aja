@@ -12,6 +12,7 @@
 #include "firmware.hpp"
 
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 
 #undef min
 #undef max
@@ -229,9 +230,55 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 AJADevice::~AJADevice()
 {
 	DeviceLock lock(this);
+    UnregisterSettings();
     nosDevice->UnregisterDevice(GlobalDeviceId);
     ClearState();
     Close();
+}
+
+NOS_REGISTER_NAME_SPACED(REFERENCE_ENTRY_EDITOR_ITEM_NAME, "Out Reference");
+NOS_REGISTER_NAME(Reference);
+NOS_REGISTER_NAME(string);
+
+std::string GetReferenceStringListName(std::string deviceDisplayName) { return "aja.ReferenceSource." + deviceDisplayName; }
+
+nosResult AJADevice::UpdateSettings(nosName entryName, nosBuffer itemValue) {
+    if (entryName != NSN_Reference)
+        return NOS_RESULT_FAILED;
+
+    std::string serialNumberStr = nos::Name(entryName).AsCStr() + NSN_Reference.AsString().length();
+    uint64_t serialNum{};
+    StringToSerialNum64(serialNumberStr, serialNum);
+   
+    auto device = Devices.find(serialNum);
+    if (device == Devices.end())
+        return NOS_RESULT_FAILED;
+
+    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue));
+}
+
+void AJADevice::RegisterSettings() {
+    nosSettingsEntryParams params{};
+    std::string noneText = "NONE";
+    nosBuffer noneTextBuf = { .Data = &noneText[0], .Size = 5 };
+    params.Buffer = &noneTextBuf;
+    params.DisplayName = NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME;
+    params.EntryName = nos::Name(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()));
+    params.IsEditableFromEditor = true;
+    params.TargetName = nos::Name(NOS_DEVICE_SUBSYSTEM_NAME);
+    params.TypeName = NSN_string;
+    params.UpdateCallback = UpdateSettings;
+    nos::fb::TVisualizer visualizer;
+    visualizer.type = nos::fb::VisualizerType::NAMED_VALUE;
+    visualizer.name = GetReferenceStringListName(GetDisplayName());
+    auto visBuf = nos::Buffer::From(visualizer);
+    params.Visualizer = visBuf.As<nos::fb::Visualizer>();
+    params.WriteDirectories = NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE;
+    nosSettings->RegisterEntry(&params);
+}
+
+void AJADevice::UnregisterSettings() {
+    nosSettings->UnregisterEntry(nos::Name(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber())));
 }
 
 AJADevice::AJADevice(uint64_t serial)
@@ -282,6 +329,7 @@ AJADevice::AJADevice(uint64_t serial)
         .Handle = serial
     };
     nosDevice->RegisterDevice(&params, &GlobalDeviceId);
+	RegisterSettings();
 }
 
 bool AJADevice::ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
@@ -888,6 +936,13 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
     }
 }
 
+void AJADevice::UpdateReferenceNamedValueList() {
+    std::vector<std::string> list{ "Reference In", "Free Run" };
+    for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(ID); ++i)
+        list.push_back("SDI In " + std::to_string(i));
+    nos::UpdateStringList(GetReferenceStringListName(GetDisplayName()), list);
+}
+
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
     return CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
@@ -917,6 +972,27 @@ bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
             return WaitForInputFieldID(fieldId, channel);
         else
             return WaitForOutputFieldID(fieldId, channel);
+    }
+}
+
+void AJADevice::UpdateReferenceSource(std::string referenceValue)
+{
+    auto ReferenceSource = NTV2_REFERENCE_INVALID;
+    if (referenceValue.empty())
+        nosEngine.LogE("Empty value received for reference pin!");
+    else if (std::string::npos != referenceValue.find("Reference In"))
+        ReferenceSource = NTV2_REFERENCE_EXTERNAL;
+    else if (std::string::npos != referenceValue.find("Free Run"))
+        ReferenceSource = NTV2_REFERENCE_FREERUN;
+    else if (auto pos = referenceValue.find("SDI In"); std::string::npos != pos)
+        ReferenceSource = AJADevice::ChannelToRefSrc(NTV2Channel(referenceValue[pos + 7] - '1'));
+    if (ReferenceSource != NTV2_REFERENCE_INVALID)
+    {
+        NTV2ReferenceSource curRef{};
+        if (GetReference(curRef) && curRef != ReferenceSource)
+            SetReference(ReferenceSource);
+
+        
     }
 }
 

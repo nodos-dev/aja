@@ -34,7 +34,11 @@
             {
               "name": "nos.sync",
               "version": "10.1"
-            }
+            },
+        {
+          "name": "nos.sys.settings",
+          "version": "1.0"
+        }
         ],
         "category": "Media I/O"
     },

@@ -5,6 +5,7 @@
 
 #include <Nodos/PluginAPI.h>
 
+#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
 #include <nosSync/nosSync.h>
 
@@ -12,11 +13,13 @@ NOS_INIT()
 NOS_VULKAN_INIT()
 NOS_DEVICE_SUBSYSTEM_INIT()
 NOS_SYNC_INIT()
+NOS_SETTINGS_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 	NOS_DEVICE_SUBSYSTEM_IMPORT()
 	NOS_SYNC_IMPORT()
+	NOS_SETTINGS_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 
