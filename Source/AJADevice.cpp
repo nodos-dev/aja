@@ -265,7 +265,7 @@ void AJADevice::RegisterSettings() {
     params.DisplayName = NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME;
     params.EntryName = nos::Name(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()));
     params.IsEditableFromEditor = true;
-    params.TargetName = nos::Name(NOS_DEVICE_SUBSYSTEM_NAME);
+    params.TargetName = nos::Name(std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + SerialNum64ToString(GetSerialNumber()));
     params.TypeName = NSN_string;
     params.UpdateCallback = UpdateSettings;
     nos::fb::TVisualizer visualizer;
