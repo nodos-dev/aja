@@ -240,15 +240,14 @@ NOS_REGISTER_NAME_SPACED(REFERENCE_ENTRY_EDITOR_ITEM_NAME, "Out Reference");
 NOS_REGISTER_NAME(Reference);
 NOS_REGISTER_NAME(string);
 
-std::string GetReferenceStringListName(std::string deviceDisplayName) { return "aja.ReferenceSource." + deviceDisplayName; }
+std::string GetReferenceStringListName(uint64_t serialNumber) { return "aja.ReferenceSource." + std::to_string(serialNumber); }
 
 nosResult AJADevice::UpdateSettings(nosName entryName, nosBuffer itemValue) {
-    if (entryName != NSN_Reference)
+    if (!nos::Name(entryName).AsString().starts_with(NSN_Reference))
         return NOS_RESULT_FAILED;
 
-    std::string serialNumberStr = nos::Name(entryName).AsCStr() + NSN_Reference.AsString().length();
-    uint64_t serialNum{};
-    StringToSerialNum64(serialNumberStr, serialNum);
+    std::string serialNumberStr = nos::Name(entryName).AsCStr() + NSN_Reference.AsString().length() + 1;
+    uint64_t serialNum = std::stoull(serialNumberStr);
    
     auto device = Devices.find(serialNum);
     if (device == Devices.end())
@@ -262,22 +261,23 @@ void AJADevice::RegisterSettings() {
     nosSettingsEntryParams params{};
     std::string noneText = "NONE";
     nosBuffer noneTextBuf = { .Data = &noneText[0], .Size = 5 };
-    nos::fb::TVisualizer visualizer = { .type = nos::fb::VisualizerType::NAMED_VALUE, .name = GetReferenceStringListName(GetDisplayName()) };
+    nos::fb::TVisualizer visualizer = { .type = nos::fb::VisualizerType::NAMED_VALUE, .name = GetReferenceStringListName(GetSerialNumber()) };
     nos::sys::settings::RegisterEntry(
-        NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()),
+        NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber()),
         NSN_string.AsCStr(),
         UpdateSettings,
         noneTextBuf,
         NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE,
         true,
         NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME.AsCStr(),
-        std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + SerialNum64ToString(GetSerialNumber()),
+        std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + std::to_string(GetSerialNumber()),
         visualizer
     );
+    UpdateReferenceNamedValueList();
 }
 
 void AJADevice::UnregisterSettings() {
-	nos::sys::settings::UnregisterEntry(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()));
+	nos::sys::settings::UnregisterEntry(NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber()));
 }
 
 AJADevice::AJADevice(uint64_t serial)
@@ -939,7 +939,13 @@ void AJADevice::UpdateReferenceNamedValueList() {
     std::vector<std::string> list{ "Reference In", "Free Run" };
     for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(ID); ++i)
         list.push_back("SDI In " + std::to_string(i));
-    nos::UpdateStringList(GetReferenceStringListName(GetDisplayName()), list);
+
+	nos::fb::TNamedValues listUpdate;
+	listUpdate.name = GetReferenceStringListName(GetSerialNumber());
+    for (auto& value : list) {
+        listUpdate.values.push_back(std::make_unique<nos::fb::TNamedValue>(nos::fb::TNamedValue{ .type_name = NSN_string.AsCStr(), .pin_value = std::vector<uint8_t>{value.c_str(), value.c_str() + value.length() + 1}, .value_name = value}));
+    }
+    nos::SendNamedValueUpdate(listUpdate);
 }
 
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
