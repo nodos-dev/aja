@@ -255,6 +255,7 @@ nosResult AJADevice::UpdateSettings(nosName entryName, nosBuffer itemValue) {
         return NOS_RESULT_FAILED;
 
     device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue));
+    return NOS_RESULT_SUCCESS;
 }
 
 void AJADevice::RegisterSettings() {
