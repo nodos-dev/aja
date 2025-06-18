@@ -85,7 +85,7 @@ std::pair<bool, std::string> Channel::Open()
 
 			if (Info.is_quad && !NTV2_IS_QUAD_FRAME_FORMAT(fmt))
 			{
-				if(auto it = ch.find("1080p"); it != string::npos)
+				if(auto it = ch.find("1080p"); it != std::string::npos)
 					ch.replace(it, 5, "UHDp");
 			}
 			return ch;
