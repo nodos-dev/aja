@@ -261,24 +261,22 @@ void AJADevice::RegisterSettings() {
     nosSettingsEntryParams params{};
     std::string noneText = "NONE";
     nosBuffer noneTextBuf = { .Data = &noneText[0], .Size = 5 };
-    params.Buffer = &noneTextBuf;
-    params.DisplayName = NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME;
-    params.EntryName = nos::Name(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()));
-    params.IsEditableFromEditor = true;
-    params.TargetName = nos::Name(std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + SerialNum64ToString(GetSerialNumber()));
-    params.TypeName = NSN_string;
-    params.UpdateCallback = UpdateSettings;
-    nos::fb::TVisualizer visualizer;
-    visualizer.type = nos::fb::VisualizerType::NAMED_VALUE;
-    visualizer.name = GetReferenceStringListName(GetDisplayName());
-    auto visBuf = nos::Buffer::From(visualizer);
-    params.Visualizer = visBuf.As<nos::fb::Visualizer>();
-    params.WriteDirectories = NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE;
-    nosSettings->RegisterEntry(&params);
+    nos::fb::TVisualizer visualizer = { .type = nos::fb::VisualizerType::NAMED_VALUE, .name = GetReferenceStringListName(GetDisplayName()) };
+    nos::sys::settings::RegisterEntry(
+        NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()),
+        NSN_string.AsCStr(),
+        UpdateSettings,
+        noneTextBuf,
+        NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE,
+        true,
+        NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME.AsCStr(),
+        std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + SerialNum64ToString(GetSerialNumber()),
+        visualizer
+    );
 }
 
 void AJADevice::UnregisterSettings() {
-    nosSettings->UnregisterEntry(nos::Name(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber())));
+	nos::sys::settings::UnregisterEntry(NSN_Reference.AsString() + "\\" + SerialNum64ToString(GetSerialNumber()));
 }
 
 AJADevice::AJADevice(uint64_t serial)
