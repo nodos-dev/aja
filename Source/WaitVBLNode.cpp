@@ -8,12 +8,20 @@
 
 #include <nosSync/nosSync.h>
 
+#include <ctime>
+
 namespace nos::aja
 {
 
 NOS_REGISTER_NAME(VBLFailed)
 
-nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs, uint64_t* outVblCount);
+nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult);
+nosResult ResetVBLEvent(void* ctx);
+
+uint64_t NowNs()
+{
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+}
 
 struct WaitVBLNodeContext : NodeContext
 {
@@ -24,8 +32,17 @@ struct WaitVBLNodeContext : NodeContext
 		});
 	}
 
-	nosResult WaitVBL(uint64_t* outVblTimestampNs, uint64_t* outVblCount)
+	struct SyncTimeStartPoint
 	{
+		uint64_t FrameCount;
+		int64_t Clock;
+	};
+	std::optional<SyncTimeStartPoint> SyncStart;
+
+	nosResult WaitVBL(nosWaitResult* outResult)
+	{
+		if (!SyncStart)
+			return NOS_RESULT_FAILED;
 		if (auto device = GetDevice())
 		{
 			auto channel = GetChannel();
@@ -34,8 +51,53 @@ struct WaitVBLNodeContext : NodeContext
 				ChannelInfo.is_input,
 				ChannelInfo.is_interlaced,
 				sys::vulkan::FieldType::ODD); // GetLastVBLTimestamp only updated on odd field for interlaced.
-			*outVblTimestampNs = device->GetLastVBLTimestamp(channel, ChannelInfo.is_input);
-			*outVblCount = GetVBLCount(*device, channel);
+			auto frameCount = GetVBLCount(*device, channel);
+			// Calculate frame timestamp with sync start point + frame count diff * delta time
+			auto deltaSecs = GetDeltaSeconds(GetVideoFormat(), ChannelInfo.is_interlaced);
+			uint64_t frameNs =
+				SyncStart->Clock +
+				uint64_t((deltaSecs.x * 1'000'000'000.0 * (frameCount - SyncStart->FrameCount)) / double(deltaSecs.y));
+
+			auto steadyClockNowNs = NowNs();
+			outResult->TimeSinceLastEventNs = steadyClockNowNs - frameNs;
+			
+			std::chrono::steady_clock::duration startTime =
+				std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+					std::chrono::nanoseconds(frameNs));
+
+			nosEngine.LogD("%s: %s Time Since Last VBL: %llu (Time: %s)",
+				ChannelInfo.is_input ? "In " : "Out",
+				ChannelInfo.channel_name.c_str(), outResult->TimeSinceLastEventNs,
+						   std::format("{:%H:%M:%S}", startTime).c_str());
+			outResult->EventCount = frameCount;
+			return NOS_RESULT_SUCCESS;
+		}
+		else
+		{
+			// Tried to wait when channel not configured. Set pending path restart.
+			PendingPathRestart = true;
+			return NOS_RESULT_FAILED;
+		}
+	}
+
+	nosResult ResetVBL()
+	{
+		if (auto device = GetDevice())
+		{
+			auto channel = GetChannel();
+			for (int i = 0; i < 2; ++i)
+				WaitVBL(
+					device.get(),
+					channel,
+					ChannelInfo.is_input,
+					ChannelInfo.is_interlaced,
+					sys::vulkan::FieldType::ODD); // GetLastVBLTimestamp only updated on odd field for interlaced.
+			auto steadyClockNowNs = NowNs();
+			SyncTimeStartPoint info{};
+			info.FrameCount = GetVBLCount(*device, channel);
+			info.Clock = steadyClockNowNs;
+			SyncStart = info;
+			
 			return NOS_RESULT_SUCCESS;
 		}
 		else
@@ -216,9 +278,10 @@ struct WaitVBLNodeContext : NodeContext
 				return;
 			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
 			nosRegisterEventParams params{
-				.EventGroupId = 1,
+				.EventGroupId = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
 				.DeltaSeconds = deltaSecs,
 				.UserData = this,
+				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
 				.OutEventId = &WaitId,
 			};
@@ -295,9 +358,14 @@ struct WaitVBLNodeContext : NodeContext
 	bool PendingPathRestart = false;
 };
 
-nosResult WaitVBLEvent(void* ctx, uint64_t* outVblTimestampNs, uint64_t* outVblCount)
+nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult)
 {
-	return (static_cast<struct WaitVBLNodeContext*>(ctx))->WaitVBL(outVblTimestampNs, outVblCount);
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->WaitVBL(outResult);
+}
+
+nosResult ResetVBLEvent(void* ctx)
+{
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->ResetVBL();
 }
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
