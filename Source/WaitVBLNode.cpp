@@ -30,6 +30,10 @@ struct WaitVBLNodeContext : NodeContext
 		AddPinValueWatcher(NOS_NAME("Channel"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldValue) {
 			newVal.As<aja::ChannelInfo>()->UnPackTo(&ChannelInfo);
 		});
+		AddPinValueWatcher(NOS_NAME("EnableSync"), [this](nos::Buffer const& newVal, std::optional<nos::Buffer> oldValue) {
+			if (!oldValue || *oldValue != newVal)
+				nosEngine.SendPathRestart(NodeId);
+		});
 	}
 
 	struct SyncTimeStartPoint
@@ -41,8 +45,6 @@ struct WaitVBLNodeContext : NodeContext
 
 	nosResult WaitVBL(nosWaitResult* outResult)
 	{
-		if (!SyncStart)
-			return NOS_RESULT_FAILED;
 		if (auto device = GetDevice())
 		{
 			auto channel = GetChannel();
@@ -54,21 +56,19 @@ struct WaitVBLNodeContext : NodeContext
 			auto frameCount = GetVBLCount(*device, channel);
 			// Calculate frame timestamp with sync start point + frame count diff * delta time
 			auto deltaSecs = GetDeltaSeconds(GetVideoFormat(), ChannelInfo.is_interlaced);
-			uint64_t frameNs =
-				SyncStart->Clock +
-				uint64_t((deltaSecs.x * 1'000'000'000.0 * (frameCount - SyncStart->FrameCount)) / double(deltaSecs.y));
-
-			auto steadyClockNowNs = NowNs();
-			outResult->TimeSinceLastEventNs = steadyClockNowNs - frameNs;
-			
-			std::chrono::steady_clock::duration startTime =
-				std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-					std::chrono::nanoseconds(frameNs));
-
-			nosEngine.LogD("%s: %s Time Since Last VBL: %llu (Time: %s)",
-				ChannelInfo.is_input ? "In " : "Out",
-				ChannelInfo.channel_name.c_str(), outResult->TimeSinceLastEventNs,
-						   std::format("{:%H:%M:%S}", startTime).c_str());
+			if (SyncStart)
+			{
+				uint64_t frameNs = SyncStart->Clock + uint64_t((deltaSecs.x * 1'000'000'000.0 * (frameCount - SyncStart->FrameCount)) / double(deltaSecs.y));
+				auto steadyClockNowNs = NowNs();
+				outResult->TimeSinceLastEventNs = steadyClockNowNs - frameNs;
+				std::chrono::steady_clock::duration startTime =
+					std::chrono::duration_cast<std::chrono::steady_clock::duration>(
+						std::chrono::nanoseconds(frameNs));
+				nosEngine.LogD("%s: %s Time Since Last VBL: %llu (Time: %s)",
+					ChannelInfo.is_input ? "In" : "Out",
+					ChannelInfo.channel_name.c_str(), outResult->TimeSinceLastEventNs,
+					std::format("{:%H:%M:%S}", startTime).c_str());
+			}
 			outResult->EventCount = frameCount;
 			return NOS_RESULT_SUCCESS;
 		}
@@ -97,7 +97,6 @@ struct WaitVBLNodeContext : NodeContext
 			info.FrameCount = GetVBLCount(*device, channel);
 			info.Clock = steadyClockNowNs;
 			SyncStart = info;
-			
 			return NOS_RESULT_SUCCESS;
 		}
 		else
@@ -284,7 +283,7 @@ struct WaitVBLNodeContext : NodeContext
 				return;
 			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
 			nosRegisterEventParams params{
-				.EventGroupId = NOS_SYNC_DEFAULT_EVENT_GROUP_ID,
+				.EventGroupId = IsSyncEnabled() ? NOS_SYNC_DEFAULT_EVENT_GROUP_ID : NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
 				.DeltaSeconds = deltaSecs,
 				.UserData = this,
 				.ResetFn = ResetVBLEvent,
@@ -333,6 +332,7 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		nosSync->UnregisterEvent(WaitId);
 		WaitId = 0;
+		SyncStart = std::nullopt;
 	}
 
 	void FrameDropped(uint32_t dropCount, bool vblMissed)
@@ -340,6 +340,14 @@ struct WaitVBLNodeContext : NodeContext
 		VBLState.Dropped = true;
 		VBLState.FramesSinceLastDrop = 0;
 		nosEngine.LogW("%s: %s dropped %lld frames (%s missed)", ChannelInfo.is_input ? "In" : "Out", ChannelInfo.channel_name.c_str(), dropCount, vblMissed ? "VBL" : "DMA");
+	}
+
+	bool IsSyncEnabled()
+	{
+		auto buf = GetWatchedPinValue(NOS_NAME("EnableSync"));
+		if (!buf.has_value() || buf->Size != sizeof(bool))
+			return false;
+		return *reinterpret_cast<const bool*>(buf->Data) == true;
 	}
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction) 
