@@ -2,7 +2,7 @@
     "info": {
         "id": {
             "name": "nos.aja",
-            "version": "2.11.5"
+            "version": "2.12.0"
         },
         "display_name": "AJA",
         "description": "Video I/O plugin for AJA cards.",
@@ -42,7 +42,7 @@
         "Config/AJA.nosdef",
         "Config/OutputNode.nosdef",
         "Config/InputNode.nosdef",
-		"Config/FillKey.nosdef"
+        "Config/FillKey.nosdef"
     ],
     "custom_types" :[
       "Config/AJA.fbs"

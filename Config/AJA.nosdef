@@ -191,6 +191,14 @@
 						"type_name": "uint",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "EnableSync",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference.",
+						"data": true
 					}
 				],
 				"functions": [
