@@ -958,7 +958,20 @@ void AJADevice::UnregisterNode(nos::uuid id)
 bool AJADevice::CheckFirmware(std::string& msg, std::string& msgDetails)
 {
     std::string date, time;
-    auto re = GetRunningFirmwareDate(date, time);
+    BITFILE_INFO_STRUCT bitFileInfo{};
+    bitFileInfo.whichFPGA = eFPGAVideoProc;
+    if (DriverGetBitFileInformation(bitFileInfo))
+    {
+		date = bitFileInfo.dateStr;
+		time = bitFileInfo.timeStr;
+	}
+
+	if (date.empty() || time.empty())
+	{
+		msg = "Firmware date or time is not available.";
+		return false;
+	}
+
     std::string model = GetModelName();
     if (auto it = firmware_list.find(model); it != firmware_list.end())
     {
@@ -970,6 +983,8 @@ bool AJADevice::CheckFirmware(std::string& msg, std::string& msgDetails)
         }
         return true;
     }
+    // ? This returns the below message if a newer untested firmware is used. We should return this even if its newer, if not tested.
+    // Ideally a config file should be used to get the tested firmware list.
     msg = "Not tested firmware";
     msgDetails = "Firmware (" + date + ") for device (" + model + ") has not been tested.";
     return false;
