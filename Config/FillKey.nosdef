@@ -3,7 +3,7 @@
       "class_name": "nos.aja.FillKey",
 		"menu_info": {
 		  "category": "Device|AJA",
-		  "display_name": "AJA Out Key+Fill",
+		  "display_name": "AJA Out Fill + Key",
 		  "name_aliases": [
 			"video",
 			"camera",
@@ -31,7 +31,7 @@
         "pins": [
           {
             "id": "d2007283-aebb-41e5-8eab-856fe587a764",
-            "name": "Source",
+            "name": "Video",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_ONLY",
@@ -54,9 +54,18 @@
             },
             "advanced_property": true,
             "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "true" },
-              { "key": "Category", "value": "Common" },
-              { "key": "OrphanPortal", "value": "/Channel.Channel" }
+              {
+                "key": "AdvancedProperty",
+                "value": "true"
+              },
+              {
+                "key": "Category",
+                "value": "Common"
+              },
+              {
+                "key": "OrphanPortal",
+                "value": "/Channel.Channel"
+              }
             ],
             "contents_type": "PortalPin",
             "contents": { "source_id": "b35df378-8230-4328-a665-9eb3c701ea15" }
@@ -906,7 +915,7 @@
             },
             {
               "id": "a6e8ebc6-83ae-475a-bb19-8b237ea2cc88",
-              "name": "Source",
+              "name": "Video",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
@@ -9925,7 +9934,7 @@
         "meta_data_map": [
           { "key": "CategoryPropertyPaneOrder", "value": "{\n  \"Common\": 2,\n  \"Fill\": 0,\n  \"Key\": 1\n}" }
         ],
-        "display_name": "AJA Out Key+Fill",
+        "display_name": "AJA Out Fill + Key",
         "plugin_version": { "major": 2, "minor": 6, "patch": 9 }
       }
     }

@@ -32,6 +32,7 @@
           {
             "id": "28b773fc-d8d5-4aee-a074-fa8a2a84d9ff",
             "name": "Source",
+            "display_name": "Video",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_ONLY",
@@ -1242,7 +1243,7 @@
             },
             {
               "id": "48ae6d18-4f9b-442e-95be-74c3a585c385",
-              "name": "Source",
+              "name": "Video",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {
