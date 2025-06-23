@@ -32,6 +32,7 @@
           {
             "id": "0862a13e-eeba-44f2-802b-ebf73da6973d",
             "name": "Output",
+            "display_name": "Video",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "OUTPUT_PIN",
             "can_show_as": "OUTPUT_PIN_ONLY",

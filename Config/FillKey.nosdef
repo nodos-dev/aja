@@ -32,6 +32,7 @@
           {
             "id": "98562f10-2fa7-45a0-90f6-ee81d0facd3a",
             "name": "Source",
+            "display_name": "Video",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_ONLY",
@@ -733,6 +734,7 @@
                 {
                   "id": "7445c196-842a-4181-a4eb-c24a65b22ebf",
                   "name": "Source",
+                  "display_name": "Video",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
@@ -1414,6 +1416,7 @@
                   {
                     "id": "6abf5f22-2535-4ce7-a9ac-73be5f2208e6",
                     "name": "Source",
+                    "display_name": "Video",
                     "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
@@ -1491,6 +1494,7 @@
                       {
                         "id": "1df8e56c-c7ad-48de-af77-040bd21e7a73",
                         "name": "Source",
+                        "display_name": "Video",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_ONLY",
@@ -4567,7 +4571,7 @@
                           "contents_type": "Job",
                           "contents": { "type": "" },
                           "function_category": "Default Node",
-                          "display_name": "Source",
+                          "display_name": "Video",
                           "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                         },
                         {
@@ -5007,6 +5011,7 @@
                 {
                   "id": "9a6d8ae7-cfd7-4131-a392-cd94b68ec733",
                   "name": "Source",
+                  "display_name": "Video",
                   "type_name": "nos.sys.vulkan.Texture",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
@@ -5366,6 +5371,7 @@
                       {
                         "id": "69c38c0b-82af-43a1-bc36-2ace44012d6f",
                         "name": "Source",
+                        "display_name": "Video",
                         "type_name": "nos.sys.vulkan.Texture",
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_ONLY",
@@ -5891,6 +5897,7 @@
                   {
                     "id": "711abcce-66da-48ef-b88b-7009d1231d92",
                     "name": "Source",
+                    "display_name": "Video",
                     "class_name": "nos.internal.GraphInput",
                     "pins": [
                       {
@@ -8859,7 +8866,7 @@
                           "contents_type": "Job",
                           "contents": { "type": "" },
                           "function_category": "Default Node",
-                          "display_name": "Source",
+                          "display_name": "Video",
                           "plugin_version": { "major": 0, "minor": 0, "patch": 0 }
                         },
                         {
@@ -9291,6 +9298,7 @@
             {
               "id": "30d93485-3aee-49e5-a344-37a8a7d1cd8c",
               "name": "Source",
+              "display_name": "Video",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {

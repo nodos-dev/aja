@@ -32,6 +32,7 @@
           {
             "id": "f6c4f1c2-2eca-4438-aa74-fdbb7ddc7452",
             "name": "Source",
+            "display_name": "Video",
             "type_name": "nos.sys.vulkan.Texture",
             "show_as": "INPUT_PIN",
             "can_show_as": "INPUT_PIN_ONLY",
