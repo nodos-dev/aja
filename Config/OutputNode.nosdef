@@ -1243,7 +1243,8 @@
             },
             {
               "id": "48ae6d18-4f9b-442e-95be-74c3a585c385",
-              "name": "Video",
+              "name": "Source",
+              "display_name": "Video",
               "class_name": "nos.internal.GraphInput",
               "pins": [
                 {

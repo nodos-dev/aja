@@ -1379,7 +1379,8 @@
             },
             {
               "id": "0cc76a0a-26d3-4527-8e32-05d018603816",
-              "name": "Video",
+              "name": "Output",
+              "display_name": "Video",
               "class_name": "nos.internal.GraphOutput",
               "pins": [
                 {
