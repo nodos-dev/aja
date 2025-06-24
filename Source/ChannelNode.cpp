@@ -34,7 +34,7 @@ struct ChannelNodeContext : NodeContext
 {
 	std::optional<uint32_t> RefListenerId = 0;
 	size_t DropCount = 0;
-	bool PinDataUpdateForNewSuitableDevice = false;
+	bool OnlyUpdateDevicePinValue = false;
 	ChannelNodeContext(nosFbNodePtr node) : NodeContext(node), CurrentChannel(this)
 	{
 		if (auto* pins = node->pins())
@@ -75,9 +75,9 @@ struct ChannelNodeContext : NodeContext
 		});
 		AddPinValueWatcher(NSN_Device, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			DevicePinValue = newVal.As<sys::device::TDeviceInfo>();
-			if (PinDataUpdateForNewSuitableDevice)
+			if (OnlyUpdateDevicePinValue)
 			{
-				PinDataUpdateForNewSuitableDevice = false;
+				OnlyUpdateDevicePinValue = false;
 				return;
 			}
 			auto oldDevice = Device;
@@ -154,7 +154,7 @@ struct ChannelNodeContext : NodeContext
 				auto foundDeviceObj = sys::device::ConvertDeviceInfo(foundDeviceInfo);
 				if (DevicePinValue != foundDeviceObj)
 				{
-					PinDataUpdateForNewSuitableDevice = true;
+					OnlyUpdateDevicePinValue = true;
 					SetPinValue(NSN_Device, nos::Buffer::From(foundDeviceObj));
 				}
 			}
