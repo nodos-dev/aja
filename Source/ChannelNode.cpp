@@ -34,6 +34,7 @@ struct ChannelNodeContext : NodeContext
 {
 	std::optional<uint32_t> RefListenerId = 0;
 	size_t DropCount = 0;
+	bool OnlyUpdateDevicePinValue = false;
 	ChannelNodeContext() : NodeContext(), CurrentChannel(*this) {}
 
 	nosResult OnCreate(nosFbNodePtr node) override
@@ -84,6 +85,11 @@ struct ChannelNodeContext : NodeContext
 		});
 		AddPinValueWatcher(NSN_Device, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			DevicePinValue = newVal.As<sys::device::TDeviceInfo>();
+			if (OnlyUpdateDevicePinValue)
+			{
+				OnlyUpdateDevicePinValue = false;
+				return;
+			}
 			auto oldDevice = Device;
 
 			nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfo(DevicePinValue);
@@ -148,6 +154,21 @@ struct ChannelNodeContext : NodeContext
 			{
 				if (oldValue)
 					ResetAfter(AJAChangedPinType::Device);
+				else if (Device)
+				{
+					nosDeviceInfo foundDeviceInfo{};
+					auto res = nosDevice->GetDeviceInfo(deviceId, &foundDeviceInfo);
+					NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Device must be found at this point")
+						if (NOS_RESULT_SUCCESS == res)
+						{
+							auto foundDeviceObj = sys::device::ConvertDeviceInfo(foundDeviceInfo);
+							if (DevicePinValue != foundDeviceObj)
+							{
+								OnlyUpdateDevicePinValue = true;
+								SetPinValue(NSN_Device, nos::Buffer::From(foundDeviceObj));
+							}
+						}
+				}
 				else if (DevicePinValue.vendor_name == PIN_VALUE_NONE)
 					AutoSelectIfSingle(NSN_Device, GetPossibleDevices());
 			}
