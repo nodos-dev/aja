@@ -88,7 +88,7 @@ struct ChannelNodeContext : NodeContext
 			}
 			auto oldDevice = Device;
 
-			nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfoWithoutProperties(DevicePinValue);
+			nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfo(DevicePinValue);
 			nosDeviceId deviceId{};
 			uint64_t newDeviceSerial = -1;
 			auto res = nosDevice->GetSuitableDevice(&deviceInfoFromPin, &deviceId);

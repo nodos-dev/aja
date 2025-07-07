@@ -303,9 +303,13 @@ AJADevice::AJADevice(uint64_t serial)
 
     ClearState();
     std::string firmwareMsg, firmwareMsgDetails;
-    CheckFirmware(firmwareMsg, firmwareMsgDetails);
-	std::string driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
-    nosDeviceProperty driverProp = {.Name = nos::Name("Firmware Info"), .Value = driverPropMessage.c_str()};
+    nosDeviceProperty driverProp{};
+	bool isFirmwareValid = true;
+    if (!CheckFirmware(firmwareMsg, firmwareMsgDetails)) {
+        std::string driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
+        driverProp = {.Name = nos::Name("Firmware Info"), .Value = driverPropMessage.c_str()};
+        isFirmwareValid = false;
+    }
     // Register to device subsys
     nosRegisterDeviceParams params{
         .Device = {
@@ -313,12 +317,12 @@ AJADevice::AJADevice(uint64_t serial)
             .ModelName = nos::Name(GetModelName()),
             .TopologicalId = GetIndexNumber(),
             .SerialNumber = nos::Name(std::to_string(serial)),
-            .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO),
-        .Properties = &driverProp,
-        .PropertyCount = 1
+            .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO)
         },
         .DisplayName = nos::Name(GetModelName()),
-        .Handle = serial
+        .Handle = serial,
+        .Properties = isFirmwareValid ? nullptr : &driverProp ,
+        .PropertyCount = isFirmwareValid ? 0ull : 1ull
     };
     nosDevice->RegisterDevice(&params, &GlobalDeviceId);
 	RegisterSettings();
