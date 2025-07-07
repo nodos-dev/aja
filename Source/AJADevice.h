@@ -153,8 +153,7 @@ struct AJADevice : CNTV2Card
     void UpdateReferenceSource(std::string referenceValue);
     void UpdateReferenceNamedValueList();
     void RegisterSettings();
-    static nosResult UpdateSettings(nosName entryName, nosBuffer itemValue);
-    void UnregisterSettings();
+    static nosResult UpdateSettings(const char* entryName, nosBuffer itemValue);
 
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);

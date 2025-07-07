@@ -230,19 +230,18 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 AJADevice::~AJADevice()
 {
 	DeviceLock lock(this);
-    UnregisterSettings();
     nosDevice->UnregisterDevice(GlobalDeviceId);
     ClearState();
     Close();
 }
 
-NOS_REGISTER_NAME_SPACED(REFERENCE_ENTRY_EDITOR_ITEM_NAME, "Out Reference");
+static constexpr char REFERENCE_ENTRY_EDITOR_ITEM_NAME[] = "Out Reference";
 NOS_REGISTER_NAME(Reference);
 NOS_REGISTER_NAME(string);
 
 std::string GetReferenceStringListName(uint64_t serialNumber) { return "aja.ReferenceSource." + std::to_string(serialNumber); }
 
-nosResult AJADevice::UpdateSettings(nosName entryName, nosBuffer itemValue) {
+nosResult AJADevice::UpdateSettings(const char* entryName, nosBuffer itemValue) {
     if (!nos::Name(entryName).AsString().starts_with(NSN_Reference))
         return NOS_RESULT_FAILED;
 
@@ -267,17 +266,11 @@ void AJADevice::RegisterSettings() {
         NSN_string.AsCStr(),
         UpdateSettings,
         noneTextBuf,
-        NOS_SETTINGS_FILE_DIRECTORY_WORKSPACE,
-        true,
-        NSN_REFERENCE_ENTRY_EDITOR_ITEM_NAME.AsCStr(),
+        REFERENCE_ENTRY_EDITOR_ITEM_NAME,
         std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + std::to_string(GetSerialNumber()),
         visualizer
     );
     UpdateReferenceNamedValueList();
-}
-
-void AJADevice::UnregisterSettings() {
-	nos::sys::settings::UnregisterEntry(NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber()));
 }
 
 AJADevice::AJADevice(uint64_t serial)
