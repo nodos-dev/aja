@@ -12,6 +12,7 @@
 #include "firmware.hpp"
 
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 
 #undef min
 #undef max
@@ -97,6 +98,8 @@ void AJADevice::Init()
     CNTV2Card dev;
     for (ULWord i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
         Devices[dev.GetSerialNumber()] = (std::make_shared<AJADevice>(dev.GetSerialNumber())); // TODO: Error check on AJADevice ctor.
+    for (auto& device : Devices)
+        device.second->RegisterSettings();
 }
 
 void AJADevice::Deinit()
@@ -228,12 +231,50 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 
 AJADevice::~AJADevice()
 {
-    {
-        DeviceLock lock(this);
-        nosDevice->UnregisterDevice(GlobalDeviceId);
-        ClearState();
-    }
+	DeviceLock lock(this);
+    nosDevice->UnregisterDevice(GlobalDeviceId);
+    ClearState();
     Close();
+}
+
+static constexpr char REFERENCE_ENTRY_EDITOR_ITEM_NAME[] = "Out Reference";
+NOS_REGISTER_NAME(Reference);
+NOS_REGISTER_NAME(string);
+
+std::string GetReferenceStringListName(uint64_t serialNumber) { return "aja.ReferenceSource." + std::to_string(serialNumber); }
+
+static constexpr const char* REFERENCE_DEFAULTS[2] = { "Reference In", "Free Run" };
+
+nosResult AJADevice::UpdateSettingsCallback(const char* entryName, nosBuffer itemValue) {
+    if (!nos::Name(entryName).AsString().starts_with(NSN_Reference))
+        return NOS_RESULT_FAILED;
+
+    std::string serialNumberStr = nos::Name(entryName).AsCStr() + NSN_Reference.AsString().length() + 1;
+    uint64_t serialNum = std::stoull(serialNumberStr);
+   
+    auto device = Devices.find(serialNum);
+    if (device == Devices.end())
+        return NOS_RESULT_FAILED;
+
+    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue), false);
+    return NOS_RESULT_SUCCESS;
+}
+
+void AJADevice::RegisterSettings() {
+    nosSettingsEntryParams params{};
+    std::string defaultReference = REFERENCE_DEFAULTS[0];
+    nosBuffer defaultReferenceVal = { .Data = &defaultReference[0], .Size = defaultReference.length() + 1 };
+    nos::fb::TVisualizer visualizer = { .type = nos::fb::VisualizerType::COMBO_BOX, .name = GetReferenceStringListName(GetSerialNumber()) };
+    nos::sys::settings::RegisterEntry(
+        NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber()),
+        NSN_string.AsCStr(),
+        UpdateSettingsCallback,
+        defaultReferenceVal,
+        REFERENCE_ENTRY_EDITOR_ITEM_NAME,
+        std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + std::to_string(GetSerialNumber()),
+        visualizer
+    );
+    UpdateReferenceStringList();
 }
 
 AJADevice::AJADevice(uint64_t serial)
@@ -260,28 +301,32 @@ AJADevice::AJADevice(uint64_t serial)
         nosEngine.LogE("## ERROR:  Device '%ull' cannot capture", serial);
         return;
     }
+    AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
+    AJA_ASSERT(SetMultiFormatMode(true));
+    AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
 
-    {
-        DeviceLock lock(this);
-
-        AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
-        AJA_ASSERT(SetMultiFormatMode(true));
-        AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
-
-        ClearState();
+    ClearState();
+    std::string firmwareMsg, firmwareMsgDetails;
+    nosDeviceProperty driverProp{};
+	bool isFirmwareValid = true;
+    if (!CheckFirmware(firmwareMsg, firmwareMsgDetails)) {
+        std::string driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
+        driverProp = {.Name = nos::Name("Firmware Info"), .Value = driverPropMessage.c_str()};
+        isFirmwareValid = false;
     }
-
     // Register to device subsys
-    nosRegisterDeviceParams params {
+    nosRegisterDeviceParams params{
         .Device = {
             .VendorName = NSN_VendorName,
             .ModelName = nos::Name(GetModelName()),
             .TopologicalId = GetIndexNumber(),
             .SerialNumber = nos::Name(std::to_string(serial)),
-            .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO),
+            .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO)
         },
         .DisplayName = nos::Name(GetModelName()),
-        .Handle = serial
+        .Handle = serial,
+        .Properties = isFirmwareValid ? nullptr : &driverProp ,
+        .PropertyCount = isFirmwareValid ? 0ull : 1ull
     };
     nosDevice->RegisterDevice(&params, &GlobalDeviceId);
 }
@@ -890,30 +935,17 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
     }
 }
 
-uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener)
-{
-    std::unique_lock lock(ReferenceListeners.Mutex);
-    auto id = ReferenceListeners.NextID++;
-    ReferenceListeners.Map[id] = std::move(listener);
-    return id;
-}
+void AJADevice::UpdateReferenceStringList() {
+    std::vector<std::string> list{ REFERENCE_DEFAULTS[0], REFERENCE_DEFAULTS[1] };
+    for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(ID); ++i)
+        list.push_back("SDI In " + std::to_string(i));
 
-void AJADevice::RemoveReferenceSourceListener(uint32_t id)
-{
-    std::unique_lock lock(ReferenceListeners.Mutex);
-    ReferenceListeners.Map.erase(id);
+    nos::UpdateStringList(GetReferenceStringListName(GetSerialNumber()), list);
 }
 
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
-    auto ret = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
-    if (ret)
-    {
-        std::unique_lock lock(ReferenceListeners.Mutex);
-        for (auto& listener : ReferenceListeners.Map | std::views::values)
-            listener(inRefSource);
-    }
-    return ret;
+    return CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
 }
 
 std::unordered_set<NTV2Channel> AJADevice::GetFilteredChannels(bool isInput)
@@ -940,6 +972,28 @@ bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
             return WaitForInputFieldID(fieldId, channel);
         else
             return WaitForOutputFieldID(fieldId, channel);
+    }
+}
+
+void AJADevice::UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry)
+{
+    auto ReferenceSource = NTV2_REFERENCE_INVALID;
+    if (referenceValue.empty())
+        nosEngine.LogE("Empty value received for reference pin!");
+    else if (std::string::npos != referenceValue.find("Reference In"))
+        ReferenceSource = NTV2_REFERENCE_EXTERNAL;
+    else if (std::string::npos != referenceValue.find("Free Run"))
+        ReferenceSource = NTV2_REFERENCE_FREERUN;
+    else if (auto pos = referenceValue.find("SDI In"); std::string::npos != pos)
+        ReferenceSource = AJADevice::ChannelToRefSrc(NTV2Channel(referenceValue[pos + 7] - '1'));
+    if (ReferenceSource != NTV2_REFERENCE_INVALID)
+    {
+        NTV2ReferenceSource curRef{};
+        if (GetReference(curRef) && curRef != ReferenceSource) {
+            SetReference(ReferenceSource);
+            if (updateSettingsEntry)
+                nosSettings->UpdateEntryValue((NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber())).c_str(), nosBuffer{ .Data = &referenceValue[0], .Size = referenceValue.length() + 1 });
+        }
     }
 }
 

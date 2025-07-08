@@ -150,6 +150,10 @@ struct AJADevice : CNTV2Card
 	void UnregisterNode(nos::uuid id);
 
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
+    void UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry);
+    void UpdateReferenceStringList();
+    void RegisterSettings();
+    static nosResult UpdateSettingsCallback(const char* entryName, nosBuffer itemValue);
 
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);
@@ -178,12 +182,6 @@ private:
     void CloseQLChannel(NTV2Channel channel, bool isInput);
 
     void SendCheckConfigurationToNodes();
-
-    struct {
-        std::unordered_map<uint32_t, std::function<void(NTV2ReferenceSource)>> Map;
-        uint32_t NextID = 0;
-        std::mutex Mutex;
-    } ReferenceListeners;
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;

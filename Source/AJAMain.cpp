@@ -5,6 +5,7 @@
 
 #include <Nodos/PluginAPI.h>
 
+#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
 #include <nosSync/nosSync.h>
 
@@ -12,11 +13,13 @@ NOS_INIT()
 NOS_VULKAN_INIT()
 NOS_DEVICE_SUBSYSTEM_INIT()
 NOS_SYNC_INIT()
+NOS_SETTINGS_INIT()
 
 NOS_BEGIN_IMPORT_DEPS()
 	NOS_VULKAN_IMPORT()
 	NOS_DEVICE_SUBSYSTEM_IMPORT()
 	NOS_SYNC_IMPORT()
+	NOS_SETTINGS_IMPORT()
 NOS_END_IMPORT_DEPS()
 
 
@@ -79,12 +82,15 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	static nosResult MigrateInOutNodes(nosFbNodePtr node, nosBuffer* outBuffer)
 	{
 		auto pluginVersion = node->plugin_version();
-		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
+		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 13;
 		if (!needsMigration)
 			return NOS_RESULT_SUCCESS;
 		// In child nodes, search for Device pin and migrate it
 		fb::TNode cur;
 		node->UnPackTo(&cur);
+		std::erase_if(cur.pins, [](const auto& pin) {
+			return pin->name == "ReferenceSource";
+			});
 		auto* graph = node->contents_as_Graph();
 		if (!graph)
 			return NOS_RESULT_SUCCESS;

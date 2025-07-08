@@ -191,25 +191,6 @@
             "display_name": "Frame Buffer Format"
           },
           {
-            "id": "9bd78ebd-b159-4284-87f9-c4f97a61cff4",
-            "name": "ReferenceSource",
-            "type_name": "string",
-            "show_as": "PROPERTY",
-            "can_show_as": "PROPERTY_ONLY",
-            "visualizer": {
-              "type": "COMBO_BOX",
-              "name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d"
-            },
-            "data": "None",
-            "def": "",
-            "meta_data_map": [
-              { "key": "AdvancedProperty", "value": "false" }
-            ],
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "23e51beb-bbd7-4b57-8f94-0109e585f46b" },
-            "display_name": "Reference Source"
-          },
-          {
             "id": "25519fcb-9745-40de-9b9c-a018db94ffde",
             "name": "QuadLinkOutputMode",
             "type_name": "nos.aja.QuadLinkMode",
@@ -1701,27 +1682,6 @@
                   "contents_type": "JobPin",
                   "contents": { },
                   "display_name": "Frame Buffer Format"
-                },
-                {
-                  "id": "23e51beb-bbd7-4b57-8f94-0109e585f46b",
-                  "name": "ReferenceSource",
-                  "type_name": "string",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "PROPERTY_ONLY",
-                  "visualizer": {
-                    "type": "COMBO_BOX",
-                    "name": "aja.ReferenceSource.ee70ba6c-5b6f-40ce-81f9-a29ac963231d"
-                  },
-                  "data": "None",
-                  "referred_by": [
-                    "9bd78ebd-b159-4284-87f9-c4f97a61cff4"
-                  ],
-                  "def": "",
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "false" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { }
                 },
                 {
                   "id": "8a6a249e-e5f6-4e9e-874f-d8b398fbc304",
