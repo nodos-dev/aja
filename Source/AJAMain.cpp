@@ -82,12 +82,15 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	static nosResult MigrateInOutNodes(nosFbNodePtr node, nosBuffer* outBuffer)
 	{
 		auto pluginVersion = node->plugin_version();
-		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
+		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 13;
 		if (!needsMigration)
 			return NOS_RESULT_SUCCESS;
 		// In child nodes, search for Device pin and migrate it
 		fb::TNode cur;
 		node->UnPackTo(&cur);
+		std::erase_if(cur.pins, [](const auto& pin) {
+			return pin->name == "ReferenceSource";
+			});
 		auto* graph = node->contents_as_Graph();
 		if (!graph)
 			return NOS_RESULT_SUCCESS;

@@ -241,7 +241,7 @@ NOS_REGISTER_NAME(string);
 
 std::string GetReferenceStringListName(uint64_t serialNumber) { return "aja.ReferenceSource." + std::to_string(serialNumber); }
 
-nosResult AJADevice::UpdateSettings(const char* entryName, nosBuffer itemValue) {
+nosResult AJADevice::UpdateSettingsCallback(const char* entryName, nosBuffer itemValue) {
     if (!nos::Name(entryName).AsString().starts_with(NSN_Reference))
         return NOS_RESULT_FAILED;
 
@@ -252,7 +252,7 @@ nosResult AJADevice::UpdateSettings(const char* entryName, nosBuffer itemValue) 
     if (device == Devices.end())
         return NOS_RESULT_FAILED;
 
-    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue));
+    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue), false);
     return NOS_RESULT_SUCCESS;
 }
 
@@ -264,7 +264,7 @@ void AJADevice::RegisterSettings() {
     nos::sys::settings::RegisterEntry(
         NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber()),
         NSN_string.AsCStr(),
-        UpdateSettings,
+        UpdateSettingsCallback,
         noneTextBuf,
         REFERENCE_ENTRY_EDITOR_ITEM_NAME,
         std::string(NOS_DEVICE_SUBSYSTEM_NAME) + "\\" + std::to_string(GetSerialNumber()),
@@ -977,7 +977,7 @@ bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
     }
 }
 
-void AJADevice::UpdateReferenceSource(std::string referenceValue)
+void AJADevice::UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry)
 {
     auto ReferenceSource = NTV2_REFERENCE_INVALID;
     if (referenceValue.empty())
@@ -991,10 +991,11 @@ void AJADevice::UpdateReferenceSource(std::string referenceValue)
     if (ReferenceSource != NTV2_REFERENCE_INVALID)
     {
         NTV2ReferenceSource curRef{};
-        if (GetReference(curRef) && curRef != ReferenceSource)
+        if (GetReference(curRef) && curRef != ReferenceSource) {
             SetReference(ReferenceSource);
-
-        
+            if (updateSettingsEntry)
+                nosSettings->UpdateEntryValue((NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber())).c_str(), nosBuffer{ .Data = &referenceValue[0], .Size = referenceValue.length() + 1 });
+        }
     }
 }
 

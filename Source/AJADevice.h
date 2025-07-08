@@ -150,10 +150,10 @@ struct AJADevice : CNTV2Card
 	void UnregisterNode(nos::uuid id);
 
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
-    void UpdateReferenceSource(std::string referenceValue);
+    void UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry);
     void UpdateReferenceNamedValueList();
     void RegisterSettings();
-    static nosResult UpdateSettings(const char* entryName, nosBuffer itemValue);
+    static nosResult UpdateSettingsCallback(const char* entryName, nosBuffer itemValue);
 
     std::unordered_set<NTV2Channel> GetFilteredChannels(bool isInput);
     bool WaitVBL(NTV2Channel, bool isInput, NTV2FieldID fieldId);
