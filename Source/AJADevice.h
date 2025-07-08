@@ -151,7 +151,7 @@ struct AJADevice : CNTV2Card
 
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
     void UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry);
-    void UpdateReferenceNamedValueList();
+    void UpdateReferenceStringList();
     void RegisterSettings();
     static nosResult UpdateSettingsCallback(const char* entryName, nosBuffer itemValue);
 
