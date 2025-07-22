@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 #include <ntv2enums.h>
 

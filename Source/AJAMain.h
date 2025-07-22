@@ -5,7 +5,7 @@
 #pragma once
 
 #include <Nodos/PluginAPI.h>
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 
 #include "ntv2enums.h"

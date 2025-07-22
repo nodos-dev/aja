@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 
 #include "nosDeviceSubsystem/nosDeviceSubsystem.h"
 

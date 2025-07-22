@@ -4,7 +4,7 @@
 
 #include "AJADevice.h"
 
-#include <Nodos/PluginHelpers.hpp>
+#include <Nodos/Plugin.hpp>
 #include <ntv2utils.h>
 
 namespace nos::aja
