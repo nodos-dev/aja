@@ -238,21 +238,18 @@ struct ChannelNodeContext : NodeContext
 
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher(NSN_FrameBufferFormat,
-						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-							   CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
-							   TryUpdateChannel();
-						   });
-		AddPinValueWatcher(NSN_QuadLinkOutputMode,
-						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-							   OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
-							   TryUpdateChannel();
-						   });
-		AddPinValueWatcher(NSN_QuadLinkInputMode,
-						   [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
-							   InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
-							   TryUpdateChannel();
-						   });
+		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_QuadLinkInputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
+		});
 		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ForceInterlaced = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();

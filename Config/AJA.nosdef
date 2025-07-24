@@ -44,6 +44,18 @@
 						"type_name": "nos.sys.vulkan.Buffer",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "NumAudioSamples",
+						"type_name": "uint",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "AudioPacket",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
 					}
 				],
 				"functions": [

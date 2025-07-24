@@ -61,9 +61,10 @@ struct DMAWriteNodeContext : DMANodeBase
 	
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nosResourceShareInfo inputBuffer{};
+		nosResourceShareInfo inputBuffer{}, audioPacket{};
 		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
 		uint32_t curVBLCount = 0;
+		uint32_t numAudioSamples = 0;
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
 			auto& pin = *params->Pins[i];
@@ -73,10 +74,24 @@ struct DMAWriteNodeContext : DMANodeBase
 				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
 			if (pin.Name == NOS_NAME("CurrentVBL"))
 				curVBLCount = *InterpretPinValue<uint32_t>(*pin.Data);
+			if (pin.Name == NOS_NAME("AudioPacket"))
+				audioPacket = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
+			if (pin.Name == NOS_NAME("NumAudioSamples"))
+				numAudioSamples = *InterpretPinValue<uint32_t>(*pin.Data);
 		}
 
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
+
+		bool audioPlaying = false;
+		NTV2AudioSystem audioSys{};
+		Device->GetSDIOutputAudioSystem(Channel, audioSys);
+		Device->IsAudioOutputRunning(audioSys, audioPlaying);
+		if (!audioPlaying)
+		{
+			Device->StartAudioOutput(audioSys, true);
+			Device->SetAudioOutputEraseMode(audioSys, true);
+		}
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
 		auto inputSize = inputBuffer.Memory.Size;
@@ -90,6 +105,25 @@ struct DMAWriteNodeContext : DMANodeBase
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
+
+		if (audioPacket.Memory.Handle && numAudioSamples > 0)
+		{
+			auto audioBuffer = nosVulkan->Map(&audioPacket);
+			if (audioBuffer)
+			{
+				// audioBuffer contains 32-bit words with 24-bit samples in MSB
+				ULWord byteCount = numAudioSamples * sizeof(ULWord); // 4 bytes per sample
+				
+				// Get current play head position to write ahead of it
+				ULWord currentPlayHead = 0;
+				Device->ReadAudioLastOut(currentPlayHead, audioSys);
+				
+				// Write audio data ahead of the play head
+				// Use the current play head position as the write offset
+				Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, currentPlayHead, byteCount);
+				NumAudioBytesWritten += byteCount;
+			}
+		}
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,
@@ -105,7 +139,20 @@ struct DMAWriteNodeContext : DMANodeBase
 		DMANodeBase::OnPathStart();
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
+		NumAudioBytesWritten = 0;
 	}
+
+	void OnPathStop() override
+	{
+		DMANodeBase::OnPathStop();
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return;
+		NTV2AudioSystem audioSys{};
+		Device->GetSDIOutputAudioSystem(Channel, audioSys);
+		Device->StopAudioOutput(audioSys);
+	}
+
+	ULWord NumAudioBytesWritten;
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions* functions)
