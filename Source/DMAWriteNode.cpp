@@ -7,6 +7,7 @@
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <Nodos/Utils/Stopwatch.hpp>
 
+#include <nos.audio/Audio_generated.h>
 #include "AJA_generated.h"
 #include "AJADevice.h"
 #include "AJAMain.h"
@@ -64,7 +65,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		nosResourceShareInfo inputBuffer{}, audioPacket{};
 		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
 		uint32_t curVBLCount = 0;
-		uint32_t numAudioSamples = 0;
+		audio::AudioPacketDescriptor audioPacketDesc = {};
 		for (size_t i = 0; i < params->PinCount; ++i)
 		{
 			auto& pin = *params->Pins[i];
@@ -76,8 +77,8 @@ struct DMAWriteNodeContext : DMANodeBase
 				curVBLCount = *InterpretPinValue<uint32_t>(*pin.Data);
 			if (pin.Name == NOS_NAME("AudioPacket"))
 				audioPacket = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
-			if (pin.Name == NOS_NAME("NumAudioSamples"))
-				numAudioSamples = *InterpretPinValue<uint32_t>(*pin.Data);
+			if (pin.Name == NOS_NAME("AudioPacketDescriptor"))
+				audioPacketDesc = *InterpretPinValue<audio::AudioPacketDescriptor>(*pin.Data);
 		}
 
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
@@ -89,8 +90,17 @@ struct DMAWriteNodeContext : DMANodeBase
 		Device->IsAudioOutputRunning(audioSys, audioPlaying);
 		if (!audioPlaying)
 		{
+			Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys);
 			Device->StartAudioOutput(audioSys, true);
 			Device->SetAudioOutputEraseMode(audioSys, true);
+		}
+		else
+		{
+			ULWord audioChannelCount{};
+			Device->GetNumberAudioChannels(audioChannelCount, audioSys);
+			if (audioChannelCount != audioPacketDesc.channel_count())
+				if (!Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys))
+					nosEngine.LogE("Failed to set audio channel count for output");
 		}
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
@@ -106,22 +116,35 @@ struct DMAWriteNodeContext : DMANodeBase
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
 
-		if (audioPacket.Memory.Handle && numAudioSamples > 0)
+		if (audioPacket.Memory.Handle && audioPacketDesc.num_samples() > 0)
 		{
 			auto audioBuffer = nosVulkan->Map(&audioPacket);
 			if (audioBuffer)
 			{
+				ULWord wrapAddress = 0;
+				Device->GetAudioWrapAddress(wrapAddress, audioSys);
+				
 				// audioBuffer contains 32-bit words with 24-bit samples in MSB
-				ULWord byteCount = numAudioSamples * sizeof(ULWord); // 4 bytes per sample
-				
-				// Get current play head position to write ahead of it
-				ULWord currentPlayHead = 0;
-				Device->ReadAudioLastOut(currentPlayHead, audioSys);
-				
-				// Write audio data ahead of the play head
-				// Use the current play head position as the write offset
-				Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, currentPlayHead, byteCount);
-				NumAudioBytesWritten += byteCount;
+				ULWord byteCount = audioPacketDesc.num_samples() * audioPacketDesc.channel_count() *
+								   sizeof(ULWord); // 4 bytes per sample
+				if (LastWrittenAudioBufferOffset + byteCount > wrapAddress)
+				{
+					ULWord firstPartSize = wrapAddress - LastWrittenAudioBufferOffset;
+					// Write audio data up to the wrap address
+					Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, LastWrittenAudioBufferOffset, firstPartSize);
+					// Write the remaining audio data from the start
+					ULWord remainingSize = byteCount - firstPartSize;
+					Device->DMAWriteAudio(
+						audioSys, (const ULWord*)(audioBuffer + firstPartSize), 0, remainingSize);
+					LastWrittenAudioBufferOffset = remainingSize;
+				}
+				else
+				{
+					// Write audio data ahead of the play head
+					// Use the current play head position as the write offset
+					Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, LastWrittenAudioBufferOffset, byteCount);
+					LastWrittenAudioBufferOffset += byteCount;
+				}
 			}
 		}
 
@@ -139,7 +162,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		DMANodeBase::OnPathStart();
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
-		NumAudioBytesWritten = 0;
+		LastWrittenAudioBufferOffset = 0;
 	}
 
 	void OnPathStop() override
@@ -152,7 +175,8 @@ struct DMAWriteNodeContext : DMANodeBase
 		Device->StopAudioOutput(audioSys);
 	}
 
-	ULWord NumAudioBytesWritten;
+	ULWord LastWrittenAudioBufferOffset;
+	ULWord LastAudioLastOut = 0;
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions* functions)

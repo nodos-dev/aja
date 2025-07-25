@@ -61,6 +61,12 @@ nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERAT
 # nos.sys.device
 nos_get_module("nos.sys.device" "0.11" NOS_SYS_DEVICE_TARGET)
 
+# nos.audio
+nos_get_module("nos.audio" "0.1" NOS_AUDIO_TARGET)
+nos_find_module_path("nos.audio" "0.1" NOS_AUDIO_PATH)
+set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
+nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" "${NOS_AUDIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosAudio)
+
 # nos.sync
 nos_get_module("nos.sync" "10.1" NOS_SYNC_TARGET)
 
@@ -70,11 +76,12 @@ set(GENERATED_DIR "${SOURCE_DIR}/__generated__")
 nos_generate_flatbuffers("${CMAKE_CURRENT_SOURCE_DIR}/Config" "${GENERATED_DIR}" "cpp" 
     "${NOS_UTILITIES_PATH};${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" nosAJA_generated)
 
-list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2
+list(APPEND DEPENDENCIES generated_nosAJA_dep_nosMediaIO generated_nosAJA_dep_nosUtilities nosAJA_generated ajantv2 generated_nosAJA_dep_nosAudio
     ${NOS_SYS_VULKAN_TARGET}
     ${NOS_SYS_DEVICE_TARGET}
     ${NOS_SYNC_TARGET}
     ${NOS_SYS_SETTINGS_TARGET_NAME}
+    ${NOS_AUDIO_TARGET}
     ${NOS_PLUGIN_SDK_TARGET})
 list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
@@ -82,6 +89,7 @@ list(APPEND INCLUDE_FOLDERS
     ${GENERATED_DIR}
     ${NOS_UTILITIES_GENERATED_DIR}
     ${NOS_MEDIAIO_GENERATED_DIR}
+    ${NOS_AUDIO_GENERATED_DIR}
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
 #   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win

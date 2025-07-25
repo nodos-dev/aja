@@ -46,8 +46,8 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
-						"name": "NumAudioSamples",
-						"type_name": "uint",
+						"name": "AudioPacketDescriptor",
+						"type_name": "nos.audio.AudioPacketDescriptor",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
