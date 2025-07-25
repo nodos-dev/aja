@@ -84,6 +84,8 @@ struct DMAWriteNodeContext : DMANodeBase
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
+		bool receivingAudio = audioPacket.Memory.Handle && audioPacketDesc.num_samples() > 0;
+
 		bool audioPlaying = false;
 		NTV2AudioSystem audioSys{};
 		Device->GetSDIOutputAudioSystem(Channel, audioSys);
@@ -94,7 +96,7 @@ struct DMAWriteNodeContext : DMANodeBase
 			Device->StartAudioOutput(audioSys, true);
 			Device->SetAudioOutputEraseMode(audioSys, true);
 		}
-		else
+		else if (receivingAudio)
 		{
 			ULWord audioChannelCount{};
 			Device->GetNumberAudioChannels(audioChannelCount, audioSys);
@@ -176,7 +178,6 @@ struct DMAWriteNodeContext : DMANodeBase
 	}
 
 	ULWord LastWrittenAudioBufferOffset;
-	ULWord LastAudioLastOut = 0;
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions* functions)
