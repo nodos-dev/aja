@@ -16,6 +16,8 @@
 namespace nos::aja
 {
 
+#define NOS_AJA_AUDIO_DIAGNOSTICS 0
+
 struct DMAWriteNodeContext : DMANodeBase
 {
 	DMAWriteNodeContext() : DMANodeBase(DMA_WRITE)
@@ -118,14 +120,15 @@ struct DMAWriteNodeContext : DMANodeBase
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
 
+		ULWord wrapAddress = 0;
+		Device->GetAudioWrapAddress(wrapAddress, audioSys);
+		const char* status = "Skipped";
 		if (audioPacket.Memory.Handle && audioPacketDesc.num_samples() > 0)
 		{
 			auto audioBuffer = nosVulkan->Map(&audioPacket);
 			if (audioBuffer)
 			{
-				ULWord wrapAddress = 0;
-				Device->GetAudioWrapAddress(wrapAddress, audioSys);
-				
+				status = "Written";
 				// audioBuffer contains 32-bit words with 24-bit samples in MSB
 				ULWord byteCount = audioPacketDesc.num_samples() * audioPacketDesc.channel_count() *
 								   sizeof(ULWord); // 4 bytes per sample
@@ -149,6 +152,14 @@ struct DMAWriteNodeContext : DMANodeBase
 				}
 			}
 		}
+
+#if NOS_AJA_AUDIO_DIAGNOSTICS
+		ULWord playheadPos{};
+		Device->ReadAudioLastOut(playheadPos, audioSys);
+		float playhead = 100.f * (float(playheadPos) / float(wrapAddress));
+		float lastWritten = 100.f * (float(LastWrittenAudioBufferOffset) / float(wrapAddress));
+		nosEngine.LogI("%s, Playhead: %.2f, LastWritten: %.2f", status, playhead, lastWritten);
+#endif
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,
