@@ -120,6 +120,12 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
+						"name": "AudioBufferToWrite",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
 						"name": "CurrentVBL",
 						"type_name": "uint",
 						"show_as": "INPUT_PIN",
@@ -128,6 +134,18 @@
 					{
 						"name": "Output",
 						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "AudioOutput",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "AudioPacketDescriptor",
+						"type_name": "nos.audio.AudioPacketDescriptor",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					}

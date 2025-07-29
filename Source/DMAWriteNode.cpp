@@ -95,7 +95,9 @@ struct DMAWriteNodeContext : DMANodeBase
 		if (!audioPlaying)
 		{
 			Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys);
-			Device->StartAudioOutput(audioSys, true);
+			// Start writing audio data from 0.2 seconds ahead of the play head
+			LastWrittenAudioBufferOffset = 48000 / 5 * sizeof(ULWord) * audioPacketDesc.channel_count();
+			Device->StartAudioOutput(audioSys, false);
 			Device->SetAudioOutputEraseMode(audioSys, true);
 		}
 		else if (receivingAudio)
