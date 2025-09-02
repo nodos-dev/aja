@@ -40,25 +40,25 @@ set(CMAKE_DEBUG_POSTFIX "")
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 
 # nos.sys.vulkan
-nos_get_module("nos.sys.vulkan" "6.28" NOS_SYS_VULKAN_TARGET)
+nos_get_module("nos.sys.vulkan" "7.0" NOS_SYS_VULKAN_TARGET)
 
 # nos.sys.settings
-nos_get_module("nos.sys.settings" "1.1" NOS_SYS_SETTINGS_TARGET_NAME)
+nos_get_module("nos.sys.settings" "2.0" NOS_SYS_SETTINGS_TARGET_NAME)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "2.11" NOS_MEDIAIO_TARGET)
-nos_find_module_path("nos.mediaio" "2.11" NOS_MEDIAIO_PATH)
+nos_get_module("nos.mediaio" "3.0" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "3.0" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
-nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
+nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Types" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
 nos_get_module("nos.utilities" "3.21" NOS_UTILITIES_TARGET)
 nos_find_module_path("nos.utilities" "3.21" NOS_UTILITIES_PATH)
 set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
-nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosUtilities)
+nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Types" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosUtilities)
 
 # nos.sys.device
-nos_get_module("nos.sys.device" "0.11" NOS_SYS_DEVICE_TARGET)
+nos_get_module("nos.sys.device" "1.0" NOS_SYS_DEVICE_TARGET)
 
 # nos.sync
 nos_get_module("nos.sync" "10.1" NOS_SYNC_TARGET)
