@@ -2749,7 +2749,7 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": "WARNING",
+                        "data": "FAILURE",
                         "def": "INFO",
                         "contents_type": "JobPin",
                         "contents": { }
