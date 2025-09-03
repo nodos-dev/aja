@@ -977,7 +977,7 @@ bool AJADevice::CheckFirmware(std::string& msg)
     {
         if (it->second > date)
         {
-            msg = "Installed firmware (" + date + ") is out of date. Recommended firmware date is " + it->second + ". Please update your device.";
+            msg = "Installed firmware (" + date + ") is out of date.\nRecommended firmware date is " + it->second + ".\nPlease update your device.";
             return false;
         }
         return true;
