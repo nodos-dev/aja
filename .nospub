@@ -6,7 +6,8 @@
         "Assets/**",
         "Shaders/**",
         "Binaries/*.{dll,dylib,so}",
-        "Types/**"
+        "Types/**",
+        "Nodes/*.nosnode"
     ],
     "trigger_publish_globs": [
         "Source/**",
