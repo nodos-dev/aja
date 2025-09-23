@@ -256,7 +256,7 @@ nosResult AJADevice::UpdateSettingsCallback(const char* entryName, nosBuffer ite
     if (device == Devices.end())
         return NOS_RESULT_FAILED;
 
-    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue), false);
+    device->second->UpdateReferenceSource(nos::InterpretObjectData<const char>(itemValue), false);
     return NOS_RESULT_SUCCESS;
 }
 

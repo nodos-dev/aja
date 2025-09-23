@@ -38,7 +38,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		{
 			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
 				return;
-			auto* channelInfo = InterpretPinValue<ChannelInfo>(value);
+			auto* channelInfo = InterpretObjectData<ChannelInfo>(value);
 			Device = nullptr;
 			LastChannelInfo = {};
 			if (!channelInfo || !channelInfo->device())
@@ -59,32 +59,18 @@ struct DMAWriteNodeContext : DMANodeBase
 		}
 	}
 	
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		nosResourceShareInfo inputBuffer{};
-		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
-		uint32_t curVBLCount = 0;
-		for (size_t i = 0; i < params->PinCount; ++i)
-		{
-			auto& pin = *params->Pins[i];
-			if (pin.Name == NOS_NAME_STATIC("Input"))
-				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
-			if (pin.Name == NOS_NAME("FieldType"))
-				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
-			if (pin.Name == NOS_NAME("CurrentVBL"))
-				curVBLCount = *InterpretPinValue<uint32_t>(*pin.Data);
-		}
+		TypedObjectRef inputBufferObject = params.GetPinObject<vkss::Buffer>(NOS_NAME("Input"));
+		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
+		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
 
-		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
+		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
-		auto buffer = nosVulkan->Map(&inputBuffer);
-		auto inputSize = inputBuffer.Memory.Size;
-
-		//nosVulkan->Begin("Flush before AJA DMA Write", &cmd);
-		//nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &event};
-		//nosVulkan->End(cmd, &end);
-		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
+		auto buffer = nosVulkan->Map(inputBufferObject);
+		auto inputBufferInfo = *vkss::GetResourceInfo(inputBufferObject);
+		auto inputSize = inputBufferInfo.Size;
 
 		if (curVBLCount == 0)
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);

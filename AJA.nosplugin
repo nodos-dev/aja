@@ -9,11 +9,11 @@
         "dependencies": [
             {
                 "name": "nos.sys.vulkan",
-                "version": "7.0"
+                "version": "8.0"
             },
             {
                 "name": "nos.mediaio",
-                "version": "3.0"
+                "version": "3.1"
             },
 			{
 				"name": "nos.utilities",

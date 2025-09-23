@@ -20,13 +20,12 @@ struct DMAReadNodeContext : DMANodeBase
 	{
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* params) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams execParams = params;
-		nosResourceShareInfo bufferToWrite = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*execParams[NOS_NAME_STATIC("BufferToWrite")].Data));
-		auto fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*execParams[NOS_NAME_STATIC("FieldType")].Data);
-		ChannelInfo* channelInfo = InterpretPinValue<ChannelInfo>(*execParams[NOS_NAME_STATIC("Channel")].Data);
-		uint32_t curVBLCount = *InterpretPinValue<uint32_t>(*execParams[NOS_NAME_STATIC("CurrentVBL")].Data);
+		TypedObjectRef dstBufferObject = params.GetPinObject<vkss::Buffer>(NOS_NAME("BufferToWrite"));
+		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
+		const ChannelInfo* channelInfo = params.GetPinData<ChannelInfo>(NOS_NAME("Channel"));
+		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
 
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
@@ -49,28 +48,29 @@ struct DMAReadNodeContext : DMANodeBase
 			Mode = AJADevice::SL;
 		auto [_, bufferSize] = GetDMAInfo();
 
-		if (!bufferToWrite.Memory.Handle)
+		if (!dstBufferObject.IsValid())
 		{
 			nosEngine.LogE("DMA read target buffer is not valid.");
 			return NOS_RESULT_FAILED;
 		}
-		if (bufferToWrite.Info.Buffer.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
+		const auto& dstBufferInfo = *vkss::GetResourceInfo(dstBufferObject);
+		if (dstBufferInfo.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
 		{
 			nosEngine.LogE("DMA read target buffer size or format is not valid.");
 			return NOS_RESULT_FAILED;
 		}
 
-		uint8_t* buffer = nosVulkan->Map(&bufferToWrite);
-		auto inputBufferSize = bufferToWrite.Memory.Size;
+		uint8_t* buffer = nosVulkan->Map(dstBufferObject);
+		auto inputBufferSize = dstBufferInfo.Size;
 
 		if (curVBLCount == 0)
 			Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputBufferSize);
 
-		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
+		nosVulkan->SetResourceFieldType(dstBufferObject, (nosTextureFieldType)fieldType);
 
-		nosEngine.SetPinValue(execParams[NOS_NAME_STATIC("Output")].Id, Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
+		SetPinObject(NOS_NAME("Output"), dstBufferObject);
 
 		return NOS_RESULT_SUCCESS;
 	}
