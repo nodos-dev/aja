@@ -1,387 +1,387 @@
 {
-	"nodes": [
-		{
-			"class_name": "DMAWrite",
-			"menu_info": {
-				"category": "Device|AJA",
-				"class_name": "DMAWrite",
-				"display_name": "DMA Write"
-			},
-			"node": {
-				"class_name": "DMAWrite",
-				"display_name": "AJA DMA Write",
-				"contents_type": "Job",
-				"description": "Sends YCbCr frames to the specified channel",
-				"pins": [
-					{
-						"name": "Run",
-						"type_name": "nos.exe",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "FieldType",
-						"display_name": "Field Type",
-						"type_name": "nos.sys.vulkan.FieldType",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "PROGRESSIVE"
-					},
-					{
-						"name": "Channel",
-						"type_name": "nos.aja.ChannelInfo",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "CurrentVBL",
-						"type_name": "uint",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "Input",
-						"type_name": "nos.sys.vulkan.Buffer",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					}
-				],
-				"functions": [
-					{
-						"class_name": "Drop",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Propagate",
-								"type_name": "nos.exe",
-								"show_as": "OUTPUT_PIN"
-							}
-						],
-						"scheduling_type": "Event"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "DMARead",
-			"menu_info": {
-				"category": "Device|AJA",
-				"class_name": "DMARead",
-				"display_name": "DMA Read"
-			},
-			"node": {
-				"class_name": "DMARead",
-				"display_name": "AJA DMA Read",
-				"contents_type": "Job",
-				"description": "Reads YCbCr frames from the specified channel",
-				"pins": [
-					{
-						"name": "Run",
-						"type_name": "nos.exe",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "DMA Complete",
-						"type_name": "nos.exe",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "FieldType",
-						"display_name": "Field Type",
-						"type_name": "nos.sys.vulkan.FieldType",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "PROGRESSIVE"
-					},
-					{
-						"name": "Channel",
-						"type_name": "nos.aja.ChannelInfo",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "BufferToWrite",
-						"type_name": "nos.sys.vulkan.Buffer",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "CurrentVBL",
-						"type_name": "uint",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "Output",
-						"type_name": "nos.sys.vulkan.Buffer",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					}
-				],
-				"functions": [
-					{
-						"class_name": "Drop",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Propagate",
-								"type_name": "nos.exe",
-								"show_as": "OUTPUT_PIN"
-							}
-						],
-						"scheduling_type": "Event"
-					}
-				]
-			}
-		},
-		{
-			"class_name": "WaitVBL",
-			"menu_info": {
-				"category": "Device|AJA",
-				"class_name": "WaitVBL",
-				"display_name": "Wait VBL"
-			},
-			"node": {
-				"class_name": "WaitVBL",
-				"display_name": "AJA Wait VBL",
-				"contents_type": "Job",
-				"description": "",
-				"pins": [
-					{
-						"name": "Run",
-						"type_name": "nos.exe",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "VBL",
-						"type_name": "nos.exe",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "WaitField",
-						"display_name": "Wait Field",
-						"type_name": "nos.sys.vulkan.FieldType",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": "PROGRESSIVE",
-						"description": "Field to wait VBL on. If set to UNKNOWN, it will keep track of fields to wait on its own. If signal is progressive, this property is ignored."
-					},
-					{
-						"name": "FieldType",
-						"display_name": "Field Type",
-						"type_name": "nos.sys.vulkan.FieldType",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-						"data": "UNKNOWN",
-						"description": "Which field this VBL belongs to",
-						"readonly": true
-					},
-					{
-						"name": "Channel",
-						"type_name": "nos.aja.ChannelInfo",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "CurrentVBL",
-						"type_name": "uint",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "EnableSync",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference.",
-						"data": true
-					}
-				],
-				"functions": [
-					{
-						"class_name": "VBLFailed",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Propagate",
-								"type_name": "nos.exe",
-								"show_as": "OUTPUT_PIN"
-							}
-						],
-						"scheduling_type": "Event"
-					},
-					{
-						"class_name": "Drop",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Trigger",
-								"type_name": "nos.exe",
-								"show_as": "INPUT_PIN"
-							}
-						]
-					}
-				]
-			}
-		},
-		{
-			"class_name": "Channel",
-			"menu_info": {
-				"category": "Device|AJA",
-				"class_name": "Channel",
-				"display_name": "Channel"
-			},
-			"node": {
-				"class_name": "Channel",
-				"display_name": "AJA Channel",
-				"contents_type": "Job",
-				"description": "Debugging/test node for opening channels",
-				"pins": [
-					{
-						"name": "Run",
-						"type_name": "nos.exe",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_ONLY"
-					},
-					{
-						"name": "Continue",
-						"type_name": "nos.exe",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "Channel",
-						"type_name": "nos.aja.ChannelInfo",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "IsOpen",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "IsInput",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "Device",
-						"type_name": "nos.sys.device.DeviceInfo",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "ChannelName",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "Resolution",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "FrameRate",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "IsInterlaced",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "FrameBufferFormat",
-						"display_name": "Frame Buffer Format",
-						"type_name": "nos.mediaio.YCbCrPixelFormat",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "IsQuad",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "QuadLinkInputMode",
-						"type_name": "nos.aja.QuadLinkInputMode",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "QuadLinkOutputMode",
-						"type_name": "nos.aja.QuadLinkMode",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY"
-					},
-					{
-						"name": "ForceInterlaced",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY"
-					},
-					{
-						"name": "AcquireDevice",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "If true, Nodos AJA plugin will lock the device for exclusive use.\nOther programs will not be able to use the device until Nodos is closed.",
-						"data": true
-					}
-				],
-				"functions": [
-					{
-						"class_name": "TryUpdateChannel",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "InTrigger",
-								"type_name": "nos.exe",
-								"show_as": "INPUT_PIN"
-							}
-						]
-					},
-					{
-						"class_name": "Drop",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Trigger",
-								"type_name": "nos.exe",
-								"show_as": "INPUT_PIN"
-							}
-						]
-					},
-					{
-						"class_name": "CheckChannelConfig",
-						"contents_type": "Job"
-					},
-					{
-						"class_name": "CheckChannelStatus",
-						"contents_type": "Job",
-						"pins": [
-							{
-								"name": "Tick",
-								"type_name": "nos.exe",
-								"show_as": "INPUT_PIN",
-								"can_show_as": "INPUT_PIN_OR_PROPERTY"
-							}
-						]
-					}
-				]
-			}
-		}
-	]
+    "nodes": [
+        {
+            "class_name": "DMAWrite",
+            "menu_info": {
+                "category": "Device|AJA",
+                "class_name": "DMAWrite",
+                "display_name": "DMA Write"
+            },
+            "node": {
+                "class_name": "DMAWrite",
+                "display_name": "AJA DMA Write",
+                "contents_type": "Job",
+                "description": "Sends YCbCr frames to the specified channel",
+                "pins": [
+                    {
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "FieldType",
+                        "display_name": "Field Type",
+                        "type_name": "nos.sys.vulkan.FieldType",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": "PROGRESSIVE"
+                    },
+                    {
+                        "name": "Channel",
+                        "type_name": "nos.aja.ChannelInfo",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "CurrentVBL",
+                        "type_name": "uint",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "Input",
+                        "type_name": "nos.sys.vulkan.Buffer",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    }
+                ],
+                "functions": [
+                    {
+                        "class_name": "Drop",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Propagate",
+                                "type_name": "nos.exe",
+                                "show_as": "OUTPUT_PIN"
+                            }
+                        ],
+                        "scheduling_type": "Event"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "DMARead",
+            "menu_info": {
+                "category": "Device|AJA",
+                "class_name": "DMARead",
+                "display_name": "DMA Read"
+            },
+            "node": {
+                "class_name": "DMARead",
+                "display_name": "AJA DMA Read",
+                "contents_type": "Job",
+                "description": "Reads YCbCr frames from the specified channel",
+                "pins": [
+                    {
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "DMA Complete",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "FieldType",
+                        "display_name": "Field Type",
+                        "type_name": "nos.sys.vulkan.FieldType",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": "PROGRESSIVE"
+                    },
+                    {
+                        "name": "Channel",
+                        "type_name": "nos.aja.ChannelInfo",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "BufferToWrite",
+                        "type_name": "nos.sys.vulkan.Buffer",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "CurrentVBL",
+                        "type_name": "uint",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "Output",
+                        "type_name": "nos.sys.vulkan.Buffer",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    }
+                ],
+                "functions": [
+                    {
+                        "class_name": "Drop",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Propagate",
+                                "type_name": "nos.exe",
+                                "show_as": "OUTPUT_PIN"
+                            }
+                        ],
+                        "scheduling_type": "Event"
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "WaitVBL",
+            "menu_info": {
+                "category": "Device|AJA",
+                "class_name": "WaitVBL",
+                "display_name": "Wait VBL"
+            },
+            "node": {
+                "class_name": "WaitVBL",
+                "display_name": "AJA Wait VBL",
+                "contents_type": "Job",
+                "description": "",
+                "pins": [
+                    {
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "VBL",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "WaitField",
+                        "display_name": "Wait Field",
+                        "type_name": "nos.sys.vulkan.FieldType",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "data": "PROGRESSIVE",
+                        "description": "Field to wait VBL on. If set to UNKNOWN, it will keep track of fields to wait on its own. If signal is progressive, this property is ignored."
+                    },
+                    {
+                        "name": "FieldType",
+                        "display_name": "Field Type",
+                        "type_name": "nos.sys.vulkan.FieldType",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
+                        "data": "UNKNOWN",
+                        "description": "Which field this VBL belongs to",
+                        "readonly": true
+                    },
+                    {
+                        "name": "Channel",
+                        "type_name": "nos.aja.ChannelInfo",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "CurrentVBL",
+                        "type_name": "uint",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "EnableSync",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference.",
+                        "data": true
+                    }
+                ],
+                "functions": [
+                    {
+                        "class_name": "VBLFailed",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Propagate",
+                                "type_name": "nos.exe",
+                                "show_as": "OUTPUT_PIN"
+                            }
+                        ],
+                        "scheduling_type": "Event"
+                    },
+                    {
+                        "class_name": "Drop",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Trigger",
+                                "type_name": "nos.exe",
+                                "show_as": "INPUT_PIN"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "class_name": "Channel",
+            "menu_info": {
+                "category": "Device|AJA",
+                "class_name": "Channel",
+                "display_name": "Channel"
+            },
+            "node": {
+                "class_name": "Channel",
+                "display_name": "AJA Channel",
+                "contents_type": "Job",
+                "description": "Debugging/test node for opening channels",
+                "pins": [
+                    {
+                        "name": "Run",
+                        "type_name": "nos.exe",
+                        "show_as": "INPUT_PIN",
+                        "can_show_as": "INPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "Continue",
+                        "type_name": "nos.exe",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_ONLY"
+                    },
+                    {
+                        "name": "Channel",
+                        "type_name": "nos.aja.ChannelInfo",
+                        "show_as": "OUTPUT_PIN",
+                        "can_show_as": "OUTPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "IsOpen",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "IsInput",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "Device",
+                        "type_name": "nos.sys.device.DeviceInfo",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "ChannelName",
+                        "type_name": "string",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "Resolution",
+                        "type_name": "string",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "FrameRate",
+                        "type_name": "string",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "IsInterlaced",
+                        "type_name": "string",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "FrameBufferFormat",
+                        "display_name": "Frame Buffer Format",
+                        "type_name": "nos.mediaio.YCbCrPixelFormat",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "IsQuad",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "QuadLinkInputMode",
+                        "type_name": "nos.aja.QuadLinkInputMode",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "QuadLinkOutputMode",
+                        "type_name": "nos.aja.QuadLinkMode",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "PROPERTY_ONLY"
+                    },
+                    {
+                        "name": "ForceInterlaced",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                    },
+                    {
+                        "name": "AcquireDevice",
+                        "type_name": "bool",
+                        "show_as": "PROPERTY",
+                        "can_show_as": "INPUT_PIN_OR_PROPERTY",
+                        "description": "If true, Nodos AJA plugin will lock the device for exclusive use.\nOther programs will not be able to use the device until Nodos is closed.",
+                        "data": true
+                    }
+                ],
+                "functions": [
+                    {
+                        "class_name": "TryUpdateChannel",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "InTrigger",
+                                "type_name": "nos.exe",
+                                "show_as": "INPUT_PIN"
+                            }
+                        ]
+                    },
+                    {
+                        "class_name": "Drop",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Trigger",
+                                "type_name": "nos.exe",
+                                "show_as": "INPUT_PIN"
+                            }
+                        ]
+                    },
+                    {
+                        "class_name": "CheckChannelConfig",
+                        "contents_type": "Job"
+                    },
+                    {
+                        "class_name": "CheckChannelStatus",
+                        "contents_type": "Job",
+                        "pins": [
+                            {
+                                "name": "Tick",
+                                "type_name": "nos.exe",
+                                "show_as": "INPUT_PIN",
+                                "can_show_as": "INPUT_PIN_OR_PROPERTY"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
 }
