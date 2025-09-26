@@ -838,7 +838,7 @@
                 {
                   "id": "01214362-be35-4712-88e8-2b8db2454544",
                   "name": "GPUEventRef",
-                  "type_name": "nos.sys.vulkan.GPUEventResource",
+                  "type_name": "nos.sys.vulkan.GPUEventHolder",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
@@ -1326,7 +1326,7 @@
                 {
                   "id": "a538f85f-d3e3-4189-b015-6e266e03e15c",
                   "name": "InputGPUEventRef",
-                  "type_name": "nos.sys.vulkan.GPUEventResource",
+                  "type_name": "nos.sys.vulkan.GPUEventHolder",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizer": {
@@ -1462,7 +1462,7 @@
                 {
                   "id": "89f767ed-6d06-440b-ab6d-18fb79140abb",
                   "name": "GPUEventRef",
-                  "type_name": "nos.sys.vulkan.GPUEventResource",
+                  "type_name": "nos.sys.vulkan.GPUEventHolder",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
