@@ -7,6 +7,7 @@
 #include <nosVulkanSubsystem/Helpers.hpp>
 #include <Nodos/Utils/Stopwatch.hpp>
 
+#include <nos.audio/Audio_generated.h>
 #include "AJA_generated.h"
 #include "AJADevice.h"
 #include "AJAMain.h"
@@ -15,9 +16,13 @@
 namespace nos::aja
 {
 
+#define NOS_AJA_AUDIO_DIAGNOSTICS 0
+
 struct DMAWriteNodeContext : DMANodeBase
 {
-	DMAWriteNodeContext() : DMANodeBase(DMA_WRITE)
+	DMAWriteNodeContext()
+		: DMANodeBase(DMA_WRITE)
+		, LastWrittenAudioBufferOffset(0)
 	{
 	}
 
@@ -64,9 +69,35 @@ struct DMAWriteNodeContext : DMANodeBase
 		TypedObjectRef inputBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
 		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
+		TypedObjectRef audioPacket = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("AudioPacket"));
+		auto audioPacketDesc = *params.GetPinData<audio::AudioPacketDescriptor>(NOS_NAME("AudioPacketDescriptor"));
+
 
 		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
+
+		bool receivingAudio = audioPacket && audioPacketDesc.num_samples() > 0;
+
+		bool audioPlaying = false;
+		NTV2AudioSystem audioSys{};
+		Device->GetSDIOutputAudioSystem(Channel, audioSys);
+		Device->IsAudioOutputRunning(audioSys, audioPlaying);
+		if (!audioPlaying)
+		{
+			Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys);
+			// Start writing audio data from 0.2 seconds ahead of the play head
+			LastWrittenAudioBufferOffset = 48000 / 5 * sizeof(ULWord) * audioPacketDesc.channel_count();
+			Device->StartAudioOutput(audioSys, false);
+			Device->SetAudioOutputEraseMode(audioSys, true);
+		}
+		else if (receivingAudio)
+		{
+			ULWord audioChannelCount{};
+			Device->GetNumberAudioChannels(audioChannelCount, audioSys);
+			if (audioChannelCount != audioPacketDesc.channel_count())
+				if (!Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys))
+					nosEngine.LogE("Failed to set audio channel count for output");
+		}
 
 		auto buffer = nosVulkan->Map(inputBufferObject);
 		auto inputBufferInfo = *sys::vulkan::GetResourceInfo(inputBufferObject);
@@ -76,6 +107,47 @@ struct DMAWriteNodeContext : DMANodeBase
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
+
+		ULWord wrapAddress = 0;
+		Device->GetAudioWrapAddress(wrapAddress, audioSys);
+		const char* status = "Skipped";
+		if (audioPacket && audioPacketDesc.num_samples() > 0)
+		{
+			auto audioBuffer = nosVulkan->Map(audioPacket);
+			if (audioBuffer)
+			{
+				status = "Written";
+				// audioBuffer contains 32-bit words with 24-bit samples in MSB
+				ULWord byteCount = audioPacketDesc.num_samples() * audioPacketDesc.channel_count() *
+								   sizeof(ULWord); // 4 bytes per sample
+				if (LastWrittenAudioBufferOffset + byteCount > wrapAddress)
+				{
+					ULWord firstPartSize = wrapAddress - LastWrittenAudioBufferOffset;
+					// Write audio data up to the wrap address
+					Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, LastWrittenAudioBufferOffset, firstPartSize);
+					// Write the remaining audio data from the start
+					ULWord remainingSize = byteCount - firstPartSize;
+					Device->DMAWriteAudio(
+						audioSys, (const ULWord*)(audioBuffer + firstPartSize), 0, remainingSize);
+					LastWrittenAudioBufferOffset = remainingSize;
+				}
+				else
+				{
+					// Write audio data ahead of the play head
+					// Use the current play head position as the write offset
+					Device->DMAWriteAudio(audioSys, (const ULWord*)audioBuffer, LastWrittenAudioBufferOffset, byteCount);
+					LastWrittenAudioBufferOffset += byteCount;
+				}
+			}
+		}
+
+#if NOS_AJA_AUDIO_DIAGNOSTICS
+		ULWord playheadPos{};
+		Device->ReadAudioLastOut(playheadPos, audioSys);
+		float playhead = 100.f * (float(playheadPos) / float(wrapAddress));
+		float lastWritten = 100.f * (float(LastWrittenAudioBufferOffset) / float(wrapAddress));
+		nosEngine.LogI("%s, Playhead: %.2f, LastWritten: %.2f", status, playhead, lastWritten);
+#endif
 
 		nosScheduleNodeParams schedule {
 			.NodeId = NodeId,
@@ -91,7 +163,20 @@ struct DMAWriteNodeContext : DMANodeBase
 		DMANodeBase::OnPathStart();
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
+		LastWrittenAudioBufferOffset = 0;
 	}
+
+	void OnPathStop() override
+	{
+		DMANodeBase::OnPathStop();
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return;
+		NTV2AudioSystem audioSys{};
+		Device->GetSDIOutputAudioSystem(Channel, audioSys);
+		Device->StopAudioOutput(audioSys);
+	}
+
+	ULWord LastWrittenAudioBufferOffset;
 };
 
 nosResult RegisterDMAWriteNode(nosNodeFunctions* functions)

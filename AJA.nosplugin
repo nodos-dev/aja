@@ -38,7 +38,11 @@
 			{
 				"name": "nos.sys.settings",
 				"version": "3.0"
-			}
+			},
+      {
+        "name": "nos.audio",
+        "version": "1.0"
+      }
 		],
 		"category": "Media I/O"
 	},
