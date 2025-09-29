@@ -22,7 +22,7 @@ struct DMAReadNodeContext : DMANodeBase
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		TypedObjectRef dstBufferObject = params.GetPinObject<vkss::Buffer>(NOS_NAME("BufferToWrite"));
+		TypedObjectRef dstBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("BufferToWrite"));
 		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		const ChannelInfo* channelInfo = params.GetPinData<ChannelInfo>(NOS_NAME("Channel"));
 		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
@@ -53,7 +53,7 @@ struct DMAReadNodeContext : DMANodeBase
 			nosEngine.LogE("DMA read target buffer is not valid.");
 			return NOS_RESULT_FAILED;
 		}
-		const auto& dstBufferInfo = *vkss::GetResourceInfo(dstBufferObject);
+		const auto& dstBufferInfo = *sys::vulkan::GetResourceInfo(dstBufferObject);
 		if (dstBufferInfo.Size != bufferSize || Format == NTV2_FORMAT_UNKNOWN)
 		{
 			nosEngine.LogE("DMA read target buffer size or format is not valid.");

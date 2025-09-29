@@ -61,7 +61,7 @@ struct DMAWriteNodeContext : DMANodeBase
 	
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		TypedObjectRef inputBufferObject = params.GetPinObject<vkss::Buffer>(NOS_NAME("Input"));
+		TypedObjectRef inputBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
 		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
 
@@ -69,7 +69,7 @@ struct DMAWriteNodeContext : DMANodeBase
 			return NOS_RESULT_FAILED;
 
 		auto buffer = nosVulkan->Map(inputBufferObject);
-		auto inputBufferInfo = *vkss::GetResourceInfo(inputBufferObject);
+		auto inputBufferInfo = *sys::vulkan::GetResourceInfo(inputBufferObject);
 		auto inputSize = inputBufferInfo.Size;
 
 		if (curVBLCount == 0)
