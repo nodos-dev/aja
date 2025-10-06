@@ -91,6 +91,7 @@ list(APPEND INCLUDE_FOLDERS
     ${NOS_UTILITIES_GENERATED_DIR}
     ${NOS_MEDIAIO_GENERATED_DIR}
     ${NOS_AUDIO_GENERATED_DIR}
+    "${NOS_SYS_VULKAN_PATH}/Include/nosVulkanSubsystem"
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
 #   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win
