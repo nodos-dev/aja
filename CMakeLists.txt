@@ -41,6 +41,7 @@ set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 
 # nos.sys.vulkan
 nos_get_module("nos.sys.vulkan" "8.0" NOS_SYS_VULKAN_TARGET)
+nos_find_plugin_path("nos.sys.vulkan" "8.0" NOS_SYS_VULKAN_PATH)
 
 # nos.sys.settings
 nos_get_module("nos.sys.settings" "3.0" NOS_SYS_SETTINGS_TARGET_NAME)
@@ -67,7 +68,8 @@ nos_get_module("nos.sync" "11.0" NOS_SYNC_TARGET)
 nos_get_plugin("nos.audio" "1.0" NOS_AUDIO_TARGET)
 nos_find_module_path("nos.audio" "1.0" NOS_AUDIO_PATH)
 set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
-nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" "${NOS_AUDIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosAudio)
+nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" 
+    "${NOS_AUDIO_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosAudio)
 
 # AJA Plugin
 # ----------
