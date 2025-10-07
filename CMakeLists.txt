@@ -46,11 +46,15 @@ nos_find_plugin_path("nos.sys.vulkan" "8.0" NOS_SYS_VULKAN_PATH)
 # nos.sys.settings
 nos_get_module("nos.sys.settings" "3.0" NOS_SYS_SETTINGS_TARGET_NAME)
 
+# nos.audio
+nos_get_plugin("nos.audio" "1.0" NOS_AUDIO_TARGET)
+nos_find_module_path("nos.audio" "1.0" NOS_AUDIO_PATH)
+
 # nos.mediaio
 nos_get_module("nos.mediaio" "4.0" NOS_MEDIAIO_TARGET)
 nos_find_module_path("nos.mediaio" "4.0" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
-nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Types" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
+nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Types" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_AUDIO_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
 nos_get_module("nos.utilities" "4.0" NOS_UTILITIES_TARGET)
@@ -64,9 +68,6 @@ nos_get_module("nos.sys.device" "2.0" NOS_SYS_DEVICE_TARGET)
 # nos.sync
 nos_get_module("nos.sync" "11.0" NOS_SYNC_TARGET)
 
-# nos.audio
-nos_get_plugin("nos.audio" "1.0" NOS_AUDIO_TARGET)
-nos_find_module_path("nos.audio" "1.0" NOS_AUDIO_PATH)
 set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
 nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" 
     "${NOS_AUDIO_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosAudio)
