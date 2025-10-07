@@ -69,24 +69,30 @@ struct DMAWriteNodeContext : DMANodeBase
 		TypedObjectRef inputBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
 		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
-		TypedObjectRef audioPacket = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("AudioPacket"));
-		auto audioPacketDesc = *params.GetPinData<audio::AudioPacketDescriptor>(NOS_NAME("AudioPacketDescriptor"));
-
 
 		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
-		bool receivingAudio = audioPacket && audioPacketDesc.num_samples() > 0;
+		CompositeObjectRef audioPacket = params.GetPinObject(NOS_NAME("AudioPacket"));
+		auto descObject = audioPacket.GetField<TypedObjectRef<audio::AudioPacketDescriptor>>(NOS_NAME("desc"));
+		auto audioBufferObject = audioPacket.GetField<TypedObjectRef<sys::vulkan::Buffer>>(NOS_NAME("buffer"));
+		bool receivingAudio = false;
+		audio::AudioPacketDescriptor* audioPacketDesc = nullptr;
+		if (audioPacket && descObject && audioBufferObject)
+		{
+			audioPacketDesc = descObject->InterpretBuffer();
+			receivingAudio = audioPacketDesc->num_samples() > 0;
+		}
 
 		bool audioPlaying = false;
 		NTV2AudioSystem audioSys{};
 		Device->GetSDIOutputAudioSystem(Channel, audioSys);
 		Device->IsAudioOutputRunning(audioSys, audioPlaying);
-		if (!audioPlaying)
+		if (!audioPlaying && receivingAudio)
 		{
-			Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys);
+			Device->SetNumberAudioChannels(audioPacketDesc->channel_count(), audioSys);
 			// Start writing audio data from 0.2 seconds ahead of the play head
-			LastWrittenAudioBufferOffset = 48000 / 5 * sizeof(ULWord) * audioPacketDesc.channel_count();
+			LastWrittenAudioBufferOffset = 48000 / 5 * sizeof(ULWord) * audioPacketDesc->channel_count();
 			Device->StartAudioOutput(audioSys, false);
 			Device->SetAudioOutputEraseMode(audioSys, true);
 		}
@@ -94,8 +100,8 @@ struct DMAWriteNodeContext : DMANodeBase
 		{
 			ULWord audioChannelCount{};
 			Device->GetNumberAudioChannels(audioChannelCount, audioSys);
-			if (audioChannelCount != audioPacketDesc.channel_count())
-				if (!Device->SetNumberAudioChannels(audioPacketDesc.channel_count(), audioSys))
+			if (audioChannelCount != audioPacketDesc->channel_count())
+				if (!Device->SetNumberAudioChannels(audioPacketDesc->channel_count(), audioSys))
 					nosEngine.LogE("Failed to set audio channel count for output");
 		}
 
@@ -111,14 +117,14 @@ struct DMAWriteNodeContext : DMANodeBase
 		ULWord wrapAddress = 0;
 		Device->GetAudioWrapAddress(wrapAddress, audioSys);
 		const char* status = "Skipped";
-		if (audioPacket && audioPacketDesc.num_samples() > 0)
+		if (receivingAudio && audioPacketDesc->num_samples() > 0)
 		{
-			auto audioBuffer = nosVulkan->Map(audioPacket);
+			auto audioBuffer = nosVulkan->Map(*audioBufferObject);
 			if (audioBuffer)
 			{
 				status = "Written";
 				// audioBuffer contains 32-bit words with 24-bit samples in MSB
-				ULWord byteCount = audioPacketDesc.num_samples() * audioPacketDesc.channel_count() *
+				ULWord byteCount = audioPacketDesc->num_samples() * audioPacketDesc->channel_count() *
 								   sizeof(ULWord); // 4 bytes per sample
 				if (LastWrittenAudioBufferOffset + byteCount > wrapAddress)
 				{
