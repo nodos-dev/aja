@@ -267,7 +267,7 @@
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
-            "data": 20,
+            "data": 2,
             "min": 1,
             "max": 120,
             "def": 2,
@@ -1976,7 +1976,7 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "min": 1,
                   "def": 2,
                   "contents_type": "JobPin",
@@ -2088,7 +2088,7 @@
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 2,
                   "meta_data_map": [
                     { "key": "AdvancedProperty", "value": "false" }
@@ -2105,7 +2105,7 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "referred_by": [
                     "5b446670-bb81-4886-a88c-b9dc6548f856"
                   ],
@@ -7006,7 +7006,7 @@
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 0,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
@@ -7023,7 +7023,7 @@
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 0,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
@@ -7214,7 +7214,7 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 2,
                   "contents_type": "JobPin",
                   "contents": { },
@@ -7431,7 +7431,7 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 2,
                   "contents_type": "JobPin",
                   "contents": { },
@@ -7486,7 +7486,7 @@
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 0,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
@@ -7503,7 +7503,7 @@
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": 20,
+                  "data": 2,
                   "def": 0,
                   "meta_data_map": [
                     { "key": "PinHidden", "value": "true" }
