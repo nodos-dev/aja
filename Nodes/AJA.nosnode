@@ -20,6 +20,12 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
 						"name": "FieldType",
 						"display_name": "Field Type",
 						"type_name": "nos.sys.vulkan.FieldType",
@@ -403,6 +409,34 @@
 								"can_show_as": "INPUT_PIN_OR_PROPERTY"
 							}
 						]
+					}
+				]
+			}
+		},
+		{
+			"class_name": "GetDeltaSeconds",
+			"menu_info": {
+				"category": "Device|AJA",
+				"class_name": "GetDeltaSeconds",
+				"display_name": "Get Delta Seconds"
+			},
+			"node": {
+				"class_name": "GetDeltaSeconds",
+				"display_name": "Get Delta Seconds",
+				"contents_type": "Job",
+				"description": "Retrieves the delta seconds for the specified channel",
+				"pins": [
+					{
+						"name": "Channel",
+						"type_name": "nos.aja.ChannelInfo",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "DeltaSeconds",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
 				]
 			}

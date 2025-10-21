@@ -15,7 +15,6 @@
 
 namespace nos::aja
 {
-
 #define NOS_AJA_AUDIO_DIAGNOSTICS 0
 
 struct DMAWriteNodeContext : DMANodeBase
@@ -28,15 +27,6 @@ struct DMAWriteNodeContext : DMANodeBase
 
 	nos::Buffer LastChannelInfo = {};
 
-	void GetScheduleInfo(nosScheduleInfo* out) override
-	{
-		*out = nosScheduleInfo{
-			.Importance = 1,
-			.DeltaSeconds = GetDeltaSeconds(Format, IsInterlaced()),
-			.Type = NOS_SCHEDULE_TYPE_ON_DEMAND,
-		};
-	}
- 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{ 
 		if (pinName == NOS_NAME_STATIC("Channel"))
@@ -154,21 +144,12 @@ struct DMAWriteNodeContext : DMANodeBase
 		float lastWritten = 100.f * (float(LastWrittenAudioBufferOffset) / float(wrapAddress));
 		nosEngine.LogI("%s, Playhead: %.2f, LastWritten: %.2f", status, playhead, lastWritten);
 #endif
-
-		nosScheduleNodeParams schedule {
-			.NodeId = NodeId,
-			.AddScheduleCount = 1
-		};
-		nosEngine.ScheduleNode(&schedule);
-		
 		return NOS_RESULT_SUCCESS;
 	}
 
 	void OnPathStart() override
 	{
 		DMANodeBase::OnPathStart();
-		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
-		nosEngine.ScheduleNode(&schedule);
 		LastWrittenAudioBufferOffset = 0;
 	}
 
@@ -190,5 +171,4 @@ nosResult RegisterDMAWriteNode(nosNodeFunctions* functions)
 	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.aja.DMAWrite"), DMAWriteNodeContext, functions)
 	return NOS_RESULT_SUCCESS;
 }
-
 }

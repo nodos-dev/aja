@@ -56,17 +56,23 @@ nos_find_module_path("nos.mediaio" "4.0" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Types" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_AUDIO_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
 
+# nos.sync
+nos_get_module("nos.sync" "11.1" NOS_SYNC_TARGET)
+nos_find_module_path("nos.sync" "11.1" NOS_SYNC_PATH)
+set(NOS_SYNC_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.sync")
+nos_generate_flatbuffers("${NOS_SYNC_PATH}/Types" "${NOS_SYNC_GENERATED_DIR}" "cpp" "${NOS_SYNC_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosSync)
+
 # nos.utilities
 nos_get_module("nos.utilities" "4.0" NOS_UTILITIES_TARGET)
 nos_find_module_path("nos.utilities" "4.0" NOS_UTILITIES_PATH)
 set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
-nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Types" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosUtilities)
+nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Types" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SYNC_PATH};${NOS_AUDIO_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosUtilities)
 
 # nos.sys.device
 nos_get_module("nos.sys.device" "2.0" NOS_SYS_DEVICE_TARGET)
 
 # nos.sync
-nos_get_module("nos.sync" "11.0" NOS_SYNC_TARGET)
+nos_get_module("nos.sync" "11.1" NOS_SYNC_TARGET)
 
 set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
 nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" 
