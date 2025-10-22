@@ -181,9 +181,13 @@ struct DMAReadNodeContext : DMANodeBase
 
 		nosVulkan->SetResourceFieldType(dstBufferObject, (nosTextureFieldType)fieldType);
 
+		std::unordered_map<nos::Name, nos::ObjectRef> audioPacketFields;
+		audioPacketFields[NOS_NAME("desc")] = PrimitiveObjectRef::Create(NOS_NAME("nos.audio.AudioPacketDescriptor"), nos::Buffer::From(audioPacketDesc)).value_or(ObjectRef());
+		audioPacketFields[NOS_NAME("buffer")] = audioBufferToWrite;
+		auto packetObj = CompositeObjectRef::Create(NOS_NAME("nos.audio.AudioPacket"), audioPacketFields);
+
 		SetPinObject(NOS_NAME("Output"), dstBufferObject);
-		SetPinObject(NOS_NAME_STATIC("AudioOutput"), audioBufferToWrite);
-		SetPinValue(NOS_NAME_STATIC("AudioPacketDescriptor"), audioPacketDesc);
+		SetPinObject(NOS_NAME("AudioPacket"), packetObj.value_or(ObjectRef()));
 
 		return NOS_RESULT_SUCCESS;
 	}

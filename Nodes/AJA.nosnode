@@ -138,14 +138,8 @@
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					},
 					{
-						"name": "AudioOutput",
-						"type_name": "nos.sys.vulkan.Buffer",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "AudioPacketDescriptor",
-						"type_name": "nos.audio.AudioPacketDescriptor",
+						"name": "AudioPacket",
+						"type_name": "nos.audio.AudioPacket",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
