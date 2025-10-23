@@ -75,8 +75,8 @@ struct DMAWriteNodeContext : DMANodeBase
 		}
 
 		bool audioPlaying = false;
-		NTV2AudioSystem audioSys{};
-		Device->GetSDIOutputAudioSystem(Channel, audioSys);
+		auto audioSys = NTV2AudioSystem(Channel);
+		Device->SetSDIOutputAudioSystem(Channel,audioSys);
 		Device->IsAudioOutputRunning(audioSys, audioPlaying);
 		if (!audioPlaying && receivingAudio)
 		{
