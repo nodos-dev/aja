@@ -642,7 +642,7 @@
             {
               "id": "8f14cc78-b5eb-4bf7-9823-b57715391235",
               "name": "CopyTexture",
-              "class_name": "nos.utilities.CopyTexture",
+              "class_name": "nos.utilities.CopyResource",
               "pins": [
                 {
                   "id": "74f12470-583b-45f5-98f8-2741ce69d70a",

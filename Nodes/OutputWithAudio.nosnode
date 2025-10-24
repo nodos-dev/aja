@@ -1652,7 +1652,7 @@
             {
               "id": "77e1a39f-4640-4f15-b11c-873c00c874c2",
               "name": "CopyBuffer",
-              "class_name": "nos.utilities.CopyBuffer",
+              "class_name": "nos.utilities.CopyResource",
               "pins": [
                 {
                   "id": "9db91f12-aec4-4136-a690-16e6ff50ef9b",
