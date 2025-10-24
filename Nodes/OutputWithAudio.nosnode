@@ -417,7 +417,12 @@
               } },
             "contents_type": "PortalPin",
             "contents": { "source_id": "3d909448-55dc-4c3c-9c40-e2c02331eb0d" },
-            "orphan_state": { }
+            "orphan_state": { },
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" },
+              { "key": "Category", "value": "" },
+              { "key": "OrphanPortal", "value": "/Channel.Channel" }
+            ]
           }
         ],
         "pos": { "x": 0.0, "y": 0.0 },
