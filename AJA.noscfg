@@ -42,7 +42,8 @@
         "Config/AJA.nosdef",
         "Config/OutputNode.nosdef",
         "Config/InputNode.nosdef",
-        "Config/FillKey.nosdef"
+        "Config/FillKey.nosdef",
+        "Config/DebayerSource.nosdef"
     ],
     "custom_types" :[
       "Config/AJA.fbs"
