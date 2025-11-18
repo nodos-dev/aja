@@ -4,7 +4,6 @@
 
 // External
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
 #include <Nodos/Utils/Stopwatch.hpp>
 
 #include "AJA_generated.h"

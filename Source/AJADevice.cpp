@@ -1,21 +1,19 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "AJADevice.h"
-#include "nosDefines.h"
-#include "ntv2enums.h"
-#include "ntv2signalrouter.h"
-#include "ntv2utils.h"
-#include <ntv2devicescanner.h>
-#include <ranges>
-#include <system/process.h>
 
 #include "firmware.hpp"
 
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
 #include <nosSettingsSubsystem/nosSettingsSubsystem.h>
 
-#undef min
-#undef max
+#include "ntv2enums.h"
+#include "ntv2signalrouter.h"
+#include "ntv2utils.h"
+#include <ntv2devicescanner.h>
+#include <system/process.h>
+
+
 #if !defined(_WIN32)
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif

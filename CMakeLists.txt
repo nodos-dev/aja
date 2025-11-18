@@ -25,9 +25,6 @@ set(AJANTV2_DISABLE_TOOLS ON)
 set(AJANTV2_DISABLE_PLUGIN_LOAD ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-#if(WIN32)
-	remove_definitions(-DNOMINMAX)
-#endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/libajantv2 "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
 
@@ -49,6 +46,9 @@ nos_get_module("nos.sys.settings" "3.0" NOS_SYS_SETTINGS_TARGET_NAME)
 # nos.audio
 nos_get_plugin("nos.audio" "1.0" NOS_AUDIO_TARGET)
 nos_find_module_path("nos.audio" "1.0" NOS_AUDIO_PATH)
+set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
+nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" 
+    "${NOS_SDK_DIR}/Types;${NOS_SYS_VULKAN_PATH};${NOS_AUDIO_PATH}" generated_nosAJA_dep_nosAudio)
 
 # nos.mediaio
 nos_get_module("nos.mediaio" "4.0" NOS_MEDIAIO_TARGET)
@@ -74,10 +74,6 @@ nos_get_module("nos.sys.device" "2.0" NOS_SYS_DEVICE_TARGET)
 # nos.sync
 nos_get_module("nos.sync" "11.1" NOS_SYNC_TARGET)
 
-set(NOS_AUDIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.audio")
-nos_generate_flatbuffers("${NOS_AUDIO_PATH}/Types" "${NOS_AUDIO_GENERATED_DIR}" "cpp" 
-    "${NOS_AUDIO_PATH};${NOS_SYS_VULKAN_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosAudio)
-
 # AJA Plugin
 # ----------
 set(GENERATED_DIR "${SOURCE_DIR}/__generated__")
@@ -95,16 +91,17 @@ list(APPEND INCLUDE_FOLDERS
     ${EXTERNAL_DIR}
     ${SOURCE_DIR}
     ${GENERATED_DIR}
+    "${NOS_SYS_VULKAN_PATH}/Include/nosVulkanSubsystem"
     ${NOS_UTILITIES_GENERATED_DIR}
     ${NOS_MEDIAIO_GENERATED_DIR}
     ${NOS_AUDIO_GENERATED_DIR}
-    "${NOS_SYS_VULKAN_PATH}/Include/nosVulkanSubsystem"
     ${CMAKE_CURRENT_LIST_DIR}/External
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2
-#   ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/src/win
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/includes)
 
 nos_add_plugin("nosAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
+
+target_compile_definitions(nosAJA PRIVATE "-DNOMINMAX")
 
 # Project generation
 nos_group_targets("nosAJA" "NOS Plugins")
