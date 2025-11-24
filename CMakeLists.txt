@@ -25,9 +25,6 @@ set(AJANTV2_DISABLE_TOOLS ON)
 set(AJANTV2_DISABLE_PLUGIN_LOAD ON)
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-#if(WIN32)
-	remove_definitions(-DNOMINMAX)
-#endif()
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/External/libajantv2 "${CMAKE_CURRENT_BINARY_DIR}/ajalibraries")
 
@@ -87,6 +84,8 @@ list(APPEND INCLUDE_FOLDERS
     ${CMAKE_CURRENT_LIST_DIR}/External/libajantv2/ajantv2/includes)
 
 nos_add_plugin("nosAJA" "${DEPENDENCIES}" "${INCLUDE_FOLDERS}")
+
+target_compile_definitions(nosAJA PRIVATE "-DNOMINMAX")
 
 # Project generation
 nos_group_targets("nosAJA" "NOS Plugins")
