@@ -159,10 +159,10 @@ struct WaitVBLNodeContext : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
-		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
+		const auto& outId = params[NOS_NAME("VBL")].Id;
+		const auto& outVBLCountId = params[NOS_NAME("CurrentVBL")].Id;
 		nos::sys::vulkan::FieldType waitField = *params.GetPinData<nos::sys::vulkan::FieldType>(NOS_NAME("WaitField"));
-		uuid outFieldPinId = params[NOS_NAME("FieldType")].Id;
+		const auto& outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		auto device = GetDevice();
 		if (!device)
 			return NOS_RESULT_FAILED;
