@@ -67,7 +67,7 @@ struct DMAWriteNodeContext : DMANodeBase
 		auto descObject = audioPacket.GetField<TypedObjectRef<audio::AudioPacketDescriptor>>(NOS_NAME("desc"));
 		auto audioBufferObject = audioPacket.GetField<TypedObjectRef<sys::vulkan::Buffer>>(NOS_NAME("buffer"));
 		bool receivingAudio = false;
-		audio::AudioPacketDescriptor* audioPacketDesc = nullptr;
+		const audio::AudioPacketDescriptor* audioPacketDesc = nullptr;
 		if (audioPacket && descObject && audioBufferObject)
 		{
 			audioPacketDesc = descObject->InterpretBuffer();

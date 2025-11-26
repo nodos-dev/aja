@@ -69,11 +69,11 @@ struct ChannelNodeContext : NodeContext
 		SetPinVisualizer(NSN_IsInterlaced,
 						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
 
-		AddPinValueWatcher<bool>(NSN_IsOpen, [this](bool* newVal, std::optional<bool*> oldValue) {
+		AddPinValueWatcher<bool>(NSN_IsOpen, [this](const bool* newVal, std::optional<const bool*> oldValue) {
 			ShouldOpen = *newVal;
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher<bool>(NSN_IsInput, [this](bool* newVal, std::optional<bool*> oldValue) {
+		AddPinValueWatcher<bool>(NSN_IsInput, [this](const bool* newVal, std::optional<const bool*> oldValue) {
 			IsInput = *newVal;
 			if (oldValue)
 				ResetAfter(AJAChangedPinType::IsInput);
@@ -239,21 +239,19 @@ struct ChannelNodeContext : NodeContext
 			TryUpdateChannel();
 		});
 		AddPinValueWatcher<mediaio::YCbCrPixelFormat>(NSN_FrameBufferFormat,
-			[this](mediaio::YCbCrPixelFormat* newVal, std::optional<mediaio::YCbCrPixelFormat*> oldValue) {
+			[this](const mediaio::YCbCrPixelFormat* newVal, std::optional<const mediaio::YCbCrPixelFormat*> oldValue) {
 				CurrentPixelFormat = *newVal;
 				TryUpdateChannel();
 			});
-		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkOutputMode,
-			[this](AJADevice::Mode* newVal, std::optional<AJADevice::Mode*> oldValue) {
+		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkOutputMode, [this](const AJADevice::Mode* newVal, std::optional<const AJADevice::Mode*> oldValue) {
 				OutputModePin = *newVal;
 				TryUpdateChannel();
 			});
-		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkInputMode,
-			[this](AJADevice::Mode* newVal, std::optional<AJADevice::Mode*> oldValue) {
+		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkInputMode, [this](const AJADevice::Mode* newVal, std::optional<const AJADevice::Mode*> oldValue) {
 				InputModePin = *newVal;
 				TryUpdateChannel();
 			});
-		AddPinValueWatcher<bool>(NSN_ForceInterlaced, [this](bool* newVal, std::optional<bool*> oldValue) {
+		AddPinValueWatcher<bool>(NSN_ForceInterlaced, [this](const bool* newVal, std::optional<const bool*> oldValue) {
 			ForceInterlaced = *newVal;
 			TryUpdateChannel();
 		});
