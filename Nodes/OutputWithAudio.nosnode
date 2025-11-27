@@ -6930,7 +6930,7 @@
                     "contents": { "type": "" },
                     "function_category": "Default Node",
                     "description": "Scales the input image to the desired output size (FILL as alignment method)\nusing various scaling algorithms",
-                    "plugin_version": { "major": 4, "minor": 0, "patch": 0 }
+                    "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
                   },
                   {
                     "id": "5a75abae-7c20-44ed-9b41-2a45dee946de",
