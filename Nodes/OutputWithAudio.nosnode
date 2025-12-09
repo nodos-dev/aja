@@ -1124,7 +1124,7 @@
                         "memory_flags": "HOST_VISIBLE DOWNLOAD",
                         "element_type": "ELEMENT_TYPE_UNDEFINED",
                         "field_type": "UNKNOWN"
-                      }, "gpu_event_holder": { }, "host_use_complete_promise": { } } },
+                      }, "wait_gpu": { }, "host_promise": { } } },
                   "min": { "audio_packet": { "desc": {
                         "sample_rate": 0,
                         "num_samples": 0,
@@ -1333,7 +1333,7 @@
                 {
                   "id": "5acfd8cf-df23-479d-a970-e5c0524d7f98",
                   "name": "frame_buffer",
-                  "type_name": "nos.utilities.BufferSyncEventsTuple",
+                  "type_name": "nos.utilities.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                   "visualizer": {
@@ -1352,7 +1352,7 @@
                       "memory_flags": "HOST_VISIBLE DOWNLOAD",
                       "element_type": "ELEMENT_TYPE_UNDEFINED",
                       "field_type": "UNKNOWN"
-                    }, "gpu_event_holder": { }, "host_use_complete_promise": { } },
+                    }, "wait_gpu": { }, "host_promise": { } },
                   "min": { "buffer": {
                       "size_in_bytes": 0,
                       "alignment": 0,
@@ -2285,7 +2285,7 @@
                         "memory_flags": "HOST_VISIBLE DOWNLOAD",
                         "element_type": "ELEMENT_TYPE_UNDEFINED",
                         "field_type": "UNKNOWN"
-                      }, "gpu_event_holder": { }, "host_use_complete_promise": { } } },
+                      }, "wait_gpu": { }, "host_promise": { } } },
                   "min": { "audio_packet": { "desc": {
                         "sample_rate": 0,
                         "num_samples": 0,
@@ -2452,7 +2452,7 @@
                         "memory_flags": "HOST_VISIBLE DOWNLOAD",
                         "element_type": "ELEMENT_TYPE_UNDEFINED",
                         "field_type": "UNKNOWN"
-                      }, "gpu_event_holder": { }, "host_use_complete_promise": { } } },
+                      }, "wait_gpu": { }, "host_promise": { } } },
                   "min": { "audio_packet": { "desc": {
                         "sample_rate": 0,
                         "num_samples": 0,
@@ -4045,7 +4045,7 @@
                 {
                   "id": "a9bf3bb9-a68f-46d7-a5b5-30c19b723fce",
                   "name": "Input",
-                  "type_name": "nos.utilities.BufferSyncEventsTuple",
+                  "type_name": "nos.utilities.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
@@ -4064,7 +4064,7 @@
                       "memory_flags": "HOST_VISIBLE DOWNLOAD",
                       "element_type": "ELEMENT_TYPE_UNDEFINED",
                       "field_type": "UNKNOWN"
-                    }, "gpu_event_holder": { }, "host_use_complete_promise": { } },
+                    }, "wait_gpu": { }, "host_promise": { } },
                   "min": { "buffer": {
                       "size_in_bytes": 0,
                       "alignment": 0,
@@ -4158,7 +4158,7 @@
                 },
                 {
                   "id": "3af97fe7-3fee-4ffa-86d6-ae8d693a6fdf",
-                  "name": "gpu_event_holder",
+                  "name": "wait_gpu",
                   "type_name": "nos.sys.vulkan.GPUEventHolder",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
@@ -4172,7 +4172,7 @@
                 },
                 {
                   "id": "7d3faa54-7e64-493f-90a8-f37c0e5fb92f",
-                  "name": "host_use_complete_promise",
+                  "name": "host_promise",
                   "type_name": "nos.sync.Promise",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
@@ -4191,7 +4191,7 @@
               "contents_type": "Job",
               "contents": { "type": "" },
               "function_category": "Default Node",
-              "display_name": "Break nos.utilities.BufferSyncEventsTuple",
+              "display_name": "Break nos.utilities.BufferSyncTuple",
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
             {
@@ -8034,7 +8034,7 @@
                 {
                   "id": "4258d504-b770-41ea-8dea-8565e1d76602",
                   "name": "Output",
-                  "type_name": "nos.utilities.BufferSyncEventsTuple",
+                  "type_name": "nos.utilities.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
@@ -8053,7 +8053,7 @@
                       "memory_flags": "HOST_VISIBLE DOWNLOAD",
                       "element_type": "ELEMENT_TYPE_UNDEFINED",
                       "field_type": "UNKNOWN"
-                    }, "gpu_event_holder": { }, "host_use_complete_promise": { } },
+                    }, "wait_gpu": { }, "host_promise": { } },
                   "min": { "buffer": {
                       "size_in_bytes": 0,
                       "alignment": 0,
@@ -8148,7 +8148,7 @@
                 },
                 {
                   "id": "620ca807-8580-4a19-bb69-dc27912abba9",
-                  "name": "gpu_event_holder",
+                  "name": "wait_gpu",
                   "type_name": "nos.sys.vulkan.GPUEventHolder",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -8162,7 +8162,7 @@
                 },
                 {
                   "id": "899f67bc-f139-45ef-94c1-47ca0d827f7d",
-                  "name": "host_use_complete_promise",
+                  "name": "host_promise",
                   "type_name": "nos.sync.Promise",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
@@ -8182,7 +8182,7 @@
               "contents": { "type": "" },
               "function_category": "Default Node",
               "template_parameters": [
-                { "name": "Type", "type_name": "string", "value": "nos.utilities.BufferSyncEventsTuple" }
+                { "name": "Type", "type_name": "string", "value": "nos.utilities.BufferSyncTuple" }
               ],
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
@@ -9451,7 +9451,7 @@
                         "memory_flags": "HOST_VISIBLE DOWNLOAD",
                         "element_type": "ELEMENT_TYPE_UNDEFINED",
                         "field_type": "UNKNOWN"
-                      }, "gpu_event_holder": { }, "host_use_complete_promise": { } } },
+                      }, "wait_gpu": { }, "host_promise": { } } },
                   "min": { "audio_packet": { "desc": {
                         "sample_rate": 0,
                         "num_samples": 0,
@@ -9661,7 +9661,7 @@
                 {
                   "id": "9038b23e-5855-4963-bc52-eff162cd5e37",
                   "name": "frame_buffer",
-                  "type_name": "nos.utilities.BufferSyncEventsTuple",
+                  "type_name": "nos.utilities.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
@@ -9680,7 +9680,7 @@
                       "memory_flags": "HOST_VISIBLE DOWNLOAD",
                       "element_type": "ELEMENT_TYPE_UNDEFINED",
                       "field_type": "UNKNOWN"
-                    }, "gpu_event_holder": { }, "host_use_complete_promise": { } },
+                    }, "wait_gpu": { }, "host_promise": { } },
                   "min": { "buffer": {
                       "size_in_bytes": 0,
                       "alignment": 0,
