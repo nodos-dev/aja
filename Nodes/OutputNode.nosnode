@@ -3733,6 +3733,7 @@
             {
               "id": "f86e0b43-afc9-4b59-a7a8-15ca3a6302e9",
               "name": "Auto Resize",
+              "class_name": "nos.utilities.AutoResize",
               "pins": [
                 {
                   "id": "775ee5eb-ad82-4bcd-9862-94655457a2d8",
