@@ -2916,7 +2916,7 @@
                   "show_as": "PROPERTY",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
-                  "data": 4,
+                  "data": 2,
                   "def": 2,
                   "contents_type": "JobPin",
                   "contents": { },
