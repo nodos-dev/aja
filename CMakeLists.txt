@@ -43,8 +43,8 @@ nos_get_module("nos.sys.vulkan" "7.1" NOS_SYS_VULKAN_TARGET)
 nos_get_module("nos.sys.settings" "2.1" NOS_SYS_SETTINGS_TARGET_NAME)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "3.2" NOS_MEDIAIO_TARGET)
-nos_find_module_path("nos.mediaio" "3.2" NOS_MEDIAIO_PATH)
+nos_get_module("nos.mediaio" "3.3" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "3.3" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Types" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/Types" generated_nosAJA_dep_nosMediaIO)
 
