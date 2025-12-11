@@ -13,11 +13,11 @@
             },
             {
                 "name": "nos.mediaio",
-                "version": "3.1"
+                "version": "3.2"
             },
 			{
 				"name": "nos.utilities",
-				"version": "3.29"
+				"version": "3.31"
 			},
 			{
 				"name": "nos.math",
