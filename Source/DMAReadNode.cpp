@@ -45,17 +45,19 @@ struct DMAReadNodeContext : DMANodeBase
 		Device->GetNumberAudioChannels(audioChannelCount, AudioSystem);
 		if (!audioRunning)
 		{
-			AudioSystem = NTV2AudioSystem(Channel);
-			Device->SetAudioCaptureEnable(AudioSystem, true);
-			Device->StartAudioInput(AudioSystem, false);
 			auto inSource = GetNTV2InputSourceForIndex(Channel, NTV2_INPUTSOURCES_SDI);
-			auto audioSys = NTV2InputSourceToAudioSystem(inSource);
+			auto embeddedIn = NTV2InputSourceToEmbeddedAudioInput(inSource);
+			AudioSystem = NTV2InputSourceToAudioSystem(inSource);
+			auto itemPath = nos::GetItemPath(NodeId).value_or("<unknown>");
+			if (!Device->SetAudioSystemInputSource(AudioSystem, NTV2_AUDIO_EMBEDDED, embeddedIn))
+				nosEngine.LogE("%s: Failed to set audio system input source", itemPath.c_str());
+			if (!Device->SetEmbeddedAudioInput(embeddedIn, AudioSystem))
+				nosEngine.LogE("%s: Failed to set embedded audio input", itemPath.c_str());
+			if (!Device->SetAudioCaptureEnable(AudioSystem, true))
+				nosEngine.LogE("%s: Failed to enable audio capture", itemPath.c_str());
+			if (!Device->StartAudioInput(AudioSystem, false))
+				nosEngine.LogE("%s: Failed to start audio input", itemPath.c_str());
 			Device->GetAudioReadOffset(AudioReadOffset, AudioSystem);
-			NTV2AudioSource audioSource{};
-			NTV2EmbeddedAudioInput embeddedIn{};
-			NTV2AudioChannelPairs audioChannelPairs{};
-			Device->GetDetectedAudioChannelPairs(AudioSystem, audioChannelPairs);
-			Device->GetAudioSystemInputSource(AudioSystem, audioSource, embeddedIn);
 			Device->GetAudioWrapAddress(AudioWrapAddress, AudioSystem);
 			// AudioWrapAddress = AudioWrapAddress + AudioReadOffset;
 			AudioInLastAddress = AudioReadOffset;
