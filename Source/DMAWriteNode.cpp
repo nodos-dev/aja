@@ -15,7 +15,7 @@
 
 namespace nos::aja
 {
-#define NOS_AJA_AUDIO_DIAGNOSTICS 0
+#define NOS_AJA_AUDIO_OUTPUT_DIAGNOSTICS 0
 
 struct DMAWriteNodeContext : DMANodeBase
 {
@@ -137,7 +137,7 @@ struct DMAWriteNodeContext : DMANodeBase
 			}
 		}
 
-#if NOS_AJA_AUDIO_DIAGNOSTICS
+#if NOS_AJA_AUDIO_OUTPUT_DIAGNOSTICS
 		ULWord playheadPos{};
 		Device->ReadAudioLastOut(playheadPos, audioSys);
 		float playhead = 100.f * (float(playheadPos) / float(wrapAddress));

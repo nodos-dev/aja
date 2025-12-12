@@ -15,10 +15,17 @@
 
 namespace nos::aja
 {
+
+#define NOS_AJA_AUDIO_INPUT_DIAGNOSTICS 0
+
 struct DMAReadNodeContext : DMANodeBase
 {
 	DMAReadNodeContext() : DMANodeBase(DMA_READ)
+	{}
+
+	void OnPathStart() override
 	{
+		LastReadAudioBufferOffset = 0;
 	}
 
 	void OnPathStop() override
@@ -28,26 +35,28 @@ struct DMAReadNodeContext : DMANodeBase
 			return;
 		Device->StopAudioInput(AudioSystem);
 		Device->SetAudioCaptureEnable(AudioSystem, false);
+		
 	}
 
 	nosResult ReadAudio(TypedObjectRef<sys::vulkan::Buffer> bufToWrite, audio::AudioPacketDescriptor& outAudioPacket)
 	{
 		outAudioPacket.mutate_bit_depth(audio::BitDepth::AUDIO_BIT_DEPTH_24_BIT);
 		outAudioPacket.mutate_sample_rate(48000);
+		outAudioPacket.mutate_sample_stride(sizeof(ULWord));
 		if (!bufToWrite)
 			return NOS_RESULT_FAILED;
-		uint8_t* audioBuffer = nosVulkan->Map(bufToWrite);
+		auto dstBufInfo = *sys::vulkan::GetResourceInfo(bufToWrite);
+		auto audioBuffer = nosVulkan->Map(bufToWrite);
 		if (!audioBuffer)
 			return NOS_RESULT_FAILED;
 		bool audioRunning = false;
+		auto inSource = GetNTV2InputSourceForIndex(Channel, NTV2_INPUTSOURCES_SDI);
+		auto embeddedIn = NTV2InputSourceToEmbeddedAudioInput(inSource);
+		AudioSystem = NTV2InputSourceToAudioSystem(inSource);
 		Device->IsAudioInputRunning(AudioSystem, audioRunning);
-		ULWord audioChannelCount = 0;
-		Device->GetNumberAudioChannels(audioChannelCount, AudioSystem);
+
 		if (!audioRunning)
 		{
-			auto inSource = GetNTV2InputSourceForIndex(Channel, NTV2_INPUTSOURCES_SDI);
-			auto embeddedIn = NTV2InputSourceToEmbeddedAudioInput(inSource);
-			AudioSystem = NTV2InputSourceToAudioSystem(inSource);
 			auto itemPath = nos::GetItemPath(NodeId).value_or("<unknown>");
 			if (!Device->SetAudioSystemInputSource(AudioSystem, NTV2_AUDIO_EMBEDDED, embeddedIn))
 				nosEngine.LogE("%s: Failed to set audio system input source", itemPath.c_str());
@@ -55,77 +64,93 @@ struct DMAReadNodeContext : DMANodeBase
 				nosEngine.LogE("%s: Failed to set embedded audio input", itemPath.c_str());
 			if (!Device->SetAudioCaptureEnable(AudioSystem, true))
 				nosEngine.LogE("%s: Failed to enable audio capture", itemPath.c_str());
-			if (!Device->StartAudioInput(AudioSystem, false))
+			if (!Device->StartAudioInput(AudioSystem, true))
 				nosEngine.LogE("%s: Failed to start audio input", itemPath.c_str());
 			Device->GetAudioReadOffset(AudioReadOffset, AudioSystem);
-			Device->GetAudioWrapAddress(AudioWrapAddress, AudioSystem);
-			// AudioWrapAddress = AudioWrapAddress + AudioReadOffset;
-			AudioInLastAddress = AudioReadOffset;
+			Device->SetNumberAudioChannels(6, AudioSystem);
+			Device->SetAudioRate(NTV2_AUDIO_48K, AudioSystem);
+			outAudioPacket.mutate_channel_count(6);
+
+			// Get raw hardware wrap address
+			ULWord wrapAddress = 0;
+			Device->GetAudioWrapAddress(wrapAddress, AudioSystem);
+
+			// Normalize wrap address so it lives in the same coordinate space
+			AudioInWrapAddress = wrapAddress + AudioReadOffset;
+
+			// Initialize last-read pointer to current hardware location
+			Device->ReadAudioLastIn(LastReadAudioBufferOffset, AudioSystem);
+			LastReadAudioBufferOffset &= ~0x3UL;
+			LastReadAudioBufferOffset += AudioReadOffset;
+			outAudioPacket.mutate_num_samples(0);
+			return NOS_RESULT_SUCCESS;
 		}
+		ULWord audioChannelCount = 0;
+		Device->GetNumberAudioChannels(audioChannelCount, AudioSystem);
 		outAudioPacket.mutate_channel_count(audioChannelCount);
-		outAudioPacket.mutate_sample_stride(sizeof(ULWord));
+
 		uint32_t currentAudioInAddress = 0;
 		Device->ReadAudioLastIn(currentAudioInAddress, AudioSystem);
-
-		currentAudioInAddress =
-			currentAudioInAddress -
-			(currentAudioInAddress % (sizeof(ULWord) * audioChannelCount)); //	Force sample alignment
+		//currentAudioInAddress &= ~0x3UL; //	Force DWORD alignment
+		currentAudioInAddress -= (currentAudioInAddress % (sizeof(ULWord) * audioChannelCount)); //	Force sample alignment
 		currentAudioInAddress += AudioReadOffset;
-		uint32_t audioBytesCaptured{};
-		auto oldAudioInLastAddress = AudioInLastAddress;
-		AudioInLastAddress = currentAudioInAddress;
-		auto dstBufInfo = *sys::vulkan::GetResourceInfo(bufToWrite);
-		if (currentAudioInAddress < oldAudioInLastAddress)
+
+		uint32_t bytesArrived = 0;
+		if (currentAudioInAddress < LastReadAudioBufferOffset)
 		{
-			audioBytesCaptured = (AudioWrapAddress + AudioReadOffset) - oldAudioInLastAddress;
+			//	Audio address has wrapped around the end of the buffer.
+			//	Do the calculations and transfer from the last address to the end of the buffer...
+			ULWord firstPartSize = AudioInWrapAddress - LastReadAudioBufferOffset;
+			ULWord remainingSize = currentAudioInAddress - AudioReadOffset;
+			bytesArrived = firstPartSize + remainingSize;
 
-			if (audioBytesCaptured % (sizeof(ULWord) * audioChannelCount) != 0)
+			if (bytesArrived > dstBufInfo.Size)
 			{
-				nosEngine.LogE("Audio read size is not DWORD aligned.");
+				nosEngine.LogE("%s: Audio read size exceeds buffer size! Discarding excess.",
+								nos::GetItemPath(NodeId).value_or("<unknown>").c_str());
+				if (firstPartSize >= dstBufInfo.Size)
+				{
+					firstPartSize = dstBufInfo.Size;
+					remainingSize = 0;
+				}
+				else
+				{
+					remainingSize = dstBufInfo.Size - firstPartSize;
+				}
+				bytesArrived = firstPartSize + remainingSize;
 			}
-
-			if (audioBytesCaptured > dstBufInfo.Size)
-			{
-				nosEngine.LogE("Audio read size exceeds buffer size.");
-			}
-			Device->DMAReadAudio(
-				AudioSystem, reinterpret_cast<uint32_t*>(audioBuffer), oldAudioInLastAddress, audioBytesCaptured);
-
-			auto audioBytesRemaining = currentAudioInAddress - AudioReadOffset;
-			audioBytesRemaining =
-				audioBytesRemaining -
-				(audioBytesRemaining % (sizeof(ULWord) * audioChannelCount)); //	Force sample alignment
-			if (audioBytesRemaining > dstBufInfo.Size)
-			{
-				nosEngine.LogE("Audio read size exceeds buffer size.");
-				return NOS_RESULT_FAILED;
-			}
-			Device->DMAReadAudio(AudioSystem,
-								 reinterpret_cast<uint32_t*>(audioBuffer + audioBytesCaptured),
-								 AudioReadOffset,
-								 audioBytesRemaining);
-
-			audioBytesCaptured += audioBytesRemaining;
+			remainingSize -= (remainingSize % (sizeof(ULWord) * audioChannelCount)); //	Force sample alignment
+			// Read audio data up to the wrap address
+			Device->DMAReadAudio(AudioSystem, (ULWord*)audioBuffer, LastReadAudioBufferOffset, firstPartSize);
+			// Read the remaining audio data from the start
+			Device->DMAReadAudio(AudioSystem, (ULWord*)(audioBuffer + firstPartSize), AudioReadOffset, remainingSize);
 		}
 		else
 		{
-			audioBytesCaptured = currentAudioInAddress - oldAudioInLastAddress;
-			if (audioBytesCaptured > dstBufInfo.Size)
+			bytesArrived = currentAudioInAddress - LastReadAudioBufferOffset;
+			if (bytesArrived > dstBufInfo.Size)
 			{
-				nosEngine.LogE("Audio read size exceeds buffer size.");
-				return NOS_RESULT_FAILED;
+				nosEngine.LogE("%s: Audio read size exceeds buffer size! Discarding excess.",
+								nos::GetItemPath(NodeId).value_or("<unknown>").c_str());
+				bytesArrived = dstBufInfo.Size;
 			}
-			if (audioBytesCaptured > 0)
-			{
-				Device->DMAReadAudio(
-					AudioSystem, reinterpret_cast<ULWord*>(audioBuffer), oldAudioInLastAddress, audioBytesCaptured);
-			}
+			// Read audio data ahead of the record head
+			// Use the current record head position as the read offset
+			Device->DMAReadAudio(AudioSystem, (ULWord*)audioBuffer, LastReadAudioBufferOffset, bytesArrived);
 		}
-		if (audioBytesCaptured % (sizeof(ULWord) * audioChannelCount) != 0)
-		{
-			nosEngine.LogE("Audio read size is not DWORD aligned.");
-		}
-		outAudioPacket.mutate_num_samples(audioBytesCaptured / sizeof(ULWord) / audioChannelCount);
+		outAudioPacket.mutate_num_samples(bytesArrived / sizeof(ULWord) / audioChannelCount);
+		LastReadAudioBufferOffset = currentAudioInAddress;
+
+#if NOS_AJA_AUDIO_INPUT_DIAGNOSTICS
+		ULWord recordHeadPos{};
+		Device->ReadAudioLastIn(recordHeadPos, AudioSystem);
+		recordHeadPos &= ~0x3UL;
+		recordHeadPos += AudioReadOffset;
+		float recordHead = 100.f * (float(recordHeadPos) / float(AudioInWrapAddress));
+		float lastRead = 100.f * (float(LastReadAudioBufferOffset) / float(AudioInWrapAddress));
+		auto nodePath = nos::GetItemPath(NodeId).value_or("<unknown>");
+		nosEngine.LogI("%s: Record Head: %.2f, Last Read: %.2f", nodePath.c_str(), recordHead, lastRead);
+#endif
 		return NOS_RESULT_SUCCESS;
 	}
 
@@ -195,9 +220,9 @@ struct DMAReadNodeContext : DMANodeBase
 	}
 
 	NTV2AudioSystem AudioSystem{};
-	uint32_t AudioReadOffset{};
-	uint32_t AudioWrapAddress{};
-	uint32_t AudioInLastAddress{};
+	ULWord LastReadAudioBufferOffset;
+	ULWord AudioReadOffset;
+	ULWord AudioInWrapAddress;
 };
 
 nosResult RegisterDMAReadNode(nosNodeFunctions* functions)
