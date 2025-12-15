@@ -136,7 +136,7 @@ struct DMANodeBase : NodeContext
 				auto fieldId = fieldType == nos::sys::vulkan::FieldType::EVEN ? NTV2_FIELD0 : NTV2_FIELD1;
 				util::Stopwatch sw;
 				Device->DmaTransfer(NTV2_DMA_FIRST_AVAILABLE, IsInput(), 0,
-					const_cast<ULWord*>((uint32_t*)buffer), // target CPU buffer address
+					((uint32_t*)buffer), // target CPU buffer address
 					offset + fieldId * pitch, // source AJA buffer address
 					pitch, // length of one line
 					segments, // number of lines

@@ -25,6 +25,7 @@ struct DMAReadNodeContext : DMANodeBase
 
 	void OnPathStart() override
 	{
+		DMANodeBase::OnPathStart();
 		LastReadAudioBufferOffset = 0;
 	}
 
