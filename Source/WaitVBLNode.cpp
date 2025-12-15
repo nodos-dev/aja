@@ -2,7 +2,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include "AJA_generated.h"
+#include "nosAja/AJA_generated.h"
 #include "AJADevice.h"
 #include "AJAMain.h"
 

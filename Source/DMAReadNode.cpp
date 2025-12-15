@@ -3,11 +3,11 @@
 #include <Nodos/Plugin.hpp>
 
 // External
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
-#include <nosVulkanSubsystem/Helpers.hpp>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
+#include <nosSysVulkan/Helpers.hpp>
 #include <Nodos/Utils/Stopwatch.hpp>
 
-#include "AJA_generated.h"
+#include "nosAja/AJA_generated.h"
 #include "AJADevice.h"
 #include "AJAMain.h"
 #include "DMANodeBase.hpp"
