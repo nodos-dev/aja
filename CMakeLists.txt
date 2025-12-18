@@ -30,5 +30,8 @@ target_include_directories(${NOS_PLUGIN_TARGET} PRIVATE
 #   ${CMAKE_CURRENT_SOURCE_DIR}/External/libajantv2/ajantv2/src/win
     ${CMAKE_CURRENT_SOURCE_DIR}/External/libajantv2/ajantv2/includes)
 
-# Project generation
-nos_group_targets(${NOS_PLUGIN_TARGET} "NOS Plugins")
+if (WIN32)
+    target_compile_definitions(${NOS_PLUGIN_TARGET} PRIVATE -DNOMINMAX)
+endif()
+
+target_compile_definitions(${NOS_PLUGIN_TARGET} PRIVATE "NOS_DISABLE_DEPRECATED")

@@ -13,7 +13,7 @@
             },
             {
                 "name": "nos.mediaio",
-                "version": "3.3"
+                "version": "3.3.1"
             },
 			{
 				"name": "nos.utilities",
@@ -44,5 +44,5 @@
     },
     "binary_path": "Binaries/nosAja",
     "third_party_software": ["./Config/Licenses.json"],
-    "sdk_dependency": "40.0"
+    "sdk_version": "40.0"
 }
