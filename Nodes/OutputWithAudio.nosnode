@@ -6491,7 +6491,7 @@
             },
             {
               "id": "e22bc6da-f2c5-4bea-90dd-e0dd0437ae14",
-              "name": "AutoResample (1)",
+              "name": "Auto Resample",
               "class_name": "nos.audio.AutoResample",
               "pins": [
                 {
@@ -11541,7 +11541,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel" },
+          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/Auto Resample/ShowStatus" },
           { "key": "PluginVersion", "value": "2.4.0" }
         ],
         "display_name": "AJA Output",
