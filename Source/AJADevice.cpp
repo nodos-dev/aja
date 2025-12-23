@@ -11,8 +11,8 @@
 
 #include "firmware.hpp"
 
-#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
-#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
+#include <nosSysDevice/nosDeviceSubsystem.h>
+#include <nosSysSettings/nosSettingsSubsystem.h>
 
 #undef min
 #undef max
