@@ -46,5 +46,6 @@
 	"third_party_software": [
 		"./Config/Licenses.json"
 	],
-	"sdk_version": "40.0"
+	"sdk_version": "40.0",
+	"schema_version": "1.4-v1"
 }
