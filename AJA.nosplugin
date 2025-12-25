@@ -33,7 +33,7 @@
 			},
 			{
 			  "name": "nos.sync",
-			  "version": "11.0"
+			  "version": "11.1"
 			},
 			{
 				"name": "nos.sys.settings",
@@ -47,5 +47,6 @@
 		"category": "Media I/O"
 	},
 	"binary_path": "Binaries/nosAJA",
-	"third_party_software": ["Config/Licenses.json"]
+	"third_party_software": ["Config/Licenses.json"],
+	"sdk_version": "41.0"
 }
