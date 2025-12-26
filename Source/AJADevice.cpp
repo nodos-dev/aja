@@ -4,8 +4,8 @@
 
 #include "firmware.hpp"
 
-#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
-#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
+#include <nosSysDevice/nosDeviceSubsystem.h>
+#include <nosSysSettings/nosSettingsSubsystem.h>
 
 #include "ntv2enums.h"
 #include "ntv2signalrouter.h"
@@ -1030,7 +1030,7 @@ bool AJADevice::CheckFirmware(std::string& msg, std::string& msgDetails)
         if (it->second > date)
         {
             msg = "Firmware out of date";
-            msgDetails = "Installed firmware (" + date + ") is out of date. Recommended firmware date is " + it->second + ". Please update your device.";
+            msgDetails = "Installed firmware (" + date + ") is out of date.\n Recommended firmware date is " + it->second + ".\n Please update your device.";
             return false;
         }
         return true;

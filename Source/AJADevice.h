@@ -17,7 +17,7 @@
 
 #include <Nodos/Plugin.hpp>
 
-#include "nosDeviceSubsystem/nosDeviceSubsystem.h"
+#include "nosSysDevice/nosDeviceSubsystem.h"
 
 #define AJA_ASSERT(x) { if(!(x)) { printf("%s:%d\n", __FILE__, __LINE__); abort();} }
 

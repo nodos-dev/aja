@@ -1,6 +1,6 @@
 #include "AJAMain.h"
 
-#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+#include <nosSysDevice/nosDeviceSubsystem.h>
 
 #include "AJADevice.h"
 

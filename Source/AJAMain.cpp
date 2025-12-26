@@ -5,8 +5,8 @@
 
 #include <Nodos/PluginAPI.h>
 
-#include <nosSettingsSubsystem/nosSettingsSubsystem.h>
-#include <nosDeviceSubsystem/nosDeviceSubsystem.h>
+#include <nosSysSettings/nosSettingsSubsystem.h>
+#include <nosSysDevice/nosDeviceSubsystem.h>
 #include <nosSync/nosSync.h>
 
 NOS_INIT()

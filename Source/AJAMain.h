@@ -6,7 +6,7 @@
 
 #include <Nodos/PluginAPI.h>
 #include <Nodos/Plugin.hpp>
-#include <nosVulkanSubsystem/nosVulkanSubsystem.h>
+#include <nosSysVulkan/nosVulkanSubsystem.h>
 
 #include "ntv2enums.h"
 #include "ntv2utils.h"
