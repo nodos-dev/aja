@@ -157,13 +157,12 @@ struct WaitVBLNodeContext : NodeContext
 		return curVBLCount;
 	}
 
-	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
+	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		NodeExecuteParams params = execParams;
-		uuid const& outId = params[NOS_NAME_STATIC("VBL")].Id;
-		uuid const& outVBLCountId = params[NOS_NAME_STATIC("CurrentVBL")].Id;
-		nos::sys::vulkan::FieldType waitField = *InterpretPinValue<nos::sys::vulkan::FieldType>(params[NOS_NAME("WaitField")].Data->Data);
-		uuid outFieldPinId = params[NOS_NAME("FieldType")].Id;
+		const auto& outId = params[NOS_NAME("VBL")].Id;
+		const auto& outVBLCountId = params[NOS_NAME("CurrentVBL")].Id;
+		nos::sys::vulkan::FieldType waitField = *params.GetPinData<nos::sys::vulkan::FieldType>(NOS_NAME("WaitField"));
+		const auto& outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		auto device = GetDevice();
 		if (!device)
 			return NOS_RESULT_FAILED;
@@ -248,7 +247,7 @@ struct WaitVBLNodeContext : NodeContext
 		VBLState.LastVBLCount = curVBLCount;
 		
 		nosEngine.SetPinDirty(outId); // This is unnecessary for now, but when we remove automatically setting outputs dirty on execute, this will be required.
-		nosEngine.SetPinValue(outVBLCountId, nos::Buffer::From(curVBLCount));
+		SetPinValue(outVBLCountId, curVBLCount);
 		return NOS_RESULT_SUCCESS;
 	}
 

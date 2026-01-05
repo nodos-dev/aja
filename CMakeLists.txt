@@ -27,7 +27,6 @@ target_link_libraries(${NOS_PLUGIN_TARGET} PRIVATE ajantv2)
 target_include_directories(${NOS_PLUGIN_TARGET} PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/External
     ${CMAKE_CURRENT_SOURCE_DIR}/External/libajantv2
-#   ${CMAKE_CURRENT_SOURCE_DIR}/External/libajantv2/ajantv2/src/win
     ${CMAKE_CURRENT_SOURCE_DIR}/External/libajantv2/ajantv2/includes)
 
 if (WIN32)

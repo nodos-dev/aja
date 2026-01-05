@@ -1,21 +1,19 @@
 // Copyright MediaZ Teknoloji A.S. All Rights Reserved.
 
 #include "AJADevice.h"
-#include "nosDefines.h"
-#include "ntv2enums.h"
-#include "ntv2signalrouter.h"
-#include "ntv2utils.h"
-#include <ntv2devicescanner.h>
-#include <ranges>
-#include <system/process.h>
 
 #include "firmware.hpp"
 
 #include <nosSysDevice/nosDeviceSubsystem.h>
 #include <nosSysSettings/nosSettingsSubsystem.h>
 
-#undef min
-#undef max
+#include "ntv2enums.h"
+#include "ntv2signalrouter.h"
+#include "ntv2utils.h"
+#include <ntv2devicescanner.h>
+#include <system/process.h>
+
+
 #if !defined(_WIN32)
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 #endif
@@ -256,7 +254,7 @@ nosResult AJADevice::UpdateSettingsCallback(const char* entryName, nosBuffer ite
     if (device == Devices.end())
         return NOS_RESULT_FAILED;
 
-    device->second->UpdateReferenceSource(nos::InterpretPinValue<const char>(itemValue), false);
+    device->second->UpdateReferenceSource(nos::InterpretObjectData<const char>(itemValue), false);
     return NOS_RESULT_SUCCESS;
 }
 

@@ -23,8 +23,7 @@ std::optional<nos::fb::TNode> MigrateChannelNode(nosFbNodePtr node)
         if (pin->name == "Device") {
 			if (pin->type_name == "nos.sys.device.DeviceInfo")
 			{
-                sys::device::TDeviceInfo info;
-                InterpretPinValue<sys::device::DeviceInfo>(pin->data.data())->UnPackTo(&info);
+                sys::device::TDeviceInfo info = InterpretObjectData<sys::device::TDeviceInfo>(pin->data.data());
                 nosDeviceInfo deviceInfoFromPin = sys::device::ConvertDeviceInfo(info);
                 nosDeviceId deviceId{};
                 uint64_t newDeviceSerial = -1;
@@ -80,7 +79,7 @@ std::optional<nos::fb::TNode> MigrateChannelNode(nosFbNodePtr node)
         std::erase_if(cur.pins, [serialNumber](const auto& pin)
             {
                 if (pin->name == "ReferenceSource" && pin->type_name == "string") {
-                    const char* refValue = InterpretPinValue<char>(pin->data.data());
+                    const char* refValue = InterpretObjectData<char>(pin->data.data());
                     auto device = AJADevice::GetDeviceBySerialNumber(serialNumber);
                     if (!device) {
 						nosEngine.LogE("Failed to find device with serial number %llu for ReferenceSource migration", serialNumber);

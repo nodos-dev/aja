@@ -4,22 +4,16 @@
 
 #pragma once
 
-#include <ajabase/common/types.h>
-#include <ajabase/common/timecodeburn.h>
-
-#include <ajantv2/includes/ntv2card.h>
-#include <ajantv2/includes/ntv2enums.h>
-#include <ajantv2/includes/ntv2rp188.h>
-#include <ajantv2/includes/ntv2utils.h>
-#include <ajantv2/includes/ntv2signalrouter.h>
-
-#include "ntv2publicinterface.h"
-#include "ntv2vpid.h"
-
 // stl
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <ajantv2/includes/ntv2card.h>
+#include <ajantv2/includes/ntv2enums.h>
+#include <ajantv2/includes/ntv2utils.h>
+
+#include "ntv2vpid.h"
 
 #include <Nodos/Plugin.hpp>
 

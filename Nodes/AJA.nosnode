@@ -20,6 +20,12 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
+						"name": "Continue",
+						"type_name": "nos.exe",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
 						"name": "FieldType",
 						"display_name": "Field Type",
 						"type_name": "nos.sys.vulkan.FieldType",
@@ -42,6 +48,12 @@
 					{
 						"name": "Input",
 						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "AudioPacket",
+						"type_name": "nos.audio.AudioPacket",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
 					}
@@ -108,6 +120,12 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
+						"name": "AudioBufferToWrite",
+						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
 						"name": "CurrentVBL",
 						"type_name": "uint",
 						"show_as": "INPUT_PIN",
@@ -116,6 +134,12 @@
 					{
 						"name": "Output",
 						"type_name": "nos.sys.vulkan.Buffer",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "AudioPacket",
+						"type_name": "nos.audio.AudioPacket",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
@@ -379,6 +403,34 @@
 								"can_show_as": "INPUT_PIN_OR_PROPERTY"
 							}
 						]
+					}
+				]
+			}
+		},
+		{
+			"class_name": "GetDeltaSeconds",
+			"menu_info": {
+				"category": "Device|AJA",
+				"class_name": "GetDeltaSeconds",
+				"display_name": "Get Delta Seconds"
+			},
+			"node": {
+				"class_name": "GetDeltaSeconds",
+				"display_name": "Get Delta Seconds",
+				"contents_type": "Job",
+				"description": "Retrieves the delta seconds for the specified channel",
+				"pins": [
+					{
+						"name": "Channel",
+						"type_name": "nos.aja.ChannelInfo",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "DeltaSeconds",
+						"type_name": "nos.fb.vec2u",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
 				]
 			}

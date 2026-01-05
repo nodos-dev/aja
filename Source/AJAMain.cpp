@@ -33,6 +33,7 @@ enum class Nodes : int
 	Channel,
 	Input,
 	Output,
+	GetDeltaSeconds,
 	Count
 };
 
@@ -40,6 +41,7 @@ nosResult RegisterDMAWriteNode(nosNodeFunctions*);
 nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
+nosResult RegisterGetDeltaSecondsNode(nosNodeFunctions*);
 
 struct AJAPluginFunctions : nos::PluginFunctions
 {
@@ -66,6 +68,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
 		NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
 		NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
+		NOS_RETURN_ON_FAILURE(RegisterGetDeltaSecondsNode(outList[(int)Nodes::GetDeltaSeconds]))
 		
 		// TODO: Remove these when migration of class-named graphs become available in Nodos.
 		*outList[(int)Nodes::Input] = nosNodeFunctions {
