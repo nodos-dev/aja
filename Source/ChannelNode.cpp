@@ -147,7 +147,7 @@ struct ChannelNodeContext : NodeContext
 				{
 					nosDeviceInfo foundDeviceInfo{};
 					auto res = nosDevice->GetDeviceInfo(deviceId, &foundDeviceInfo);
-					NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Device must be found at this point")
+					NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS && "Device must be found at this point")
 					if (NOS_RESULT_SUCCESS == res)
 					{
 						auto foundDeviceObj = sys::device::ConvertDeviceInfo(foundDeviceInfo);
