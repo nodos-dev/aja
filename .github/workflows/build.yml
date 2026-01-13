@@ -8,12 +8,17 @@ on:
       publish_mode:
         description: 'Publish Mode'
         required: true
-        default: 'Only Changed'
+        default: 'If Changed'
         type: choice
         options:
-          - Only Changed
-          - All Plugins
+          - If Changed
+          - Force
           - None
+      plugin_name:
+        description: 'Single plugin name (optional)'
+        required: false
+        default: ''
+        type: string
       clean:
         description: 'Clean build'
         required: false
@@ -37,8 +42,8 @@ on:
 
 run-name: >-
   ${{ ((github.event_name == 'push') && format('Build Only: {0}', github.event.head_commit.message)) ||
-      (github.event.inputs.publish_mode == 'Only Changed') && 'Build & Release' || 
-      (github.event.inputs.publish_mode == 'All Plugins') && 'Build & Release (All)' ||
+      (github.event.inputs.publish_mode == 'If Changed') && 'Build & Release' || 
+      (github.event.inputs.publish_mode == 'Force') && 'Build & Release (Force)' ||
       'Build Only' }}
 
 concurrency:
@@ -69,6 +74,7 @@ jobs:
     with:
       ref_name: ${{ github.ref_name }}
       publish_mode: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_mode || 'None' }}
+      plugin_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.plugin_name || '' }}
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
