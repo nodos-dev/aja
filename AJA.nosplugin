@@ -46,7 +46,7 @@
 		],
 		"category": "Media I/O"
 	},
-	"binary_path": "Binaries/nosAJA",
+	"binary_path": "Binaries/nosAja",
 	"third_party_software": ["Config/Licenses.json"],
 	"sdk_version": "41.0",
 	"schema_version": "1.4-v1"
