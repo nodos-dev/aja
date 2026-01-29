@@ -2,6 +2,11 @@
 	"nodes": [
 		{
 			"class_name": "DebayerSource",
+			"menu_info": {
+				"category": "Experimental",
+				"class_name": "DebayerSource",
+				"display_name": "Debayer Source"
+			},
 			"node": {
 				"id": "0be8f785-ae19-4889-98e6-5b49aba065e3",
 				"name": "Collapsed Graph",
