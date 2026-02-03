@@ -95,7 +95,11 @@ void AJADevice::Init()
     CNTV2DeviceScanner scanner;
     CNTV2Card dev;
     for (ULWord i = 0; scanner.GetDeviceAtIndex(i, dev); i++)
-        Devices[dev.GetSerialNumber()] = (std::make_shared<AJADevice>(dev.GetSerialNumber())); // TODO: Error check on AJADevice ctor.
+    {
+        std::string serialNumStr;
+        dev.GetSerialNumberString(serialNumStr);
+        Devices[dev.GetSerialNumber()] = (std::make_shared<AJADevice>(serialNumStr)); // TODO: Error check on AJADevice ctor.
+    }
     for (auto& device : Devices)
         device.second->RegisterSettings();
 }
@@ -275,7 +279,7 @@ void AJADevice::RegisterSettings() {
     UpdateReferenceStringList();
 }
 
-AJADevice::AJADevice(uint64_t serial)
+AJADevice::AJADevice(std::string const& serial)
 {
     AJAStatus	status	(AJA_STATUS_SUCCESS);
 
@@ -318,11 +322,11 @@ AJADevice::AJADevice(uint64_t serial)
             .VendorName = NSN_VendorName,
             .ModelName = nos::Name(GetModelName()),
             .TopologicalId = GetIndexNumber(),
-            .SerialNumber = nos::Name(std::to_string(serial)),
+            .SerialNumber = nos::Name(std::to_string(GetSerialNumber())),
             .Flags = nosDeviceFlags(NOS_DEVICE_FLAG_PCI | NOS_DEVICE_FLAG_VIDEO_IO)
         },
         .DisplayName = nos::Name(GetModelName()),
-        .Handle = serial,
+        .Handle = GetSerialNumber(),
         .Properties = isFirmwareValid ? nullptr : &driverProp ,
         .PropertyCount = isFirmwareValid ? 0ull : 1ull
     };
