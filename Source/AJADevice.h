@@ -109,7 +109,7 @@ struct AJADevice : CNTV2Card
     bool IsTSI(NTV2Channel channel);
     Mode GetMode(NTV2Channel channel);
     ~AJADevice();
-    AJADevice(uint64_t serial);
+    AJADevice(std::string const& serial);
     bool ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode);
 
     bool CanChannelDoFormat(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode);
