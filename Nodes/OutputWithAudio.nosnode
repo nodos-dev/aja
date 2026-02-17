@@ -725,7 +725,7 @@
                 {
                   "id": "e601f07b-ba42-4cd0-891f-43cb6c0a3bb8",
                   "name": "Input",
-                  "type_name": "nos.utilities.BufferSyncTuple",
+                  "type_name": "nos.resource.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -2807,7 +2807,7 @@
                 {
                   "id": "384c2d38-1dae-4da6-aba5-c65b1bda1892",
                   "name": "Output",
-                  "type_name": "nos.utilities.FrameBufferWithAudioSync",
+                  "type_name": "nos.resource.FrameBufferWithAudioSync",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -2885,7 +2885,7 @@
                 {
                   "id": "8283474f-4fd2-4ca3-b085-3f34c9cd8aee",
                   "name": "audio_packet",
-                  "type_name": "nos.utilities.AudioSyncTuple",
+                  "type_name": "nos.resource.AudioSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -2936,7 +2936,7 @@
                 {
                   "id": "b1468c87-12df-4c99-b2e8-5c906a69dfe4",
                   "name": "frame_buffer",
-                  "type_name": "nos.utilities.BufferSyncTuple",
+                  "type_name": "nos.resource.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -2979,7 +2979,7 @@
               "function_category": "Default Node",
               "display_name": "Make",
               "template_parameters": [
-                { "name": "Type", "type_name": "string", "value": "nos.utilities.FrameBufferWithAudioSync" }
+                { "name": "Type", "type_name": "string", "value": "nos.resource.FrameBufferWithAudioSync" }
               ],
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
@@ -4458,7 +4458,7 @@
                 {
                   "id": "b83e4608-0ef0-4cf0-a479-870bd4f6a442",
                   "name": "Input",
-                  "type_name": "nos.utilities.FrameBufferWithAudioSync",
+                  "type_name": "nos.resource.FrameBufferWithAudioSync",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -4502,7 +4502,7 @@
                 {
                   "id": "eb75860d-5904-4317-8de5-09b245f70ff4",
                   "name": "audio_packet",
-                  "type_name": "nos.utilities.AudioSyncTuple",
+                  "type_name": "nos.resource.AudioSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -4533,7 +4533,7 @@
                 {
                   "id": "9b16d3df-8269-490d-8fd1-b8d9f146207e",
                   "name": "frame_buffer",
-                  "type_name": "nos.utilities.BufferSyncTuple",
+                  "type_name": "nos.resource.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -7117,7 +7117,7 @@
                 {
                   "id": "635156b3-ad94-46e1-82c7-87e685d5ac4b",
                   "name": "Output",
-                  "type_name": "nos.utilities.BufferSyncTuple",
+                  "type_name": "nos.resource.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -7467,7 +7467,7 @@
                       {
                         "id": "51d74a57-300c-490d-a187-a749f6310db4",
                         "name": "Input",
-                        "type_name": "nos.utilities.BufferSyncTuple",
+                        "type_name": "nos.resource.BufferSyncTuple",
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizers": [],
@@ -7535,7 +7535,7 @@
                       {
                         "id": "385f1efa-3008-4ecd-a7f9-ab78317a3bb0",
                         "name": "Output",
-                        "type_name": "nos.utilities.BufferSyncTuple",
+                        "type_name": "nos.resource.BufferSyncTuple",
                         "show_as": "OUTPUT_PIN",
                         "can_show_as": "OUTPUT_PIN_ONLY",
                         "visualizers": [],
@@ -7665,7 +7665,7 @@
                       {
                         "id": "b9168337-3dfc-4a05-acba-2cca4506abe5",
                         "name": "Output",
-                        "type_name": "nos.utilities.BufferSyncTuple",
+                        "type_name": "nos.resource.BufferSyncTuple",
                         "show_as": "OUTPUT_PIN",
                         "can_show_as": "OUTPUT_PIN_ONLY",
                         "visualizers": [],
@@ -7803,7 +7803,7 @@
                     "contents": { "type": "" },
                     "function_category": "Default Node",
                     "template_parameters": [
-                      { "name": "Type", "type_name": "string", "value": "nos.utilities.BufferSyncTuple" }
+                      { "name": "Type", "type_name": "string", "value": "nos.resource.BufferSyncTuple" }
                     ],
                     "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
                   },
@@ -8734,7 +8734,7 @@
                 {
                   "id": "beaa03f1-ce3a-4c54-9753-e21993c6ed99",
                   "name": "Input",
-                  "type_name": "nos.utilities.FrameBufferWithAudioSync",
+                  "type_name": "nos.resource.FrameBufferWithAudioSync",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizers": [],
@@ -8825,7 +8825,7 @@
                 {
                   "id": "894d4d67-3be7-42b7-a06f-55749cbdde36",
                   "name": "Output",
-                  "type_name": "nos.utilities.FrameBufferWithAudioSync",
+                  "type_name": "nos.resource.FrameBufferWithAudioSync",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -9332,7 +9332,7 @@
                 {
                   "id": "9e37492a-c0ef-4ece-b9b5-394b2b7ca32a",
                   "name": "Input",
-                  "type_name": "nos.utilities.AudioSyncTuple",
+                  "type_name": "nos.resource.AudioSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -12252,7 +12252,7 @@
                 {
                   "id": "2afbabe4-004a-4cae-ae24-d58508080cb1",
                   "name": "Output",
-                  "type_name": "nos.utilities.AudioSyncTuple",
+                  "type_name": "nos.resource.AudioSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -12384,7 +12384,7 @@
               "function_category": "Default Node",
               "display_name": "Make",
               "template_parameters": [
-                { "name": "Type", "type_name": "string", "value": "nos.utilities.AudioSyncTuple" }
+                { "name": "Type", "type_name": "string", "value": "nos.resource.AudioSyncTuple" }
               ],
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
@@ -12729,3 +12729,4 @@
       }
     }
   ] }
+

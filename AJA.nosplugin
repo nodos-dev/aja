@@ -16,8 +16,20 @@
 				"version": "4.0"
 			},
 			{
-				"name": "nos.utilities",
-				"version": "4.0"
+				"name": "nos.resource",
+				"version": "1.0"
+			},
+			{
+				"name": "nos.flow",
+				"version": "1.0"
+			},
+			{
+				"name": "nos.imageprocessing",
+				"version": "1.0"
+			},
+			{
+				"name": "nos.compositing",
+				"version": "1.0"
 			},
 			{
 				"name": "nos.math",

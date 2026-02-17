@@ -656,7 +656,7 @@
 								{
 									"id": "a8bde63d-e232-446c-be8a-579d90538076",
 									"name": "Output",
-									"type_name": "nos.utilities.TextureSyncTuple",
+									"type_name": "nos.resource.TextureSyncTuple",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"visualizers": [],
@@ -1064,7 +1064,7 @@
 											{
 												"id": "4a321731-5f3b-43d8-8875-e9efe3a5bdef",
 												"name": "Output",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -1193,7 +1193,7 @@
 											{
 												"name": "Type",
 												"type_name": "string",
-												"value": "nos.utilities.TextureSyncTuple"
+												"value": "nos.resource.TextureSyncTuple"
 											}
 										],
 										"plugin_version": {
@@ -1807,7 +1807,7 @@
 											{
 												"id": "aafbf923-53e4-4834-a985-bdb5ea5cb61a",
 												"name": "Input",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_ONLY",
 												"visualizers": [],
@@ -1853,7 +1853,7 @@
 											{
 												"id": "02202b2e-0a8a-43f5-a6b6-bcab3463aaf8",
 												"name": "Output",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -2755,7 +2755,7 @@
 								{
 									"id": "8f59656a-4ae9-439c-a825-602cb9048403",
 									"name": "Input",
-									"type_name": "nos.utilities.TextureSyncTuple",
+									"type_name": "nos.resource.TextureSyncTuple",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -3163,7 +3163,7 @@
 											{
 												"id": "6f1440a0-699f-4c18-b413-e790d14cf506",
 												"name": "Input",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
 												"visualizers": [],
@@ -3384,7 +3384,7 @@
 											{
 												"id": "94dbfb38-4f73-4991-872d-0cd870d41b07",
 												"name": "Output",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -3429,7 +3429,7 @@
 											{
 												"id": "a4b9fddc-0049-48e4-9e01-1315b4dbfa96",
 												"name": "Input",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
 												"visualizers": [],
@@ -4293,7 +4293,7 @@
 								{
 									"id": "edfaa5f0-5bdc-4f1a-b512-c3d3acdbaa01",
 									"name": "Output",
-									"type_name": "nos.utilities.AudioSyncTuple",
+									"type_name": "nos.resource.AudioSyncTuple",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"visualizers": [],
@@ -4468,7 +4468,7 @@
 								{
 									"name": "Type",
 									"type_name": "string",
-									"value": "nos.utilities.AudioSyncTuple"
+									"value": "nos.resource.AudioSyncTuple"
 								}
 							],
 							"plugin_version": {
@@ -4885,7 +4885,7 @@
 								{
 									"id": "ff761da3-1df6-4de6-888b-b08771030d1d",
 									"name": "Input",
-									"type_name": "nos.utilities.VideoFrameWithAudioSync",
+									"type_name": "nos.resource.VideoFrameWithAudioSync",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_ONLY",
 									"visualizers": [],
@@ -5004,7 +5004,7 @@
 								{
 									"id": "a8243864-30cc-4008-bdfd-a0ceda12e625",
 									"name": "Output",
-									"type_name": "nos.utilities.VideoFrameWithAudioSync",
+									"type_name": "nos.resource.VideoFrameWithAudioSync",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"visualizers": [],
@@ -7381,7 +7381,7 @@
 								{
 									"id": "633fc1bd-c7e2-4365-8386-8517fc9b7b97",
 									"name": "Output",
-									"type_name": "nos.utilities.VideoFrameWithAudioSync",
+									"type_name": "nos.resource.VideoFrameWithAudioSync",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_ONLY",
 									"visualizers": [],
@@ -7487,7 +7487,7 @@
 								{
 									"id": "4f8f997d-263f-41f9-ae3e-e18e79301564",
 									"name": "audio_packet",
-									"type_name": "nos.utilities.AudioSyncTuple",
+									"type_name": "nos.resource.AudioSyncTuple",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -7558,7 +7558,7 @@
 								{
 									"id": "7e9dfe94-e380-4fd4-8490-402f8cbab1bc",
 									"name": "frame",
-									"type_name": "nos.utilities.TextureSyncTuple",
+									"type_name": "nos.resource.TextureSyncTuple",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -7615,7 +7615,7 @@
 								{
 									"name": "Type",
 									"type_name": "string",
-									"value": "nos.utilities.VideoFrameWithAudioSync"
+									"value": "nos.resource.VideoFrameWithAudioSync"
 								}
 							],
 							"plugin_version": {
@@ -8373,7 +8373,7 @@
 								{
 									"id": "52af7506-382d-407a-92bf-ee6a30c7f9d3",
 									"name": "Input",
-									"type_name": "nos.utilities.AudioSyncTuple",
+									"type_name": "nos.resource.AudioSyncTuple",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -8581,7 +8581,7 @@
 											{
 												"id": "b088adbe-e82c-4895-afd1-02a35a11e8dc",
 												"name": "Input",
-												"type_name": "nos.utilities.AudioSyncTuple",
+												"type_name": "nos.resource.AudioSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
 												"visualizers": [],
@@ -9094,7 +9094,7 @@
 											{
 												"id": "0a7f518d-3aba-4577-b5f0-095ac50be631",
 												"name": "Output",
-												"type_name": "nos.utilities.AudioSyncTuple",
+												"type_name": "nos.resource.AudioSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -9165,7 +9165,7 @@
 											{
 												"id": "37b70182-ba24-48bb-b527-fe435b421f1c",
 												"name": "Input",
-												"type_name": "nos.utilities.AudioSyncTuple",
+												"type_name": "nos.resource.AudioSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
 												"visualizers": [],
@@ -10266,7 +10266,7 @@
 								{
 									"id": "378cbe09-254a-4161-9a29-d0c017f84528",
 									"name": "Input",
-									"type_name": "nos.utilities.VideoFrameWithAudioSync",
+									"type_name": "nos.resource.VideoFrameWithAudioSync",
 									"show_as": "INPUT_PIN",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -10373,7 +10373,7 @@
 								{
 									"id": "d415a851-bb5b-4d47-a6ff-05451266a514",
 									"name": "audio_packet",
-									"type_name": "nos.utilities.AudioSyncTuple",
+									"type_name": "nos.resource.AudioSyncTuple",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -10444,7 +10444,7 @@
 								{
 									"id": "df555509-ed44-464d-875c-4acd12c0cf1d",
 									"name": "frame",
-									"type_name": "nos.utilities.TextureSyncTuple",
+									"type_name": "nos.resource.TextureSyncTuple",
 									"show_as": "OUTPUT_PIN",
 									"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 									"visualizers": [],
@@ -13456,3 +13456,4 @@
 	],
 	"schema_version": "1.4-v1"
 }
+

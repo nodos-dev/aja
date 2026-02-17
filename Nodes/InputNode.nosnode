@@ -5365,7 +5365,7 @@
 											{
 												"id": "e415074e-9d91-4024-a8f7-a17addb05d0b",
 												"name": "Input",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
 												"visualizers": [],
@@ -5989,7 +5989,7 @@
 														{
 															"id": "a4295c98-517f-428c-9c15-3b0370b0cef1",
 															"name": "Input",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "INPUT_PIN",
 															"can_show_as": "INPUT_PIN_OR_PROPERTY",
 															"visualizers": [],
@@ -6114,7 +6114,7 @@
 														"type": ""
 													},
 													"function_category": "Default Node",
-													"display_name": "Break nos.utilities.TextureSyncTuple",
+													"display_name": "Break nos.resource.TextureSyncTuple",
 													"plugin_version": {
 														"major": 3,
 														"minor": 0,
@@ -6617,7 +6617,7 @@
 														{
 															"id": "5e753203-0b3e-4b41-b029-324242ef16ed",
 															"name": "Output",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "OUTPUT_PIN",
 															"can_show_as": "OUTPUT_PIN_ONLY",
 															"visualizers": [],
@@ -6662,7 +6662,7 @@
 														{
 															"id": "d7a5c897-c6e4-43e2-a019-1a08efacd767",
 															"name": "Input",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "INPUT_PIN",
 															"can_show_as": "INPUT_PIN_OR_PROPERTY",
 															"visualizers": [],
@@ -6842,7 +6842,7 @@
 											{
 												"id": "9100e3b1-a89e-41cc-a94e-49117267d3b8",
 												"name": "Input",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_ONLY",
 												"visualizers": [],
@@ -6899,7 +6899,7 @@
 											{
 												"id": "fe8226eb-3269-4f97-8e2b-62e53322d86d",
 												"name": "Output",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -7016,7 +7016,7 @@
 											{
 												"id": "09bf5f52-a1b8-4a06-b4b4-db01f2dc1725",
 												"name": "Output",
-												"type_name": "nos.utilities.TextureSyncTuple",
+												"type_name": "nos.resource.TextureSyncTuple",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"visualizers": [],
@@ -7856,7 +7856,7 @@
 														{
 															"id": "d73094a5-75c2-43f4-8a47-e3a0ac52a644",
 															"name": "Output",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "OUTPUT_PIN",
 															"can_show_as": "OUTPUT_PIN_ONLY",
 															"visualizers": [],
@@ -7985,7 +7985,7 @@
 														{
 															"name": "Type",
 															"type_name": "string",
-															"value": "nos.utilities.TextureSyncTuple"
+															"value": "nos.resource.TextureSyncTuple"
 														}
 													],
 													"plugin_version": {
@@ -8134,7 +8134,7 @@
 														{
 															"id": "f35c7618-a11f-4d2f-8a45-bf35c836733d",
 															"name": "Input",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "INPUT_PIN",
 															"can_show_as": "INPUT_PIN_ONLY",
 															"visualizers": [],
@@ -8180,7 +8180,7 @@
 														{
 															"id": "edc92b89-00c8-460f-9698-b08bc353a54d",
 															"name": "Output",
-															"type_name": "nos.utilities.TextureSyncTuple",
+															"type_name": "nos.resource.TextureSyncTuple",
 															"show_as": "OUTPUT_PIN",
 															"can_show_as": "OUTPUT_PIN_ONLY",
 															"visualizers": [],
@@ -9512,3 +9512,4 @@
 	],
 	"schema_version": "1.4-v1"
 }
+
