@@ -406,7 +406,7 @@
             {
               "id": "20a4bbb8-3365-4db6-9598-3d9b87407ec8",
               "name": "WaitGPUEvent",
-              "class_name": "nos.utilities.WaitGPUEvent",
+              "class_name": "nos.sync.WaitGPUEvent",
               "pins": [
                 {
                   "id": "83d28f09-0eed-4bca-840c-1da41c5e2720",
@@ -1099,7 +1099,7 @@
                   {
                     "id": "dae0b4a8-6afd-4248-86b1-f9713211546f",
                     "name": "BufferProvider (1)",
-                    "class_name": "nos.utilities.BufferProvider",
+                    "class_name": "nos.resource.BufferProvider",
                     "pins": [
                       {
                         "id": "79d0fda2-6983-4f3c-b8a7-fbe97aac461a",
@@ -1954,7 +1954,7 @@
                   {
                     "id": "33dfdc12-1551-40b1-8160-e9f09f7ee514",
                     "name": "HostVisibleBufferCopy",
-                    "class_name": "nos.utilities.HostVisibleBufferCopy",
+                    "class_name": "nos.resource.HostVisibleBufferCopy",
                     "pins": [
                       {
                         "id": "aecd62aa-420c-4533-b5bb-912d16b8898d",
@@ -3585,7 +3585,7 @@
                   {
                     "id": "ce369df3-6846-438a-af61-49515a3d5e95",
                     "name": "ShowStatus",
-                    "class_name": "nos.utilities.ShowStatus",
+                    "class_name": "nos.flow.ShowStatus",
                     "pins": [
                       {
                         "id": "cf5e6c75-9531-4e21-bd7f-a55932e2a227",
@@ -3996,7 +3996,7 @@
                   {
                     "id": "04ee9351-296e-4a5b-a144-3925e0910d50",
                     "name": "GetFieldType",
-                    "class_name": "nos.mediaio.GetFieldType",
+                    "class_name": "nos.resource.GetFieldType",
                     "pins": [
                       {
                         "id": "f8e3611d-2eff-41c6-9510-6063c1bc47f1",
@@ -5149,7 +5149,7 @@
             {
               "id": "cd6be230-ddbf-4db8-a4e3-37954930db15",
               "name": "Auto Resize",
-              "class_name": "nos.utilities.AutoResize",
+              "class_name": "nos.imageprocessing.AutoResize",
               "pins": [
                 {
                   "id": "d53cb49b-c102-4e99-9b4c-f4445e97986c",
@@ -5323,7 +5323,7 @@
                   {
                     "id": "15669229-4189-4186-a181-d747994515c2",
                     "name": "Resize",
-                    "class_name": "nos.utilities.Resize",
+                    "class_name": "nos.imageprocessing.Resize",
                     "pins": [
                       {
                         "id": "ff0ac9ae-7a43-415e-b55a-9d530914803c",
@@ -5397,7 +5397,7 @@
                       {
                         "id": "451cef7d-4773-4359-9a50-bc8c72c7b6c5",
                         "name": "Method",
-                        "type_name": "nos.utilities.ResizeMethod",
+                        "type_name": "nos.imageprocessing.ResizeMethod",
                         "show_as": "PROPERTY",
                         "can_show_as": "INPUT_OUTPUT_PROPERTY",
                         "visualizers": [],
@@ -5488,7 +5488,7 @@
                   {
                     "id": "bd768358-3473-4adb-9718-6579853c1a5a",
                     "name": "ShowStatus",
-                    "class_name": "nos.utilities.ShowStatus",
+                    "class_name": "nos.flow.ShowStatus",
                     "pins": [
                       {
                         "id": "14c176a3-dc29-4059-8810-59d2829bdfb0",
@@ -7285,7 +7285,7 @@
                   {
                     "id": "454bb529-2712-4f48-b418-25fded703881",
                     "name": "CopyBuffer",
-                    "class_name": "nos.utilities.CopyResource",
+                    "class_name": "nos.resource.CopyResource",
                     "pins": [
                       {
                         "id": "e4e30b69-5c45-422a-a71b-48d4e3539d21",
@@ -7810,7 +7810,7 @@
                   {
                     "id": "68149aea-e9ef-4974-8f48-a91bda369ca0",
                     "name": "BufferProvider",
-                    "class_name": "nos.utilities.BufferProvider",
+                    "class_name": "nos.resource.BufferProvider",
                     "pins": [
                       {
                         "id": "68143cf6-5ddc-4824-88a3-63eb0cacb464",
@@ -8266,7 +8266,7 @@
             {
               "id": "3f9f3cce-67da-42d7-ab83-b6a682a0de1f",
               "name": "MultiLiveOut",
-              "class_name": "nos.utilities.MultiLiveOut",
+              "class_name": "nos.flow.MultiLiveOut",
               "pins": [
                 {
                   "id": "d5c3201b-f192-4652-b54f-c86bdb93b448",
@@ -11106,7 +11106,7 @@
                   {
                     "id": "f601a32f-f0dd-4786-b354-90c25fbd3351",
                     "name": "ShowStatus",
-                    "class_name": "nos.utilities.ShowStatus",
+                    "class_name": "nos.flow.ShowStatus",
                     "pins": [
                       {
                         "id": "4662bcab-861d-492a-8ec7-cfa9170a0f6c",
@@ -11773,7 +11773,7 @@
             {
               "id": "d679a91b-9078-4d98-ab4f-dbf1d3ccef88",
               "name": "GetFieldType (1)",
-              "class_name": "nos.mediaio.GetFieldType",
+              "class_name": "nos.resource.GetFieldType",
               "pins": [
                 {
                   "id": "471ec379-d7d7-491e-849c-25bc7fb10b12",
@@ -12123,7 +12123,7 @@
             {
               "id": "8f90b5ba-846f-4b93-8811-c73b40b975d3",
               "name": "ScheduleRequest",
-              "class_name": "nos.utilities.ScheduleRequest",
+              "class_name": "nos.flow.ScheduleRequest",
               "pins": [
                 {
                   "id": "3e4bbf8b-ac4d-4899-8824-84d5f54ad677",

@@ -2147,7 +2147,7 @@
 						{
 							"id": "06322455-9f6c-4161-99b6-56f3f8053a70",
 							"name": "UploadBuffer (1)",
-							"class_name": "nos.utilities.UploadBuffer",
+							"class_name": "nos.resource.UploadBuffer",
 							"pins": [
 								{
 									"id": "c4c35d9c-3be9-4b9f-95fb-d3d855038249",
@@ -3623,7 +3623,7 @@
 						{
 							"id": "8d75c216-e08b-4ac0-a958-f3565cd25a26",
 							"name": "BufferProvider",
-							"class_name": "nos.utilities.BufferProvider",
+							"class_name": "nos.resource.BufferProvider",
 							"pins": [
 								{
 									"id": "1ce79cf4-0665-4065-b6a4-008058cbfed5",
@@ -3877,7 +3877,7 @@
 						{
 							"id": "56429ad8-ec2c-492e-91f2-54dffd9f2e9b",
 							"name": "Timed Function Signaller",
-							"class_name": "nos.utilities.TimedFunctionSignaller",
+							"class_name": "nos.flow.TimedFunctionSignaller",
 							"pins": [
 								{
 									"id": "fb85fd96-7e30-4184-bec2-645d15093f74",
@@ -4080,7 +4080,7 @@
 									{
 										"id": "94751115-e729-47f2-a06f-abe6ee64ab2d",
 										"name": "PropagateExecution",
-										"class_name": "nos.utilities.PropagateExecution",
+										"class_name": "nos.flow.PropagateExecution",
 										"pins": [
 											{
 												"id": "bbd5369a-79f2-4dc9-b561-1ccd5b562b36",
@@ -4164,7 +4164,7 @@
 									{
 										"id": "fcb84efe-e774-4d88-9944-818935f3f67c",
 										"name": "CPUSleep",
-										"class_name": "nos.utilities.CPUSleep",
+										"class_name": "nos.flow.CPUSleep",
 										"pins": [
 											{
 												"id": "830a0eeb-6878-4cf2-8ce1-2816cb04fb27",
@@ -5418,7 +5418,7 @@
 												{
 													"id": "c05f4668-ad4d-4778-8f3f-3baa45e60bff",
 													"name": "SetFieldType (1)",
-													"class_name": "nos.mediaio.SetFieldType",
+													"class_name": "nos.resource.SetFieldType",
 													"pins": [
 														{
 															"id": "72032535-dc1c-4a11-b858-f0da89f69041",
@@ -5527,7 +5527,7 @@
 												{
 													"id": "0105d6e0-4cdf-422c-8ef0-171dd47a1104",
 													"name": "TextureProvider (1)",
-													"class_name": "nos.utilities.TextureProvider",
+													"class_name": "nos.resource.TextureProvider",
 													"pins": [
 														{
 															"id": "c86cef8e-b0ca-45ce-b90c-897ad53ca511",
@@ -5739,7 +5739,7 @@
 												{
 													"id": "a96fe3e2-b3de-4266-bbbe-d1a454ef12be",
 													"name": "GetFieldType",
-													"class_name": "nos.mediaio.GetFieldType",
+													"class_name": "nos.resource.GetFieldType",
 													"pins": [
 														{
 															"id": "79ac6b72-cb71-454f-a847-a887ba354a5f",
@@ -6292,7 +6292,7 @@
 												{
 													"id": "fbc0a051-a033-4f06-b370-c8f396331bad",
 													"name": "CopyResource",
-													"class_name": "nos.utilities.CopyResource",
+													"class_name": "nos.resource.CopyResource",
 													"pins": [
 														{
 															"id": "a43dea69-6a2a-4633-8524-8e8e0717874b",
@@ -7212,7 +7212,7 @@
 												{
 													"id": "c9824b86-30f0-4811-a2cd-0ca67500f5e2",
 													"name": "CopyTexture",
-													"class_name": "nos.utilities.CopyResource",
+													"class_name": "nos.resource.CopyResource",
 													"pins": [
 														{
 															"id": "928df3f4-1a64-4191-881c-18e6a6ce902f",
@@ -7391,7 +7391,7 @@
 												{
 													"id": "0dd05042-bc10-4571-9dcc-325e5f395a4e",
 													"name": "TextureProvider",
-													"class_name": "nos.utilities.TextureProvider",
+													"class_name": "nos.resource.TextureProvider",
 													"pins": [
 														{
 															"id": "61c72b9e-4bdc-44bc-ad79-a3139791fd7f",
@@ -7600,7 +7600,7 @@
 												{
 													"id": "6a83300f-5c2f-448c-b853-9815a7b08623",
 													"name": "SetFieldType",
-													"class_name": "nos.mediaio.SetFieldType",
+													"class_name": "nos.resource.SetFieldType",
 													"pins": [
 														{
 															"id": "29ff7eb7-aa3a-42f3-9ae3-25a39d5cf61c",
@@ -7778,7 +7778,7 @@
 												{
 													"id": "12e2053f-e7be-4941-951c-9856cd236b6d",
 													"name": "GetFieldType (1)",
-													"class_name": "nos.mediaio.GetFieldType",
+													"class_name": "nos.resource.GetFieldType",
 													"pins": [
 														{
 															"id": "adf794bf-9144-40b6-bc3c-f639da8d064f",

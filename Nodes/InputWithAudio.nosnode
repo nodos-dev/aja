@@ -941,7 +941,7 @@
 									{
 										"id": "03e95028-daf3-4867-a348-a0134f4afd18",
 										"name": "SetFieldType",
-										"class_name": "nos.mediaio.SetFieldType",
+										"class_name": "nos.resource.SetFieldType",
 										"pins": [
 											{
 												"id": "e41ac71a-b5dd-49bd-93d9-a41de5026f3b",
@@ -1205,7 +1205,7 @@
 									{
 										"id": "5496cc1c-2395-45f7-beab-41a95d5eacfc",
 										"name": "CopyTexture",
-										"class_name": "nos.utilities.CopyResource",
+										"class_name": "nos.resource.CopyResource",
 										"pins": [
 											{
 												"id": "1f21c090-fd11-4146-ae90-29ea60294ecb",
@@ -1593,7 +1593,7 @@
 									{
 										"id": "c0201c74-6263-40d2-8cdf-6864041cf9af",
 										"name": "TextureProvider",
-										"class_name": "nos.utilities.TextureProvider",
+										"class_name": "nos.resource.TextureProvider",
 										"pins": [
 											{
 												"id": "9e280c7f-dd1d-46c7-8b30-4a867c371042",
@@ -1924,7 +1924,7 @@
 									{
 										"id": "008ddd30-a1a0-42ad-971f-946e08b069f5",
 										"name": "GetFieldType (1)",
-										"class_name": "nos.mediaio.GetFieldType",
+										"class_name": "nos.resource.GetFieldType",
 										"pins": [
 											{
 												"id": "584303dd-bed9-4161-8556-b32ba9bfd168",
@@ -2326,7 +2326,7 @@
 						{
 							"id": "1e91e2e0-c472-47b2-8bd3-79eacaf2a8bf",
 							"name": "BufferProvider",
-							"class_name": "nos.utilities.BufferProvider",
+							"class_name": "nos.resource.BufferProvider",
 							"pins": [
 								{
 									"id": "59dc69b0-05fc-4725-85b3-2f8e5fcf6027",
@@ -3313,7 +3313,7 @@
 									{
 										"id": "dc6d5767-701a-4cf2-a8c6-ceba205563c9",
 										"name": "GetFieldType",
-										"class_name": "nos.mediaio.GetFieldType",
+										"class_name": "nos.resource.GetFieldType",
 										"pins": [
 											{
 												"id": "24aaec75-9e32-4ebb-92e1-55eae8d0e71e",
@@ -3620,7 +3620,7 @@
 									{
 										"id": "a7a807a7-30fd-4a26-8679-e6db49e5ae82",
 										"name": "CopyResource",
-										"class_name": "nos.utilities.CopyResource",
+										"class_name": "nos.resource.CopyResource",
 										"pins": [
 											{
 												"id": "bf0979a2-b768-43f9-955f-1e879b1b29a3",
@@ -3801,7 +3801,7 @@
 									{
 										"id": "94cdb101-81d6-4067-9bbb-63207cb7bf6b",
 										"name": "TextureProvider",
-										"class_name": "nos.utilities.TextureProvider",
+										"class_name": "nos.resource.TextureProvider",
 										"pins": [
 											{
 												"id": "6cb1fe9c-f74b-4f53-879f-59208bae3479",
@@ -4013,7 +4013,7 @@
 									{
 										"id": "a5e10f54-3861-4279-bc42-64fa9b82d350",
 										"name": "SetFieldType",
-										"class_name": "nos.mediaio.SetFieldType",
+										"class_name": "nos.resource.SetFieldType",
 										"pins": [
 											{
 												"id": "0430232a-ae04-4251-af15-7f202eac20d7",
@@ -4591,7 +4591,7 @@
 						{
 							"id": "5088fad4-fefe-440d-b96d-6a858098bba4",
 							"name": "BufferProvider (2)",
-							"class_name": "nos.utilities.BufferProvider",
+							"class_name": "nos.resource.BufferProvider",
 							"pins": [
 								{
 									"id": "347811b3-1aae-4944-81ee-299d3a31986d",
@@ -6128,7 +6128,7 @@
 						{
 							"id": "7a8c6488-54f4-4cec-a691-f91ddee61571",
 							"name": "BufferProvider (1)",
-							"class_name": "nos.utilities.BufferProvider",
+							"class_name": "nos.resource.BufferProvider",
 							"pins": [
 								{
 									"id": "402c0c0e-dbee-46ea-9104-5bfeb60a4129",
@@ -6891,7 +6891,7 @@
 						{
 							"id": "003adb65-303d-4725-aff9-30ae9babd976",
 							"name": "Timed Function Signaller",
-							"class_name": "nos.utilities.TimedFunctionSignaller",
+							"class_name": "nos.flow.TimedFunctionSignaller",
 							"pins": [
 								{
 									"id": "60b55d34-886e-440d-b3a2-a638172bcdf1",
@@ -6963,7 +6963,7 @@
 									{
 										"id": "417bc50e-5651-4daa-87d8-9949476f0e27",
 										"name": "PropagateExecution",
-										"class_name": "nos.utilities.PropagateExecution",
+										"class_name": "nos.flow.PropagateExecution",
 										"pins": [
 											{
 												"id": "57372c1b-ccf1-4fe0-8b45-951f4730bbd2",
@@ -7108,7 +7108,7 @@
 									{
 										"id": "c41827d0-a6ad-4461-806d-f8c3cf8cace7",
 										"name": "CPUSleep",
-										"class_name": "nos.utilities.CPUSleep",
+										"class_name": "nos.flow.CPUSleep",
 										"pins": [
 											{
 												"id": "d6da4fc6-1f04-4f49-8f96-557ba36b7e95",
@@ -9431,7 +9431,7 @@
 									{
 										"id": "9f9ac33d-1171-45e5-9dd1-414c43dfcce1",
 										"name": "HostVisibleBufferCopy",
-										"class_name": "nos.utilities.HostVisibleBufferCopy",
+										"class_name": "nos.resource.HostVisibleBufferCopy",
 										"pins": [
 											{
 												"id": "d18132a5-aaf0-4abc-b5d9-b24450413a7e",
@@ -9627,7 +9627,7 @@
 									{
 										"id": "e83e561c-8719-4868-8a65-d091269c9756",
 										"name": "BufferProvider",
-										"class_name": "nos.utilities.BufferProvider",
+										"class_name": "nos.resource.BufferProvider",
 										"pins": [
 											{
 												"id": "2962255e-f817-4b2b-abc1-7ed76d822463",
@@ -10095,7 +10095,7 @@
 						{
 							"id": "a5e063d3-8fbd-40a5-925c-3414288e4f62",
 							"name": "HostVisibleBufferCopy",
-							"class_name": "nos.utilities.HostVisibleBufferCopy",
+							"class_name": "nos.resource.HostVisibleBufferCopy",
 							"pins": [
 								{
 									"id": "656520ec-62f9-4a22-a88c-612f001e0dab",
@@ -11440,7 +11440,7 @@
 						{
 							"id": "977a48ef-7f6b-4694-9c12-7da6e7af1c83",
 							"name": "UploadBuffer (1)",
-							"class_name": "nos.utilities.UploadBuffer",
+							"class_name": "nos.resource.UploadBuffer",
 							"pins": [
 								{
 									"id": "6b0cee78-1182-4c5b-9e43-9da2791dccb7",
