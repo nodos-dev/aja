@@ -2369,7 +2369,7 @@
                 {
                   "id": "5823fd02-8169-45d3-bb74-58b2f9aa3564",
                   "name": "Output",
-                  "type_name": "nos.resource.BufferSyncTuple",
+                  "type_name": "nos.mediaio.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -2505,7 +2505,7 @@
               "contents": { "type": "" },
               "function_category": "Default Node",
               "template_parameters": [
-                { "name": "Type", "type_name": "string", "value": "nos.resource.BufferSyncTuple" }
+                { "name": "Type", "type_name": "string", "value": "nos.mediaio.BufferSyncTuple" }
               ],
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
@@ -3259,7 +3259,7 @@
                 {
                   "id": "4dfb8d93-575e-4e8d-8505-f212f8807402",
                   "name": "Input",
-                  "type_name": "nos.resource.BufferSyncTuple",
+                  "type_name": "nos.mediaio.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizers": [],
@@ -3340,7 +3340,7 @@
                 {
                   "id": "9a42953b-f036-4fec-b1a2-34cc1cc096a8",
                   "name": "Output",
-                  "type_name": "nos.resource.BufferSyncTuple",
+                  "type_name": "nos.mediaio.BufferSyncTuple",
                   "show_as": "OUTPUT_PIN",
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizers": [],
@@ -3975,7 +3975,7 @@
                 {
                   "id": "ee8ec391-1e1b-4b87-8531-1e4b8d1f7d41",
                   "name": "Input",
-                  "type_name": "nos.resource.BufferSyncTuple",
+                  "type_name": "nos.mediaio.BufferSyncTuple",
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizers": [],
@@ -4109,7 +4109,7 @@
               "contents_type": "Job",
               "contents": { "type": "" },
               "function_category": "Default Node",
-              "display_name": "Break nos.resource.BufferSyncTuple",
+              "display_name": "Break nos.mediaio.BufferSyncTuple",
               "plugin_version": { "major": 3, "minor": 0, "patch": 0 }
             },
             {
