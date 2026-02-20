@@ -681,7 +681,7 @@
 									{
 										"id": "1067fc43-3ef0-46a8-aec5-9018e494b043",
 										"name": "UploadBufferProvider",
-										"class_name": "nos.utilities.UploadBufferProvider",
+										"class_name": "nos.resource.UploadBufferProvider",
 										"pins": [
 											{
 												"id": "3e553874-152e-4eb8-a877-3d3a8a629a54",
@@ -1149,7 +1149,7 @@
 									{
 										"id": "2d85cde8-e1fc-4c71-ae70-95f819be6de5",
 										"name": "UploadBuffer",
-										"class_name": "nos.utilities.UploadBuffer",
+										"class_name": "nos.resource.UploadBuffer",
 										"pins": [
 											{
 												"id": "e927b003-61ae-4432-a10f-90ab09e98172",
@@ -1558,7 +1558,7 @@
 									{
 										"id": "15bd6e07-8ba9-42cd-aa60-804bdf985286",
 										"name": "Timed Function Signaller",
-										"class_name": "nos.utilities.TimedFunctionSignaller",
+										"class_name": "nos.flow.TimedFunctionSignaller",
 										"pins": [
 											{
 												"id": "27b4031c-60a6-4ac5-8bda-66b6be9684d2",
@@ -1678,7 +1678,7 @@
 												{
 													"id": "a41cad05-865d-47db-bbb3-c9b07f16c3ba",
 													"name": "PropagateExecution",
-													"class_name": "nos.utilities.PropagateExecution",
+													"class_name": "nos.flow.PropagateExecution",
 													"pins": [
 														{
 															"id": "832d2e88-ae77-4323-be80-dbe576d6ad78",
@@ -1758,7 +1758,7 @@
 												{
 													"id": "f2658743-674c-4f5c-8274-f84b8fc41140",
 													"name": "CPUSleep",
-													"class_name": "nos.utilities.CPUSleep",
+													"class_name": "nos.flow.CPUSleep",
 													"pins": [
 														{
 															"id": "93a2986f-4013-4a33-9fa4-0092a7750e20",
@@ -3199,7 +3199,7 @@
 									{
 										"id": "345e0b5e-5c18-4b88-9e42-cc0b1268d592",
 										"name": "BoundedQueue",
-										"class_name": "nos.utilities.BoundedQueue",
+										"class_name": "nos.resource.BoundedQueue",
 										"pins": [
 											{
 												"id": "70afb9ce-61b9-4e5a-bf48-bc0ee11b63a0",
@@ -4000,7 +4000,7 @@
 									{
 										"id": "7178b883-177d-4fbe-876b-0f4007d63274",
 										"name": "UploadBufferProvider",
-										"class_name": "nos.utilities.UploadBufferProvider",
+										"class_name": "nos.resource.UploadBufferProvider",
 										"pins": [
 											{
 												"id": "75008cb5-d243-459d-a87e-e63926f463fb",
@@ -4517,7 +4517,7 @@
 									{
 										"id": "821c7964-0fee-41ba-a8fc-19a9d4783290",
 										"name": "UploadBuffer",
-										"class_name": "nos.utilities.UploadBuffer",
+										"class_name": "nos.resource.UploadBuffer",
 										"pins": [
 											{
 												"id": "ddd93728-f2f8-46f9-985e-deadb689d4bc",
@@ -4926,7 +4926,7 @@
 									{
 										"id": "38ac411d-aa63-474e-a94c-2c9a8573573d",
 										"name": "Timed Function Signaller",
-										"class_name": "nos.utilities.TimedFunctionSignaller",
+										"class_name": "nos.flow.TimedFunctionSignaller",
 										"pins": [
 											{
 												"id": "9aab4807-1fcb-47ea-802f-e4626d3cfa72",
@@ -5046,7 +5046,7 @@
 												{
 													"id": "e8835755-ac15-4018-bd16-3052a56bd40b",
 													"name": "PropagateExecution",
-													"class_name": "nos.utilities.PropagateExecution",
+													"class_name": "nos.flow.PropagateExecution",
 													"pins": [
 														{
 															"id": "0b9aeaba-918c-4ee8-aadd-14ff7885b5b4",
@@ -5188,7 +5188,7 @@
 												{
 													"id": "4f65c4a9-ea76-42b1-bd8b-6358de1630ef",
 													"name": "CPUSleep",
-													"class_name": "nos.utilities.CPUSleep",
+													"class_name": "nos.flow.CPUSleep",
 													"pins": [
 														{
 															"id": "7d63cbaa-b577-4f72-8b86-780717193753",
@@ -6567,7 +6567,7 @@
 									{
 										"id": "1c8cb944-1fef-48a4-a21a-351ecaee9e72",
 										"name": "BoundedQueue",
-										"class_name": "nos.utilities.BoundedQueue",
+										"class_name": "nos.resource.BoundedQueue",
 										"pins": [
 											{
 												"id": "a6ff654a-2514-4f55-9307-951335c950a4",

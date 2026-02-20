@@ -912,7 +912,7 @@
 						{
 							"id": "cbb0f69b-08da-4e53-ac8e-e70a6b5f4409",
 							"name": "ChannelViewer",
-							"class_name": "nos.utilities.ChannelViewer",
+							"class_name": "nos.compositing.ChannelViewer",
 							"pins": [
 								{
 									"id": "735a1c28-a562-4339-a8c9-50a825657113",
@@ -943,7 +943,7 @@
 								{
 									"id": "546e5b74-550c-4d84-9f91-3caed0fb1279",
 									"name": "Channel",
-									"type_name": "nos.utilities.ChannelViewerChannels",
+									"type_name": "nos.compositing.ChannelViewerChannels",
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"data": "A",
@@ -961,7 +961,7 @@
 								{
 									"id": "0317c695-f78f-4505-8dcf-881c4568030a",
 									"name": "Format",
-									"type_name": "nos.utilities.ChannelViewerFormats",
+									"type_name": "nos.compositing.ChannelViewerFormats",
 									"show_as": "PROPERTY",
 									"can_show_as": "PROPERTY_ONLY",
 									"data": "Rec_709",
@@ -1516,7 +1516,7 @@
 									{
 										"id": "7d2e665d-de3d-4059-9348-ee2d1e334562",
 										"name": "BufferRing",
-										"class_name": "nos.utilities.RingBuffer",
+										"class_name": "nos.resource.RingBuffer",
 										"pins": [
 											{
 												"id": "b4a62ea4-284d-4201-9ce9-c80d1e32a3a9",
@@ -4287,7 +4287,7 @@
 												{
 													"id": "79ea3a3c-d1bb-45ee-892f-d3d8a58e2740",
 													"name": "ShowStatus",
-													"class_name": "nos.utilities.ShowStatus",
+													"class_name": "nos.flow.ShowStatus",
 													"pins": [
 														{
 															"id": "b9099b17-44ec-466e-b73a-047adca7f203",
@@ -5106,7 +5106,7 @@
 												{
 													"id": "10a3112a-5133-413e-9466-990dc3d7cb59",
 													"name": "Resize",
-													"class_name": "nos.utilities.Resize",
+													"class_name": "nos.imageprocessing.Resize",
 													"pins": [
 														{
 															"id": "c541ca8c-c5e8-4e4b-b30a-0ac235a138e7",
@@ -5166,7 +5166,7 @@
 														{
 															"id": "ee57615a-bd15-408c-aa2e-9defd034d10d",
 															"name": "Method",
-															"type_name": "nos.utilities.ResizeMethod",
+															"type_name": "nos.imageprocessing.ResizeMethod",
 															"show_as": "PROPERTY",
 															"can_show_as": "INPUT_OUTPUT_PROPERTY",
 															"data": "BILINEAR",
@@ -7415,7 +7415,7 @@
 									{
 										"id": "2494ecfa-7747-4db1-aec7-100065a45283",
 										"name": "BufferRing",
-										"class_name": "nos.utilities.RingBuffer",
+										"class_name": "nos.resource.RingBuffer",
 										"pins": [
 											{
 												"id": "a5624541-cb99-46e1-a029-1cb66cb14f55",
@@ -9933,7 +9933,7 @@
 												{
 													"id": "6124dff9-2226-4f3c-aa19-5ae4f6a0577f",
 													"name": "ShowStatus",
-													"class_name": "nos.utilities.ShowStatus",
+													"class_name": "nos.flow.ShowStatus",
 													"pins": [
 														{
 															"id": "a1728f81-8741-4464-8938-31063180298c",
@@ -10693,7 +10693,7 @@
 												{
 													"id": "a6d17fda-b24f-448b-9edd-25d7586ab0d5",
 													"name": "Resize",
-													"class_name": "nos.utilities.Resize",
+													"class_name": "nos.imageprocessing.Resize",
 													"pins": [
 														{
 															"id": "36aba321-df85-4aeb-98b2-f8b0a9a92b0a",
@@ -10753,7 +10753,7 @@
 														{
 															"id": "c5212b74-b408-4d8b-86f9-b2fef9e93cd7",
 															"name": "Method",
-															"type_name": "nos.utilities.ResizeMethod",
+															"type_name": "nos.imageprocessing.ResizeMethod",
 															"show_as": "PROPERTY",
 															"can_show_as": "INPUT_OUTPUT_PROPERTY",
 															"data": "BILINEAR",
