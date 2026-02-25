@@ -14,11 +14,16 @@ on:
           - If Changed
           - Force
           - None
-      plugin_name:
-        description: 'Single plugin name (optional)'
+      plugin_names:
+        description: 'Publish only these plugins (semicolon-delimited) (optional)'
         required: false
         default: ''
         type: string
+      run_tests:
+        description: 'Run Tests'
+        required: false
+        default: false
+        type: boolean
       clean:
         description: 'Clean build'
         required: false
@@ -39,6 +44,15 @@ on:
         required: false
         default: true
         type: boolean
+      version_check:
+        description: 'Version Check'
+        required: true
+        default: 'strict'
+        type: choice
+        options:
+          - none
+          - loose
+          - strict
 
 run-name: >-
   ${{ ((github.event_name == 'push') && format('Build Only: {0}', github.event.head_commit.message)) ||
@@ -74,9 +88,11 @@ jobs:
     with:
       ref_name: ${{ github.ref_name }}
       publish_mode: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_mode || 'None' }}
-      plugin_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.plugin_name || '' }}
+      plugin_names: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.plugin_names || '' }}
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
-      linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push'}}
+      linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
+      run_tests: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.run_tests) || false }}
+      version_check: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_check || 'strict' }}
