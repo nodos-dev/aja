@@ -1021,20 +1021,18 @@ bool AJADevice::AcquireDevice()
     if (GetStreamingApplication(curAppFourCC, curPid))
     {
         if (curPid == nosPid)
-        {
-            auto curApp = FourCCToString(curAppFourCC);
-            if (curPid != 0)
-		        nosEngine.LogW("Device %s is already acquired by application %s (PID %d). Trying to reclaim it.", GetDisplayName().c_str(), curApp.c_str(), curPid);
-        }
+            return true;
+		auto curApp = FourCCToString(curAppFourCC);
+        if (curPid != 0)
+		    nosEngine.LogW("Device %s is already acquired by application %s (PID %d). Trying to reclaim it.", GetDisplayName().c_str(), curApp.c_str(), curPid);
     }
 
-    if (!AcquireStreamForApplicationWithReference(NOS_FOURCC, nosPid))
+    if (!AcquireStreamForApplication(NOS_FOURCC, nosPid))
     {
 		nosEngine.LogE("Failed to acquire device %s for Nodos.", GetDisplayName().c_str());
 		return false;
     }
-    if(nosPid != curPid)
-        nosEngine.LogD("Device %s acquired by Nodos.", GetDisplayName().c_str());
+    nosEngine.LogD("Device %s acquired by Nodos.", GetDisplayName().c_str());
     return true;
 }
 
@@ -1058,7 +1056,7 @@ void AJADevice::ReleaseDevice()
 		return;
     }
 
-    if (ReleaseStreamForApplicationWithReference(NOS_FOURCC, nosPid))
+    if (ReleaseStreamForApplication(NOS_FOURCC, nosPid))
         nosEngine.LogD("Device %s released by Nodos", GetDisplayName().c_str());
     else
         nosEngine.LogE("Failed to release device %s", GetDisplayName().c_str());
