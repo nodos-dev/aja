@@ -5554,7 +5554,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/BufferRing" },
+          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus" },
           { "key": "PluginVersion", "value": "2.4.0" }
         ],
         "plugin_version": { "major": 2, "minor": 6, "patch": 23 }

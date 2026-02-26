@@ -79,72 +79,31 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	static nosResult MigrateInOutNodes(nosFbNodePtr node, nosBuffer* outBuffer)
 	{
 		auto pluginVersion = node->plugin_version();
-		auto isVersionLessThan = [](auto* version, int major, int minor) -> bool
-		{
-			if (!version)
-				return true;
-			if (version->major() != major)
-				return version->major() < major;
-			return version->minor() < minor;
-		};
-
-		bool needsChannelMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
-		bool isOutputNode = node->class_name() && node->class_name()->string_view().ends_with("aja.Output");
-		bool needsNodeStatusPortalMigration = isOutputNode && isVersionLessThan(pluginVersion, 2, 8);
-
-		if (!needsChannelMigration && !needsNodeStatusPortalMigration)
+		bool needsMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
+		if (!needsMigration)
 			return NOS_RESULT_SUCCESS;
-
+		// In child nodes, search for Device pin and migrate it
 		fb::TNode cur;
 		node->UnPackTo(&cur);
-
-		bool migrated = false;
-
-		// In child nodes, search for Device pin and migrate it.
-		if (needsChannelMigration)
-		{
-			auto* graph = node->contents_as_Graph();
-			if (graph && graph->nodes())
-			{
-				int i = -1;
-				for (auto* childNode : *graph->nodes())
-				{
-					++i;
-					auto* className = childNode->class_name();
-					if (!className)
-						continue;
-					if (className->string_view().ends_with("aja.Channel"))
-					{
-						if (auto migratedNode = MigrateChannelNode(childNode))
-						{
-							cur.contents.AsGraph()->nodes[i] = std::make_unique<fb::TNode>(std::move(*migratedNode));
-							migrated = true;
-						}
-					}
-				}
-			}
-		}
-
-		if (needsNodeStatusPortalMigration)
-		{
-			constexpr auto key = "NodeStatusPortal";
-			constexpr auto value = "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/BufferRing";
-			for (auto& metadata : cur.meta_data_map)
-			{
-				if (!metadata || metadata->key != key)
-					continue;
-				if (metadata->value != value)
-				{
-					metadata->value = value;
-					migrated = true;
-				}
-				break;
-			}
-		}
-
-		if (!migrated)
+		auto* graph = node->contents_as_Graph();
+		if (!graph)
 			return NOS_RESULT_SUCCESS;
-
+		int i = -1;
+		for (auto* childNode : *graph->nodes())
+		{
+			++i;
+			auto* className = childNode->class_name();
+			if (!className)
+				continue;
+			if (className->string_view().ends_with("aja.Channel"))
+			{
+				if (auto migrated = MigrateChannelNode(childNode))
+				{
+					cur.contents.AsGraph()->nodes[i] = std::make_unique<fb::TNode>(std::move(*migrated));
+					continue;
+				}
+			}
+		}
 		auto nodeBuffer = nos::EngineBuffer::CopyFrom(cur);
 		*outBuffer = nodeBuffer.Release();
 		return NOS_RESULT_SUCCESS;
