@@ -45,7 +45,8 @@ struct AJAPluginFunctions : nos::PluginFunctions
 		nosRegisterEventGroupParams params{
 			.Id = 1,
 			.Timeout = 10.0, // Allow 10 frames for sync
-			.Tolerance = 0.49f, // Allow a fraction frame time for tolerance
+			.ConsensusTolerance = 0.49f, // Allow a fraction frame time for tolerance
+			.DriftTolerance = 24.0 
 		};
 		nosSync->RegisterEventGroup(&params);
 		return NOS_RESULT_SUCCESS;
@@ -90,7 +91,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 
 		bool needsChannelMigration = !pluginVersion || pluginVersion->major() <= 2 && pluginVersion->minor() < 3;
 		bool isOutputNode = node->class_name() && node->class_name()->string_view().ends_with("aja.Output");
-		bool needsNodeStatusPortalMigration = isOutputNode && isVersionLessThan(pluginVersion, 2, 8);
+		bool needsNodeStatusPortalMigration = isVersionLessThan(pluginVersion, 2, 8);
 
 		if (!needsChannelMigration && !needsNodeStatusPortalMigration)
 			return NOS_RESULT_SUCCESS;
@@ -128,7 +129,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 		if (needsNodeStatusPortalMigration)
 		{
 			constexpr auto key = "NodeStatusPortal";
-			constexpr auto value = "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/BufferRing";
+			auto value = isOutputNode ? "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/BufferRing;/WaitVBL" : "/Channel;/WaitVBL";
 			for (auto& metadata : cur.meta_data_map)
 			{
 				if (!metadata || metadata->key != key)

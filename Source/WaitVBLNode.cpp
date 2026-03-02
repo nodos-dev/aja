@@ -9,6 +9,7 @@
 #include <nosSync/nosSync.h>
 
 #include <ctime>
+#include <numeric>
 
 namespace nos::aja
 {
@@ -17,6 +18,7 @@ NOS_REGISTER_NAME(VBLFailed)
 
 nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult);
 nosResult ResetVBLEvent(void* ctx);
+void OnSyncHealthNotification(void* ctx, const nosEventGroupHealth* status);
 
 uint64_t NowNs()
 {
@@ -42,6 +44,49 @@ struct WaitVBLNodeContext : NodeContext
 		int64_t Clock;
 	};
 	std::optional<SyncTimeStartPoint> SyncStart;
+
+	enum class Status
+	{
+		Ok,
+		DriftingSyncGroup
+	} CurrentStatus;
+	uint32_t FramesLostPerDay;
+
+	void SetStatus(Status newStatus, uint32_t framesLostPerDay = 0)
+	{
+		if (CurrentStatus == newStatus && FramesLostPerDay == framesLostPerDay)
+			return;
+		switch (newStatus)
+		{
+		case Status::Ok: {
+			ClearNodeStatusMessages();
+			FramesLostPerDay = 0;
+			break;
+		}
+		case Status::DriftingSyncGroup: {
+			std::stringstream ss;
+			ss << "Sync Error:\n"
+			   << "\tVertical blank times of consumer and producer\n"
+				  "\tI/O nodes (AJA etc.) are drifting apart. Check your\n"
+				  "\treference source and cabling. In free-run or with unknown\n"
+				  "\tgenlock, this can happen. Currently, around "
+			   << framesLostPerDay << " frames\n"
+			   << "\tcan be lost per day at this drift rate.";
+			FramesLostPerDay = framesLostPerDay;
+			SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
+			break;
+		}
+		}
+		CurrentStatus = newStatus;
+	}
+
+	void OnSyncHealthNotification(const nosEventGroupHealth* status)
+	{
+		if (status->DriftDetected)
+			SetStatus(Status::DriftingSyncGroup, static_cast<uint32_t>(status->DriftsPerHour * 24));
+		else
+			SetStatus(Status::Ok);
+	}
 
 	nosResult WaitVBL(nosWaitResult* outResult)
 	{
@@ -123,6 +168,14 @@ struct WaitVBLNodeContext : NodeContext
 			channel, isInput, isInterlaced ? GetFieldId(VBLState.InterlacedWaitField) : NTV2_FIELD_INVALID);
 	}
 
+	uint64_t GetLastVBLTimestamp(AJADevice* device, NTV2Channel channel, bool isInput)
+	{
+		if (isInput)
+			return device->GetLastInputVerticalInterruptTimestamp(channel);
+		else
+			return device->GetLastOutputVerticalInterruptTimestamp(channel);
+	}
+
 	std::shared_ptr<AJADevice> GetDevice() const
 	{
 		if (!ChannelInfo.device)
@@ -180,6 +233,8 @@ struct WaitVBLNodeContext : NodeContext
 		{
 			ScopedProfilerEvent _(ChannelInfo.channel_name + " Wait VBL");
 			vblSuccess = WaitVBL(device.get(), channel, ChannelInfo.is_input, isInterlaced, waitField);
+			if (vblSuccess)
+				nosSync->NotifyEventOccured(WaitId);
 #if NOS_AJA_DIAGNOSTICS
 			uint64_t timepoint = 0;
 			if (ChannelInfo.is_input)
@@ -275,6 +330,7 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnPathStartInitiated() override
 	{
+		SetStatus(Status::Ok);
 		VBLState = {};
 		if (auto device = GetDevice())
 		{
@@ -288,6 +344,7 @@ struct WaitVBLNodeContext : NodeContext
 				.UserData = this,
 				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
+				.NotifyHealthFn = aja::OnSyncHealthNotification,
 				.OutEventId = &WaitId,
 			};
 			nosSync->RegisterEvent(&params);
@@ -380,6 +437,11 @@ nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult)
 nosResult ResetVBLEvent(void* ctx)
 {
 	return (static_cast<struct WaitVBLNodeContext*>(ctx))->ResetVBL();
+}
+
+void OnSyncHealthNotification(void* ctx, const nosEventGroupHealth* status)
+{
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->OnSyncHealthNotification(status);
 }
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
