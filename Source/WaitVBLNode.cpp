@@ -48,13 +48,15 @@ struct WaitVBLNodeContext : NodeContext
 	enum class Status
 	{
 		Ok,
-		DriftingSyncGroup
+		ReferenceSourcesMixed,
+		UnhealthySync
 	} CurrentStatus;
 	uint32_t FramesLostPerDay;
 
-	void SetStatus(Status newStatus, uint32_t framesLostPerDay = 0)
+	void SetStatus(Status newStatus, double driftsPerHour = 0)
 	{
-		if (CurrentStatus == newStatus && FramesLostPerDay == framesLostPerDay)
+		uint32_t driftsPerDay = 24 * driftsPerHour;
+		if (CurrentStatus == newStatus && FramesLostPerDay == driftsPerDay)
 			return;
 		switch (newStatus)
 		{
@@ -63,16 +65,29 @@ struct WaitVBLNodeContext : NodeContext
 			FramesLostPerDay = 0;
 			break;
 		}
-		case Status::DriftingSyncGroup: {
+		case Status::ReferenceSourcesMixed: {
+			if (!GetDevice() || IsExternallySynced(*GetDevice()))
+				ClearNodeStatusMessages();
+			else
+			{
+				std::stringstream ss;
+				ss << "Sync Error:\n"
+				   << "\tOutput is not synced to a reference source!\n"
+				   << "\tCheck reference source property and cabling.";
+				SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
+			}
+			break;
+		}
+		case Status::UnhealthySync: {
 			std::stringstream ss;
 			ss << "Sync Error:\n"
-			   << "\tVertical blank times of consumer and producer\n"
-				  "\tI/O nodes (AJA etc.) are drifting apart. Check your\n"
-				  "\treference source and cabling. In free-run or with unknown\n"
+			   << "\tVertical blank times of video I/O nodes\n"
+				  "\tare drifting apart. Check your reference source\n"
+				  "\tand cabling. In free-run or with unknown\n"
 				  "\tgenlock, this can happen. Currently, around "
-			   << framesLostPerDay << " frames\n"
+			   << driftsPerDay << " frames\n"
 			   << "\tcan be lost per day at this drift rate.";
-			FramesLostPerDay = framesLostPerDay;
+			FramesLostPerDay = driftsPerDay;
 			SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			break;
 		}
@@ -82,8 +97,10 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnSyncHealthNotification(const nosEventGroupHealth* status)
 	{
-		if (status->DriftDetected)
-			SetStatus(Status::DriftingSyncGroup, static_cast<uint32_t>(status->DriftsPerHour * 24));
+		if (status->AreSyncSourcesMixed)
+			SetStatus(Status::ReferenceSourcesMixed);
+		else if (status->DriftDetected)
+			SetStatus(Status::UnhealthySync, status->DriftsPerHour);
 		else
 			SetStatus(Status::Ok);
 	}
@@ -328,6 +345,22 @@ struct WaitVBLNodeContext : NodeContext
 #endif
 	} VBLState;
 
+	nosBool IsExternallySynced(AJADevice& device)
+	{
+		if (!ChannelInfo.is_input) // Is output?
+		{
+			NTV2ReferenceSource refSrc = NTV2_REFERENCE_INVALID;
+			NTV2FrameRate refFrameRate{};
+			device.GetReferenceAndFrameRate(refSrc, refFrameRate);
+			if (refSrc == NTV2_REFERENCE_INVALID || refSrc == NTV2_REFERENCE_FREERUN ||
+				refFrameRate == NTV2_FRAMERATE_UNKNOWN)
+				return NOS_FALSE;
+			else
+				return NOS_TRUE;
+		}
+		return NOS_TRUE;
+	}
+
 	void OnPathStartInitiated() override
 	{
 		SetStatus(Status::Ok);
@@ -338,6 +371,7 @@ struct WaitVBLNodeContext : NodeContext
 			if (fmt == NTV2_FORMAT_UNKNOWN)
 				return;
 			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
+			
 			nosRegisterEventParams params{
 				.EventGroupId = IsSyncEnabled() ? NOS_SYNC_DEFAULT_EVENT_GROUP_ID : NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
 				.DeltaSeconds = deltaSecs,
@@ -345,6 +379,8 @@ struct WaitVBLNodeContext : NodeContext
 				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
 				.NotifyHealthFn = aja::OnSyncHealthNotification,
+				.DriftTolerance = 1.0 / 4.0, // Allow 1 frame drift per 4 hours,
+				.IsExternallySynchronized = IsExternallySynced(*device),
 				.OutEventId = &WaitId,
 			};
 			nosSync->RegisterEvent(&params);

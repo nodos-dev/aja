@@ -42,13 +42,6 @@ struct AJAPluginFunctions : nos::PluginFunctions
 {
 	nosResult Initialize() override
 	{
-		nosRegisterEventGroupParams params{
-			.Id = 1,
-			.Timeout = 10.0, // Allow 10 frames for sync
-			.ConsensusTolerance = 0.49f, // Allow a fraction frame time for tolerance
-			.DriftTolerance = 24.0 
-		};
-		nosSync->RegisterEventGroup(&params);
 		return NOS_RESULT_SUCCESS;
 	}
 	nosResult ExportNodeFunctions(size_t& outSize, nosNodeFunctions** outList) override
