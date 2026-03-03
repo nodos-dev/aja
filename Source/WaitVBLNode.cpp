@@ -18,7 +18,7 @@ NOS_REGISTER_NAME(VBLFailed)
 
 nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult);
 nosResult ResetVBLEvent(void* ctx);
-void OnSyncHealthNotification(void* ctx, const nosEventGroupHealth* status);
+void OnSyncHealthNotification(void* ctx, const nosSyncGroupHealth* status);
 
 uint64_t NowNs()
 {
@@ -49,20 +49,15 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		Ok,
 		ReferenceSourcesMixed,
-		UnhealthySync
-	} CurrentStatus;
-	uint32_t FramesLostPerDay;
+		ConsensusFailed,
+	};
 
-	void SetStatus(Status newStatus, double driftsPerHour = 0)
+	void SetStatus(Status newStatus)
 	{
-		uint32_t driftsPerDay = 24 * driftsPerHour;
-		if (CurrentStatus == newStatus && FramesLostPerDay == driftsPerDay)
-			return;
 		switch (newStatus)
 		{
 		case Status::Ok: {
 			ClearNodeStatusMessages();
-			FramesLostPerDay = 0;
 			break;
 		}
 		case Status::ReferenceSourcesMixed: {
@@ -78,29 +73,37 @@ struct WaitVBLNodeContext : NodeContext
 			}
 			break;
 		}
-		case Status::UnhealthySync: {
+		case Status::ConsensusFailed: {
 			std::stringstream ss;
 			ss << "Sync Error:\n"
-			   << "\tVertical blank times of video I/O nodes\n"
-				  "\tare drifting apart. Check your reference source\n"
-				  "\tand cabling. In free-run or with unknown\n"
-				  "\tgenlock, this can happen. Currently, around "
-			   << driftsPerDay << " frames\n"
-			   << "\tcan be lost per day at this drift rate.";
-			FramesLostPerDay = driftsPerDay;
+			   << "\tUnable to synchronize vertical blanks of\n"
+			   << "\tconnected video I/O nodes.\n"
+			   << "\tEnsure proper reference source and cabling.";
 			SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			break;
 		}
 		}
-		CurrentStatus = newStatus;
 	}
 
-	void OnSyncHealthNotification(const nosEventGroupHealth* status)
+	void OnSyncHealthNotification(const nosSyncGroupHealth* status)
 	{
 		if (status->AreSyncSourcesMixed)
 			SetStatus(Status::ReferenceSourcesMixed);
-		else if (status->DriftDetected)
-			SetStatus(Status::UnhealthySync, status->DriftsPerHour);
+		else if (status->ConsensusStatus != NOS_CONSENSUS_ACHIEVED)
+		{
+			switch (status->ConsensusStatus)
+			{
+			case NOS_CONSENSUS_ATTEMPT_FAILED:
+			case NOS_CONSENSUS_TIMEOUT: {
+				SetStatus(Status::ConsensusFailed); 
+				break;
+			}
+			default: {
+				SetStatus(Status::Ok);
+				break;
+			}
+			}
+		}
 		else
 			SetStatus(Status::Ok);
 	}
@@ -250,8 +253,6 @@ struct WaitVBLNodeContext : NodeContext
 		{
 			ScopedProfilerEvent _(ChannelInfo.channel_name + " Wait VBL");
 			vblSuccess = WaitVBL(device.get(), channel, ChannelInfo.is_input, isInterlaced, waitField);
-			if (vblSuccess)
-				nosSync->NotifyEventOccured(WaitId);
 #if NOS_AJA_DIAGNOSTICS
 			uint64_t timepoint = 0;
 			if (ChannelInfo.is_input)
@@ -363,7 +364,6 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnPathStartInitiated() override
 	{
-		SetStatus(Status::Ok);
 		VBLState = {};
 		if (auto device = GetDevice())
 		{
@@ -378,10 +378,9 @@ struct WaitVBLNodeContext : NodeContext
 				.UserData = this,
 				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
-				.NotifyHealthFn = aja::OnSyncHealthNotification,
-				.DriftTolerance = 1.0 / 4.0, // Allow 1 frame drift per 4 hours,
-				.IsExternallySynchronized = IsExternallySynced(*device),
 				.OutEventId = &WaitId,
+				.NotifyHealthFn = aja::OnSyncHealthNotification,
+				.IsExternallySynchronized = IsExternallySynced(*device),
 			};
 			nosSync->RegisterEvent(&params);
 		}
@@ -475,7 +474,7 @@ nosResult ResetVBLEvent(void* ctx)
 	return (static_cast<struct WaitVBLNodeContext*>(ctx))->ResetVBL();
 }
 
-void OnSyncHealthNotification(void* ctx, const nosEventGroupHealth* status)
+void OnSyncHealthNotification(void* ctx, const nosSyncGroupHealth* status)
 {
 	return (static_cast<struct WaitVBLNodeContext*>(ctx))->OnSyncHealthNotification(status);
 }
