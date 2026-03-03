@@ -57,8 +57,8 @@ struct DMAWriteNodeContext : DMANodeBase
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		TypedObjectRef inputBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
-		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
-		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
+		auto fieldType = *params.GetPinValue<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
+		uint32_t curVBLCount = *params.GetPinValue<uint32_t>(NOS_NAME("CurrentVBL"));
 
 		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;

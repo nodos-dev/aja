@@ -158,9 +158,9 @@ struct DMAReadNodeContext : DMANodeBase
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		TypedObjectRef dstBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("BufferToWrite"));
-		auto fieldType = *params.GetPinData<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
-		const ChannelInfo* channelInfo = params.GetPinData<ChannelInfo>(NOS_NAME("Channel"));
-		uint32_t curVBLCount = *params.GetPinData<uint32_t>(NOS_NAME("CurrentVBL"));
+		auto fieldType = *params.GetPinValue<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
+		const ChannelInfo* channelInfo = params.GetPinValue<ChannelInfo>(NOS_NAME("Channel"));
+		uint32_t curVBLCount = *params.GetPinValue<uint32_t>(NOS_NAME("CurrentVBL"));
 
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;

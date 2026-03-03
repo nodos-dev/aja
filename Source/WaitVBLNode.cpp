@@ -161,7 +161,7 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		const auto& outId = params[NOS_NAME("VBL")].Id;
 		const auto& outVBLCountId = params[NOS_NAME("CurrentVBL")].Id;
-		nos::sys::vulkan::FieldType waitField = *params.GetPinData<nos::sys::vulkan::FieldType>(NOS_NAME("WaitField"));
+		nos::sys::vulkan::FieldType waitField = *params.GetPinValue<nos::sys::vulkan::FieldType>(NOS_NAME("WaitField"));
 		const auto& outFieldPinId = params[NOS_NAME("FieldType")].Id;
 		auto device = GetDevice();
 		if (!device)

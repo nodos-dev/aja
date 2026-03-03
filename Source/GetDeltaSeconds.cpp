@@ -24,7 +24,7 @@ struct GetDeltaSecondsNodeContext : NodeContext
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
-		auto& channel = *params.GetPinData<aja::ChannelInfo>(NOS_NAME("Channel"));
+		auto& channel = *params.GetPinValue<aja::ChannelInfo>(NOS_NAME("Channel"));
 		auto delta = GetDeltaSeconds(static_cast<NTV2VideoFormat>(channel.video_format_idx()), channel.is_interlaced());
 		SetPinValue(NOS_NAME("DeltaSeconds"), nos::Buffer::From(delta));
 		return NOS_RESULT_SUCCESS;
