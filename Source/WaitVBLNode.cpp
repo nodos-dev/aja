@@ -49,20 +49,17 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		Ok,
 		ReferenceSourcesMixed,
-		UnhealthySync
+		UnhealthySync,
 	} CurrentStatus;
-	uint32_t FramesLostPerDay;
 
-	void SetStatus(Status newStatus, double driftsPerHour = 0)
+	void SetStatus(Status newStatus)
 	{
-		uint32_t driftsPerDay = 24 * driftsPerHour;
-		if (CurrentStatus == newStatus && FramesLostPerDay == driftsPerDay)
+		if (CurrentStatus == newStatus)
 			return;
 		switch (newStatus)
 		{
 		case Status::Ok: {
 			ClearNodeStatusMessages();
-			FramesLostPerDay = 0;
 			break;
 		}
 		case Status::ReferenceSourcesMixed: {
@@ -82,12 +79,7 @@ struct WaitVBLNodeContext : NodeContext
 			std::stringstream ss;
 			ss << "Sync Error:\n"
 			   << "\tVertical blank times of video I/O nodes\n"
-				  "\tare drifting apart. Check your reference source\n"
-				  "\tand cabling. In free-run or with unknown\n"
-				  "\tgenlock, this can happen. Currently, around "
-			   << driftsPerDay << " frames\n"
-			   << "\tcan be lost per day at this drift rate.";
-			FramesLostPerDay = driftsPerDay;
+				  "\tcannot be matched, ensure proper reference source and cabling.\n";
 			SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			break;
 		}
@@ -97,10 +89,10 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnSyncHealthNotification(const nosEventGroupHealth* status)
 	{
-		if (status->AreSyncSourcesMixed)
+		if (status->HasMixedReferenceTypes)
 			SetStatus(Status::ReferenceSourcesMixed);
-		else if (status->DriftDetected)
-			SetStatus(Status::UnhealthySync, status->DriftsPerHour);
+		else if (status->UnableToReachConsensus)
+			SetStatus(Status::UnhealthySync);
 		else
 			SetStatus(Status::Ok);
 	}
@@ -250,8 +242,6 @@ struct WaitVBLNodeContext : NodeContext
 		{
 			ScopedProfilerEvent _(ChannelInfo.channel_name + " Wait VBL");
 			vblSuccess = WaitVBL(device.get(), channel, ChannelInfo.is_input, isInterlaced, waitField);
-			if (vblSuccess)
-				nosSync->NotifyEventOccured(WaitId);
 #if NOS_AJA_DIAGNOSTICS
 			uint64_t timepoint = 0;
 			if (ChannelInfo.is_input)
@@ -371,17 +361,16 @@ struct WaitVBLNodeContext : NodeContext
 			if (fmt == NTV2_FORMAT_UNKNOWN)
 				return;
 			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
-			
+
 			nosRegisterEventParams params{
 				.EventGroupId = IsSyncEnabled() ? NOS_SYNC_DEFAULT_EVENT_GROUP_ID : NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
 				.DeltaSeconds = deltaSecs,
 				.UserData = this,
 				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
-				.NotifyHealthFn = aja::OnSyncHealthNotification,
-				.DriftTolerance = 1.0 / 4.0, // Allow 1 frame drift per 4 hours,
-				.IsExternallySynchronized = IsExternallySynced(*device),
 				.OutEventId = &WaitId,
+				.NotifyHealthFn = aja::OnSyncHealthNotification,
+				.IsExternallySynchronized = IsExternallySynced(*device)
 			};
 			nosSync->RegisterEvent(&params);
 		}
