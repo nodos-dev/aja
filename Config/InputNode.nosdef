@@ -3257,7 +3257,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Channel" }
+          { "key": "NodeStatusPortal", "value": "/Channel;/WaitVBL" }
         ],
         "plugin_version": { "major": 2, "minor": 6, "patch": 18 }
       }

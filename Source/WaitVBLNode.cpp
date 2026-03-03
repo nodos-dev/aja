@@ -9,6 +9,7 @@
 #include <nosSync/nosSync.h>
 
 #include <ctime>
+#include <numeric>
 
 namespace nos::aja
 {
@@ -17,6 +18,7 @@ NOS_REGISTER_NAME(VBLFailed)
 
 nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult);
 nosResult ResetVBLEvent(void* ctx);
+void OnSyncHealthNotification(void* ctx, const nosSyncGroupHealth* status);
 
 uint64_t NowNs()
 {
@@ -42,6 +44,69 @@ struct WaitVBLNodeContext : NodeContext
 		int64_t Clock;
 	};
 	std::optional<SyncTimeStartPoint> SyncStart;
+
+	enum class Status
+	{
+		Ok,
+		ReferenceSourcesMixed,
+		ConsensusFailed,
+	};
+
+	void SetStatus(Status newStatus)
+	{
+		switch (newStatus)
+		{
+		case Status::Ok: {
+			ClearNodeStatusMessages();
+			break;
+		}
+		case Status::ReferenceSourcesMixed: {
+			if (!GetDevice() || IsExternallySynced(*GetDevice()))
+				ClearNodeStatusMessages();
+			else
+			{
+				std::stringstream ss;
+				ss << "Sync Error:\n"
+				   << "\tOutput is not synced to a reference source!\n"
+				   << "\tCheck reference source property and cabling.";
+				SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
+			}
+			break;
+		}
+		case Status::ConsensusFailed: {
+			std::stringstream ss;
+			ss << "Sync Error:\n"
+			   << "\tUnable to synchronize vertical blanks of\n"
+			   << "\tconnected video I/O nodes.\n"
+			   << "\tEnsure proper reference source and cabling.";
+			SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
+			break;
+		}
+		}
+	}
+
+	void OnSyncHealthNotification(const nosSyncGroupHealth* status)
+	{
+		if (status->AreSyncSourcesMixed)
+			SetStatus(Status::ReferenceSourcesMixed);
+		else if (status->ConsensusStatus != NOS_CONSENSUS_ACHIEVED)
+		{
+			switch (status->ConsensusStatus)
+			{
+			case NOS_CONSENSUS_ATTEMPT_FAILED:
+			case NOS_CONSENSUS_TIMEOUT: {
+				SetStatus(Status::ConsensusFailed); 
+				break;
+			}
+			default: {
+				SetStatus(Status::Ok);
+				break;
+			}
+			}
+		}
+		else
+			SetStatus(Status::Ok);
+	}
 
 	nosResult WaitVBL(nosWaitResult* outResult)
 	{
@@ -121,6 +186,14 @@ struct WaitVBLNodeContext : NodeContext
 		}
 		return device->WaitVBL(
 			channel, isInput, isInterlaced ? GetFieldId(VBLState.InterlacedWaitField) : NTV2_FIELD_INVALID);
+	}
+
+	uint64_t GetLastVBLTimestamp(AJADevice* device, NTV2Channel channel, bool isInput)
+	{
+		if (isInput)
+			return device->GetLastInputVerticalInterruptTimestamp(channel);
+		else
+			return device->GetLastOutputVerticalInterruptTimestamp(channel);
 	}
 
 	std::shared_ptr<AJADevice> GetDevice() const
@@ -273,6 +346,22 @@ struct WaitVBLNodeContext : NodeContext
 #endif
 	} VBLState;
 
+	nosBool IsExternallySynced(AJADevice& device)
+	{
+		if (!ChannelInfo.is_input) // Is output?
+		{
+			NTV2ReferenceSource refSrc = NTV2_REFERENCE_INVALID;
+			NTV2FrameRate refFrameRate{};
+			device.GetReferenceAndFrameRate(refSrc, refFrameRate);
+			if (refSrc == NTV2_REFERENCE_INVALID || refSrc == NTV2_REFERENCE_FREERUN ||
+				refFrameRate == NTV2_FRAMERATE_UNKNOWN)
+				return NOS_FALSE;
+			else
+				return NOS_TRUE;
+		}
+		return NOS_TRUE;
+	}
+
 	void OnPathStartInitiated() override
 	{
 		VBLState = {};
@@ -282,6 +371,7 @@ struct WaitVBLNodeContext : NodeContext
 			if (fmt == NTV2_FORMAT_UNKNOWN)
 				return;
 			auto deltaSecs = GetDeltaSeconds(fmt, ChannelInfo.is_interlaced);
+			
 			nosRegisterEventParams params{
 				.EventGroupId = IsSyncEnabled() ? NOS_SYNC_DEFAULT_EVENT_GROUP_ID : NOS_SYNC_NO_SYNC_EVENT_GROUP_ID,
 				.DeltaSeconds = deltaSecs,
@@ -289,6 +379,8 @@ struct WaitVBLNodeContext : NodeContext
 				.ResetFn = ResetVBLEvent,
 				.WaitFn = WaitVBLEvent,
 				.OutEventId = &WaitId,
+				.NotifyHealthFn = aja::OnSyncHealthNotification,
+				.IsExternallySynchronized = IsExternallySynced(*device),
 			};
 			nosSync->RegisterEvent(&params);
 		}
@@ -380,6 +472,11 @@ nosResult WaitVBLEvent(void* ctx, nosWaitResult* outResult)
 nosResult ResetVBLEvent(void* ctx)
 {
 	return (static_cast<struct WaitVBLNodeContext*>(ctx))->ResetVBL();
+}
+
+void OnSyncHealthNotification(void* ctx, const nosSyncGroupHealth* status)
+{
+	return (static_cast<struct WaitVBLNodeContext*>(ctx))->OnSyncHealthNotification(status);
 }
 
 nosResult RegisterWaitVBLNode(nosNodeFunctions* functions)
