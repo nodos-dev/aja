@@ -353,7 +353,6 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnPathStartInitiated() override
 	{
-		SetStatus(Status::Ok);
 		VBLState = {};
 		if (auto device = GetDevice())
 		{
