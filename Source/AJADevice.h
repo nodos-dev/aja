@@ -19,7 +19,7 @@
 
 #include "nosSysDevice/nosDeviceSubsystem.h"
 
-#define AJA_ASSERT(x) { if(!(x)) { printf("%s:%d\n", __FILE__, __LINE__); abort();} }
+#define NOS_AJA_SOFT_CHECK(x) { if(!(x)) { nosEngine.LogE("Soft check failed at: %s:%d\n", __FILE__, __LINE__); NOS_SOFT_CHECK(false);} }
 
 struct RestartParams {
     enum Flags : uint32_t {
@@ -30,6 +30,8 @@ struct RestartParams {
 };
 
 NOS_REGISTER_NAME_SPACED(VendorName, "AJA Video Systems")
+NOS_REGISTER_NAME(DeviceTagSDI)
+NOS_REGISTER_NAME(DeviceTagIPVideo)
 
 struct DeviceLock
 {
@@ -176,6 +178,12 @@ private:
     void CloseQLChannel(NTV2Channel channel, bool isInput);
 
     void SendCheckConfigurationToNodes();
+
+    struct {
+        std::unordered_map<uint32_t, std::function<void(NTV2ReferenceSource)>> Map;
+        uint32_t NextID = 0;
+        std::recursive_mutex Mutex;
+    } ReferenceListeners;
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;

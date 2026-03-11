@@ -3,7 +3,6 @@
 #include "Channels.h"
 #include "AJAMain.h"
 
-// TODO: Remove this node once things settle down.
 namespace nos::aja
 {
 NOS_REGISTER_NAME(ChannelName);
@@ -30,11 +29,19 @@ enum class AJAChangedPinType
 	FrameRate
 };
 
-struct ChannelNode : NodeContext
+// TODO: IP Video: Duplicate code.
+inline std::string GetIpChannelName(bool isInput, NTV2Channel channel)
+{
+	return std::string("IP ") + (isInput ? "In " : "Out ") + std::to_string(channel + 1);
+}
+
+// TODO: IP Video: Merge this with ChannelNode when the time comes.
+struct IPVideoChannelNode : NodeContext
 {
 	size_t DropCount = 0;
 	bool OnlyUpdateDevicePinValue = false;
-	ChannelNode() : NodeContext(), CurrentChannel(*this) {}
+
+	IPVideoChannelNode() : NodeContext(), CurrentChannel(*this) {}
 
 	nosResult OnCreate(nosFbNodePtr node) override
 	{
@@ -48,33 +55,26 @@ struct ChannelNode : NodeContext
 			}
 		}
 
-		nosOrphanState orphan{.Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel is not open"};
+		nosOrphanState orphan{ .Type = NOS_ORPHAN_STATE_TYPE_ORPHAN, .Message = "Channel is not open" };
 		nosEngine.SetItemOrphanState(CurrentChannel.ChannelPinId, &orphan);
 
 		UpdateStringList(GetChannelStringListName(), {PIN_VALUE_NONE});
 		UpdateStringList(GetResolutionStringListName(), {PIN_VALUE_NONE});
 		UpdateStringList(GetFrameRateStringListName(), {PIN_VALUE_NONE});
 		UpdateStringList(GetInterlacedStringListName(), {PIN_VALUE_NONE});
+		
+		SetPinVisualizer(NSN_Device, {.type = nos::fb::VisualizerType::NAMED_VALUE, .name = sys::device::GetDeviceListNameForTag(NSN_VendorName, NSN_DeviceTagIPVideo), .hide_value = true});
+		SetPinVisualizer(NSN_ChannelName, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetChannelStringListName()});
+		SetPinVisualizer(NSN_Resolution, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetResolutionStringListName()});
+		SetPinVisualizer(NSN_FrameRate, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetFrameRateStringListName()});
+		SetPinVisualizer(NSN_IsInterlaced, {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
 
-		SetPinVisualizer(NSN_Device,
-						 {.type = nos::fb::VisualizerType::NAMED_VALUE,
-						  .name = sys::device::GetDeviceListNameForTag(NSN_VendorName, NSN_DeviceTagSDI),
-						  .hide_value = true});
-		SetPinVisualizer(NSN_ChannelName,
-						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetChannelStringListName()});
-		SetPinVisualizer(NSN_Resolution,
-						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetResolutionStringListName()});
-		SetPinVisualizer(NSN_FrameRate,
-						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetFrameRateStringListName()});
-		SetPinVisualizer(NSN_IsInterlaced,
-						 {.type = nos::fb::VisualizerType::COMBO_BOX, .name = GetInterlacedStringListName()});
-
-		AddPinValueWatcher<bool>(NSN_IsOpen, [this](const bool* newVal, std::optional<const bool*> oldValue) {
-			ShouldOpen = *newVal;
+		AddPinValueWatcher(NSN_IsOpen, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			ShouldOpen = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher<bool>(NSN_IsInput, [this](const bool* newVal, std::optional<const bool*> oldValue) {
-			IsInput = *newVal;
+		AddPinValueWatcher(NSN_IsInput, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			IsInput = *InterpretPinValue<bool>(newVal);
 			if (oldValue)
 				ResetAfter(AJAChangedPinType::IsInput);
 			UpdateAfter(AJAChangedPinType::IsInput, !oldValue);
@@ -104,8 +104,14 @@ struct ChannelNode : NodeContext
 				assert(res == NOS_RESULT_SUCCESS);
 				newDeviceSerial = handle;
 			}
-
+			
 			Device = AJADevice::GetDeviceBySerialNumber(newDeviceSerial).get();
+
+			std::string msg, msgDetails;
+			if (Device && !Device->CheckFirmware(msg, msgDetails))
+			{
+				CurrentChannel.SetStatus(aja::Channel::StatusType::Firmware, fb::NodeStatusMessageType::WARNING, msg, msgDetails, 0, false);
+			}
 
 			if (oldDevice != Device)
 			{
@@ -118,7 +124,7 @@ struct ChannelNode : NodeContext
 						DeviceAcquired = false;
 					}
 				}
-				if (Device)
+				if(Device)
 				{
 					Device->RegisterNode(NodeId);
 					if (!DeviceAcquired && ShouldAcquireDevice)
@@ -128,6 +134,7 @@ struct ChannelNode : NodeContext
 					}
 				}
 			}
+
 			if (DevicePinValue.vendor_name != PIN_VALUE_NONE && !Device)
 				ResetDevicePin();
 			else
@@ -138,16 +145,16 @@ struct ChannelNode : NodeContext
 				{
 					nosDeviceInfo foundDeviceInfo{};
 					auto res = nosDevice->GetDeviceInfo(deviceId, &foundDeviceInfo);
-					NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS, "Device must be found at this point")
-						if (NOS_RESULT_SUCCESS == res)
+					NOS_SOFT_CHECK(res == NOS_RESULT_SUCCESS && "Device must be found at this point")
+					if (NOS_RESULT_SUCCESS == res)
+					{
+						auto foundDeviceObj = sys::device::ConvertDeviceInfo(foundDeviceInfo);
+						if (DevicePinValue != foundDeviceObj)
 						{
-							auto foundDeviceObj = sys::device::ConvertDeviceInfo(foundDeviceInfo);
-							if (DevicePinValue != foundDeviceObj)
-							{
-								OnlyUpdateDevicePinValue = true;
-								SetPinValue(NSN_Device, nos::Buffer::From(foundDeviceObj));
-							}
+							OnlyUpdateDevicePinValue = true;
+							SetPinValue(NSN_Device, nos::Buffer::From(foundDeviceObj));
 						}
+					}
 				}
 				else if (DevicePinValue.vendor_name == PIN_VALUE_NONE)
 					AutoSelectIfSingle(NSN_Device, GetPossibleDevices());
@@ -176,8 +183,8 @@ struct ChannelNode : NodeContext
 				}
 			}
 		});
-		AddPinValueWatcher<const char>(NSN_ChannelName, [this](const char* newVal, std::optional<const char*> oldValue) {
-			ChannelPinValue = newVal;
+		AddPinValueWatcher(NSN_ChannelName, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			ChannelPinValue = InterpretPinValue<const char>(newVal);
 			auto [channel, mode] = GetChannelFromString(ChannelPinValue);
 			Channel = channel;
 			IsSingleLink = !AJADevice::IsQuad(mode);
@@ -192,8 +199,8 @@ struct ChannelNode : NodeContext
 			}
 			UpdateAfter(AJAChangedPinType::ChannelName, !oldValue);
 		});
-		AddPinValueWatcher<const char>(NSN_Resolution, [this](const char* newVal, std::optional<const char*> oldValue) {
-			ResolutionPinValue = newVal;
+		AddPinValueWatcher(NSN_Resolution, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			ResolutionPinValue = InterpretPinValue<const char>(newVal);
 			Resolution = GetNTV2FrameGeometryFromString(ResolutionPinValue);
 			if (ResolutionPinValue != PIN_VALUE_NONE && Resolution == NTV2_FG_INVALID)
 				SetPinValue(NSN_Resolution, nosBuffer{.Data = (void*)PIN_VALUE_NONE, .Size = 5});
@@ -206,8 +213,8 @@ struct ChannelNode : NodeContext
 			}
 			UpdateAfter(AJAChangedPinType::Resolution, !oldValue);
 		});
-		AddPinValueWatcher<const char>(NSN_FrameRate, [this](const char* newVal, std::optional<const char*> oldValue) {
-			FrameRatePinValue = newVal;
+		AddPinValueWatcher(NSN_FrameRate, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			FrameRatePinValue = InterpretPinValue<const char>(newVal);
 			FrameRate = GetNTV2FrameRateFromString(FrameRatePinValue);
 			if (FrameRatePinValue != PIN_VALUE_NONE && FrameRate == NTV2_FRAMERATE_INVALID)
 				SetPinValue(NSN_FrameRate, nosBuffer{.Data = (void*)PIN_VALUE_NONE, .Size = 5});
@@ -220,8 +227,8 @@ struct ChannelNode : NodeContext
 			}
 			UpdateAfter(AJAChangedPinType::FrameRate, !oldValue);
 		});
-		AddPinValueWatcher<const char>(NSN_IsInterlaced, [this](const char* newVal, std::optional<const char*> oldValue) {
-			std::string interlaced = newVal;
+		AddPinValueWatcher(NSN_IsInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			std::string interlaced = InterpretPinValue<const char>(newVal);
 			InterlacedState = InterlacedState::NONE;
 			if (interlaced == PIN_VALUE_NONE)
 				InterlacedState = InterlacedState::NONE;
@@ -238,27 +245,26 @@ struct ChannelNode : NodeContext
 
 			TryUpdateChannel();
 		});
-		AddPinValueWatcher<mediaio::YCbCrPixelFormat>(NSN_FrameBufferFormat,
-			[this](const mediaio::YCbCrPixelFormat* newVal, std::optional<const mediaio::YCbCrPixelFormat*> oldValue) {
-				CurrentPixelFormat = *newVal;
-				TryUpdateChannel();
-			});
-		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkOutputMode, [this](const AJADevice::Mode* newVal, std::optional<const AJADevice::Mode*> oldValue) {
-				OutputModePin = *newVal;
-				TryUpdateChannel();
-			});
-		AddPinValueWatcher<AJADevice::Mode>(NSN_QuadLinkInputMode, [this](const AJADevice::Mode* newVal, std::optional<const AJADevice::Mode*> oldValue) {
-				InputModePin = *newVal;
-				TryUpdateChannel();
-			});
-		AddPinValueWatcher<bool>(NSN_ForceInterlaced, [this](const bool* newVal, std::optional<const bool*> oldValue) {
-			ForceInterlaced = *newVal;
+		AddPinValueWatcher(NSN_FrameBufferFormat, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			CurrentPixelFormat = *InterpretPinValue<mediaio::YCbCrPixelFormat>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_QuadLinkOutputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			OutputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_QuadLinkInputMode, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			InputModePin = *InterpretPinValue<AJADevice::Mode>(newVal);
+			TryUpdateChannel();
+		});
+		AddPinValueWatcher(NSN_ForceInterlaced, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
+			ForceInterlaced = *InterpretPinValue<bool>(newVal);
 			TryUpdateChannel();
 		});
 		return NOS_RESULT_SUCCESS;
 	}
 
-	~ChannelNode() override
+	~IPVideoChannelNode() override
 	{
 		if (Device)
 		{
@@ -281,21 +287,6 @@ struct ChannelNode : NodeContext
 	}
 	
 	mediaio::YCbCrPixelFormat CurrentPixelFormat = mediaio::YCbCrPixelFormat::YUV8;
-	
-	void UpdateReferenceSource()
-	{
-		if (IsInput)
-			return;
-
-		NTV2ReferenceSource curRef{};
-		NTV2FrameRate refFrameRate{};
-		Device->GetReferenceAndFrameRate(curRef, refFrameRate);
-
-		if (GetFrameRateFamily(refFrameRate) != GetFrameRateFamily(FrameRate))
-			CurrentChannel.SetStatus(aja::Channel::StatusType::ReferenceInvalid, fb::NodeStatusMessageType::WARNING, "Reference incompatible with frame rate", "", 5, false);
-		else
-			CurrentChannel.ClearStatus(Channel::StatusType::ReferenceInvalid);
-	}
 	
 	void TryUpdateChannel() 
 	{
@@ -537,35 +528,15 @@ struct ChannelNode : NodeContext
 			return channels;
 		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
-			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
-			for (auto mode : modes)
+			if (IsInput)
 			{
-				if (IsInput)
-				{
-					if (AJADevice::IsQuad(mode))
-					{
-						if (Device->CanMakeQuadInputFromChannel(NTV2Channel(i)))
-							channels.push_back(GetChannelName(NTV2Channel(i), mode));
-					}
-					else
-					{
-						if (Device->ChannelCanInput(NTV2Channel(i)))
-							channels.push_back(GetChannelName(NTV2Channel(i), mode));
-					}
-				}
-				else
-				{
-					if (AJADevice::IsQuad(mode))
-					{
-						if (Device->CanMakeQuadOutputFromChannel(NTV2Channel(i)))
-							channels.push_back(GetChannelName(NTV2Channel(i), mode));
-					}
-					else
-					{
-						if (Device->ChannelCanOutput(NTV2Channel(i)))
-							channels.push_back(GetChannelName(NTV2Channel(i), mode));
-					}
-				}
+				if (Device->ChannelCanInput(NTV2Channel(i)))
+					channels.push_back(GetIpChannelName(IsInput, NTV2Channel(i)));
+			}
+			else
+			{
+				if (Device->ChannelCanOutput(NTV2Channel(i)))
+					channels.push_back(GetIpChannelName(IsInput, NTV2Channel(i)));
 			}
 		}
 		return channels;
@@ -740,7 +711,7 @@ struct ChannelNode : NodeContext
 		outFunctionNames[0] = NOS_NAME_STATIC("TryUpdateChannel");
 		outFunction[0] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
-				auto* context = static_cast<ChannelNode*>(ctx);
+				auto* context = static_cast<IPVideoChannelNode*>(ctx);
 				context->TryFindChannel = true;
 				nosEngine.SendPathRestart(context->NodeId);
 				nosEngine.LogW("Input signal lost.");
@@ -750,7 +721,7 @@ struct ChannelNode : NodeContext
 		outFunctionNames[1] = NOS_NAME_STATIC("CheckChannelConfig");
 		outFunction[1] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
-				auto* context = static_cast<ChannelNode*>(ctx);
+				auto* context = static_cast<IPVideoChannelNode*>(ctx);
 				context->CheckChannelConfig();
 				return NOS_RESULT_SUCCESS;
 			};
@@ -758,7 +729,7 @@ struct ChannelNode : NodeContext
 		outFunctionNames[2] = NOS_NAME_STATIC("CheckChannelStatus");
 		outFunction[2] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
-				auto* context = static_cast<ChannelNode*>(ctx);
+				auto* context = static_cast<IPVideoChannelNode*>(ctx);
 				context->CheckChannelStatus();
 				return NOS_RESULT_SUCCESS;
 			};
@@ -766,7 +737,7 @@ struct ChannelNode : NodeContext
 		outFunctionNames[3] = NOS_NAME_STATIC("Drop");
 		outFunction[3] = [](void* ctx, nosFunctionExecuteParams* params)
 			{
-				auto* context = static_cast<ChannelNode*>(ctx);
+				auto* context = static_cast<IPVideoChannelNode*>(ctx);
 				context->CurrentChannel.IncrementDropCount();
 				return NOS_RESULT_SUCCESS;
 			};
@@ -808,9 +779,9 @@ struct ChannelNode : NodeContext
 	bool ShouldAcquireDevice = true;
 };
 
-nosResult RegisterChannelNode(nosNodeFunctions* functions)
+nosResult RegisterIPVideoChannelNode(nosNodeFunctions* functions)
 {
-	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.aja.Channel"), ChannelNode, functions)
+	NOS_BIND_NODE_CLASS(NOS_NAME_STATIC("nos.aja.IPVideoChannel"), IPVideoChannelNode, functions)
 	return NOS_RESULT_SUCCESS;
 }
 
