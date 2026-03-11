@@ -56,7 +56,7 @@ set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
 nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
 # nos.sys.device
-nos_get_module("nos.sys.device" "0.3" NOS_SYS_DEVICE_TARGET)
+nos_get_module("nos.sys.device" "0.4" NOS_SYS_DEVICE_TARGET)
 
 # nos.sync
 nos_get_module("nos.sync" "3.2" NOS_SYNC_TARGET)

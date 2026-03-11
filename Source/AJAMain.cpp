@@ -28,6 +28,7 @@ enum class Nodes : int
 	DMARead,
 	WaitVBL,
 	Channel,
+	ChannelIP,
 	Input,
 	Output,
 	Count
@@ -37,6 +38,7 @@ nosResult RegisterDMAWriteNode(nosNodeFunctions*);
 nosResult RegisterDMAReadNode(nosNodeFunctions*);
 nosResult RegisterWaitVBLNode(nosNodeFunctions*);
 nosResult RegisterChannelNode(nosNodeFunctions*);
+nosResult RegisterIPVideoChannelNode(nosNodeFunctions*);
 
 struct AJAPluginFunctions : nos::PluginFunctions
 {
@@ -56,6 +58,7 @@ struct AJAPluginFunctions : nos::PluginFunctions
 		NOS_RETURN_ON_FAILURE(RegisterDMAWriteNode(outList[(int)Nodes::DMAWrite]))
 		NOS_RETURN_ON_FAILURE(RegisterWaitVBLNode(outList[(int)Nodes::WaitVBL]))
 		NOS_RETURN_ON_FAILURE(RegisterChannelNode(outList[(int)Nodes::Channel]))
+		NOS_RETURN_ON_FAILURE(RegisterIPVideoChannelNode(outList[(int)Nodes::ChannelIP]))
 		NOS_RETURN_ON_FAILURE(RegisterDMAReadNode(outList[(int)Nodes::DMARead]))
 		
 		// TODO: Remove these when migration of class-named graphs become available in Nodos.
