@@ -303,11 +303,15 @@ AJADevice::AJADevice(std::string const& serial)
         nosEngine.LogE("## ERROR:  Device '%ull' cannot capture", serial);
         return;
     }
-    AJA_ASSERT(SetEveryFrameServices(NTV2_OEM_TASKS));			//	Since this is an OEM demo, use the OEM service level
-    AJA_ASSERT(SetMultiFormatMode(true));
-    AJA_ASSERT(SetReference(NTV2_REFERENCE_EXTERNAL));
+    {
+        DeviceLock lock(this);
 
-    ClearState();
+        NOS_AJA_SOFT_CHECK(SetEveryFrameServices(NTV2_OEM_TASKS));
+        NOS_AJA_SOFT_CHECK(SetMultiFormatMode(true));
+        NOS_AJA_SOFT_CHECK(SetReference(NTV2_REFERENCE_EXTERNAL));
+
+        ClearState();
+    }
     std::string firmwareMsg, firmwareMsgDetails;
     nosDeviceProperty driverProp{};
 	bool isFirmwareValid = true;
@@ -331,6 +335,11 @@ AJADevice::AJADevice(std::string const& serial)
         .PropertyCount = isFirmwareValid ? 0ull : 1ull
     };
     nosDevice->RegisterDevice(&params, &GlobalDeviceId);
+	// TODO: IP Video: When ready to merge channel nodes, remove this.
+	nosName tag = NSN_DeviceTagSDI;
+	if (IsSupported(kDeviceCanDo2110))
+		tag = NSN_DeviceTagIPVideo;
+	nosDevice->AddDeviceTag(GlobalDeviceId, tag);
 }
 
 bool AJADevice::ChannelIsValid(NTV2Channel channel, bool isInput, NTV2VideoFormat fmt, Mode mode)
@@ -780,14 +789,22 @@ bool AJADevice::RouteSLInputSignal(NTV2Channel channel, NTV2VideoFormat videoFmt
     re &= (SetEnableVANCData(false, false, channel));
     re &= (SetMode(channel, NTV2_MODE_INPUT));
     NTV2VideoFormat effectiveFormat = videoFmt;
-    if (NTV2_VIDEO_FORMAT_IS_B(videoFmt))
+	if (IsSupported(kDeviceCanDo3GLevelConversion))
     {
-        re &= SetSDIInLevelBtoLevelAConversion(channel, true);
-        //Find the corresponding A format
-        effectiveFormat = GetFirstMatchingVideoFormat(GetNTV2FrameRateFromVideoFormat(videoFmt), GetDisplayHeight(videoFmt), GetDisplayWidth(videoFmt), IsProgressiveTransport(videoFmt), IsPSF(videoFmt), false);
-    }
-    else
-        re &= SetSDIInLevelBtoLevelAConversion(channel, false);
+		if (NTV2_VIDEO_FORMAT_IS_B(videoFmt))
+		{
+			re &= SetSDIInLevelBtoLevelAConversion(channel, true);
+			// Find the corresponding A format
+			effectiveFormat = GetFirstMatchingVideoFormat(GetNTV2FrameRateFromVideoFormat(videoFmt),
+														  GetDisplayHeight(videoFmt),
+														  GetDisplayWidth(videoFmt),
+														  IsProgressiveTransport(videoFmt),
+														  IsPSF(videoFmt),
+														  false);
+		}
+		else
+			re &= SetSDIInLevelBtoLevelAConversion(channel, false);
+	}
     re &= (SetVideoFormat(effectiveFormat, false, false, channel));
     re &= (SetFrameBufferFormat(channel, fbFmt));
     re &= (Connect(GetFrameBufferInputXptFromChannel(channel), GetInputSourceOutputXpt(src)));
@@ -842,10 +859,10 @@ void AJADevice::CloseChannel(NTV2Channel channel, bool isInput,  bool isQuad)
 
 void AJADevice::CloseSLChannel(NTV2Channel channel, bool isInput)
 {
-    AJA_ASSERT(Disconnect(isInput ? GetFrameBufferInputXptFromChannel(channel) : GetOutputDestInputXpt(NTV2ChannelToOutputDestination(channel))));
-    AJA_ASSERT(isInput ? UnsubscribeInputVerticalEvent(channel) : UnsubscribeOutputVerticalEvent(channel));
-    AJA_ASSERT(isInput ? DisableInputInterrupt(channel) : DisableOutputInterrupt(channel));
-    AJA_ASSERT(DisableChannel(channel));
+    NOS_AJA_SOFT_CHECK(Disconnect(isInput ? GetFrameBufferInputXptFromChannel(channel) : GetOutputDestInputXpt(NTV2ChannelToOutputDestination(channel))));
+    NOS_AJA_SOFT_CHECK(isInput ? UnsubscribeInputVerticalEvent(channel) : UnsubscribeOutputVerticalEvent(channel));
+    NOS_AJA_SOFT_CHECK(isInput ? DisableInputInterrupt(channel) : DisableOutputInterrupt(channel));
+    NOS_AJA_SOFT_CHECK(DisableChannel(channel));
     Channels.erase(channel);
 }
 
@@ -861,9 +878,9 @@ void AJADevice::CloseQLChannel(NTV2Channel channel, bool isInput)
     Disconnect(GetOutputDestInputXpt(NTV2ChannelToOutputDestination(channel)));
     Disconnect(GetInputTSIFB(channel));
     Disconnect(GetFrameBufferInputXptFromChannel(channel));
-    AJA_ASSERT(isInput ? UnsubscribeInputVerticalEvent(channel) : UnsubscribeOutputVerticalEvent(channel));
-    AJA_ASSERT(isInput ? DisableInputInterrupt(channel) : DisableOutputInterrupt(channel));
-    AJA_ASSERT(DisableChannel(channel));
+    NOS_AJA_SOFT_CHECK(isInput ? UnsubscribeInputVerticalEvent(channel) : UnsubscribeOutputVerticalEvent(channel));
+    NOS_AJA_SOFT_CHECK(isInput ? DisableInputInterrupt(channel) : DisableOutputInterrupt(channel));
+    NOS_AJA_SOFT_CHECK(DisableChannel(channel));
     Channels.erase(channel);
 }
 
@@ -947,7 +964,16 @@ void AJADevice::UpdateReferenceStringList() {
 
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
-    return CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
+    auto set = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
+	NTV2ReferenceSource currentRef;
+	auto success = set && GetReference(currentRef) && currentRef == inRefSource;
+    if (success)
+    {
+        std::unique_lock lock(ReferenceListeners.Mutex);
+        for (auto& listener : ReferenceListeners.Map | std::views::values)
+            listener(inRefSource);
+    }
+    return success;
 }
 
 std::unordered_set<NTV2Channel> AJADevice::GetFilteredChannels(bool isInput)
