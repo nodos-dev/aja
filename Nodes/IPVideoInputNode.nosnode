@@ -3519,8 +3519,8 @@
 						},
 						{
 							"id": "e5ff5674-5677-4b4b-afc0-a3d92039d3ea",
-							"name": "KonaChannel",
-							"class_name": "nos.aja.KonaChannel",
+							"name": "IPVideoChannel",
+							"class_name": "nos.aja.IPVideoChannel",
 							"pins": [
 								{
 									"id": "8bd29e8f-1d35-41ff-a82d-275845bdb723",
