@@ -30,8 +30,8 @@ struct RestartParams {
 };
 
 NOS_REGISTER_NAME_SPACED(VendorName, "AJA Video Systems")
-NOS_REGISTER_NAME(DeviceTagSDI)
-NOS_REGISTER_NAME(DeviceTagIPVideo)
+NOS_REGISTER_NAME_SPACED(DeviceTagSDI, "SDI")
+NOS_REGISTER_NAME_SPACED(DeviceTagIPVideo, "IPVideo")
 
 struct DeviceLock
 {
