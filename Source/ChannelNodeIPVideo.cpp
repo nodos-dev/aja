@@ -185,9 +185,8 @@ struct IPVideoChannelNode : NodeContext
 		});
 		AddPinValueWatcher(NSN_ChannelName, [this](const nos::Buffer& newVal, std::optional<nos::Buffer> oldValue) {
 			ChannelPinValue = InterpretPinValue<const char>(newVal);
-			auto [channel, mode] = GetChannelFromString(ChannelPinValue);
+			auto channel = GetChannelFromString(ChannelPinValue);
 			Channel = channel;
-			IsSingleLink = !AJADevice::IsQuad(mode);
 			if (ChannelPinValue != PIN_VALUE_NONE && Channel == NTV2_CHANNEL_INVALID)
 				SetPinValue(NSN_ChannelName, nosBuffer{.Data = (void*)PIN_VALUE_NONE, .Size = 5});
 			else
@@ -304,7 +303,7 @@ struct IPVideoChannelNode : NodeContext
 		channelPin.device = std::make_unique<TDevice>(TDevice{{}, Device->GetSerialNumber(), Device->GetDisplayName()});
 		channelPin.channel_name = ChannelPinValue;
 		channelPin.is_input = IsInput;
-		channelPin.is_quad = !IsSingleLink;
+		channelPin.is_quad = false;
 		channelPin.video_format = NTV2VideoFormatToString(format, true); // TODO: Readonly.
 		uint32_t width, height;
 		if(IsInput)
@@ -317,13 +316,6 @@ struct IPVideoChannelNode : NodeContext
 		}
 		channelPin.resolution = std::make_unique<nos::fb::vec2u>(width, height);
 		channelPin.video_format_idx = static_cast<int>(format);
-		if (!IsSingleLink)
-		{
-			if(IsInput)
-				channelPin.input_quad_link_mode = static_cast<nos::aja::QuadLinkInputMode>(GetEffectiveQuadMode());
-			else 
-				channelPin.output_quad_link_mode = static_cast<QuadLinkMode>(GetEffectiveQuadMode());
-		}
 		channelPin.frame_buffer_format = static_cast<mediaio::YCbCrPixelFormat>(CurrentPixelFormat);
 		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
@@ -615,14 +607,6 @@ struct IPVideoChannelNode : NodeContext
 			return NTV2_FORMAT_UNKNOWN;
 		if (IsInput)
 		{
-			if (!IsSingleLink)
-				if (Device->CanMakeQuadInputFromChannel(Channel))
-				{
-					auto fmt = Device->GetSDIInputVideoFormat(Channel);
-					if(ForceInterlaced)
-						return Device->ForceInterlace(fmt);
-					return fmt;
-				}
 			if (Device->ChannelCanInput(Channel))
 			{
 				auto fmt = Device->GetSDIInputVideoFormat(Channel);
@@ -654,18 +638,14 @@ struct IPVideoChannelNode : NodeContext
 		return NTV2_FORMAT_UNKNOWN;
 	}
 
-	std::pair<NTV2Channel, AJADevice::Mode> GetChannelFromString(const std::string& str)
+	NTV2Channel GetChannelFromString(const std::string& str)
 	{
 		for (uint32_t i = NTV2_CHANNEL1; i < NTV2_MAX_NUM_CHANNELS; ++i)
 		{
-			AJADevice::Mode modes[2] = {AJADevice::SL, AJADevice::AUTO};
-			for (auto mode : modes)
-			{
-				if (GetChannelName(NTV2Channel(i), mode) == str)
-					return {NTV2Channel(i), mode};
-			}
+			if (GetIpChannelName(IsInput, NTV2Channel(i)) == str)
+				return NTV2Channel(i);
 		}
-		return {NTV2_CHANNEL_INVALID, AJADevice::SL};
+		return NTV2_CHANNEL_INVALID;
 	}
 
 	NTV2FrameGeometry GetNTV2FrameGeometryFromString(const std::string& str)
@@ -690,9 +670,7 @@ struct IPVideoChannelNode : NodeContext
 
 	AJADevice::Mode GetEffectiveQuadMode()
 	{
-		if(IsSingleLink)
-			return AJADevice::SL;
-		return IsInput ? InputModePin : OutputModePin;
+		return AJADevice::Mode::SL;
 	}
 
 	std::atomic_bool TryFindChannel = false;
@@ -768,7 +746,6 @@ struct IPVideoChannelNode : NodeContext
 		PROGRESSIVE
 	} InterlacedState = InterlacedState::NONE;
 	AJADevice::Mode InputModePin = AJADevice::SL, OutputModePin = AJADevice::SL;
-	bool IsSingleLink = true;
 
 	QuadLinkInputMode QuadLinkInputMode = QuadLinkInputMode::Tsi;
 	QuadLinkMode QuadLinkOutputMode = QuadLinkMode::Tsi;
