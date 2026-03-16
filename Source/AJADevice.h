@@ -193,8 +193,10 @@ private:
 
 inline NTV2Channel ParseChannel(std::string_view const &name)
 {
-	size_t idx = name.find("Link");
-	return NTV2Channel(name[idx + sizeof("Link")] - '1');
+    size_t pos = name.find_first_of("0123456789");
+    if (pos == std::string::npos)
+        return NTV2_CHANNEL_INVALID;
+    return NTV2Channel(name[pos] - '1');
 }
 
 inline std::vector<uint8_t> StringValue(std::string const &str)
