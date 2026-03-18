@@ -1100,7 +1100,7 @@ bool AJADevice::AcquireDevice()
     int32_t curPid{};
     if (GetStreamingApplication(curAppFourCC, curPid))
     {
-        if (curPid == nosPid)
+        if (curPid != nosPid)
         {
             auto curApp = FourCCToString(curAppFourCC);
             if (curPid != 0)
@@ -1113,7 +1113,7 @@ bool AJADevice::AcquireDevice()
 		nosEngine.LogE("Failed to acquire device %s for Nodos.", GetDisplayName().c_str());
 		return false;
     }
-    if(nosPid != curPid)
+    if (nosPid != curPid)
         nosEngine.LogD("Device %s acquired by Nodos.", GetDisplayName().c_str());
     return true;
 }
@@ -1139,7 +1139,13 @@ void AJADevice::ReleaseDevice()
     }
 
     if (ReleaseStreamForApplicationWithReference(NOS_FOURCC, nosPid))
-        nosEngine.LogD("Device %s released by Nodos", GetDisplayName().c_str());
+    {
+        if (GetStreamingApplication(curAppFourCC, curPid))
+        {
+            if (curPid != nosPid)
+                nosEngine.LogD("Device %s released by Nodos", GetDisplayName().c_str());
+        }
+    }
     else
         nosEngine.LogE("Failed to release device %s", GetDisplayName().c_str());
 }
