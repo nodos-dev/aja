@@ -158,12 +158,6 @@
               "name": "nos.sys.device.DeviceList.AJA Video Systems",
               "hide_value": true
             },
-            "data": {
-              "vendor_name": "AJA Video Systems",
-              "model_name": "Corvid44-8K",
-              "serial_number": "4050487811211866160",
-              "flags": "PCI VIDEO_IO"
-            },
             "def": {
               "vendor_name": "None"
             },
@@ -5022,12 +5016,6 @@
                     "type": "NAMED_VALUE",
                     "name": "nos.sys.device.DeviceList.AJA Video Systems.IPVideo",
                     "hide_value": true
-                  },
-                  "data": {
-                    "vendor_name": "AJA Video Systems",
-                    "model_name": "Corvid44-8K",
-                    "serial_number": "4050487811211866160",
-                    "flags": "PCI VIDEO_IO"
                   },
                   "referred_by": [
                     "c7d98b75-cec7-418d-a364-199e9f435c34"

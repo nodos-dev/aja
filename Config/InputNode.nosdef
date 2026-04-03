@@ -88,10 +88,7 @@
             "visualizer": {
             },
             "data": {
-              "vendor_name": "AJA Video Systems",
-              "model_name": "Corvid44-8K",
-              "serial_number": "4050487811211866160",
-              "flags": "PCI VIDEO_IO"
+                "vendor_name": "None"
             },
             "def": {
               "vendor_name": "None"
@@ -1649,15 +1646,6 @@
                   "can_show_as": "OUTPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
-                    "channel_name": "SingleLink 3",
-                    "is_input": true,
-                    "video_format": "1080p59.94a",
-                    "video_format_idx": 24,
-                    "frame_buffer_format": "V210",
-                    "resolution": { "x": 1920, "y": 1080 }
-                  },
                   "def": {
                     "device": { "name": "" },
                     "channel_name": "",
@@ -1909,7 +1897,6 @@
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
                   "def": { "name": "" },
                   "meta_data_map": [
                     { "key": "Category", "value": "" }
@@ -2199,10 +2186,7 @@
                     "hide_value": true
                   },
                   "data": {
-                    "vendor_name": "AJA Video Systems",
-                    "model_name": "Corvid44-8K",
-                    "serial_number": "4050487811211866160",
-                    "flags": "PCI VIDEO_IO"
+                    "vendor_name": "None"
                   },
                   "referred_by": [
                     "41a9cfd3-1cbb-4058-96f8-cb6705cb542a"
@@ -2772,15 +2756,6 @@
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizer": {
                   },
-                  "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
-                    "channel_name": "SingleLink 3",
-                    "is_input": true,
-                    "video_format": "1080p59.94a",
-                    "video_format_idx": 24,
-                    "frame_buffer_format": "V210",
-                    "resolution": { "x": 1920, "y": 1080 }
-                  },
                   "def": {
                     "device": { "name": "" },
                     "channel_name": "",
@@ -2993,15 +2968,6 @@
                   "show_as": "INPUT_PIN",
                   "can_show_as": "INPUT_PIN_ONLY",
                   "visualizer": {
-                  },
-                  "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
-                    "channel_name": "SingleLink 3",
-                    "is_input": true,
-                    "video_format": "1080p59.94a",
-                    "video_format_idx": 24,
-                    "frame_buffer_format": "V210",
-                    "resolution": { "x": 1920, "y": 1080 }
                   },
                   "def": {
                     "device": { "name": "" },
