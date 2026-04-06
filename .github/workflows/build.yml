@@ -44,15 +44,6 @@ on:
         required: false
         default: true
         type: boolean
-      version_check:
-        description: 'Version Check'
-        required: true
-        default: 'strict'
-        type: choice
-        options:
-          - none
-          - loose
-          - strict
       nodos_version:
         description: 'Nodos Version (optional, defaults to latest 1.3)'
         required: false
@@ -89,6 +80,7 @@ jobs:
     uses: nodos-dev/actions/.github/workflows/plugins.yml@main
     secrets:
       CI_TOKEN: ${{ secrets.CI_TOKEN }}
+      NODOS_STORE_ACCESS_TOKEN: ${{ secrets.NODOS_STORE_ACCESS_TOKEN }}
       SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
     with:
       ref_name: ${{ github.ref_name }}
@@ -101,4 +93,3 @@ jobs:
       linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
       run_tests: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.run_tests) || false }}
-      version_check: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version_check || 'strict' }}
