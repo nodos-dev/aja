@@ -1578,14 +1578,7 @@
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizer": {
                         },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 1",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
-                        },
+
                         "def": {
                           "device": { "name": "" },
                           "channel_name": "",
@@ -2172,14 +2165,6 @@
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizer": {
                         },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 1",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
-                        },
                         "def": {
                           "device": { "name": "" },
                           "channel_name": "",
@@ -2714,14 +2699,6 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 1",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
-                        },
                         "def": {
                           "device": { "name": "" },
                           "channel_name": "",
@@ -2742,7 +2719,6 @@
                         "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
                         "def": { "name": "" },
                         "meta_data_map": [
                           { "key": "Category", "value": "" }
@@ -7432,14 +7408,6 @@
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizer": {
                         },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 2",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
-                        },
                         "def": {
                           "device": { "name": "" },
                           "channel_name": "",
@@ -8207,14 +8175,6 @@
                         "show_as": "INPUT_PIN",
                         "can_show_as": "INPUT_PIN_ONLY",
                         "visualizer": {
-                        },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 2",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
                         },
                         "def": {
                           "device": { "name": "" },
@@ -10042,14 +10002,6 @@
                         "can_show_as": "INPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": {
-                          "device": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
-                          "channel_name": "SingleLink 2",
-                          "video_format": "1080p59.94a",
-                          "video_format_idx": 24,
-                          "frame_buffer_format": "V210",
-                          "resolution": { "x": 1920, "y": 1080 }
-                        },
                         "def": {
                           "device": { "name": "" },
                           "channel_name": "",
@@ -10070,7 +10022,6 @@
                         "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                         "visualizer": {
                         },
-                        "data": { "serial_number": 4121974780240146480, "name": "Corvid44-8K - 0" },
                         "def": { "name": "" },
                         "meta_data_map": [
                           { "key": "Category", "value": "" }
