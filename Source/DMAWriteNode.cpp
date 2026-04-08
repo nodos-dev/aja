@@ -33,7 +33,7 @@ struct DMAWriteNodeContext : DMANodeBase
 	}
  
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
-	{ 
+	{
 		if (pinName == NOS_NAME_STATIC("Channel"))
 		{
 			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
@@ -57,23 +57,20 @@ struct DMAWriteNodeContext : DMANodeBase
 				Mode = AJADevice::SL;
 			nosEngine.RecompilePath(NodeId);
 		}
+		else if (pinName == NOS_NAME_STATIC("EnableTimecode"))
+		{
+			nosEngine.SendPathRestart(NodeId);
+		}
 	}
 	
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
 	{
-		nosResourceShareInfo inputBuffer{};
-		auto fieldType = nos::sys::vulkan::FieldType::UNKNOWN;
-		uint32_t curVBLCount = 0;
-		for (size_t i = 0; i < params->PinCount; ++i)
-		{
-			auto& pin = params->Pins[i];
-			if (pin.Name == NOS_NAME_STATIC("Input"))
-				inputBuffer = vkss::ConvertToResourceInfo(*InterpretPinValue<sys::vulkan::Buffer>(*pin.Data));
-			if (pin.Name == NOS_NAME("FieldType"))
-				fieldType = *InterpretPinValue<sys::vulkan::FieldType>(*pin.Data);
-			if (pin.Name == NOS_NAME("CurrentVBL"))
-				curVBLCount = *InterpretPinValue<uint32_t>(*pin.Data);
-		}
+		NodeExecuteParams execParams = params;
+		nosResourceShareInfo inputBuffer = vkss::ConvertToResourceInfo(
+			*execParams.GetPinData<sys::vulkan::Buffer>(NOS_NAME_STATIC("Input")));
+		auto fieldType = *execParams.GetPinData<sys::vulkan::FieldType>(NOS_NAME_STATIC("FieldType"));
+		auto curVBLCount = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("CurrentVBL"));
+		auto enableRP188 = *execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode"));
 
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
@@ -81,22 +78,21 @@ struct DMAWriteNodeContext : DMANodeBase
 		auto buffer = nosVulkan->Map(&inputBuffer);
 		auto inputSize = inputBuffer.Memory.Size;
 
-		//nosVulkan->Begin("Flush before AJA DMA Write", &cmd);
-		//nosCmdEndParams end{.ForceSubmit = NOS_TRUE, .OutGPUEventHandle = &event};
-		//nosVulkan->End(cmd, &end);
-		//nosVulkan->WaitGpuEvent(&event, UINT64_MAX);
-
 		if (curVBLCount == 0)
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
 
-		nosScheduleNodeParams schedule {
-			.NodeId = NodeId,
-			.AddScheduleCount = 1
-		};
+		if (enableRP188)
+		{
+			auto rp188FrameNumber = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("TimecodeFrameNumber"));
+			auto rp188 = EncodeRP188(rp188FrameNumber);
+			nosEngine.WatchLog(("AJA " + ChannelName + " TC Out").c_str(), rp188.TimecodeStr.c_str());
+			WriteRP188(rp188.Data);
+		}
+
+		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
-		
 		return NOS_RESULT_SUCCESS;
 	}
 

@@ -2,10 +2,41 @@
 
 #pragma once
 #include <Nodos/PluginHelpers.hpp>
+#include <ajantv2/includes/ntv2rp188.h>
 
 namespace nos::aja
 {
-    
+
+static TimecodeFormat GetTimecodeFormat(NTV2FrameRate rate)
+{
+	switch (rate)
+	{
+	case NTV2_FRAMERATE_6000:	return kTCFormat60fps;
+	case NTV2_FRAMERATE_5994:	return kTCFormat60fpsDF;
+	case NTV2_FRAMERATE_4800:	return kTCFormat48fps;
+	case NTV2_FRAMERATE_4795:	return kTCFormat48fps;
+	case NTV2_FRAMERATE_3000:	return kTCFormat30fps;
+	case NTV2_FRAMERATE_2997:	return kTCFormat30fpsDF;
+	case NTV2_FRAMERATE_2500:	return kTCFormat25fps;
+	case NTV2_FRAMERATE_2400:	return kTCFormat24fps;
+	case NTV2_FRAMERATE_2398:	return kTCFormat24fps;
+	case NTV2_FRAMERATE_5000:	return kTCFormat50fps;
+	default:					return kTCFormatUnknown;
+	}
+}
+
+static UWord GetRP188SourceFilterValue(TimecodeSource source)
+{
+	switch (source)
+	{
+	case TimecodeSource::LTC:   return 0x00;
+	case TimecodeSource::VITC1: return 0x01;
+	case TimecodeSource::VITC2: return 0x02;
+	case TimecodeSource::Auto:  return 0xFF;
+	default:                    return 0x00;
+	}
+}
+
 struct DMANodeBase : NodeContext
 {
 	DMANodeBase(nosFbNodePtr node, DMADirection dir) : NodeContext(node), Direction(dir)
@@ -35,10 +66,84 @@ struct DMANodeBase : NodeContext
 		return Direction == DMA_READ;
 	}
 
+	bool RP188Configured = false;
+
+	struct RP188Result
+	{
+		NTV2_RP188 Data;
+		uint32_t FrameNumber;
+		std::string TimecodeStr;
+		bool Valid;
+	};
+
+	RP188Result EncodeRP188(uint32_t frameNumber) const
+	{
+		TimecodeFormat tcFormat = GetTimecodeFormat(GetNTV2FrameRateFromVideoFormat(Format));
+		CRP188 tc(frameNumber, tcFormat);
+		NTV2_RP188 rp188Data;
+		tc.GetRP188Reg(rp188Data);
+		std::string tcStr;
+		tc.GetRP188Str(tcStr);
+		return {rp188Data, frameNumber, tcStr, true};
+	}
+
+	RP188Result DecodeRP188(const NTV2_RP188& rp188Data) const
+	{
+		if (!rp188Data.IsValid())
+			return {NTV2_RP188(), 0, {}, false};
+		TimecodeFormat tcFormat = GetTimecodeFormat(GetNTV2FrameRateFromVideoFormat(Format));
+		CRP188 tc(rp188Data, tcFormat);
+		ULWord frameCount = 0;
+		tc.GetFrameCount(frameCount);
+		std::string tcStr;
+		tc.GetRP188Str(tcStr);
+		return {rp188Data, frameCount, tcStr, true};
+	}
+
+	RP188Result ReadRP188(UWord sourceFilter = 0)
+	{
+		if (!RP188Configured)
+		{
+			Device->SetRP188Mode(Channel, NTV2_RP188_INPUT);
+			Device->SetRP188SourceFilter(Channel, sourceFilter);
+			RP188Configured = true;
+		}
+		NTV2_RP188 rp188Data;
+		Device->GetRP188Data(Channel, rp188Data);
+		return DecodeRP188(rp188Data);
+	}
+
+	void WriteRP188(const NTV2_RP188& rp188Data)
+	{
+		if (!RP188Configured)
+		{
+			Device->SetRP188Mode(Channel, NTV2_RP188_OUTPUT);
+			Device->DisableRP188Bypass(Channel);
+			if (IsQuad())
+				for (uint32_t i = Channel + 1; i < Channel + 4u; ++i)
+				{
+					auto ch = NTV2Channel(i);
+					Device->SetRP188Mode(ch, NTV2_RP188_OUTPUT);
+					Device->DisableRP188Bypass(ch);
+				}
+			RP188Configured = true;
+		}
+		Device->SetRP188Data(Channel, rp188Data);
+		if (IsQuad())
+			for (uint32_t i = Channel + 1; i < Channel + 4u; ++i)
+				Device->SetRP188Data(NTV2Channel(i), rp188Data);
+	}
+
 	bool NeedsFrameSet = false;
 	ULWord NextVBL = 0;
 
-	virtual void OnPathStart() { NeedsFrameSet = true; DoubleBufferIdx = 0; NextVBL = 0; }
+	virtual void OnPathStart()
+	{
+		NeedsFrameSet = true;
+		DoubleBufferIdx = 0;
+		NextVBL = 0;
+		RP188Configured = false;
+	}
 
 	void SetFrame(uint32_t doubleBufferIndex)
 	{
