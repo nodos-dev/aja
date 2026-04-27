@@ -4,8 +4,27 @@
 #include <Nodos/PluginHelpers.hpp>
 #include <ajantv2/includes/ntv2rp188.h>
 
+#include <ancillarylist.h>
+#include <ancillarydata.h>
+
+#include <cstdio>
+
+#include "AJA_generated.h"
+
 namespace nos::aja
 {
+
+// Per-channel ANC region size. 8 KB per field is the AJA SDK default and is
+// enough for any realistic SMPTE 291 packet load on 12G-SDI.
+static constexpr ULWord ANC_FIELD_BYTE_COUNT = 8 * 1024;
+
+// Stand-in for CNTV2Card::NULL_POINTER (which is protected). Default-constructed
+// NTV2Buffer has zero size and signals "no field 2" to the SDK.
+inline NTV2Buffer& AncEmptyBuffer()
+{
+	static NTV2Buffer empty;
+	return empty;
+}
 
 static TimecodeFormat GetTimecodeFormat(NTV2FrameRate rate)
 {
@@ -137,12 +156,180 @@ struct DMANodeBase : NodeContext
 	bool NeedsFrameSet = false;
 	ULWord NextVBL = 0;
 
+	bool AncConfigured = false;
+	bool AncInserterEnabled = false;
+	uint8_t LastDmaSlot = 0;
+	NTV2Buffer AncF1Buffer;
+	NTV2Buffer AncF2Buffer;
+
 	virtual void OnPathStart()
 	{
 		NeedsFrameSet = true;
 		DoubleBufferIdx = 0;
 		NextVBL = 0;
 		RP188Configured = false;
+		AncConfigured = false;
+		AncInserterEnabled = false;
+		LastDmaSlot = 0;
+	}
+
+	// Lazy-allocate the host-side staging buffers for ANC F1/F2 transfer.
+	void EnsureAncBuffers()
+	{
+		if (AncF1Buffer.GetByteCount() != ANC_FIELD_BYTE_COUNT)
+			AncF1Buffer = NTV2Buffer(size_t(ANC_FIELD_BYTE_COUNT));
+		if (AncF2Buffer.GetByteCount() != ANC_FIELD_BYTE_COUNT)
+			AncF2Buffer = NTV2Buffer(size_t(ANC_FIELD_BYTE_COUNT));
+	}
+
+	// Initialize the AJA ANC extractor (input) or inserter (output) for the
+	// current channel. Idempotent within a path run.
+	bool ConfigureAnc()
+	{
+		if (AncConfigured || !Device || Channel == NTV2_CHANNEL_INVALID)
+			return AncConfigured;
+		Device->AncSetFrameBufferSize(ANC_FIELD_BYTE_COUNT, ANC_FIELD_BYTE_COUNT);
+		const UWord sdiIndex = UWord(Channel);
+		if (IsInput())
+		{
+			Device->AncExtractInit(sdiIndex, Channel);
+			// Enable extraction across all four raster regions (VANC Y/C, HANC Y/C);
+			// without this, the extractor is on but pulls no packets.
+			Device->AncExtractSetComponents(sdiIndex, true, true, true, true);
+			Device->AncExtractSetEnable(sdiIndex, true);
+		}
+		else
+		{
+			Device->AncInsertInit(sdiIndex, Channel);
+			// Enable insertion across all four raster regions (VANC Y/C, HANC Y/C);
+			// without this, the inserter is armed but emits nothing.
+			Device->AncInsertSetComponents(sdiIndex, true, true, true, true);
+			// Defer AncInsertSetEnable until after the first DMAWriteAnc populates
+			// the ANC region — otherwise the inserter could emit whatever stale
+			// bytes were sitting in that frame slot before we wrote our packets.
+		}
+		AncConfigured = true;
+		return true;
+	}
+
+	// Capture: extract ANC packets from the device's ANC region for the most
+	// recently transferred frame. Returns a Nodos buffer ready to push out to a pin.
+	nos::Buffer ReadAnc()
+	{
+		EnsureAncBuffers();
+		if (!ConfigureAnc())
+			return {};
+		const UWord sdiIndex = UWord(Channel);
+		// Use the slot the most recent video DMATransfer used, not DoubleBufferIdx
+		// (which has already been flipped by NextDoubleBuffer). Otherwise ANC and
+		// video are read from different slots and end up out of sync.
+		uint32_t frameIndex = GetFrameBufferOffset(Channel, LastDmaSlot) / Device->GetFBSize(Channel);
+		Device->AncExtractSetWriteParams(sdiIndex, frameIndex, Channel);
+		if (IsInterlaced())
+			Device->AncExtractSetField2WriteParams(sdiIndex, frameIndex, Channel);
+		// Zero before DMA so any region the extractor leaves untouched (shorter
+		// frame, missing terminator) doesn't surface stale packets from the
+		// previous read.
+		AncF1Buffer.Fill(uint8_t(0));
+		AncF2Buffer.Fill(uint8_t(0));
+		Device->DMAReadAnc(frameIndex, AncF1Buffer, IsInterlaced() ? AncF2Buffer : AncEmptyBuffer(), Channel);
+
+		AJAAncillaryList list;
+		AJAAncillaryList::SetFromDeviceAncBuffers(AncF1Buffer,
+			IsInterlaced() ? AncF2Buffer : AncEmptyBuffer(),
+			list);
+
+		flatbuffers::FlatBufferBuilder fbb;
+		std::vector<flatbuffers::Offset<ANCPacket>> packets;
+		packets.reserve(list.CountAncillaryData());
+		for (uint32_t i = 0; i < list.CountAncillaryData(); ++i)
+		{
+			AJAAncillaryData* p = list.GetAncillaryDataAtIndex(i);
+			if (!p || p->IsEmpty())
+				continue;
+			// Drop packets whose 8-bit checksum (DID + SID + DC + payload) doesn't
+			// match the wire-stored byte. Catches signal-integrity corruption that
+			// would otherwise propagate as "valid" data downstream.
+			if (!p->ChecksumOK())
+			{
+				char detail[64];
+				std::snprintf(detail, sizeof(detail), "DID=0x%02X SDID=0x%02X line=%u",
+					p->GetDID(), p->GetSID(), unsigned(p->GetLocationLineNumber()));
+				nosEngine.WatchLog(("AJA " + ChannelName + " ANC bad checksum").c_str(), detail);
+				continue;
+			}
+			auto payloadBytes = p->GetPayloadByteCount();
+			std::vector<uint8_t> payload(payloadBytes);
+			if (payloadBytes)
+				p->GetPayloadData(payload.data(), uint32_t(payloadBytes));
+			auto payloadOffset = fbb.CreateVector(payload);
+			ANCPacketBuilder pkt(fbb);
+			pkt.add_did(p->GetDID());
+			pkt.add_sdid(p->GetSID());
+			pkt.add_line_number(p->GetLocationLineNumber());
+			pkt.add_horiz_offset(p->GetLocationHorizOffset());
+			pkt.add_space(p->IsHanc() ? ANCDataSpace::HANC : ANCDataSpace::VANC);
+			pkt.add_channel(p->IsLumaChannel() ? ANCDataChannel::Y :
+				p->IsChromaChannel() ? ANCDataChannel::C : ANCDataChannel::Both);
+			pkt.add_link(p->GetLocationVideoLink() == AJAAncDataLink_B ? ANCDataLink::B : ANCDataLink::A);
+			pkt.add_is_field2(p->GetDataLocation().GetLineNumber() != 0 && !IsProgressivePicture(Format)
+				&& p->GetLocationLineNumber() > GetDisplayHeight(Format) / 2);
+			pkt.add_payload(payloadOffset);
+			packets.push_back(pkt.Finish());
+		}
+		auto packetsVec = fbb.CreateVector(packets);
+		ANCFrameBuilder frame(fbb);
+		frame.add_packets(packetsVec);
+		fbb.Finish(frame.Finish());
+		return nos::Buffer(fbb.Release());
+	}
+
+	// Playback: serialize the incoming ANCFrame pin payload into the device's
+	// ANC region for the next outgoing frame.
+	void WriteAnc(const ANCFrame* incoming)
+	{
+		if (!incoming || !incoming->packets() || incoming->packets()->size() == 0)
+			return;
+		EnsureAncBuffers();
+		if (!ConfigureAnc())
+			return;
+		AJAAncillaryList list;
+		for (auto* pkt : *incoming->packets())
+		{
+			if (!pkt)
+				continue;
+			AJAAncillaryData anc;
+			anc.SetDID(pkt->did());
+			anc.SetSID(pkt->sdid());
+			AJAAncDataLoc loc;
+			loc.SetDataSpace(pkt->space() == ANCDataSpace::VANC ? AJAAncDataSpace_VANC : AJAAncDataSpace_HANC);
+			loc.SetDataChannel(pkt->channel() == ANCDataChannel::C ? AJAAncDataChannel_C : AJAAncDataChannel_Y);
+			loc.SetDataLink(pkt->link() == ANCDataLink::B ? AJAAncDataLink_B : AJAAncDataLink_A);
+			loc.SetLineNumber(pkt->line_number());
+			loc.SetHorizontalOffset(pkt->horiz_offset());
+			anc.SetDataLocation(loc);
+			if (auto* payload = pkt->payload(); payload && payload->size())
+				anc.SetPayloadData(payload->data(), uint32_t(payload->size()));
+			list.AddAncillaryData(anc);
+		}
+		AncF1Buffer.Fill(uint8_t(0));
+		AncF2Buffer.Fill(uint8_t(0));
+		list.GetTransmitData(AncF1Buffer, IsInterlaced() ? AncF2Buffer : AncEmptyBuffer(),
+			!IsInterlaced(), 0);
+		const UWord sdiIndex = UWord(Channel);
+		// Match the slot used by the most recent video DMATransfer.
+		uint32_t frameIndex = GetFrameBufferOffset(Channel, LastDmaSlot) / Device->GetFBSize(Channel);
+		Device->DMAWriteAnc(frameIndex, AncF1Buffer, IsInterlaced() ? AncF2Buffer : AncEmptyBuffer(), Channel);
+		Device->AncInsertSetReadParams(sdiIndex, frameIndex, AncF1Buffer.GetByteCount(), Channel);
+		if (IsInterlaced())
+			Device->AncInsertSetField2ReadParams(sdiIndex, frameIndex, AncF2Buffer.GetByteCount(), Channel);
+		// Now that the ANC region for this slot has real data, enable the inserter.
+		// Idempotent past the first call.
+		if (!AncInserterEnabled)
+		{
+			Device->AncInsertSetEnable(sdiIndex, true);
+			AncInserterEnabled = true;
+		}
 	}
 
 	void SetFrame(uint32_t doubleBufferIndex)
@@ -263,6 +450,10 @@ struct DMANodeBase : NodeContext
 			}
 		}
 
+		// Remember which slot this DMA used, before NextDoubleBuffer flips state.
+		// ReadAnc/WriteAnc need this to keep ANC paired with the same slot the
+		// video frame just hit.
+		LastDmaSlot = DoubleBufferIdx;
 		DoubleBufferIdx = NextDoubleBuffer(DoubleBufferIdx);
 
 		ULWord newVBLCount = 0;

@@ -36,6 +36,9 @@ struct DMAReadNodeContext : DMANodeBase
 		uint32_t curVBLCount = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("CurrentVBL"));
 		bool enableRP188 = *execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode"));
 		auto timecodeSource = *execParams.GetPinData<TimecodeSource>(NOS_NAME_STATIC("TimecodeSource"));
+		bool enableANC = false;
+		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableANC")))
+			enableANC = *p;
 
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
@@ -99,6 +102,13 @@ struct DMAReadNodeContext : DMANodeBase
 				nosEngine.WatchLog(tcLabel.c_str(), rp188.TimecodeStr.c_str());
 				SetPinValue(NOS_NAME_STATIC("TimecodeFrameNumber"), Buffer::From(rp188.FrameNumber));
 			}
+		}
+
+		if (enableANC)
+		{
+			auto ancBuf = ReadAnc();
+			if (ancBuf.Size())
+				SetPinValue(NOS_NAME_STATIC("ANCFrame"), ancBuf);
 		}
 
 		return NOS_RESULT_SUCCESS;

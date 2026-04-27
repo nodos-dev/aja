@@ -71,6 +71,12 @@ struct DMAWriteNodeContext : DMANodeBase
 		auto fieldType = *execParams.GetPinData<sys::vulkan::FieldType>(NOS_NAME_STATIC("FieldType"));
 		auto curVBLCount = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("CurrentVBL"));
 		auto enableRP188 = *execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode"));
+		bool enableANC = false;
+		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableANC")))
+			enableANC = *p;
+		const ANCFrame* ancIncoming = nullptr;
+		if (enableANC)
+			ancIncoming = execParams.GetPinData<ANCFrame>(NOS_NAME_STATIC("ANCFrame"));
 
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
@@ -90,6 +96,9 @@ struct DMAWriteNodeContext : DMANodeBase
 			nosEngine.WatchLog(("AJA " + ChannelName + " TC Out").c_str(), rp188.TimecodeStr.c_str());
 			WriteRP188(rp188.Data);
 		}
+
+		if (enableANC && ancIncoming)
+			WriteAnc(ancIncoming);
 
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);

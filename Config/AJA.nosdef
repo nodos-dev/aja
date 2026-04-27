@@ -60,6 +60,22 @@
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
 						"data": 0
+					},
+					{
+						"name": "EnableANC",
+						"display_name": "Enable ANC",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, packets in the ANCFrame input pin are inserted into the SDI ANC region for this frame.",
+						"data": false
+					},
+					{
+						"name": "ANCFrame",
+						"display_name": "ANC In",
+						"type_name": "nos.aja.ANCFrame",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY"
 					}
 				],
 				"functions": [
@@ -158,6 +174,22 @@
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
 						"data": 0
+					},
+					{
+						"name": "EnableANC",
+						"display_name": "Enable ANC",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, the ANC region of the incoming SDI is extracted into the ANCFrame output pin.",
+						"data": false
+					},
+					{
+						"name": "ANCFrame",
+						"display_name": "ANC Out",
+						"type_name": "nos.aja.ANCFrame",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY"
 					}
 				],
 				"functions": [

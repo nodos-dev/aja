@@ -47,7 +47,9 @@
         "Config/FillKey.nosdef",
         "Config/DebayerSource.nosdef",
         "Config/InputWithTC.nosdef",
-        "Config/OutputWithTC.nosdef"
+        "Config/OutputWithTC.nosdef",
+        "Config/InputWithANC.nosdef",
+        "Config/OutputWithANC.nosdef"
     ],
     "custom_types" :[
       "Config/AJA.fbs"
