@@ -14,6 +14,16 @@
 namespace nos::aja
 {
 
+// ANC flatbuffer types live in nos.mediaio. Alias them locally so call sites
+// that pre-date the move don't have to be fully qualified.
+using ANCFrame = nos::mediaio::ANCFrame;
+using ANCFrameBuilder = nos::mediaio::ANCFrameBuilder;
+using ANCPacket = nos::mediaio::ANCPacket;
+using ANCPacketBuilder = nos::mediaio::ANCPacketBuilder;
+using ANCDataSpace = nos::mediaio::ANCDataSpace;
+using ANCDataChannel = nos::mediaio::ANCDataChannel;
+using ANCDataLink = nos::mediaio::ANCDataLink;
+
 // Per-channel ANC region size. 8 KB per field is the AJA SDK default and is
 // enough for any realistic SMPTE 291 packet load on 12G-SDI.
 static constexpr ULWord ANC_FIELD_BYTE_COUNT = 8 * 1024;
@@ -157,7 +167,6 @@ struct DMANodeBase : NodeContext
 	ULWord NextVBL = 0;
 
 	bool AncConfigured = false;
-	bool AncInserterEnabled = false;
 	uint8_t LastDmaSlot = 0;
 	NTV2Buffer AncF1Buffer;
 	NTV2Buffer AncF2Buffer;
@@ -169,7 +178,6 @@ struct DMANodeBase : NodeContext
 		NextVBL = 0;
 		RP188Configured = false;
 		AncConfigured = false;
-		AncInserterEnabled = false;
 		LastDmaSlot = 0;
 	}
 
@@ -189,6 +197,24 @@ struct DMANodeBase : NodeContext
 		if (AncConfigured || !Device || Channel == NTV2_CHANNEL_INVALID)
 			return AncConfigured;
 		Device->AncSetFrameBufferSize(ANC_FIELD_BYTE_COUNT, ANC_FIELD_BYTE_COUNT);
+
+		// One-shot wipe of the ANC regions in this channel's frame buffer slots.
+		// Without this, slots can carry leftover ANC bytes from a prior run /
+		// different config — the inserter would emit those before our first
+		// DMAWriteAnc lands, and SetFromDeviceAncBuffers would surface them on
+		// the read side until the extractor overwrites the slot.
+		{
+			const uint32_t fbSize = Device->GetFBSize(Channel);
+			const uint32_t channelCount = IsQuad() ? 4u : 1u;
+			for (uint32_t c = 0; c < channelCount; ++c)
+			{
+				const NTV2Channel ch = NTV2Channel(Channel + c);
+				const UWord slot0 = UWord(GetFrameBufferOffset(ch, 0) / fbSize);
+				const UWord slot1 = UWord(GetFrameBufferOffset(ch, 1) / fbSize);
+				Device->DMAClearAncRegion(slot0, slot1, NTV2_AncRgn_All, ch);
+			}
+		}
+
 		const UWord sdiIndex = UWord(Channel);
 		if (IsInput())
 		{
@@ -204,9 +230,9 @@ struct DMANodeBase : NodeContext
 			// Enable insertion across all four raster regions (VANC Y/C, HANC Y/C);
 			// without this, the inserter is armed but emits nothing.
 			Device->AncInsertSetComponents(sdiIndex, true, true, true, true);
-			// Defer AncInsertSetEnable until after the first DMAWriteAnc populates
-			// the ANC region — otherwise the inserter could emit whatever stale
-			// bytes were sitting in that frame slot before we wrote our packets.
+			// Safe to enable now: DMAClearAncRegion above zeroed both slots, so
+			// the inserter can't emit stale bytes before our first DMAWriteAnc.
+			Device->AncInsertSetEnable(sdiIndex, true);
 		}
 		AncConfigured = true;
 		return true;
@@ -323,13 +349,6 @@ struct DMANodeBase : NodeContext
 		Device->AncInsertSetReadParams(sdiIndex, frameIndex, AncF1Buffer.GetByteCount(), Channel);
 		if (IsInterlaced())
 			Device->AncInsertSetField2ReadParams(sdiIndex, frameIndex, AncF2Buffer.GetByteCount(), Channel);
-		// Now that the ANC region for this slot has real data, enable the inserter.
-		// Idempotent past the first call.
-		if (!AncInserterEnabled)
-		{
-			Device->AncInsertSetEnable(sdiIndex, true);
-			AncInserterEnabled = true;
-		}
 	}
 
 	void SetFrame(uint32_t doubleBufferIndex)
