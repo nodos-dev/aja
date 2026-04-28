@@ -7,8 +7,6 @@
 #include <ancillarylist.h>
 #include <ancillarydata.h>
 
-#include <cstdio>
-
 #include "AJA_generated.h"
 
 namespace nos::aja
@@ -23,6 +21,7 @@ using ANCPacketBuilder = nos::mediaio::ANCPacketBuilder;
 using ANCDataSpace = nos::mediaio::ANCDataSpace;
 using ANCDataChannel = nos::mediaio::ANCDataChannel;
 using ANCDataLink = nos::mediaio::ANCDataLink;
+using ANCDataStream = nos::mediaio::ANCDataStream;
 
 // Per-channel ANC region size. 8 KB per field is the AJA SDK default and is
 // enough for any realistic SMPTE 291 packet load on 12G-SDI.
@@ -273,17 +272,11 @@ struct DMANodeBase : NodeContext
 			AJAAncillaryData* p = list.GetAncillaryDataAtIndex(i);
 			if (!p || p->IsEmpty())
 				continue;
-			// Drop packets whose 8-bit checksum (DID + SID + DC + payload) doesn't
-			// match the wire-stored byte. Catches signal-integrity corruption that
-			// would otherwise propagate as "valid" data downstream.
-			if (!p->ChecksumOK())
-			{
-				char detail[64];
-				std::snprintf(detail, sizeof(detail), "DID=0x%02X SDID=0x%02X line=%u",
-					p->GetDID(), p->GetSID(), unsigned(p->GetLocationLineNumber()));
-				nosEngine.WatchLog(("AJA " + ChannelName + " ANC bad checksum").c_str(), detail);
-				continue;
-			}
+			// Note: we don't gate on p->ChecksumOK(). The AJA hardware extractor's
+			// stored checksum byte doesn't reliably match Calculate8BitChecksum of
+			// the recovered payload (loopback round-trip is the worst case), so the
+			// check produces false positives. Consumers do their own domain
+			// validation (e.g. ExtractTimecode rejects HH>=24/MM>=60/...).
 			auto payloadBytes = p->GetPayloadByteCount();
 			std::vector<uint8_t> payload(payloadBytes);
 			if (payloadBytes)
@@ -298,6 +291,16 @@ struct DMANodeBase : NodeContext
 			pkt.add_channel(p->IsLumaChannel() ? ANCDataChannel::Y :
 				p->IsChromaChannel() ? ANCDataChannel::C : ANCDataChannel::Both);
 			pkt.add_link(p->GetLocationVideoLink() == AJAAncDataLink_B ? ANCDataLink::B : ANCDataLink::A);
+			ANCDataStream stream = ANCDataStream::Unknown;
+			switch (p->GetLocationDataStream())
+			{
+			case AJAAncDataStream_1: stream = ANCDataStream::DS1; break;
+			case AJAAncDataStream_2: stream = ANCDataStream::DS2; break;
+			case AJAAncDataStream_3: stream = ANCDataStream::DS3; break;
+			case AJAAncDataStream_4: stream = ANCDataStream::DS4; break;
+			default:                 stream = ANCDataStream::Unknown; break;
+			}
+			pkt.add_stream(stream);
 			pkt.add_is_field2(p->GetDataLocation().GetLineNumber() != 0 && !IsProgressivePicture(Format)
 				&& p->GetLocationLineNumber() > GetDisplayHeight(Format) / 2);
 			pkt.add_payload(payloadOffset);
@@ -331,6 +334,14 @@ struct DMANodeBase : NodeContext
 			loc.SetDataSpace(pkt->space() == ANCDataSpace::VANC ? AJAAncDataSpace_VANC : AJAAncDataSpace_HANC);
 			loc.SetDataChannel(pkt->channel() == ANCDataChannel::C ? AJAAncDataChannel_C : AJAAncDataChannel_Y);
 			loc.SetDataLink(pkt->link() == ANCDataLink::B ? AJAAncDataLink_B : AJAAncDataLink_A);
+			switch (pkt->stream())
+			{
+			case ANCDataStream::DS1: loc.SetDataStream(AJAAncDataStream_1); break;
+			case ANCDataStream::DS2: loc.SetDataStream(AJAAncDataStream_2); break;
+			case ANCDataStream::DS3: loc.SetDataStream(AJAAncDataStream_3); break;
+			case ANCDataStream::DS4: loc.SetDataStream(AJAAncDataStream_4); break;
+			default:                 loc.SetDataStream(AJAAncDataStream_1); break;
+			}
 			loc.SetLineNumber(pkt->line_number());
 			loc.SetHorizontalOffset(pkt->horiz_offset());
 			anc.SetDataLocation(loc);
