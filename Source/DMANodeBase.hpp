@@ -166,6 +166,7 @@ struct DMANodeBase : NodeContext
 	ULWord NextVBL = 0;
 
 	bool AncConfigured = false;
+	bool AncInserterEnabled = false;
 	uint8_t LastDmaSlot = 0;
 	NTV2Buffer AncF1Buffer;
 	NTV2Buffer AncF2Buffer;
@@ -177,7 +178,23 @@ struct DMANodeBase : NodeContext
 		NextVBL = 0;
 		RP188Configured = false;
 		AncConfigured = false;
+		AncInserterEnabled = false;
 		LastDmaSlot = 0;
+	}
+
+	void OnPathStop() override
+	{
+		FrameBufferOffsets.clear();
+		if (AncConfigured && Device && Channel != NTV2_CHANNEL_INVALID)
+		{
+			const UWord sdiIndex = UWord(Channel);
+			if (IsInput())
+				Device->AncExtractSetEnable(sdiIndex, false);
+			else
+				Device->AncInsertSetEnable(sdiIndex, false);
+		}
+		AncConfigured = false;
+		AncInserterEnabled = false;
 	}
 
 	// Lazy-allocate the host-side staging buffers for ANC F1/F2 transfer.
@@ -229,9 +246,14 @@ struct DMANodeBase : NodeContext
 			// Enable insertion across all four raster regions (VANC Y/C, HANC Y/C);
 			// without this, the inserter is armed but emits nothing.
 			Device->AncInsertSetComponents(sdiIndex, true, true, true, true);
-			// Safe to enable now: DMAClearAncRegion above zeroed both slots, so
-			// the inserter can't emit stale bytes before our first DMAWriteAnc.
-			Device->AncInsertSetEnable(sdiIndex, true);
+			// Prime read params with size 0 so the inserter has a defined state.
+			// Do NOT enable the inserter yet — on cold boot the SDI output stack
+			// may not be transmitting yet, and enabling before the first real
+			// DMAWriteAnc + SetReadParams can leave it latched in a state that
+			// emits nothing for the rest of the run. We enable in WriteAnc once
+			// we have real ANC bytes ready in the slot the SDI is about to read.
+			Device->AncInsertSetReadParams(sdiIndex, 0, 0, Channel);
+			Device->AncInsertSetField2ReadParams(sdiIndex, 0, 0, Channel);
 		}
 		AncConfigured = true;
 		return true;
@@ -360,6 +382,15 @@ struct DMANodeBase : NodeContext
 		Device->AncInsertSetReadParams(sdiIndex, frameIndex, AncF1Buffer.GetByteCount(), Channel);
 		if (IsInterlaced())
 			Device->AncInsertSetField2ReadParams(sdiIndex, frameIndex, AncF2Buffer.GetByteCount(), Channel);
+		// Defer inserter enable until the first real DMAWriteAnc + SetReadParams
+		// has landed; mirrors the AJA SDK sample pattern (ntv2llburn) and avoids
+		// a cold-boot race where enabling pre-stream causes the inserter to stay
+		// silent until the path is restarted.
+		if (!AncInserterEnabled)
+		{
+			Device->AncInsertSetEnable(sdiIndex, true);
+			AncInserterEnabled = true;
+		}
 	}
 
 	void SetFrame(uint32_t doubleBufferIndex)
@@ -398,11 +429,6 @@ struct DMANodeBase : NodeContext
 	}
 
 	std::unordered_map<NTV2Channel, std::unordered_map<uint8_t, size_t>> FrameBufferOffsets;
-
-	void OnPathStop() override
-	{
-		FrameBufferOffsets.clear();
-	}
 
 	uint32_t GetFrameBufferOffset(NTV2Channel channel, uint8_t frame)
 	{
