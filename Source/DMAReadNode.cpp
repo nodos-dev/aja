@@ -22,7 +22,7 @@ struct DMAReadNodeContext : DMANodeBase
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{
-		if (pinName == NOS_NAME_STATIC("EnableTimecode") || pinName == NOS_NAME_STATIC("TimecodeSource"))
+		if (pinName == NOS_NAME_STATIC("EnableANC"))
 			nosEngine.SendPathRestart(NodeId);
 	}
 
@@ -34,8 +34,6 @@ struct DMAReadNodeContext : DMANodeBase
 		auto fieldType = *execParams.GetPinData<sys::vulkan::FieldType>(NOS_NAME_STATIC("FieldType"));
 		ChannelInfo* channelInfo = execParams.GetPinData<ChannelInfo>(NOS_NAME_STATIC("Channel"));
 		uint32_t curVBLCount = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("CurrentVBL"));
-		bool enableRP188 = *execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode"));
-		auto timecodeSource = *execParams.GetPinData<TimecodeSource>(NOS_NAME_STATIC("TimecodeSource"));
 		bool enableANC = false;
 		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableANC")))
 			enableANC = *p;
@@ -78,31 +76,11 @@ struct DMAReadNodeContext : DMANodeBase
 		if (curVBLCount == 0)
 			Device->GetInputVerticalInterruptCount(curVBLCount, Channel);
 
-		// Read RP188 before DMA to ensure timecode matches the frame about to be transferred.
-		RP188Result rp188;
-		if (enableRP188)
-			rp188 = ReadRP188(GetRP188SourceFilterValue(timecodeSource));
-
 		DMATransfer(fieldType, curVBLCount, buffer, inputBufferSize);
 
 		bufferToWrite.Info.Buffer.FieldType = (nosTextureFieldType)fieldType;
 
 		SetPinValue(NOS_NAME_STATIC("Output"), Buffer::From(vkss::ConvertBufferInfo(bufferToWrite)));
-
-		if (enableRP188)
-		{
-			auto tcLabel = "AJA " + ChannelName + " TC In (" + EnumNameTimecodeSource(timecodeSource) + ")";
-			if (!rp188.Valid)
-			{
-				nosEngine.WatchLog(tcLabel.c_str(), "No valid timecode");
-				SetPinValue(NOS_NAME_STATIC("TimecodeFrameNumber"), Buffer::From(uint32_t(0)));
-			}
-			else
-			{
-				nosEngine.WatchLog(tcLabel.c_str(), rp188.TimecodeStr.c_str());
-				SetPinValue(NOS_NAME_STATIC("TimecodeFrameNumber"), Buffer::From(rp188.FrameNumber));
-			}
-		}
 
 		if (enableANC)
 		{

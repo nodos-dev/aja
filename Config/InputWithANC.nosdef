@@ -242,36 +242,6 @@
             "display_name": "Enable Sync"
           },
           {
-            "id": "55162773-53c4-4d7a-b9d7-9612ce0ee38f",
-            "name": "EnableTimecode",
-            "type_name": "bool",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": false,
-            "def": false,
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "7167051e-5b3e-4b99-8ee4-b6808a866575" },
-            "display_name": "Enable Timecode"
-          },
-          {
-            "id": "559efdc6-6ead-4ae6-a391-9987ab7ef01f",
-            "name": "TimecodeSource",
-            "type_name": "nos.aja.TimecodeSource",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": "LTC",
-            "min": "LTC",
-            "max": "LTC",
-            "def": "LTC",
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "da608d9b-cda5-4d50-8d7e-cc4073974fa4" },
-            "display_name": "Timecode Source"
-          },
-          {
             "id": "bd511b3c-51bb-4e81-8fd8-769a231508b9",
             "name": "EnableANC",
             "type_name": "bool",
@@ -3335,56 +3305,6 @@
                   ],
                   "contents_type": "JobPin",
                   "contents": { }
-                },
-                {
-                  "id": "7167051e-5b3e-4b99-8ee4-b6808a866575",
-                  "name": "EnableTimecode",
-                  "type_name": "bool",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": false,
-                  "referred_by": [
-                    "55162773-53c4-4d7a-b9d7-9612ce0ee38f"
-                  ],
-                  "def": false,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Enable Timecode"
-                },
-                {
-                  "id": "da608d9b-cda5-4d50-8d7e-cc4073974fa4",
-                  "name": "TimecodeSource",
-                  "type_name": "nos.aja.TimecodeSource",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": "LTC",
-                  "referred_by": [
-                    "559efdc6-6ead-4ae6-a391-9987ab7ef01f"
-                  ],
-                  "min": "LTC",
-                  "max": "LTC",
-                  "def": "LTC",
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Timecode Source"
-                },
-                {
-                  "id": "ee07e3a0-6673-42db-b56b-6d794911f0d5",
-                  "name": "TimecodeFrameNumber",
-                  "type_name": "uint",
-                  "show_as": "OUTPUT_PIN",
-                  "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0,
-                  "def": 0,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Timecode Frame Number"
                 },
                 {
                   "id": "314a25c9-505b-4257-9c8c-8d7154b3276f",

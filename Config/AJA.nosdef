@@ -46,22 +46,6 @@
 						"can_show_as": "INPUT_PIN_ONLY"
 					},
 					{
-						"name": "EnableTimecode",
-						"display_name": "Enable Timecode",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": false
-					},
-					{
-						"name": "TimecodeFrameNumber",
-						"display_name": "Timecode Frame Number",
-						"type_name": "uint",
-						"show_as": "INPUT_PIN",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 0
-					},
-					{
 						"name": "EnableANC",
 						"display_name": "Enable ANC",
 						"type_name": "bool",
@@ -150,30 +134,6 @@
 						"type_name": "nos.sys.vulkan.Buffer",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
-					},
-					{
-						"name": "EnableTimecode",
-						"display_name": "Enable Timecode",
-						"type_name": "bool",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": false
-					},
-					{
-						"name": "TimecodeSource",
-						"display_name": "Timecode Source",
-						"type_name": "nos.aja.TimecodeSource",
-						"show_as": "PROPERTY",
-						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 0
-					},
-					{
-						"name": "TimecodeFrameNumber",
-						"display_name": "Timecode Frame Number",
-						"type_name": "uint",
-						"show_as": "OUTPUT_PIN",
-						"can_show_as": "OUTPUT_PIN_OR_PROPERTY",
-						"data": 0
 					},
 					{
 						"name": "EnableANC",

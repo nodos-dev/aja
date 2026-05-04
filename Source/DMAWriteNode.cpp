@@ -57,7 +57,7 @@ struct DMAWriteNodeContext : DMANodeBase
 				Mode = AJADevice::SL;
 			nosEngine.RecompilePath(NodeId);
 		}
-		else if (pinName == NOS_NAME_STATIC("EnableTimecode"))
+		else if (pinName == NOS_NAME_STATIC("EnableANC"))
 		{
 			nosEngine.SendPathRestart(NodeId);
 		}
@@ -70,7 +70,6 @@ struct DMAWriteNodeContext : DMANodeBase
 			*execParams.GetPinData<sys::vulkan::Buffer>(NOS_NAME_STATIC("Input")));
 		auto fieldType = *execParams.GetPinData<sys::vulkan::FieldType>(NOS_NAME_STATIC("FieldType"));
 		auto curVBLCount = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("CurrentVBL"));
-		auto enableRP188 = *execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode"));
 		bool enableANC = false;
 		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableANC")))
 			enableANC = *p;
@@ -88,14 +87,6 @@ struct DMAWriteNodeContext : DMANodeBase
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
-
-		if (enableRP188)
-		{
-			auto rp188FrameNumber = *execParams.GetPinData<uint32_t>(NOS_NAME_STATIC("TimecodeFrameNumber"));
-			auto rp188 = EncodeRP188(rp188FrameNumber);
-			nosEngine.WatchLog(("AJA " + ChannelName + " TC Out").c_str(), rp188.TimecodeStr.c_str());
-			WriteRP188(rp188.Data);
-		}
 
 		if (enableANC && ancIncoming)
 			WriteAnc(ancIncoming);

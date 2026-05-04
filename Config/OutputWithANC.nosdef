@@ -337,20 +337,6 @@
             "display_name": "Enable Sync"
           },
           {
-            "id": "f427ac09-b0ee-4088-becd-0a18b2ddfa01",
-            "name": "EnableTimecode",
-            "type_name": "bool",
-            "show_as": "PROPERTY",
-            "can_show_as": "INPUT_PIN_OR_PROPERTY",
-            "visualizer": {
-            },
-            "data": false,
-            "def": false,
-            "contents_type": "PortalPin",
-            "contents": { "source_id": "27695e39-33c1-4ad8-818d-d0f730340357" },
-            "display_name": "Enable Timecode"
-          },
-          {
             "id": "dd6a830c-a4f3-4c9d-bdd4-0c34efc55d51",
             "name": "EnableANC",
             "type_name": "bool",
@@ -939,37 +925,6 @@
                   ],
                   "contents_type": "JobPin",
                   "contents": { }
-                },
-                {
-                  "id": "27695e39-33c1-4ad8-818d-d0f730340357",
-                  "name": "EnableTimecode",
-                  "type_name": "bool",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": false,
-                  "referred_by": [
-                    "f427ac09-b0ee-4088-becd-0a18b2ddfa01"
-                  ],
-                  "def": false,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Enable Timecode"
-                },
-                {
-                  "id": "63e76de2-b897-422f-9684-afd3706ec18a",
-                  "name": "TimecodeFrameNumber",
-                  "type_name": "uint",
-                  "show_as": "INPUT_PIN",
-                  "can_show_as": "INPUT_PIN_OR_PROPERTY",
-                  "visualizer": {
-                  },
-                  "data": 0,
-                  "def": 0,
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "display_name": "Timecode Frame Number"
                 },
                 {
                   "id": "c6261fae-cc65-4879-9dea-0bb8d5be0091",

@@ -17,14 +17,6 @@ enum QuadLinkInputMode : uint
     Auto = 2,
 }
 
-enum TimecodeSource : uint
-{
-    LTC = 0,
-    VITC1 = 1,
-    VITC2 = 2,
-    Auto = 3,
-}
-
 table Device {
     serial_number: uint64;
     name: string;
