@@ -26,9 +26,12 @@ using ANCDataLink = nos::mediaio::ANCDataLink;
 using ANCDataStream = nos::mediaio::ANCDataStream;
 using ANCDataCoding = nos::mediaio::ANCDataCoding;
 
-// Per-channel ANC region size. 8 KB per field is the AJA SDK default and is
-// enough for any realistic SMPTE 291 packet load on 12G-SDI.
-static constexpr ULWord ANC_FIELD_BYTE_COUNT = 8 * 1024;
+// Per-channel ANC region size. 256 KB per field matches the AJA samples'
+// NTV2_ANCSIZE_MAX (ntv2llburn.cpp), which is sized to cover every DID — most
+// importantly S299M embedded audio across all HANC lines. The extractor is
+// run with no DID filter (see ConfigureAnc), so audio + vendor + control DIDs
+// all land in this buffer; 8 KB overflows on 1080p with embedded audio.
+static constexpr ULWord ANC_FIELD_BYTE_COUNT = 256 * 1024;
 
 // Stand-in for CNTV2Card::NULL_POINTER (which is protected). Default-constructed
 // NTV2Buffer has zero size and signals "no field 2" to the SDK.
@@ -151,6 +154,8 @@ struct DMANodeBase : NodeContext
 											// filter drops S299M audio and a few control
 											// DIDs; for arbitrary ANC (vendor packets,
 											// autorecord flags, etc.) we want them all.
+											// Staging buffer is sized for this case — see
+											// ANC_FIELD_BYTE_COUNT above.
 			for (uint32_t c = 0; c < channelCount; ++c)
 			{
 				const NTV2Channel ch = NTV2Channel(Channel + c);
@@ -528,7 +533,10 @@ struct DMANodeBase : NodeContext
 		auto [compressedExt, bufferSize] = GetDMAInfo();
 		assert(bufferSize <= UINT32_MAX);
 
-		if (bufferSize != inputBufferSize)
+		// buffer==nullptr means "do the frame-slot bookkeeping but skip the
+		// CPU-side DMA" — used by DMA Read when BufferToWrite is unconnected so
+		// ANC capture (which depends on LastDmaSlot / SetInputFrame) stays correct.
+		if (buffer && bufferSize != inputBufferSize)
 			return nosEngine.LogE("DMATransfer buffer size mismatch");
 
 		if (NeedsFrameSet)
@@ -539,8 +547,9 @@ struct DMANodeBase : NodeContext
 
 		if (curVBLCount < NextVBL)
 			return;
-		
+
 		auto offset =  GetFrameBufferOffset(Channel, DoubleBufferIdx);
+		if (buffer)
 		{
 			ScopedProfilerEvent _("AJA " + ChannelName + (IsInput() ? " DMA Read" : " DMA Write"));
 			if (IsInterlaced())
