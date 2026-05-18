@@ -2,6 +2,8 @@
 
 #include <Nodos/PluginHelpers.hpp>
 
+#include <optional>
+
 // External
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVulkanSubsystem/Helpers.hpp>
@@ -22,6 +24,12 @@ struct DMAWriteNodeContext : DMANodeBase
 	}
 
 	nos::Buffer LastChannelInfo = {};
+	// Cache last bool values so we don't restart the path when an upstream
+	// node re-writes the same value every tick. Nosengine delivers every
+	// pin write to OnPinValueChanged regardless of whether the bytes changed
+	// (see the explicit memcmp dedup for Channel above).
+	std::optional<bool> LastEnableANC;
+	std::optional<bool> LastEnableTimecode;
 
 	void GetScheduleInfo(nosScheduleInfo* out) override
 	{
@@ -59,6 +67,22 @@ struct DMAWriteNodeContext : DMANodeBase
 		}
 		else if (pinName == NOS_NAME_STATIC("EnableANC"))
 		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableANC && *LastEnableANC == v)
+				return;
+			LastEnableANC = v;
+			nosEngine.SendPathRestart(NodeId);
+		}
+		else if (pinName == NOS_NAME_STATIC("EnableTimecode"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableTimecode && *LastEnableTimecode == v)
+				return;
+			LastEnableTimecode = v;
 			nosEngine.SendPathRestart(NodeId);
 		}
 	}
@@ -77,6 +101,13 @@ struct DMAWriteNodeContext : DMANodeBase
 		if (enableANC)
 			ancIncoming = execParams.GetPinData<ANCFrame>(NOS_NAME_STATIC("ANCFrame"));
 
+		bool enableTimecode = false;
+		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode")))
+			enableTimecode = *p;
+		const Timecode* timecode = nullptr;
+		if (enableTimecode)
+			timecode = execParams.GetPinData<Timecode>(NOS_NAME_STATIC("Timecode"));
+
 		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
 
@@ -90,6 +121,8 @@ struct DMAWriteNodeContext : DMANodeBase
 
 		if (enableANC && ancIncoming)
 			WriteAnc(ancIncoming);
+		if (enableTimecode && timecode)
+			WriteTimecode(*timecode);
 
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);

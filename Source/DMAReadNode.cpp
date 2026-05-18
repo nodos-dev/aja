@@ -2,6 +2,8 @@
 
 #include <Nodos/PluginHelpers.hpp>
 
+#include <optional>
+
 // External
 #include <nosVulkanSubsystem/nosVulkanSubsystem.h>
 #include <nosVulkanSubsystem/Helpers.hpp>
@@ -20,10 +22,45 @@ struct DMAReadNodeContext : DMANodeBase
 	{
 	}
 
+	// Cache last values so we don't restart the path on every redundant pin
+	// write. The engine delivers every pin write to OnPinValueChanged whether
+	// or not the bytes changed.
+	std::optional<bool> LastEnableANC;
+	std::optional<bool> LastEnableTimecode;
+	std::optional<ATCSource> LastTimecodeSource;
+
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{
 		if (pinName == NOS_NAME_STATIC("EnableANC"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableANC && *LastEnableANC == v)
+				return;
+			LastEnableANC = v;
 			nosEngine.SendPathRestart(NodeId);
+		}
+		else if (pinName == NOS_NAME_STATIC("EnableTimecode"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableTimecode && *LastEnableTimecode == v)
+				return;
+			LastEnableTimecode = v;
+			nosEngine.SendPathRestart(NodeId);
+		}
+		else if (pinName == NOS_NAME_STATIC("TimecodeSource"))
+		{
+			if (value.Size < sizeof(ATCSource))
+				return;
+			const ATCSource v = *static_cast<const ATCSource*>(value.Data);
+			if (LastTimecodeSource && *LastTimecodeSource == v)
+				return;
+			LastTimecodeSource = v;
+			nosEngine.SendPathRestart(NodeId);
+		}
 	}
 
 	nosResult ExecuteNode(nosNodeExecuteParams* params) override
@@ -37,6 +74,12 @@ struct DMAReadNodeContext : DMANodeBase
 		bool enableANC = false;
 		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableANC")))
 			enableANC = *p;
+		bool enableTimecode = false;
+		if (auto* p = execParams.GetPinData<bool>(NOS_NAME_STATIC("EnableTimecode")))
+			enableTimecode = *p;
+		ATCSource timecodeSource = ATCSource::Auto;
+		if (auto* p = execParams.GetPinData<ATCSource>(NOS_NAME_STATIC("TimecodeSource")))
+			timecodeSource = *p;
 
 		if (!channelInfo->device())
 			return NOS_RESULT_FAILED;
@@ -87,6 +130,12 @@ struct DMAReadNodeContext : DMANodeBase
 			auto ancBuf = ReadAnc();
 			if (ancBuf.Size())
 				SetPinValue(NOS_NAME_STATIC("ANCFrame"), ancBuf);
+		}
+		if (enableTimecode)
+		{
+			Timecode tc{};
+			if (ReadTimecode(timecodeSource, tc))
+				SetPinValue(NOS_NAME_STATIC("Timecode"), nos::Buffer::From(tc));
 		}
 
 		return NOS_RESULT_SUCCESS;

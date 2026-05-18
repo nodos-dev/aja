@@ -4,6 +4,7 @@
 #include <array>
 
 #include <Nodos/PluginHelpers.hpp>
+#include <ajantv2/includes/ntv2rp188.h>
 
 #include <ancillarylist.h>
 #include <ancillarydata.h>
@@ -25,6 +26,52 @@ using ANCDataChannel = nos::mediaio::ANCDataChannel;
 using ANCDataLink = nos::mediaio::ANCDataLink;
 using ANCDataStream = nos::mediaio::ANCDataStream;
 using ANCDataCoding = nos::mediaio::ANCDataCoding;
+using Timecode = nos::mediaio::Timecode;
+using ATCSource = nos::mediaio::ATCSource;
+
+// Map an NTV2 video format to the matching TimecodeFormat for CRP188. Falls
+// back to kTCFormatUnknown when the format isn't one of the SMPTE-defined
+// frame rates — CRP188 then refuses to build a valid RP188 register pair.
+inline TimecodeFormat NTV2FormatToTimecodeFormat(NTV2VideoFormat format)
+{
+	switch (GetNTV2FrameRateFromVideoFormat(format))
+	{
+	case NTV2_FRAMERATE_6000: return kTCFormat60fps;
+	case NTV2_FRAMERATE_5994: return kTCFormat60fpsDF;
+	case NTV2_FRAMERATE_5000: return kTCFormat50fps;
+	case NTV2_FRAMERATE_4800: return kTCFormat48fps;
+	case NTV2_FRAMERATE_4795: return kTCFormat48fps;
+	case NTV2_FRAMERATE_3000: return kTCFormat30fps;
+	case NTV2_FRAMERATE_2997: return kTCFormat30fpsDF;
+	case NTV2_FRAMERATE_2500: return kTCFormat25fps;
+	case NTV2_FRAMERATE_2400: return kTCFormat24fps;
+	case NTV2_FRAMERATE_2398: return kTCFormat24fps;
+	default:                  return kTCFormatUnknown;
+	}
+}
+
+// CRP188 source/output-filter codes — bit 2-0 of DBB1 in SMPTE ST 12-2.
+inline UByte ATCSourceToRP188Filter(ATCSource src)
+{
+	switch (src)
+	{
+	case ATCSource::ATC_VITC1: return 0x01;
+	case ATCSource::ATC_VITC2: return 0x02;
+	case ATCSource::Auto:      return 0xFF; // "any" filter
+	case ATCSource::ATC_LTC:
+	default:                   return 0x00;
+	}
+}
+
+inline ATCSource RP188FilterToATCSource(UByte filter)
+{
+	switch (filter & 0x07)
+	{
+	case 0x01: return ATCSource::ATC_VITC1;
+	case 0x02: return ATCSource::ATC_VITC2;
+	default:   return ATCSource::ATC_LTC;
+	}
+}
 
 // Per-channel ANC region size. 8 KB per field is the AJA SDK default and is
 // enough for any realistic SMPTE 291 packet load on 12G-SDI.
@@ -72,6 +119,8 @@ struct DMANodeBase : NodeContext
 
 	bool AncConfigured = false;
 	bool AncInserterEnabled = false;
+	bool RP188Configured = false;
+	UByte RP188Filter = 0xFF; // Tracks the last filter passed to SetRP188SourceFilter
 	uint8_t LastDmaSlot = 0;
 	NTV2Buffer AncF1Buffer;
 	NTV2Buffer AncF2Buffer;
@@ -83,6 +132,8 @@ struct DMANodeBase : NodeContext
 		NextVBL = 0;
 		AncConfigured = false;
 		AncInserterEnabled = false;
+		RP188Configured = false;
+		RP188Filter = 0xFF;
 		LastDmaSlot = 0;
 	}
 
@@ -165,12 +216,19 @@ struct DMANodeBase : NodeContext
 		}
 		else
 		{
-			// Sever the input→output RP188 forwarding path. AJA's "RP188 bypass"
-			// (when ENABLED) routes the captured SDI input timecode straight to
-			// this SDI output's RP188 emission, overriding whatever the ANC
-			// inserter writes. With our ATC packets driving timecode via the ANC
-			// inserter, we want bypass DISABLED — same as the AJA samples
-			// (ntv2llburn, ntv2fieldburn, ntv2burn all DisableRP188Bypass).
+			// The AJA card emits ATC via two independent paths:
+			//   1) The dedicated RP188 hardware emitter, sourced from the per-channel
+			//      RP188 DBB/Low/High registers (SetRP188Data) when bypass is DISABLED,
+			//      or from a routed SDI input's RP188 (SetRP188BypassSource) when
+			//      bypass is ENABLED.
+			//   2) The ANC inserter, which serializes whatever bytes DMAWriteAnc
+			//      placed in the channel's ANC region.
+			// Per AJA SDK docs ("ancillarydata.html"), packets the hardware embeds
+			// automatically — audio control, ATC, VPID, EDH — should NOT be sent
+			// through the inserter as well, or the streams collide on the wire.
+			// We therefore drive ATC exclusively through the dedicated emitter
+			// (DisableRP188Bypass + SetRP188Data, the ntv2llburn pattern) and
+			// strip 0x60/0x60 packets out of the inserter list in WriteAnc.
 			for (uint32_t c = 0; c < channelCount; ++c)
 			{
 				const NTV2Channel ch = NTV2Channel(Channel + c);
@@ -409,6 +467,13 @@ struct DMANodeBase : NodeContext
 		{
 			if (!pkt)
 				continue;
+			// ATC is driven by the dedicated RP188 hardware emitter via the
+			// EnableTimecode / Timecode pins on DMAWrite (SetRP188Data). The
+			// hardware auto-embeds ATC packets, and per AJA SDK guidance we
+			// must not send the same packet through the inserter as well, or
+			// the two paths collide on the wire. Drop 0x60/0x60 here.
+			if (pkt->did() == 0x60 && pkt->sdid() == 0x60)
+				continue;
 			const uint32_t c = OffsetForStream(pkt->stream());
 			AJAAncillaryData anc = DeserializePacket(*pkt);
 			if (isIP)
@@ -456,6 +521,83 @@ struct DMANodeBase : NodeContext
 				Device->AncInsertSetEnable(UWord(Channel + c), true);
 			AncInserterEnabled = true;
 		}
+	}
+
+	// Output: drive the AJA card's dedicated RP188 emitter from a decoded
+	// Timecode struct. Mirrors ntv2llburn's SetRP188Data per-frame call.
+	// Returns false if the channel's video format isn't a known SMPTE rate.
+	bool WriteTimecode(const Timecode& tc)
+	{
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return false;
+		const TimecodeFormat fmt = NTV2FormatToTimecodeFormat(Format);
+		if (fmt == kTCFormatUnknown)
+			return false;
+		const NTV2FrameRate rate = GetNTV2FrameRateFromVideoFormat(Format);
+
+		CRP188 rp188;
+		rp188.SetRP188(ULWord(tc.frames()), ULWord(tc.seconds()),
+			ULWord(tc.minutes()), ULWord(tc.hours()),
+			rate, tc.drop_frame());
+		rp188.SetSource(ATCSourceToRP188Filter(tc.source()));
+
+		NTV2_RP188 reg;
+		if (!rp188.GetRP188Reg(reg))
+			return false;
+
+		const uint32_t channelCount = AncChannelCount();
+		for (uint32_t c = 0; c < channelCount; ++c)
+			Device->SetRP188Data(NTV2Channel(Channel + c), reg);
+		return true;
+	}
+
+	// Input: configure the RP188 receiver (mode + flavor filter) once per
+	// path-run and per filter change.
+	void ConfigureRP188Input(ATCSource source)
+	{
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return;
+		const UByte filter = ATCSourceToRP188Filter(source);
+		if (RP188Configured && filter == RP188Filter)
+			return;
+		const uint32_t channelCount = AncChannelCount();
+		for (uint32_t c = 0; c < channelCount; ++c)
+		{
+			const NTV2Channel ch = NTV2Channel(Channel + c);
+			Device->SetRP188Mode(ch, NTV2_RP188_INPUT);
+			Device->SetRP188SourceFilter(ch, filter);
+		}
+		RP188Filter = filter;
+		RP188Configured = true;
+	}
+
+	// Input: read the latest RP188 ATC seen on this SDI input and decode it
+	// into a Timecode struct. Returns false when the hardware reports the
+	// register as invalid (no fresh ATC since the last read).
+	bool ReadTimecode(ATCSource source, Timecode& outTc)
+	{
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return false;
+		ConfigureRP188Input(source);
+
+		NTV2_RP188 reg;
+		Device->GetRP188Data(Channel, reg);
+		if (!reg.IsValid())
+			return false;
+
+		const TimecodeFormat fmt = NTV2FormatToTimecodeFormat(Format);
+		CRP188 rp188(reg, fmt == kTCFormatUnknown ? kTCFormat30fps : fmt);
+
+		ULWord h = 0, m = 0, s = 0, f = 0;
+		if (!rp188.GetRP188Hrs(h) || !rp188.GetRP188Mins(m) ||
+			!rp188.GetRP188Secs(s) || !rp188.GetRP188Frms(f))
+			return false;
+
+		outTc = Timecode(
+			uint8_t(h), uint8_t(m), uint8_t(s), uint8_t(f),
+			rp188.DropFrame(),
+			RP188FilterToATCSource(rp188.GetSource()));
+		return true;
 	}
 
 	void SetFrame(uint32_t doubleBufferIndex)
