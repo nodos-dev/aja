@@ -395,7 +395,6 @@
 		},
 		{
 			"class_name": "IPVideoChannel",
-			"hide_in_context_menu": true,
 			"menu_info": {
 				"category": "Device|AJA",
 				"class_name": "IPVideoChannel",

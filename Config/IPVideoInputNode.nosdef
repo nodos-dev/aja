@@ -1,7 +1,6 @@
 { "nodes": [
     {
       "class_name": "nos.aja.IPInput",
-      "hide_in_context_menu": true,
       "menu_info": {
         "category": "Device|AJA",
         "display_name": "AJA In (IP Video)",
