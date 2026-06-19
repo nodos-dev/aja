@@ -772,13 +772,13 @@
                 {
                   "id": "420b844c-b7a6-4d9b-854f-6522d4d8e2bb",
                   "name": "Format",
-                  "type_name": "nos.utilities.ChannelViewerFormats",
+                  "type_name": "nos.mediaio.ColorSpace",
                   "show_as": "PROPERTY",
                   "can_show_as": "PROPERTY_ONLY",
                   "visualizer": {
                   },
-                  "data": "Rec_709",
-                  "def": "Rec_709",
+                  "data": "REC709",
+                  "def": "REC709",
                   "meta_data_map": [
                     { "key": "AdvancedProperty", "value": "false" }
                   ],
