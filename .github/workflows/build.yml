@@ -88,7 +88,7 @@ jobs:
       plugin_names: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.plugin_names || '' }}
       clean: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.clean) || false }}
       build_number: ${{ needs.set-build-number.outputs.build_number }}
-      nodos_version: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_version || '1.4' }}
+      nodos_version: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.nodos_version || null }}
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
       linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
