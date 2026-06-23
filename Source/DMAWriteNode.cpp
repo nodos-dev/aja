@@ -2,6 +2,8 @@
 
 #include <Nodos/Plugin.hpp>
 
+#include <optional>
+
 // External
 #include <nosSysVulkan/nosVulkanSubsystem.h>
 #include <nosSysVulkan/Helpers.hpp>
@@ -26,9 +28,15 @@ struct DMAWriteNodeContext : DMANodeBase
 	}
 
 	nos::Buffer LastChannelInfo = {};
+	// Cache last bool values so we don't restart the path when an upstream
+	// node re-writes the same value every tick. Nosengine delivers every
+	// pin write to OnPinValueChanged regardless of whether the bytes changed
+	// (see the explicit memcmp dedup for Channel above).
+	std::optional<bool> LastEnableANC;
+	std::optional<bool> LastEnableTimecode;
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
-	{ 
+	{
 		if (pinName == NOS_NAME_STATIC("Channel"))
 		{
 			if (LastChannelInfo.Size() == value.Size && memcmp(LastChannelInfo.Data(), value.Data, value.Size) == 0)
@@ -52,13 +60,45 @@ struct DMAWriteNodeContext : DMANodeBase
 				Mode = AJADevice::SL;
 			nosEngine.RecompilePath(NodeId);
 		}
+		else if (pinName == NOS_NAME_STATIC("EnableANC"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableANC && *LastEnableANC == v)
+				return;
+			LastEnableANC = v;
+			nosEngine.SendPathRestart(NodeId);
+		}
+		else if (pinName == NOS_NAME_STATIC("EnableTimecode"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (LastEnableTimecode && *LastEnableTimecode == v)
+				return;
+			LastEnableTimecode = v;
+			nosEngine.SendPathRestart(NodeId);
+		}
 	}
-	
+
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{
 		TypedObjectRef inputBufferObject = params.GetPinObject<sys::vulkan::Buffer>(NOS_NAME("Input"));
 		auto fieldType = *params.GetPinValue<sys::vulkan::FieldType>(NOS_NAME("FieldType"));
 		uint32_t curVBLCount = *params.GetPinValue<uint32_t>(NOS_NAME("CurrentVBL"));
+		bool enableANC = false;
+		if (auto* p = params.GetPinValue<bool>(NOS_NAME("EnableANC")))
+			enableANC = *p;
+		const ANCFrame* ancIncoming = nullptr;
+		if (enableANC)
+			ancIncoming = params.GetPinValue<ANCFrame>(NOS_NAME("ANCFrame"));
+		bool enableTimecode = false;
+		if (auto* p = params.GetPinValue<bool>(NOS_NAME("EnableTimecode")))
+			enableTimecode = *p;
+		const Timecode* timecode = nullptr;
+		if (enableTimecode)
+			timecode = params.GetPinValue<Timecode>(NOS_NAME("Timecode"));
 
 		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
@@ -103,6 +143,11 @@ struct DMAWriteNodeContext : DMANodeBase
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
 
 		DMATransfer(fieldType, curVBLCount, buffer, inputSize);
+
+		if (enableANC && ancIncoming)
+			WriteAnc(ancIncoming);
+		if (enableTimecode && timecode)
+			WriteTimecode(*timecode);
 
 		ULWord wrapAddress = 0;
 		Device->GetAudioWrapAddress(wrapAddress, audioSys);
