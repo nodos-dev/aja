@@ -56,6 +56,40 @@
 						"type_name": "nos.audio.AudioPacket",
 						"show_as": "INPUT_PIN",
 						"can_show_as": "INPUT_PIN_ONLY"
+					},
+					{
+						"name": "EnableTimecode",
+						"display_name": "Enable Timecode",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, the Timecode pin value is emitted as RP188 ATC on this SDI output every frame via the AJA card's dedicated timecode emitter. When false, the SDI output's RP188 registers are left at their last written value (typically zero on cold start) and no Timecode-pin updates reach the wire.",
+						"data": false
+					},
+					{
+						"name": "Timecode",
+						"display_name": "Timecode",
+						"type_name": "nos.mediaio.Timecode",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Decoded SMPTE timecode to embed on the SDI output. Consumed only when EnableTimecode is true. The Timecode.source field selects ATC carriage (LTC / VITC1 / VITC2); Auto is treated as LTC."
+					},
+					{
+						"name": "EnableANC",
+						"display_name": "Enable ANC",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, non-timecode packets in the ANCFrame input pin are inserted into the SDI ANC region for this frame. ATC packets (DID=0x60, SDID=0x60) are always stripped from the inserter list to avoid double-embedding with the dedicated RP188 hardware emitter — use the Timecode pin to drive ATC.",
+						"data": false
+					},
+					{
+						"name": "ANCFrame",
+						"display_name": "ANC In",
+						"type_name": "nos.mediaio.ANCFrame",
+						"show_as": "INPUT_PIN",
+						"can_show_as": "INPUT_PIN_ONLY",
+						"description": "Ancillary data packets to embed on this SDI output. Vendor / camera-control / arbitrary SMPTE 291 packets are forwarded to the AJA ANC inserter. ATC packets are dropped here (driven by the Timecode pin instead)."
 					}
 				],
 				"functions": [
@@ -142,6 +176,49 @@
 						"type_name": "nos.audio.AudioPacket",
 						"show_as": "OUTPUT_PIN",
 						"can_show_as": "OUTPUT_PIN_ONLY"
+					},
+					{
+						"name": "EnableTimecode",
+						"display_name": "Enable Timecode",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, RP188 ATC is read from this SDI input each frame via the AJA card's dedicated timecode receiver and surfaced on the Timecode output pin. When false, the Timecode pin is not updated.",
+						"data": false
+					},
+					{
+						"name": "TimecodeSource",
+						"display_name": "Timecode Source",
+						"type_name": "nos.mediaio.ATCSource",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "Selects which RP188 flavor the hardware receiver latches: ATC_LTC, ATC_VITC1, ATC_VITC2, or Auto (let the hardware pick the first valid one).",
+						"data": 0
+					},
+					{
+						"name": "Timecode",
+						"display_name": "Timecode",
+						"type_name": "nos.mediaio.Timecode",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Decoded SMPTE timecode read from the SDI input's RP188 ATC packet. Only updated when EnableTimecode is true and the hardware reported a valid timecode this frame."
+					},
+					{
+						"name": "EnableANC",
+						"display_name": "Enable ANC",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, the ANC region of the incoming SDI is extracted into the ANCFrame output pin. ATC packets (DID=0x60, SDID=0x60) still appear here verbatim — for a decoded timecode value use EnableTimecode / Timecode.",
+						"data": false
+					},
+					{
+						"name": "ANCFrame",
+						"display_name": "ANC Out",
+						"type_name": "nos.mediaio.ANCFrame",
+						"show_as": "OUTPUT_PIN",
+						"can_show_as": "OUTPUT_PIN_ONLY",
+						"description": "Ancillary data packets extracted from this SDI input's ANC region. Carries every SMPTE 291 packet the AJA extractor surfaces, with no DID filtering."
 					}
 				],
 				"functions": [
