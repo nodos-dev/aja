@@ -47,7 +47,7 @@ on:
       macos:
         description: 'Release for macOS (Apple Silicon)'
         required: false
-        default: true
+        default: false
         type: boolean
 
 run-name: >-
@@ -91,5 +91,5 @@ jobs:
       sign_binaries: ${{github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.sign_binaries) || false }}
       linux: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.linux) || github.event_name == 'push' }}
       windows: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.windows) || github.event_name == 'push' }}
-      macos: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.macos) || github.event_name == 'push' }}
+      macos: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.macos) || false }}
       run_tests: ${{ github.event_name == 'workflow_dispatch' && fromJson(github.event.inputs.run_tests) || false }}
