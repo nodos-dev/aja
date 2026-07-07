@@ -44,8 +44,8 @@ set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source")
 nos_get_module("nos.sys.vulkan" "6.0" NOS_SYS_VULKAN_TARGET)
 
 # nos.mediaio
-nos_get_module("nos.mediaio" "2.9" NOS_MEDIAIO_TARGET)
-nos_find_module_path("nos.mediaio" "2.9" NOS_MEDIAIO_PATH)
+nos_get_module("nos.mediaio" "2.10" NOS_MEDIAIO_TARGET)
+nos_find_module_path("nos.mediaio" "2.10" NOS_MEDIAIO_PATH)
 set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 

@@ -202,6 +202,30 @@ AJADevice::Mode AJADevice::GetMode(NTV2Channel channel)
     return IsTSI(channel) ? TSI : CNTV2VPID::VPIDStandardIsQuadLink(GetVPID(channel).GetStandard()) ? SQD : SL;
 }
 
+bool AJADevice::SetOutputVPID(NTV2Channel channel, Mode mode, bool enable,
+                              NTV2VPIDXferChars xfer, NTV2VPIDColorimetry colorimetry,
+                              NTV2VPIDLuminance luminance, NTV2VPIDRGBRange range)
+{
+    // The driver (NTV2_STANDARD_TASKS / OEM_TASKS) automatically generates the
+    // output VPID from the video standard and rewrites it continuously. Writing
+    // the raw VPID register (SetSDIOutVPID) would fight that generator and only
+    // hold for a frame or two. These per-output override registers are instead
+    // read BY the generator, so the HDR fields persist in the VPID it emits.
+    // enable=false clears the overrides — the driver's default (SDR) VPID stands.
+    const uint32_t spigotCount = IsQuad(mode) ? 4u : 1u;
+
+    bool re = true;
+    for (uint32_t i = 0; i < spigotCount; ++i)
+    {
+        const NTV2Channel ch = NTV2Channel(channel + i);
+        re &= SetSDIOutVPIDTransferCharacteristics(enable, xfer, ch);
+        re &= SetSDIOutVPIDColorimetry(enable, colorimetry, ch);
+        re &= SetSDIOutVPIDLuminance(enable, luminance, ch);
+        re &= SetSDIOutVPIDRGBRange(enable, range, ch);
+    }
+    return re;
+}
+
 void AJADevice::ClearState()
 {
     CNTV2Card::ClearRouting();
