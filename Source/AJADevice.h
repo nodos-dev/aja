@@ -134,6 +134,14 @@ struct AJADevice : CNTV2Card
     
     bool RouteSignal(NTV2Channel channel, NTV2VideoFormat videoFmt, bool isInput, Mode mode, NTV2FrameBufferFormat fbFmt);
 
+    // Sets the HDR fields (transfer characteristics / colorimetry / luminance / range) of the
+    // SMPTE 352 VPID that the driver auto-generates on the output spigot(s) for this channel,
+    // via the driver-integrated per-output override registers. enable=false clears the
+    // overrides, leaving the driver's default VPID. Quad modes cover all four spigots.
+    bool SetOutputVPID(NTV2Channel channel, Mode mode, bool enable,
+                       NTV2VPIDXferChars xfer, NTV2VPIDColorimetry colorimetry,
+                       NTV2VPIDLuminance luminance, NTV2VPIDRGBRange range);
+
     void CloseChannel(NTV2Channel channel, bool isInput, bool isQuad);
 
     void ClearState();
