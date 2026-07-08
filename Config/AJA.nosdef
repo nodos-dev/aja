@@ -77,7 +77,7 @@
 						"type_name": "nos.mediaio.GammaCurve",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "VPID transfer characteristics for HDR signalling. REC709 signals SDR, HLG and ST2084 signal the respective HDR curves; other values fall back to SDR.",
+						"description": "VPID transfer characteristics for HDR signalling. REC709 and SRGB signal SDR; HLG and ST2084 signal the respective HDR curves; curves with no broadcast code (linear IDENTITY, camera-log SLOG3) are signalled as Unspecified.",
 						"data": "REC709"
 					},
 					{
@@ -86,7 +86,7 @@
 						"type_name": "nos.mediaio.ColorSpace",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"description": "VPID colorimetry. REC2020 signals wide-gamut UHDTV; other values signal Rec709.",
+						"description": "VPID colorimetry. REC2020 signals wide-gamut UHDTV; REC709 and REC601 signal Rec709; gamuts with no VPID code (Sony SGAMUT3 / SGAMUT3CINE) are signalled as Unknown.",
 						"data": "REC709"
 					},
 					{

@@ -1203,7 +1203,7 @@
                   "visualizer": {
                   },
                   "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
+                    "device": { "name": "" },
                     "channel_name": "SingleLink 4",
                     "video_format": "1080p50a",
                     "video_format_idx": 23,
@@ -1398,7 +1398,7 @@
                   "visualizer": {
                   },
                   "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
+                    "device": { "name": "" },
                     "channel_name": "SingleLink 4",
                     "video_format": "1080p50a",
                     "video_format_idx": 23,
@@ -2317,7 +2317,7 @@
                   "visualizer": {
                   },
                   "data": {
-                    "device": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
+                    "device": { "name": "" },
                     "channel_name": "SingleLink 4",
                     "video_format": "1080p50a",
                     "video_format_idx": 23,
@@ -2356,7 +2356,7 @@
                   "can_show_as": "OUTPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": { "serial_number": 3545230353936756784, "name": "Corvid44-8K - 0" },
+                  "data": { "name": "" },
                   "min": { "name": "" },
                   "max": { "name": "" },
                   "def": { "name": "" },
