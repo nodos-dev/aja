@@ -50,8 +50,8 @@ set(NOS_MEDIAIO_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.mediaio")
 nos_generate_flatbuffers("${NOS_MEDIAIO_PATH}/Config" "${NOS_MEDIAIO_GENERATED_DIR}" "cpp" "${NOS_MEDIAIO_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosMediaIO)
 
 # nos.utilities
-nos_get_module("nos.utilities" "3.14" NOS_UTILITIES_TARGET)
-nos_find_module_path("nos.utilities" "3.14" NOS_UTILITIES_PATH)
+nos_get_module("nos.utilities" "3.15" NOS_UTILITIES_TARGET)
+nos_find_module_path("nos.utilities" "3.15" NOS_UTILITIES_PATH)
 set(NOS_UTILITIES_GENERATED_DIR "${SOURCE_DIR}/__generated__/nos.utilities")
 nos_generate_flatbuffers("${NOS_UTILITIES_PATH}/Config" "${NOS_UTILITIES_GENERATED_DIR}" "cpp" "${NOS_UTILITIES_PATH};${NOS_SDK_DIR}/types" generated_nosAJA_dep_nosUtilities)
 
