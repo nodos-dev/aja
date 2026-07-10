@@ -198,16 +198,15 @@ struct DMANodeBase : NodeContext
 			// Initialize an extractor per SDI spigot. In quad-link, the four
 			// sub-streams can carry independent packets — extracting only on the
 			// base SDI silently drops anything on DS2..DS4.
-			const NTV2DIDSet noFilter;	// Empty == accept every DID. The device default
-											// filter drops S299M audio and a few control
-											// DIDs; for arbitrary ANC (vendor packets,
-											// autorecord flags, etc.) we want them all.
+			// Keep the extractor's default filter, which excludes the SMPTE 299M
+			// embedded-audio DIDs (0xE0-0xE7, 0xA0-0xA7). Audio is already read separately via DMAReadAudio.
+			const NTV2DIDSet audioFilter = CNTV2Card::AncExtractGetDefaultDIDs();
 			for (uint32_t c = 0; c < channelCount; ++c)
 			{
 				const NTV2Channel ch = NTV2Channel(Channel + c);
 				const UWord sdiIndex = UWord(ch);
 				Device->AncExtractInit(sdiIndex, ch);
-				Device->AncExtractSetFilterDIDs(sdiIndex, noFilter);
+				Device->AncExtractSetFilterDIDs(sdiIndex, audioFilter);
 				// Enable extraction across all four raster regions (VANC Y/C, HANC Y/C);
 				// without this, the extractor is on but pulls no packets.
 				Device->AncExtractSetComponents(sdiIndex, true, true, true, true);
