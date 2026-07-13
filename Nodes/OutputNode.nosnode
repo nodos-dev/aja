@@ -6813,7 +6813,10 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus" },
+          {
+            "key": "NodeStatusPortal",
+            "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/ObjectRingBuffer;/WaitVBL (1)"
+          },
           { "key": "PluginVersion", "value": "2.4.0" }
         ],
         "display_name": "AJA Output",

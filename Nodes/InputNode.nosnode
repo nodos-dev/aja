@@ -7090,7 +7090,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Channel" }
+          { "key": "NodeStatusPortal", "value": "/Channel;/WaitVBL" }
         ],
         "display_name": "AJA Input",
         "plugin_version": { "major": 4, "minor": 0, "patch": 0 }
