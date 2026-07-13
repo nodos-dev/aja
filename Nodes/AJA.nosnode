@@ -75,6 +75,51 @@
 						"description": "Decoded SMPTE timecode to embed on the SDI output. Consumed only when EnableTimecode is true. The Timecode.source field selects ATC carriage (LTC / VITC1 / VITC2); Auto is treated as LTC."
 					},
 					{
+						"name": "EnableVPID",
+						"display_name": "Enable VPID",
+						"type_name": "bool",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "When true, the HDR VPID fields (Gamma Curve / Color Space / Luminance / Signal Range) below override the SMPTE 352 VPID that the driver auto-generates on this SDI output. When false, the driver's default VPID is emitted unchanged (the base VPID is always present regardless).",
+						"data": true
+					},
+					{
+						"name": "GammaCurve",
+						"display_name": "Gamma Curve",
+						"type_name": "nos.mediaio.GammaCurve",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "VPID transfer characteristics for HDR signalling. REC709 and SRGB signal SDR; HLG and ST2084 signal the respective HDR curves; curves with no broadcast code (linear IDENTITY, camera-log SLOG3) are signalled as Unspecified.",
+						"data": "REC709"
+					},
+					{
+						"name": "ColorSpace",
+						"display_name": "Color Space",
+						"type_name": "nos.mediaio.ColorSpace",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "VPID colorimetry. REC2020 signals wide-gamut UHDTV; REC709 and REC601 signal Rec709; gamuts with no VPID code (Sony SGAMUT3 / SGAMUT3CINE) are signalled as Unknown.",
+						"data": "REC709"
+					},
+					{
+						"name": "Luminance",
+						"display_name": "Luminance",
+						"type_name": "nos.mediaio.VPIDLuminance",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "VPID luminance signalling: YCbCr for conventional luma/chroma, ICtCp for constant-intensity HDR.",
+						"data": "YCbCr"
+					},
+					{
+						"name": "SignalRange",
+						"display_name": "Signal Range",
+						"type_name": "nos.mediaio.SignalRange",
+						"show_as": "PROPERTY",
+						"can_show_as": "INPUT_PIN_OR_PROPERTY",
+						"description": "VPID quantization range: Narrow (SMPTE studio range) or Full.",
+						"data": "Narrow"
+					},
+					{
 						"name": "EnableANC",
 						"display_name": "Enable ANC",
 						"type_name": "bool",

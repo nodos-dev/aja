@@ -19,6 +19,45 @@ namespace nos::aja
 {
 #define NOS_AJA_AUDIO_OUTPUT_DIAGNOSTICS 0
 
+// Map the mediaio signalling enums (shared with the rest of the pipeline) onto the
+// NTV2 VPID field enums. Curves/gamuts that SMPTE 352 can't represent are signalled
+// as Unspecified/Unknown rather than mislabelled as SDR/Rec709.
+static NTV2VPIDXferChars ToVPIDXfer(nos::mediaio::GammaCurve g)
+{
+	switch (g)
+	{
+	case nos::mediaio::GammaCurve::REC709: return NTV2_VPID_TC_SDR_TV;
+	case nos::mediaio::GammaCurve::SRGB:   return NTV2_VPID_TC_SDR_TV;
+	case nos::mediaio::GammaCurve::HLG:    return NTV2_VPID_TC_HLG;
+	case nos::mediaio::GammaCurve::ST2084: return NTV2_VPID_TC_PQ;
+	// IDENTITY (linear) and SLOG3 (camera log) have no broadcast transfer code.
+	default:                               return NTV2_VPID_TC_Unspecified;
+	}
+}
+
+static NTV2VPIDColorimetry ToVPIDColorimetry(nos::mediaio::ColorSpace c)
+{
+	switch (c)
+	{
+	// BT.601 has no VPID code; Rec709 is the standard-colorimetry default for its raster.
+	case nos::mediaio::ColorSpace::REC709:  return NTV2_VPID_Color_Rec709;
+	case nos::mediaio::ColorSpace::REC601:  return NTV2_VPID_Color_Rec709;
+	case nos::mediaio::ColorSpace::REC2020: return NTV2_VPID_Color_UHDTV;
+	// SGAMUT3 / SGAMUT3CINE are Sony wide gamuts with no VPID equivalent.
+	default:                                return NTV2_VPID_Color_Unknown;
+	}
+}
+
+static NTV2VPIDLuminance ToVPIDLuminance(nos::mediaio::VPIDLuminance l)
+{
+	return l == nos::mediaio::VPIDLuminance::ICtCp ? NTV2_VPID_Luminance_ICtCp : NTV2_VPID_Luminance_YCbCr;
+}
+
+static NTV2VPIDRGBRange ToVPIDRange(nos::mediaio::SignalRange r)
+{
+	return r == nos::mediaio::SignalRange::Full ? NTV2_VPID_Range_Full : NTV2_VPID_Range_Narrow;
+}
+
 struct DMAWriteNodeContext : DMANodeBase
 {
 	DMAWriteNodeContext()
@@ -34,6 +73,27 @@ struct DMAWriteNodeContext : DMANodeBase
 	// (see the explicit memcmp dedup for Channel above).
 	std::optional<bool> LastEnableANC;
 	std::optional<bool> LastEnableTimecode;
+
+	// HDR VPID signalling overrides. The driver auto-generates the output VPID and
+	// exposes per-output override registers for the HDR fields; it reads those when
+	// generating, so a single write persists — no per-frame re-assert, and no
+	// fighting the driver the way a raw SetSDIOutVPID would. Applied on change.
+	bool EnableVPID = true;
+	nos::mediaio::ColorSpace ColorSpace = nos::mediaio::ColorSpace::REC709;
+	nos::mediaio::GammaCurve GammaCurve = nos::mediaio::GammaCurve::REC709;
+	nos::mediaio::VPIDLuminance Luminance = nos::mediaio::VPIDLuminance::YCbCr;
+	nos::mediaio::SignalRange SignalRange = nos::mediaio::SignalRange::Narrow;
+	bool VPIDDirty = true;
+
+	void ApplyVPID()
+	{
+		if (!Device || Channel == NTV2_CHANNEL_INVALID)
+			return;
+		Device->SetOutputVPID(Channel, Mode, EnableVPID,
+		                      ToVPIDXfer(GammaCurve), ToVPIDColorimetry(ColorSpace),
+		                      ToVPIDLuminance(Luminance), ToVPIDRange(SignalRange));
+		VPIDDirty = false;
+	}
 
 	void OnPinValueChanged(nos::Name pinName, uuid const& pinId, nosBuffer value) override
 	{
@@ -58,7 +118,59 @@ struct DMAWriteNodeContext : DMANodeBase
 				Mode = static_cast<AJADevice::Mode>(channelInfo->output_quad_link_mode());
 			else
 				Mode = AJADevice::SL;
+			// Routing re-generates the VPID, so re-apply the HDR overrides after it.
+			VPIDDirty = true;
 			nosEngine.RecompilePath(NodeId);
+		}
+		else if (pinName == NOS_NAME_STATIC("EnableVPID"))
+		{
+			if (value.Size < sizeof(bool))
+				return;
+			const bool v = *static_cast<const bool*>(value.Data);
+			if (v == EnableVPID)
+				return;
+			EnableVPID = v;
+			VPIDDirty = true;
+		}
+		else if (pinName == NOS_NAME_STATIC("ColorSpace"))
+		{
+			if (value.Size < sizeof(nos::mediaio::ColorSpace))
+				return;
+			const auto v = *static_cast<const nos::mediaio::ColorSpace*>(value.Data);
+			if (v == ColorSpace)
+				return;
+			ColorSpace = v;
+			VPIDDirty = true;
+		}
+		else if (pinName == NOS_NAME_STATIC("GammaCurve"))
+		{
+			if (value.Size < sizeof(nos::mediaio::GammaCurve))
+				return;
+			const auto v = *static_cast<const nos::mediaio::GammaCurve*>(value.Data);
+			if (v == GammaCurve)
+				return;
+			GammaCurve = v;
+			VPIDDirty = true;
+		}
+		else if (pinName == NOS_NAME_STATIC("Luminance"))
+		{
+			if (value.Size < sizeof(nos::mediaio::VPIDLuminance))
+				return;
+			const auto v = *static_cast<const nos::mediaio::VPIDLuminance*>(value.Data);
+			if (v == Luminance)
+				return;
+			Luminance = v;
+			VPIDDirty = true;
+		}
+		else if (pinName == NOS_NAME_STATIC("SignalRange"))
+		{
+			if (value.Size < sizeof(nos::mediaio::SignalRange))
+				return;
+			const auto v = *static_cast<const nos::mediaio::SignalRange*>(value.Data);
+			if (v == SignalRange)
+				return;
+			SignalRange = v;
+			VPIDDirty = true;
 		}
 		else if (pinName == NOS_NAME_STATIC("EnableANC"))
 		{
@@ -102,6 +214,11 @@ struct DMAWriteNodeContext : DMANodeBase
 
 		if (!inputBufferObject.IsValid() || !Device || Format == NTV2_FORMAT_UNKNOWN)
 			return NOS_RESULT_FAILED;
+
+		// Apply HDR VPID overrides when changed; the driver keeps them in the
+		// VPID it generates, so there's no need to re-write every frame.
+		if (VPIDDirty)
+			ApplyVPID();
 
 		CompositeObjectRef audioPacket = params.GetPinObject(NOS_NAME("AudioPacket"));
 		auto descObject = audioPacket.GetField<TypedObjectRef<audio::AudioPacketDescriptor>>(NOS_NAME("desc"));
