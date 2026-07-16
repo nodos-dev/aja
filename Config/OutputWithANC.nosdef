@@ -7295,7 +7295,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/BufferRing;/WaitVBL" }
+          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/MultiRingBuffer;/WaitVBL" }
         ],
         "display_name": "AJA Out (With ANC)",
         "plugin_version": { "major": 2, "minor": 13, "patch": 1 }
