@@ -77,6 +77,13 @@ inline ATCSource RP188FilterToATCSource(UByte filter)
 // enough for any realistic SMPTE 291 packet load on 12G-SDI.
 static constexpr ULWord ANC_FIELD_BYTE_COUNT = 8 * 1024;
 
+// SMPTE 291 identifiers for the packets the AJA hardware embeds on its own, and
+// which must therefore never be handed to the inserter as well (see WriteAnc).
+static constexpr UByte ATC_DID = 0x60;  // ST 12-2 ancillary timecode
+static constexpr UByte ATC_SDID = 0x60;
+static constexpr UByte VPID_DID = 0x41; // ST 352 video payload ID
+static constexpr UByte VPID_SDID = 0x01;
+
 // Stand-in for CNTV2Card::NULL_POINTER (which is protected). Default-constructed
 // NTV2Buffer has zero size and signals "no field 2" to the SDK.
 inline NTV2Buffer& AncEmptyBuffer()
@@ -471,7 +478,14 @@ struct DMANodeBase : NodeContext
 			// hardware auto-embeds ATC packets, and per AJA SDK guidance we
 			// must not send the same packet through the inserter as well, or
 			// the two paths collide on the wire. Drop 0x60/0x60 here.
-			if (pkt->did() == 0x60 && pkt->sdid() == 0x60)
+			if (pkt->did() == ATC_DID && pkt->sdid() == ATC_SDID)
+				continue;
+			// VPID is likewise auto-embedded by the hardware, driven by the
+			// EnableVPID / ColorSpace / GammaCurve / Luminance / SignalRange pins
+			// via the driver's per-output override registers. A VPID passed through
+			// from an input would be inserted on top of the generated one and the
+			// two collide on the wire. Drop 0x41/0x01 here.
+			if (pkt->did() == VPID_DID && pkt->sdid() == VPID_SDID)
 				continue;
 			const uint32_t c = OffsetForStream(pkt->stream());
 			AJAAncillaryData anc = DeserializePacket(*pkt);
