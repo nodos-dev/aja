@@ -150,7 +150,6 @@ struct AJAPluginFunctions : nos::PluginFunctions
 	nosResult OnPreUnloadPlugin() override
 	{
 		AJADevice::Deinit();
-		nosSync->UnregisterEventGroup(1);
 		return NOS_RESULT_SUCCESS;
 	}
 
