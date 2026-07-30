@@ -1,8 +1,9 @@
 { "nodes": [
     {
       "class_name": "nos.aja.InputWithANC",
+      "hide_in_context_menu": true,
       "menu_info": {
-        "category": "Device|AJA",
+        "category": "Device|AJA|Experimental",
         "display_name": "AJA In (With ANC)",
         "name_aliases": [
           "video",
