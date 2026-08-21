@@ -758,7 +758,7 @@
 											{
 												"id": "015e6a26-4574-4cb9-ab69-11e8c3d9fc05",
 												"name": "GPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"data": {},
@@ -1189,7 +1189,7 @@
 											{
 												"id": "bbfcf9f5-914c-45be-998b-65a77de2860e",
 												"name": "InputGPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_ONLY",
 												"data": {},
@@ -1263,7 +1263,7 @@
 											{
 												"id": "2e75d354-cc65-4fa1-bf84-64f2be6112a5",
 												"name": "GPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"data": {},
@@ -4077,7 +4077,7 @@
 											{
 												"id": "5f5d5cdb-0239-424a-bf92-d5b5ce4940fb",
 												"name": "GPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"data": {},
@@ -4557,7 +4557,7 @@
 											{
 												"id": "d3d8634a-493a-4764-9589-f9909e955258",
 												"name": "InputGPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_ONLY",
 												"data": {},
@@ -4631,7 +4631,7 @@
 											{
 												"id": "b86b697a-2e04-481d-9ba7-aa057abfd99f",
 												"name": "GPUEventRef",
-												"type_name": "nos.sys.vulkan.GPUEventResource",
+												"type_name": "nos.sys.vulkan.GPUEventHolder",
 												"show_as": "OUTPUT_PIN",
 												"can_show_as": "OUTPUT_PIN_ONLY",
 												"data": {},
