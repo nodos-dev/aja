@@ -6532,7 +6532,7 @@
           ] },
         "function_category": "Default Node",
         "meta_data_map": [
-          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/MultiRingBuffer;/WaitVBL" },
+          { "key": "NodeStatusPortal", "value": "/Auto Resize/ShowStatus;/Channel;/ShowWarningIfInterlacing/ShowStatus;/RingBuffer;/WaitVBL" },
           { "key": "PluginVersion", "value": "2.4.0" }
         ],
         "display_name": "AJA Out",
