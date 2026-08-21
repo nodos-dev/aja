@@ -240,7 +240,12 @@ void AJADevice::ClearState()
         SetSDITransmitEnable(channel, false);
         SetMode(channel, NTV2_MODE_INVALID);
     }
-    SetReference(NTV2_REFERENCE_EXTERNAL);
+    // ST 2110 devices derive their timing from PTP. Forcing the external
+    // reference used by SDI devices fails on KONA IP25 and leaves the device
+    // in an unsuitable timing state for framebuffer output.
+    SetReference(IsSupported(kDeviceCanDo2110)
+        ? NTV2_REFERENCE_SFP1_PTP
+        : NTV2_REFERENCE_EXTERNAL);
 }
 
 uint32_t AJADevice::GetFBSize(NTV2Channel channel)
@@ -294,7 +299,9 @@ AJADevice::AJADevice(std::string const& serial)
 
         NOS_AJA_SOFT_CHECK(SetEveryFrameServices(NTV2_OEM_TASKS));
         NOS_AJA_SOFT_CHECK(SetMultiFormatMode(true));
-        NOS_AJA_SOFT_CHECK(SetReference(NTV2_REFERENCE_EXTERNAL));
+        NOS_AJA_SOFT_CHECK(SetReference(IsSupported(kDeviceCanDo2110)
+            ? NTV2_REFERENCE_SFP1_PTP
+            : NTV2_REFERENCE_EXTERNAL));
 
         ClearState();
     }
@@ -948,8 +955,21 @@ void AJADevice::RemoveReferenceSourceListener(uint32_t id)
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
 {
     auto set = CNTV2Card::SetReference(inRefSource, inKeepFramePulseSelect);
-	NTV2ReferenceSource currentRef;
-	auto success = set && GetReference(currentRef) && currentRef == inRefSource;
+	NTV2ReferenceSource currentRef = NTV2_REFERENCE_FREERUN;
+	auto read = GetReference(currentRef);
+	const bool matches = read && currentRef == inRefSource;
+	const bool is2110 = IsSupported(kDeviceCanDo2110);
+	// KONA IP25 reports live PTP through a dedicated status register, not as a
+	// synchronous echo of SetReference. An immediate Free Run readback is not a
+	// failed write on 2110 hardware; the device Web API remains authoritative.
+	auto success = set && read && (matches || is2110);
+	if (set && read && !matches && is2110)
+	{
+		const auto requested = NTV2ReferenceSourceToString(inRefSource, true);
+		const auto current = NTV2ReferenceSourceToString(currentRef, true);
+		nosEngine.LogW("AJA IP reference readback is asynchronous: requested=%s current=%s; verify live PTP lock",
+			requested.c_str(), current.c_str());
+	}
     if (success)
     {
         std::unique_lock lock(ReferenceListeners.Mutex);

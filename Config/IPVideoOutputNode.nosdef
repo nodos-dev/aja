@@ -311,11 +311,11 @@
             "can_show_as": "INPUT_PIN_OR_PROPERTY",
             "visualizer": {
             },
-            "data": true,
-            "def": true,
+            "data": false,
+            "def": false,
             "contents_type": "PortalPin",
             "contents": { "source_id": "134b600c-cb94-4d43-9f27-11b176675983" },
-            "description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference.",
+            "description": "Join Nodos cross-node VBL consensus. This does not select the ST 2110 PTP reference; leave false for a standalone PTP-timed IP output.",
             "display_name": "Enable Sync"
           },
           {
@@ -1658,14 +1658,14 @@
                   "can_show_as": "INPUT_PIN_OR_PROPERTY",
                   "visualizer": {
                   },
-                  "data": true,
+                  "data": false,
                   "referred_by": [
                     "d8bb9b7a-84d2-43d8-aba6-01ea62cfd775"
                   ],
-                  "def": true,
+                  "def": false,
                   "contents_type": "JobPin",
                   "contents": { },
-                  "description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference."
+                  "description": "Join Nodos cross-node VBL consensus. This does not select the ST 2110 PTP reference; leave false for a standalone PTP-timed IP output."
                 }
               ],
               "pos": { "x": 1531.0, "y": 542.0 },

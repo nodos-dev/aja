@@ -87,6 +87,11 @@ struct WaitVBLNodeContext : NodeContext
 
 	void OnSyncHealthNotification(const nosSyncGroupHealth* status)
 	{
+		if (!IsSyncEnabled())
+		{
+			SetStatus(Status::Ok);
+			return;
+		}
 		if (status->AreSyncSourcesMixed)
 			SetStatus(Status::ReferenceSourcesMixed);
 		else if (status->ConsensusStatus != NOS_CONSENSUS_ACHIEVED)
@@ -350,6 +355,13 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		if (!ChannelInfo.is_input) // Is output?
 		{
+			// KONA IP25 derives framebuffer/output timing from the SFP PTP mode
+			// selected when the device is acquired. Ordinary NTV2 reference
+			// readback can remain Free Run; querying CNTV2Config2110 from this
+			// path blocks SDK 37. Treat selected 2110/PTP timing as valid here
+			// and verify health from KONA PTP status plus VBL/DMA progress.
+			if (device.IsSupported(kDeviceCanDo2110))
+				return NOS_TRUE;
 			NTV2ReferenceSource refSrc = NTV2_REFERENCE_INVALID;
 			NTV2FrameRate refFrameRate{};
 			device.GetReferenceAndFrameRate(refSrc, refFrameRate);
@@ -390,7 +402,7 @@ struct WaitVBLNodeContext : NodeContext
 		if (auto device = GetDevice())
 		{
 			uint64_t vblTimestampNs = 0, vblCount = 0;
-			if (WaitId)
+			if (WaitId && IsSyncEnabled())
 			{
 				auto res = nosSync->WaitForConsensus(WaitId, &vblTimestampNs, &vblCount);
 				if (res != NOS_RESULT_SUCCESS)
@@ -399,6 +411,8 @@ struct WaitVBLNodeContext : NodeContext
 					return;
 				}
 			}
+			else if (auto channel = GetChannel(); channel != NTV2_CHANNEL_INVALID)
+				vblCount = GetVBLCount(*device, channel);
 			auto channel = GetChannel();
 			VBLState.LastVBLCount = vblCount;
 #if NOS_AJA_DIAGNOSTICS
