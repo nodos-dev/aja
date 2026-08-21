@@ -70,7 +70,9 @@ struct AJADevice : CNTV2Card
 
     NTV2FrameRate FPSFamily = NTV2_FRAMERATE_INVALID;
 
-    NTV2DeviceID ID;
+    // The constructor can bail out before reading this, and the destructor still
+    // runs ClearState, which asks what kind of card this is.
+    NTV2DeviceID ID = DEVICE_ID_NOTFOUND;
     nosDeviceId GlobalDeviceId;
 
     std::shared_mutex ChannelsMutex;
@@ -152,6 +154,39 @@ struct AJADevice : CNTV2Card
     bool GetExtent(NTV2VideoFormat fmt, Mode mode, uint32_t& width, uint32_t& height);
 
     void GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2FrameRate& framerate);
+
+    // True for cards that carry ST 2110 streams and nothing else, so their only
+    // house clock is PTP over SFP and NTV2_REFERENCE_EXTERNAL can never lock.
+    // Only KONA IP25 is recognised, because it is the only one tested so far.
+    //
+    // This has to be matched by device ID. The NTV2 feature tables cannot answer
+    // it: KONA IP25 reports four SDI video outputs and one reference video input
+    // even though the card has neither connector, so counting SDI or reference
+    // inputs classifies it as an SDI card. The SDK's own
+    // NTV2_DEVICE_SUPPORTS_SMPTE2110 is no help either, it names a DEVICE_ID
+    // that this version of libajantv2 never declares.
+    //
+    // REVISIT before recognising any further card. One that has both real SDI
+    // connectors and ST 2110 (Io IP 2110 is one) can genlock externally, which
+    // makes the reference a per-channel choice rather than a property of the
+    // device. Such a card needs this replaced, not extended.
+    bool IsDevice2110Only() const;
+
+    enum class PTPLock
+    {
+        Unsupported, // Card has no PTP hardware, or the status could not be read.
+        NoPTP,
+        Error,
+        NotLocked,
+        Locking,
+        Locked,
+    };
+
+    // Reads the ST 2110 PTP lock state. This is the same value the KONA web
+    // interface shows as PhaseLocked. Six register reads, no mailbox round trip,
+    // so it is safe to call from status paths.
+    PTPLock GetPTPLock();
+    static const char* ToString(PTPLock lock);
 
     uint32_t AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener);
     void RemoveReferenceSourceListener(uint32_t id);

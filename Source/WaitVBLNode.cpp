@@ -61,14 +61,19 @@ struct WaitVBLNodeContext : NodeContext
 			break;
 		}
 		case Status::ReferenceSourcesMixed: {
-			if (!GetDevice() || IsExternallySynced(*GetDevice()))
+			auto device = GetDevice();
+			if (!device || IsExternallySynced(*device))
 				ClearNodeStatusMessages();
 			else
 			{
 				std::stringstream ss;
 				ss << "Sync Error:\n"
-				   << "\tOutput is not synced to a reference source!\n"
-				   << "\tCheck reference source property and cabling.";
+				   << "\tOutput is not synced to a reference source!\n";
+				if (device->IsDevice2110Only())
+					ss << "\tPTP is " << AJADevice::ToString(device->GetPTPLock()) << ".\n"
+					   << "\tCheck the PTP domain and the network path to the grandmaster.";
+				else
+					ss << "\tCheck reference source property and cabling.";
 				SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			}
 			break;
@@ -125,7 +130,10 @@ struct WaitVBLNodeContext : NodeContext
 			{
 				uint64_t frameNs = SyncStart->Clock + uint64_t((deltaSecs.x * 1'000'000'000.0 * (frameCount - SyncStart->FrameCount)) / double(deltaSecs.y));
 				auto steadyClockNowNs = NowNs();
-				outResult->TimeSinceLastEventNs = steadyClockNowNs - frameNs;
+				// The modelled frame time can land a few microseconds ahead of the
+				// steady clock. Subtracting then wraps and the log reports a delay
+				// of several centuries.
+				outResult->TimeSinceLastEventNs = steadyClockNowNs >= frameNs ? steadyClockNowNs - frameNs : 0;
 				std::chrono::steady_clock::duration startTime =
 					std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 						std::chrono::nanoseconds(frameNs));
@@ -350,6 +358,10 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		if (!ChannelInfo.is_input) // Is output?
 		{
+			// An ST 2110 card locks to PTP, and its ordinary reference readback
+			// keeps saying Free Run while it does. Ask the PTP hardware instead.
+			if (device.IsDevice2110Only())
+				return device.GetPTPLock() == AJADevice::PTPLock::Locked ? NOS_TRUE : NOS_FALSE;
 			NTV2ReferenceSource refSrc = NTV2_REFERENCE_INVALID;
 			NTV2FrameRate refFrameRate{};
 			device.GetReferenceAndFrameRate(refSrc, refFrameRate);

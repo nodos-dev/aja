@@ -5,6 +5,7 @@
 #include "ntv2enums.h"
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
+#include <ntv2config2110.h>
 #include <ntv2devicescanner.h>
 #include <ranges>
 #include <system/process.h>
@@ -240,7 +241,7 @@ void AJADevice::ClearState()
         SetSDITransmitEnable(channel, false);
         SetMode(channel, NTV2_MODE_INVALID);
     }
-    SetReference(NTV2_REFERENCE_EXTERNAL);
+    SetReference(IsDevice2110Only() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_EXTERNAL);
 }
 
 uint32_t AJADevice::GetFBSize(NTV2Channel channel)
@@ -294,7 +295,9 @@ AJADevice::AJADevice(std::string const& serial)
 
         NOS_AJA_SOFT_CHECK(SetEveryFrameServices(NTV2_OEM_TASKS));
         NOS_AJA_SOFT_CHECK(SetMultiFormatMode(true));
-        NOS_AJA_SOFT_CHECK(SetReference(NTV2_REFERENCE_EXTERNAL));
+        // ClearState right below picks the same reference. Both are kept because
+        // ClearState also runs on release, where the choice has to hold too.
+        NOS_AJA_SOFT_CHECK(SetReference(IsDevice2110Only() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_EXTERNAL));
 
         ClearState();
     }
@@ -928,6 +931,43 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
     case NTV2_REFERENCE_INPUT7:     framerate = GetNTV2FrameRateFromVideoFormat(GetInputVideoFormat(NTV2_CHANNEL7)); break;
     case NTV2_REFERENCE_INPUT8:     framerate = GetNTV2FrameRateFromVideoFormat(GetInputVideoFormat(NTV2_CHANNEL8)); break;
     // default: device->GetFrameRate(framerate); break;
+    }
+}
+
+bool AJADevice::IsDevice2110Only() const
+{
+    return ID == DEVICE_ID_KONAIP_25G;
+}
+
+AJADevice::PTPLock AJADevice::GetPTPLock()
+{
+    if (!IsSupported(kDeviceCanDo2110))
+        return PTPLock::Unsupported;
+    CNTV2Config2110 config(*this);
+    PTPStatus status{};
+    if (!config.GetPTPStatus(status))
+        return PTPLock::Unsupported;
+    switch (status.PTP_LockedState)
+    {
+    case PTP_NO_PTP:     return PTPLock::NoPTP;
+    case PTP_ERROR:      return PTPLock::Error;
+    case PTP_NOT_LOCKED: return PTPLock::NotLocked;
+    case PTP_LOCKING:    return PTPLock::Locking;
+    case PTP_LOCKED:     return PTPLock::Locked;
+    default:             return PTPLock::Unsupported;
+    }
+}
+
+const char* AJADevice::ToString(PTPLock lock)
+{
+    switch (lock)
+    {
+    case PTPLock::NoPTP:     return "no PTP";
+    case PTPLock::Error:     return "error";
+    case PTPLock::NotLocked: return "not locked";
+    case PTPLock::Locking:   return "locking";
+    case PTPLock::Locked:    return "locked";
+    default:                 return "unavailable";
     }
 }
 

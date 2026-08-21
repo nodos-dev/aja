@@ -221,6 +221,11 @@ struct DMAWriteNodeContext : DMANodeBase
 			ApplyVPID();
 
 		auto buffer = nosVulkan->Map(&inputBuffer);
+		if (!buffer)
+		{
+			nosEngine.LogE("AJA %s DMA Write could not map the input buffer for reading", ChannelName.c_str());
+			return NOS_RESULT_FAILED;
+		}
 		auto inputSize = inputBuffer.Memory.Size;
 
 		if (curVBLCount == 0)
