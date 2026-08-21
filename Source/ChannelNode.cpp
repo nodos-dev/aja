@@ -798,7 +798,7 @@ struct ChannelNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		execParams->MarkAllOutsDirty = false;
-		return CurrentChannel.IsOpen ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+		return NOS_RESULT_SUCCESS;
 	}
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction)

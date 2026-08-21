@@ -681,7 +681,10 @@ struct IPVideoChannelNode : NodeContext
 	nosResult ExecuteNode(nosNodeExecuteParams* execParams) override
 	{
 		execParams->MarkAllOutsDirty = false;
-		return CurrentChannel.IsOpen ? NOS_RESULT_SUCCESS : NOS_RESULT_FAILED;
+		// Channel open/close is reported via status and the Channel pin.
+		// Returning FAILED here stops the DMA path and paints the node red
+		// when IsOpen is toggled off or the channel is still configuring.
+		return NOS_RESULT_SUCCESS;
 	}
 
 	static nosResult GetFunctions(size_t* outCount, nosName* outFunctionNames, nosPfnNodeFunctionExecute* outFunction)

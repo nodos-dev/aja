@@ -130,7 +130,12 @@ struct WaitVBLNodeContext : NodeContext
 			{
 				uint64_t frameNs = SyncStart->Clock + uint64_t((deltaSecs.x * 1'000'000'000.0 * (frameCount - SyncStart->FrameCount)) / double(deltaSecs.y));
 				auto steadyClockNowNs = NowNs();
-				outResult->TimeSinceLastEventNs = steadyClockNowNs - frameNs;
+				// The modeled frame timestamp can be a few microseconds ahead of the
+				// local steady clock. Clamp instead of wrapping uint64_t and logging
+				// an apparent multi-century VBL delay.
+				outResult->TimeSinceLastEventNs = steadyClockNowNs >= frameNs
+					? steadyClockNowNs - frameNs
+					: 0;
 				std::chrono::steady_clock::duration startTime =
 					std::chrono::duration_cast<std::chrono::steady_clock::duration>(
 						std::chrono::nanoseconds(frameNs));
@@ -144,9 +149,9 @@ struct WaitVBLNodeContext : NodeContext
 		}
 		else
 		{
-			// Tried to wait when channel not configured. Set pending path restart.
-			PendingPathRestart = true;
-			return NOS_RESULT_FAILED;
+			outResult->EventCount = 0;
+			outResult->TimeSinceLastEventNs = 0;
+			return NOS_RESULT_SUCCESS;
 		}
 	}
 
@@ -171,9 +176,7 @@ struct WaitVBLNodeContext : NodeContext
 		}
 		else
 		{
-			// Tried to wait when channel not configured. Set pending path restart.
-			PendingPathRestart = true;
-			return NOS_RESULT_FAILED;
+			return NOS_RESULT_SUCCESS;
 		}
 	}
 

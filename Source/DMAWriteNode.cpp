@@ -69,6 +69,9 @@ struct DMAWriteNodeContext : DMANodeBase
 	// (see the explicit memcmp dedup for Channel above).
 	std::optional<bool> LastEnableANC;
 	std::optional<bool> LastEnableTimecode;
+	uint8_t LastInvalidPreconditionMask = 0;
+	uint64_t LastMismatchedInputSize = 0;
+	uint64_t LastExpectedInputSize = 0;
 
 	// HDR VPID signalling overrides. The driver auto-generates the output VPID and
 	// exposes per-output override registers for the HDR fields; it reads those when
@@ -212,16 +215,67 @@ struct DMAWriteNodeContext : DMANodeBase
 		if (enableTimecode)
 			timecode = execParams.GetPinData<Timecode>(NOS_NAME_STATIC("Timecode"));
 
-		if (!inputBuffer.Memory.Handle || !Device || Format == NTV2_FORMAT_UNKNOWN)
-			return NOS_RESULT_FAILED;
+		const uint8_t invalidMask = uint8_t(!inputBuffer.Memory.Handle)
+			| uint8_t(!Device) << 1
+			| uint8_t(Format == NTV2_FORMAT_UNKNOWN) << 2;
+		if (invalidMask)
+		{
+			if (invalidMask != LastInvalidPreconditionMask)
+			{
+				const auto channelName = ChannelName.empty() ? "(unset)" : ChannelName.c_str();
+				const std::string formatName = Format == NTV2_FORMAT_UNKNOWN
+					? "unknown"
+					: NTV2VideoFormatToString(Format, true);
+				if (invalidMask == 1)
+					nosEngine.LogW("AJA DMA Write waiting for input texture: channel=%s format=%s", channelName, formatName.c_str());
+				else
+					nosEngine.LogI("AJA DMA Write idle: channel=%s inputHandle=%s device=%s format=%s",
+						channelName, inputBuffer.Memory.Handle ? "valid" : "missing",
+						Device ? "valid" : "missing", formatName.c_str());
+			}
+			LastInvalidPreconditionMask = invalidMask;
+			if (invalidMask == 1)
+			{
+				// RingBuffer can be empty while it fills or a source is swapped.
+				// Keep the VBL-driven path scheduled so the next buffer recovers
+				// instead of returning FAILED and stopping DMA.
+				nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
+				nosEngine.ScheduleNode(&schedule);
+			}
+			return NOS_RESULT_SUCCESS;
+		}
+		LastInvalidPreconditionMask = 0;
 
 		// Apply HDR VPID overrides when changed; the driver keeps them in the
 		// VPID it generates, so there's no need to re-write every frame.
 		if (VPIDDirty)
 			ApplyVPID();
 
-		auto buffer = nosVulkan->Map(&inputBuffer);
 		auto inputSize = inputBuffer.Memory.Size;
+		const auto expectedInputSize = GetDMAInfo().BufferSize;
+		if (expectedInputSize && inputSize != expectedInputSize)
+		{
+			if (inputSize != LastMismatchedInputSize || expectedInputSize != LastExpectedInputSize)
+			{
+				nosEngine.LogW("AJA %s DMA Write waiting for input buffer resize: expected=%llu actual=%llu",
+					ChannelName.c_str(), static_cast<unsigned long long>(expectedInputSize),
+					static_cast<unsigned long long>(inputSize));
+			}
+			LastMismatchedInputSize = inputSize;
+			LastExpectedInputSize = expectedInputSize;
+			nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
+			nosEngine.ScheduleNode(&schedule);
+			return NOS_RESULT_SUCCESS;
+		}
+		LastMismatchedInputSize = 0;
+		LastExpectedInputSize = 0;
+
+		auto buffer = nosVulkan->Map(&inputBuffer);
+		if (!buffer)
+		{
+			nosEngine.LogE("AJA %s DMA Write failed to map host-visible input buffer", ChannelName.c_str());
+			return NOS_RESULT_FAILED;
+		}
 
 		if (curVBLCount == 0)
 			Device->GetOutputVerticalInterruptCount(curVBLCount, Channel);
@@ -241,6 +295,9 @@ struct DMAWriteNodeContext : DMANodeBase
 	void OnPathStart() override
 	{
 		DMANodeBase::OnPathStart();
+		LastInvalidPreconditionMask = 0;
+		LastMismatchedInputSize = 0;
+		LastExpectedInputSize = 0;
 		nosScheduleNodeParams schedule{.NodeId = NodeId, .AddScheduleCount = 1};
 		nosEngine.ScheduleNode(&schedule);
 	}

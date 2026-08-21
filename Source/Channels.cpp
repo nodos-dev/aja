@@ -102,7 +102,7 @@ std::pair<bool, std::string> Channel::Open()
 
 void Channel::Close()
 {
-	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::WARNING, "Channel closed");
+	SetStatus(StatusType::Channel, fb::NodeStatusMessageType::INFO, "Channel closed");
 	ClearStatus(StatusType::DropCount);
 	auto device = GetDevice();
 	if (!device)
