@@ -190,7 +190,6 @@ struct AJADevice : CNTV2Card
     // "no PTP". The card's own web page is the only thing that knows, so a
     // 25G card reads as no PTP even while that page says it is locked.
     PTPLock GetPTPLock();
-    static const char* ToString(PTPLock lock);
 
     uint32_t AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener);
     void RemoveReferenceSourceListener(uint32_t id);
@@ -236,9 +235,6 @@ private:
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
-
-    // Set once we have said that this card never reports its PTP lock state.
-    std::atomic_bool ReportedMissingPTPStatus = false;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

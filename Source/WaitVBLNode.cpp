@@ -68,15 +68,8 @@ struct WaitVBLNodeContext : NodeContext
 			{
 				std::stringstream ss;
 				ss << "Sync Error:\n"
-				   << "\tOutput is not synced to a reference source!\n";
-				// TODO: Put the PTP lock state back when AJA reports it on the 25G
-				// cards. They always read as "no PTP" there, whatever the card is
-				// really doing, so saying it here only misleads.
-				//	if (device->IsDevice2110Only())
-				//		ss << "\tPTP is " << AJADevice::ToString(device->GetPTPLock()) << ".\n"
-				//		<< "\tCheck the PTP domain and the network path to the grandmaster.";
-				if (!device->IsDevice2110Only())
-					ss << "\tCheck reference source property and cabling.";
+				   << "\tOutput is not synced to a reference source!\n"
+				   << "\tCheck reference source property and cabling.";
 				SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			}
 			break;
@@ -361,10 +354,18 @@ struct WaitVBLNodeContext : NodeContext
 	{
 		if (!ChannelInfo.is_input) // Is output?
 		{
-			// An ST 2110 card locks to PTP, and its ordinary reference readback
-			// keeps saying Free Run while it does. Ask the PTP hardware instead.
+			// An ST 2110 card locks to PTP, and asking the hardware currently does not
+			// report the lock state reliably: not locked and cannot tell come back the
+			// same, so checking it here would fail every output. We assume it is locked
+			// and read the web interface instead.
+			// TODO: When AJA fixes the reporting, return false when the card is not
+			// locked, as the free-run check below does for SDI. Not being able to read
+			// the state is not a fault, so that case stays true:
+			//	auto lock = device.GetPTPLock();
+			//	return lock == AJADevice::PTPLock::Locked ||
+			//	       lock == AJADevice::PTPLock::Unsupported ? NOS_TRUE : NOS_FALSE;
 			if (device.IsDevice2110Only())
-				return device.GetPTPLock() == AJADevice::PTPLock::Locked ? NOS_TRUE : NOS_FALSE;
+				return NOS_TRUE;
 			NTV2ReferenceSource refSrc = NTV2_REFERENCE_INVALID;
 			NTV2FrameRate refFrameRate{};
 			device.GetReferenceAndFrameRate(refSrc, refFrameRate);
