@@ -4431,11 +4431,11 @@
                   "visualizer": {
                   },
                   "data": {
-                    "size_in_bytes": 0,
+                    "size_in_bytes": 5529600,
                     "alignment": 0,
-                    "external_memory": { "handle_type": 0 },
-                    "usage": "NONE",
-                    "memory_flags": "NONE",
+                    "external_memory": { "handle_type": 2 },
+                    "usage": "TRANSFER_SRC TRANSFER_DST STORAGE_BUFFER",
+                    "memory_flags": "HOST_VISIBLE DOWNLOAD",
                     "element_type": "ELEMENT_TYPE_UNDEFINED"
                   },
                   "def": {

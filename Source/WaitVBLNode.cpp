@@ -69,10 +69,13 @@ struct WaitVBLNodeContext : NodeContext
 				std::stringstream ss;
 				ss << "Sync Error:\n"
 				   << "\tOutput is not synced to a reference source!\n";
-				if (device->IsDevice2110Only())
-					ss << "\tPTP is " << AJADevice::ToString(device->GetPTPLock()) << ".\n"
-					   << "\tCheck the PTP domain and the network path to the grandmaster.";
-				else
+				// TODO: Put the PTP lock state back when AJA reports it on the 25G
+				// cards. They always read as "no PTP" there, whatever the card is
+				// really doing, so saying it here only misleads.
+				//	if (device->IsDevice2110Only())
+				//		ss << "\tPTP is " << AJADevice::ToString(device->GetPTPLock()) << ".\n"
+				//		<< "\tCheck the PTP domain and the network path to the grandmaster.";
+				if (!device->IsDevice2110Only())
 					ss << "\tCheck reference source property and cabling.";
 				SetNodeStatusMessage(ss.str(), fb::NodeStatusMessageType::FAILURE);
 			}

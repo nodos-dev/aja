@@ -182,9 +182,13 @@ struct AJADevice : CNTV2Card
         Locked,
     };
 
-    // Reads the ST 2110 PTP lock state. This is the same value the KONA web
-    // interface shows as PhaseLocked. Six register reads, no mailbox round trip,
-    // so it is safe to call from status paths.
+    // Reads the ST 2110 PTP lock state. Six register reads, no mailbox round
+    // trip, so it is safe to call from status paths.
+    //
+    // Do not trust this on a 25G card. The registers it reads belong to the
+    // older 10G cards, a 25G card reads them back as zero, and zero means
+    // "no PTP". The card's own web page is the only thing that knows, so a
+    // 25G card reads as no PTP even while that page says it is locked.
     PTPLock GetPTPLock();
     static const char* ToString(PTPLock lock);
 
@@ -232,6 +236,9 @@ private:
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
+
+    // Set once we have said that this card never reports its PTP lock state.
+    std::atomic_bool ReportedMissingPTPStatus = false;
 };
 
 inline NTV2Channel ParseChannel(std::string_view const &name)

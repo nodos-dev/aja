@@ -947,15 +947,34 @@ AJADevice::PTPLock AJADevice::GetPTPLock()
     PTPStatus status{};
     if (!config.GetPTPStatus(status))
         return PTPLock::Unsupported;
+    PTPLock lock = PTPLock::Unsupported;
     switch (status.PTP_LockedState)
     {
-    case PTP_NO_PTP:     return PTPLock::NoPTP;
-    case PTP_ERROR:      return PTPLock::Error;
-    case PTP_NOT_LOCKED: return PTPLock::NotLocked;
-    case PTP_LOCKING:    return PTPLock::Locking;
-    case PTP_LOCKED:     return PTPLock::Locked;
-    default:             return PTPLock::Unsupported;
+    case PTP_NO_PTP:     lock = PTPLock::NoPTP;     break;
+    case PTP_ERROR:      lock = PTPLock::Error;     break;
+    case PTP_NOT_LOCKED: lock = PTPLock::NotLocked; break;
+    case PTP_LOCKING:    lock = PTPLock::Locking;   break;
+    case PTP_LOCKED:     lock = PTPLock::Locked;    break;
+    default:             lock = PTPLock::Unsupported; break;
     }
+
+    // A 25G card answers "no PTP" whatever it is really doing. The registers
+    // read above belong to the older 10G cards and are not implemented here,
+    // and the card's own processor never tells the host the lock state either.
+    // So say once that we cannot see it, and point at the page that can.
+    if (lock == PTPLock::NoPTP && IsSupported(kDeviceCanDo25GIP) && !ReportedMissingPTPStatus.exchange(true))
+    {
+        std::string url;
+        if (GetLPExternalConfigurationURLString(url))
+            nosEngine.LogD("Device %s never reports PTP lock to the host, so it always reads as no PTP. "
+                           "Open %s to see whether it is really locked.",
+                           GetDisplayName().c_str(), url.c_str());
+        else
+            nosEngine.LogD("Device %s never reports PTP lock to the host, so it always reads as no PTP. "
+                           "Open the card's web interface to see whether it is really locked.",
+                           GetDisplayName().c_str());
+    }
+    return lock;
 }
 
 const char* AJADevice::ToString(PTPLock lock)
