@@ -10,7 +10,7 @@
 #include <ranges>
 #include <system/process.h>
 
-#include "firmware.hpp"
+#include "TestedFirmwares.hpp"
 
 #include <nosDeviceSubsystem/nosDeviceSubsystem.h>
 
@@ -1043,7 +1043,7 @@ bool AJADevice::CheckFirmware(std::string& msg)
 	}
 
     std::string model = GetModelName();
-    if (auto it = firmware_list.find(model); it != firmware_list.end())
+    if (auto it = TESTED_FIRMWARES.find(model); it != TESTED_FIRMWARES.end())
     {
         if (it->second > date)
         {
