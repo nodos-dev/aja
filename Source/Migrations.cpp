@@ -86,7 +86,11 @@ std::optional<nos::fb::TNode> MigrateChannelNode(nosFbNodePtr node)
                         return true;
                     }
 
-                    device->UpdateReferenceSource(refValue, true);
+                    // Old graphs can carry a placeholder ("None") in this pin; only a value that names
+                    // a real reference is worth promoting to the device's settings entry.
+                    NTV2ReferenceSource parsed{};
+                    if (device->ParseReferenceSource(refValue, parsed))
+                        device->UpdateReferenceSource(refValue, true);
                     return true;
                 }
                 return false;
