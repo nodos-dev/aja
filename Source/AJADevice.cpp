@@ -212,7 +212,7 @@ bool AJADevice::SetOutputVPID(NTV2Channel channel, Mode mode, bool enable,
     // the raw VPID register (SetSDIOutVPID) would fight that generator and only
     // hold for a frame or two. These per-output override registers are instead
     // read BY the generator, so the HDR fields persist in the VPID it emits.
-    // enable=false clears the overrides — the driver's default (SDR) VPID stands.
+    // enable=false clears the overrides â€” the driver's default (SDR) VPID stands.
     const uint32_t spigotCount = IsQuad(mode) ? 4u : 1u;
 
     bool re = true;
@@ -337,10 +337,12 @@ AJADevice::AJADevice(std::string const& serial)
         ClearState();
     }
     std::string firmwareMsg, firmwareMsgDetails;
+    // Must outlive the RegisterDevice call below: driverProp.Value is a borrowed pointer into it.
+    std::string driverPropMessage;
     nosDeviceProperty driverProp{};
 	bool isFirmwareValid = true;
     if (!CheckFirmware(firmwareMsg, firmwareMsgDetails)) {
-        std::string driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
+        driverPropMessage = firmwareMsg + "\n Details: " + firmwareMsgDetails;
         driverProp = {.Name = nos::Name("Firmware Info"), .Value = driverPropMessage.c_str()};
         isFirmwareValid = false;
     }
