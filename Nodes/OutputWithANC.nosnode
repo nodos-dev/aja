@@ -371,6 +371,24 @@
             "contents_type": "PortalPin",
             "contents": { "source_id": "1286414f-19dc-4387-8548-0cfc33a4120c" },
             "orphan_state": { }
+          },
+          {
+            "id": "3e2c7169-8f4d-4cb3-9158-4d9ea8f32c63",
+            "name": "Importance",
+            "type_name": "ulong",
+            "show_as": "PROPERTY",
+            "can_show_as": "PROPERTY_ONLY",
+            "visualizers": [],
+            "data": 100,
+            "def": 100,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "66898df6-d34b-4e74-96db-5a30665d7878" },
+            "orphan_state": { },
+            "description": "When a node feeds this output and another thread as well, it runs on whichever of the two threads has the higher importance. Raise this to keep such nodes on this output's main thread, where they run in step with the card's frame timing.",
+            "display_name": "Importance"
           }
         ],
         "pos": { "x": 0.0, "y": 0.0 },
@@ -1692,8 +1710,11 @@
                   "show_as": "PROPERTY",
                   "can_show_as": "PROPERTY_ONLY",
                   "visualizers": [],
-                  "data": 0,
-                  "def": 0,
+                  "data": 100,
+                  "referred_by": [
+                    "3e2c7169-8f4d-4cb3-9158-4d9ea8f32c63"
+                  ],
+                  "def": 100,
                   "meta_data_map": [
                     { "key": "AdvancedProperty", "value": "false" }
                   ],

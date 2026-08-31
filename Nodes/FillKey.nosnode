@@ -1423,8 +1423,8 @@
 												"type_name": "ulong",
 												"show_as": "PROPERTY",
 												"can_show_as": "PROPERTY_ONLY",
-												"data": 0,
-												"def": 0,
+												"data": 100,
+												"def": 100,
 												"meta_data_map": [
 													{
 														"key": "AdvancedProperty",
@@ -7941,8 +7941,8 @@
 												"type_name": "ulong",
 												"show_as": "PROPERTY",
 												"can_show_as": "PROPERTY_ONLY",
-												"data": 0,
-												"def": 0,
+												"data": 100,
+												"def": 100,
 												"meta_data_map": [
 													{
 														"key": "AdvancedProperty",

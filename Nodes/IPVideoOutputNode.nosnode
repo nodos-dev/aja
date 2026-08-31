@@ -304,6 +304,24 @@
             "orphan_state": { },
             "description": "Synchronize VBL with other I/O nodes' VBLs. If no common reference lock is used, this won't make much difference.",
             "display_name": "Enable Sync"
+          },
+          {
+            "id": "4f3d827a-9051-4dc4-a269-5eafb9043d74",
+            "name": "Importance",
+            "type_name": "ulong",
+            "show_as": "PROPERTY",
+            "can_show_as": "PROPERTY_ONLY",
+            "visualizers": [],
+            "data": 100,
+            "def": 100,
+            "meta_data_map": [
+              { "key": "AdvancedProperty", "value": "true" }
+            ],
+            "contents_type": "PortalPin",
+            "contents": { "source_id": "99bbf642-841e-4dcf-861b-d6fbb733e9bd" },
+            "orphan_state": { },
+            "description": "When a node feeds this output and another thread as well, it runs on whichever of the two threads has the higher importance. Raise this to keep such nodes on this output's main thread, where they run in step with the card's frame timing.",
+            "display_name": "Importance"
           }
         ],
         "pos": { "x": 0.0, "y": 0.0 },
@@ -5615,8 +5633,11 @@
                   "show_as": "PROPERTY",
                   "can_show_as": "PROPERTY_ONLY",
                   "visualizers": [],
-                  "data": 0,
-                  "def": 0,
+                  "data": 100,
+                  "referred_by": [
+                    "4f3d827a-9051-4dc4-a269-5eafb9043d74"
+                  ],
+                  "def": 100,
                   "meta_data_map": [
                     { "key": "AdvancedProperty", "value": "false" }
                   ],
