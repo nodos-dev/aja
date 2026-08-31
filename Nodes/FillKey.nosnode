@@ -579,44 +579,6 @@
 						"display_name": "Frame Buffer Format"
 					},
 					{
-						"id": "0b8c74ba-0d6e-4327-92bb-036c821c36d3",
-						"name": "ReferenceSource",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY",
-						"data": "None",
-						"def": "",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "false"
-							},
-							{
-								"key": "Category",
-								"value": "Key"
-							},
-							{
-								"key": "PinDeduplicationGroup",
-								"value": "12"
-							},
-							{
-								"key": "PinPropertyPaneOrder",
-								"value": "11"
-							}
-						],
-						"contents_type": "PortalPin",
-						"contents": {
-							"source_id": "cc0b4c9f-5510-43b8-b4f3-7d370fbd4ec6"
-						},
-						"display_name": "Reference Source",
-						"visualizers": [
-							{
-								"type": "COMBO_BOX",
-								"name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d"
-							}
-						]
-					},
-					{
 						"id": "e687032d-4e33-463f-8130-d705a3293423",
 						"name": "QuadLinkOutputMode (1)",
 						"type_name": "nos.aja.QuadLinkMode",
@@ -804,44 +766,6 @@
 								"type": "NAMED_VALUE",
 								"name": "nos.sys.device.DeviceList.AJA Video Systems",
 								"hide_value": true
-							}
-						]
-					},
-					{
-						"id": "2ffd038e-2f93-462a-9c5a-d389251bcc5d",
-						"name": "ReferenceSource (1)",
-						"type_name": "string",
-						"show_as": "PROPERTY",
-						"can_show_as": "PROPERTY_ONLY",
-						"data": "None",
-						"def": "",
-						"meta_data_map": [
-							{
-								"key": "AdvancedProperty",
-								"value": "false"
-							},
-							{
-								"key": "Category",
-								"value": "Fill"
-							},
-							{
-								"key": "PinDeduplicationGroup",
-								"value": "12"
-							},
-							{
-								"key": "PinPropertyPaneOrder",
-								"value": "0"
-							}
-						],
-						"contents_type": "PortalPin",
-						"contents": {
-							"source_id": "432de869-372a-476b-92ca-8bcbd7625b27"
-						},
-						"display_name": "Reference Source",
-						"visualizers": [
-							{
-								"type": "COMBO_BOX",
-								"name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d"
 							}
 						]
 					},
@@ -1234,32 +1158,6 @@
 										"source_id": "95ef133f-e6a1-4cc0-afd1-5699634a1bf2"
 									},
 									"display_name": "Frame Buffer Format"
-								},
-								{
-									"id": "cdd2c053-6150-46f8-b2ae-a14ea3c3ff66",
-									"name": "ReferenceSource",
-									"type_name": "string",
-									"show_as": "PROPERTY",
-									"can_show_as": "PROPERTY_ONLY",
-									"data": "None",
-									"def": "",
-									"meta_data_map": [
-										{
-											"key": "AdvancedProperty",
-											"value": "false"
-										}
-									],
-									"contents_type": "PortalPin",
-									"contents": {
-										"source_id": "cc0b4c9f-5510-43b8-b4f3-7d370fbd4ec6"
-									},
-									"display_name": "Reference Source",
-									"visualizers": [
-										{
-											"type": "COMBO_BOX",
-											"name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d"
-										}
-									]
 								},
 								{
 									"id": "9a5998c2-de0e-4e2e-9aff-e07115d750c3",
@@ -3587,33 +3485,6 @@
 												"contents_type": "JobPin",
 												"contents": {},
 												"display_name": "Frame Buffer Format"
-											},
-											{
-												"id": "cc0b4c9f-5510-43b8-b4f3-7d370fbd4ec6",
-												"name": "ReferenceSource",
-												"type_name": "string",
-												"show_as": "PROPERTY",
-												"can_show_as": "PROPERTY_ONLY",
-												"data": "None",
-												"referred_by": [
-													"0b8c74ba-0d6e-4327-92bb-036c821c36d3",
-													"cdd2c053-6150-46f8-b2ae-a14ea3c3ff66"
-												],
-												"def": "",
-												"meta_data_map": [
-													{
-														"key": "AdvancedProperty",
-														"value": "false"
-													}
-												],
-												"contents_type": "JobPin",
-												"contents": {},
-												"visualizers": [
-													{
-														"type": "COMBO_BOX",
-														"name": "aja.ReferenceSource.32ff7c90-5d51-4541-beab-642b52952a03"
-													}
-												]
 											},
 											{
 												"id": "6b61f62a-3e4d-4c17-bc2d-64ecea85761c",
@@ -6758,36 +6629,6 @@
 									"display_name": "Frame Buffer Format"
 								},
 								{
-									"id": "0a265981-2727-4b5c-8ae7-2e4d2218be06",
-									"name": "ReferenceSource",
-									"type_name": "string",
-									"show_as": "PROPERTY",
-									"can_show_as": "PROPERTY_ONLY",
-									"data": "None",
-									"def": "",
-									"meta_data_map": [
-										{
-											"key": "AdvancedProperty",
-											"value": "false"
-										},
-										{
-											"key": "Category",
-											"value": "Fill"
-										}
-									],
-									"contents_type": "PortalPin",
-									"contents": {
-										"source_id": "432de869-372a-476b-92ca-8bcbd7625b27"
-									},
-									"display_name": "Reference Source",
-									"visualizers": [
-										{
-											"type": "COMBO_BOX",
-											"name": "aja.ReferenceSource.7a5eb76d-90b1-4e0a-bbcc-ae0df5283b0d"
-										}
-									]
-								},
-								{
 									"id": "8bd2a0c1-b463-469f-9a1e-24af37b1bcfe",
 									"name": "QuadLinkOutputMode",
 									"type_name": "nos.aja.QuadLinkMode",
@@ -9171,33 +9012,6 @@
 												"contents_type": "JobPin",
 												"contents": {},
 												"display_name": "Frame Buffer Format"
-											},
-											{
-												"id": "432de869-372a-476b-92ca-8bcbd7625b27",
-												"name": "ReferenceSource",
-												"type_name": "string",
-												"show_as": "PROPERTY",
-												"can_show_as": "PROPERTY_ONLY",
-												"data": "None",
-												"referred_by": [
-													"2ffd038e-2f93-462a-9c5a-d389251bcc5d",
-													"0a265981-2727-4b5c-8ae7-2e4d2218be06"
-												],
-												"def": "",
-												"meta_data_map": [
-													{
-														"key": "AdvancedProperty",
-														"value": "false"
-													}
-												],
-												"contents_type": "JobPin",
-												"contents": {},
-												"visualizers": [
-													{
-														"type": "COMBO_BOX",
-														"name": "aja.ReferenceSource.a783f4fb-06a6-4de4-8bf0-ab4d66c1bda0"
-													}
-												]
 											},
 											{
 												"id": "4b46af1d-972f-40e0-b960-e27bbf82bf2d",

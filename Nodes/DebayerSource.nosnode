@@ -2365,30 +2365,6 @@
 												"contents": {}
 											},
 											{
-												"id": "3d7354ea-cfaf-4649-9f74-6731f7885e0d",
-												"name": "ReferenceSource",
-												"type_name": "string",
-												"show_as": "PROPERTY",
-												"can_show_as": "PROPERTY_ONLY",
-												"data": "Reference In",
-												"def": "",
-												"readonly": true,
-												"meta_data_map": [
-													{
-														"key": "Category",
-														"value": ""
-													}
-												],
-												"contents_type": "JobPin",
-												"contents": {},
-												"visualizers": [
-													{
-														"type": "COMBO_BOX",
-														"name": "aja.ReferenceSource.399086ca-0c84-466f-99f5-5125d4ed3ecc"
-													}
-												]
-											},
-											{
 												"id": "4294d67c-c676-4a57-8304-f479e800df38",
 												"name": "ForceInterlaced",
 												"type_name": "bool",
@@ -5731,30 +5707,6 @@
 												],
 												"contents_type": "JobPin",
 												"contents": {}
-											},
-											{
-												"id": "4c2c9821-2999-4714-99c6-fc90e8bce9f5",
-												"name": "ReferenceSource",
-												"type_name": "string",
-												"show_as": "PROPERTY",
-												"can_show_as": "PROPERTY_ONLY",
-												"data": "Reference In",
-												"def": "",
-												"readonly": true,
-												"meta_data_map": [
-													{
-														"key": "Category",
-														"value": ""
-													}
-												],
-												"contents_type": "JobPin",
-												"contents": {},
-												"visualizers": [
-													{
-														"type": "COMBO_BOX",
-														"name": "aja.ReferenceSource.3759cad0-513d-47ef-a01b-681847bf6a6a"
-													}
-												]
 											},
 											{
 												"id": "9ec4c33a-9393-4af3-8e56-7e5e746227e8",

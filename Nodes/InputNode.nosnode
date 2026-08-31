@@ -6348,24 +6348,6 @@
                   "orphan_state": { }
                 },
                 {
-                  "id": "72b92a3e-0d28-402f-bda4-2aa481ba6eef",
-                  "name": "ReferenceSource",
-                  "type_name": "string",
-                  "show_as": "PROPERTY",
-                  "can_show_as": "PROPERTY_ONLY",
-                  "visualizers": [],
-                  "data": "None",
-                  "def": "",
-                  "readonly": true,
-                  "meta_data_map": [
-                    { "key": "AdvancedProperty", "value": "true" },
-                    { "key": "Category", "value": "" }
-                  ],
-                  "contents_type": "JobPin",
-                  "contents": { },
-                  "orphan_state": { "type": "ORPHAN", "message": "Pin not found in owner node's definition" }
-                },
-                {
                   "id": "8900ca61-97ad-436d-b121-5c69d9d9a89d",
                   "name": "ForceInterlaced",
                   "type_name": "bool",
