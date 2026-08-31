@@ -111,6 +111,7 @@ struct ChannelNode : NodeContext
 			{
 				if (oldDevice)
 				{
+					UnsubscribeFromReference(oldDevice);
 					oldDevice->UnregisterNode(NodeId);
 					if (DeviceAcquired)
 					{
@@ -126,6 +127,7 @@ struct ChannelNode : NodeContext
 						Device->AcquireDevice();
 						DeviceAcquired = true;
 					}
+					SubscribeToReference();
 				}
 			}
 			if (DevicePinValue.vendor_name != PIN_VALUE_NONE && !Device)
@@ -262,11 +264,30 @@ struct ChannelNode : NodeContext
 	{
 		if (Device)
 		{
+			UnsubscribeFromReference(Device);
 			Device->UnregisterNode(NodeId);
 			if (DeviceAcquired)
 				Device->ReleaseDevice();
 		}
 		CurrentChannel.Close();
+	}
+
+	// Follow the device's reference so the node reflects a change made in the devices pane immediately.
+	void SubscribeToReference()
+	{
+		if (!Device || ReferenceListenerId)
+			return;
+		ReferenceListenerId = Device->AddReferenceSourceListener([this](NTV2ReferenceSource) { UpdateReferenceSource(); });
+		UpdateReferenceSource();
+	}
+
+	void UnsubscribeFromReference(AJADevice* device)
+	{
+		if (!ReferenceListenerId)
+			return;
+		device->RemoveReferenceSourceListener(*ReferenceListenerId);
+		ReferenceListenerId.reset();
+		CurrentChannel.ClearStatus(Channel::StatusType::Reference);
 	}
 
 	static nosResult MigrateNode(nosFbNodePtr node, nosBuffer* outBuffer)
@@ -282,14 +303,22 @@ struct ChannelNode : NodeContext
 	
 	mediaio::YCbCrPixelFormat CurrentPixelFormat = mediaio::YCbCrPixelFormat::YUV8;
 	
+	// The reference is no longer a pin on this node; it is picked per device in the devices pane. Show
+	// what that selection currently is on the node, and re-check it against the channel's frame rate.
 	void UpdateReferenceSource()
 	{
-		if (IsInput)
+		if (!Device)
 			return;
 
 		NTV2ReferenceSource curRef{};
 		NTV2FrameRate refFrameRate{};
 		Device->GetReferenceAndFrameRate(curRef, refFrameRate);
+
+		CurrentChannel.SetStatus(aja::Channel::StatusType::Reference, fb::NodeStatusMessageType::INFO,
+								 "Reference: " + Device->ReferenceSourceToString(curRef), "", 0, false);
+
+		if (IsInput)
+			return;
 
 		if (GetFrameRateFamily(refFrameRate) != GetFrameRateFamily(FrameRate))
 			CurrentChannel.SetStatus(aja::Channel::StatusType::ReferenceInvalid, fb::NodeStatusMessageType::WARNING, "Reference incompatible with frame rate", "", 5, false);
@@ -336,6 +365,8 @@ struct ChannelNode : NodeContext
 		channelPin.frame_buffer_format = static_cast<mediaio::YCbCrPixelFormat>(CurrentPixelFormat);
 		channelPin.is_interlaced = !IsProgressivePicture(format);
  		CurrentChannel.Update(std::move(channelPin), true);
+		// The frame rate may have changed, so re-check it against the reference.
+		UpdateReferenceSource();
 	}
 
 	void CheckChannelConfig()
@@ -725,6 +756,8 @@ struct ChannelNode : NodeContext
 	}
 
 	std::atomic_bool TryFindChannel = false;
+
+	std::optional<uint32_t> ReferenceListenerId;
 
 	nosResult ExecuteNode(NodeExecuteParams const& params) override
 	{

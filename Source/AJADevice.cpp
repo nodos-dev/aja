@@ -13,6 +13,8 @@
 #include <ntv2devicescanner.h>
 #include <system/process.h>
 
+#include <charconv>
+
 
 #if !defined(_WIN32)
 #define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
@@ -212,7 +214,7 @@ bool AJADevice::SetOutputVPID(NTV2Channel channel, Mode mode, bool enable,
     // the raw VPID register (SetSDIOutVPID) would fight that generator and only
     // hold for a frame or two. These per-output override registers are instead
     // read BY the generator, so the HDR fields persist in the VPID it emits.
-    // enable=false clears the overrides â€” the driver's default (SDR) VPID stands.
+    // enable=false clears the overrides — the driver's default (SDR) VPID stands.
     const uint32_t spigotCount = IsQuad(mode) ? 4u : 1u;
 
     bool re = true;
@@ -241,7 +243,9 @@ void AJADevice::ClearState()
         SetSDITransmitEnable(channel, false);
         SetMode(channel, NTV2_MODE_INVALID);
     }
-    SetReference(NTV2_REFERENCE_EXTERNAL);
+    // Routing is gone, but the reference is a device-wide setting owned by the devices pane:
+    // put back whatever is selected there rather than falling back to the built-in default.
+    SetReference(SelectedReference);
 }
 
 uint32_t AJADevice::GetFBSize(NTV2Channel channel)
@@ -258,6 +262,12 @@ uint32_t AJADevice::GetFBSize(NTV2Channel channel)
 AJADevice::~AJADevice()
 {
 	DeviceLock lock(this);
+    // Drop the listeners before ClearState(): it sets the reference, which would otherwise call back
+    // into nodes that are holding a raw pointer to this half-destroyed device.
+    {
+        std::unique_lock listenerLock(ReferenceListeners.Mutex);
+        ReferenceListeners.Map.clear();
+    }
     nosDevice->UnregisterDevice(GlobalDeviceId);
     ClearState();
     Close();
@@ -270,19 +280,29 @@ NOS_REGISTER_NAME(string);
 std::string GetReferenceStringListName(uint64_t serialNumber) { return "aja.ReferenceSource." + std::to_string(serialNumber); }
 
 static constexpr const char* REFERENCE_DEFAULTS[2] = { "Reference In", "Free Run" };
+static constexpr char SDI_IN_REFERENCE_PREFIX[] = "SDI In ";
 
 nosResult AJADevice::UpdateSettingsCallback(const char* entryName, nosBuffer itemValue) {
     if (!nos::Name(entryName).AsString().starts_with(NSN_Reference))
         return NOS_RESULT_FAILED;
 
     std::string serialNumberStr = nos::Name(entryName).AsCStr() + NSN_Reference.AsString().length() + 1;
-    uint64_t serialNum = std::stoull(serialNumberStr);
-   
+    uint64_t serialNum = 0;
+    auto [_, ec] = std::from_chars(serialNumberStr.data(), serialNumberStr.data() + serialNumberStr.size(), serialNum);
+    if (ec != std::errc{})
+    {
+        nosEngine.LogE("Malformed serial number in reference settings entry '%s'", entryName);
+        return NOS_RESULT_FAILED;
+    }
+
     auto device = Devices.find(serialNum);
     if (device == Devices.end())
         return NOS_RESULT_FAILED;
 
-    device->second->UpdateReferenceSource(nos::InterpretObjectData<const char>(itemValue), false);
+    // Reporting failure makes the settings subsystem keep the default value instead of persisting
+    // a reference the card never accepted.
+    if (!device->second->UpdateReferenceSource(nos::InterpretObjectData<const char>(itemValue), false))
+        return NOS_RESULT_FAILED;
     return NOS_RESULT_SUCCESS;
 }
 
@@ -332,8 +352,9 @@ AJADevice::AJADevice(std::string const& serial)
 
         NOS_AJA_SOFT_CHECK(SetEveryFrameServices(NTV2_OEM_TASKS));
         NOS_AJA_SOFT_CHECK(SetMultiFormatMode(true));
-        NOS_AJA_SOFT_CHECK(SetReference(NTV2_REFERENCE_EXTERNAL));
 
+        // ClearState() applies SelectedReference, which is still the default here. RegisterSettings()
+        // overwrites it with the persisted devices pane selection once the device is constructed.
         ClearState();
     }
     std::string firmwareMsg, firmwareMsgDetails;
@@ -982,10 +1003,36 @@ void AJADevice::GetReferenceAndFrameRate(NTV2ReferenceSource& reference, NTV2Fra
 
 void AJADevice::UpdateReferenceStringList() {
     std::vector<std::string> list{ REFERENCE_DEFAULTS[0], REFERENCE_DEFAULTS[1] };
-    for (int i = 1; i <= NTV2DeviceGetNumVideoInputs(ID); ++i)
-        list.push_back("SDI In " + std::to_string(i));
+    for (int i = 1; i <= int(NTV2DeviceGetNumVideoInputs(ID)); ++i)
+        list.push_back(SDI_IN_REFERENCE_PREFIX + std::to_string(i));
 
     nos::UpdateStringList(GetReferenceStringListName(GetSerialNumber()), list);
+}
+
+std::string AJADevice::ReferenceSourceToString(NTV2ReferenceSource source) const
+{
+    if (source == NTV2_REFERENCE_EXTERNAL)
+        return REFERENCE_DEFAULTS[0];
+    if (source == NTV2_REFERENCE_FREERUN)
+        return REFERENCE_DEFAULTS[1];
+    for (int i = 0; i < int(NTV2DeviceGetNumVideoInputs(ID)); ++i)
+        if (ChannelToRefSrc(NTV2Channel(i)) == source)
+            return SDI_IN_REFERENCE_PREFIX + std::to_string(i + 1);
+    return NTV2ReferenceSourceToString(source, true);
+}
+
+uint32_t AJADevice::AddReferenceSourceListener(std::function<void(NTV2ReferenceSource)> listener)
+{
+    std::unique_lock lock(ReferenceListeners.Mutex);
+    auto id = ReferenceListeners.NextID++;
+    ReferenceListeners.Map[id] = std::move(listener);
+    return id;
+}
+
+void AJADevice::RemoveReferenceSourceListener(uint32_t id)
+{
+    std::unique_lock lock(ReferenceListeners.Mutex);
+    ReferenceListeners.Map.erase(id);
 }
 
 bool AJADevice::SetReference(const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect)
@@ -1029,26 +1076,54 @@ bool AJADevice::WaitVBL(NTV2Channel channel, bool isInput, NTV2FieldID fieldId)
     }
 }
 
-void AJADevice::UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry)
+bool AJADevice::ParseReferenceSource(std::string const& referenceValue, NTV2ReferenceSource& outSource) const
 {
-    auto ReferenceSource = NTV2_REFERENCE_INVALID;
     if (referenceValue.empty())
-        nosEngine.LogE("Empty value received for reference pin!");
-    else if (std::string::npos != referenceValue.find("Reference In"))
-        ReferenceSource = NTV2_REFERENCE_EXTERNAL;
-    else if (std::string::npos != referenceValue.find("Free Run"))
-        ReferenceSource = NTV2_REFERENCE_FREERUN;
-    else if (auto pos = referenceValue.find("SDI In"); std::string::npos != pos)
-        ReferenceSource = AJADevice::ChannelToRefSrc(NTV2Channel(referenceValue[pos + 7] - '1'));
-    if (ReferenceSource != NTV2_REFERENCE_INVALID)
+        return false;
+    if (std::string::npos != referenceValue.find(REFERENCE_DEFAULTS[0]))
     {
-        NTV2ReferenceSource curRef{};
-        if (GetReference(curRef) && curRef != ReferenceSource) {
-            SetReference(ReferenceSource);
-            if (updateSettingsEntry)
-                nosSettings->UpdateEntryValue((NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber())).c_str(), nosBuffer{ .Data = &referenceValue[0], .Size = referenceValue.length() + 1 });
-        }
+        outSource = NTV2_REFERENCE_EXTERNAL;
+        return true;
     }
+    if (std::string::npos != referenceValue.find(REFERENCE_DEFAULTS[1]))
+    {
+        outSource = NTV2_REFERENCE_FREERUN;
+        return true;
+    }
+    auto pos = referenceValue.find(SDI_IN_REFERENCE_PREFIX);
+    if (std::string::npos == pos)
+        return false;
+    const char* first = referenceValue.data() + pos + std::size(SDI_IN_REFERENCE_PREFIX) - 1;
+    int inputIndex = 0;
+    auto [_, ec] = std::from_chars(first, referenceValue.data() + referenceValue.size(), inputIndex);
+    if (ec != std::errc{} || inputIndex < 1 || inputIndex > int(NTV2DeviceGetNumVideoInputs(ID)))
+        return false;
+    outSource = AJADevice::ChannelToRefSrc(NTV2Channel(inputIndex - 1));
+    return true;
+}
+
+bool AJADevice::UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry)
+{
+    NTV2ReferenceSource referenceSource = NTV2_REFERENCE_INVALID;
+    if (!ParseReferenceSource(referenceValue, referenceSource))
+    {
+        nosEngine.LogE("Device %s: Unsupported reference source '%s'", GetDisplayName().c_str(), referenceValue.c_str());
+        return false;
+    }
+
+    // Remember the selection first, so that a later ClearState() restores it instead of the default.
+    SelectedReference = referenceSource;
+
+    NTV2ReferenceSource curRef{};
+    if ((!GetReference(curRef) || curRef != referenceSource) && !SetReference(referenceSource))
+    {
+        nosEngine.LogE("Device %s: Failed to set reference source to '%s'", GetDisplayName().c_str(), referenceValue.c_str());
+        return false;
+    }
+
+    if (updateSettingsEntry)
+        nosSettings->UpdateEntryValue((NSN_Reference.AsString() + "\\" + std::to_string(GetSerialNumber())).c_str(), nosBuffer{ .Data = &referenceValue[0], .Size = referenceValue.length() + 1 });
+    return true;
 }
 
 void AJADevice::RegisterNode(nos::uuid id)

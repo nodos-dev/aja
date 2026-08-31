@@ -5,6 +5,7 @@
 #pragma once
 
 // stl
+#include <atomic>
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
@@ -154,7 +155,14 @@ struct AJADevice : CNTV2Card
 	void UnregisterNode(nos::uuid id);
 
     bool SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false) override;
-    void UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry);
+    // Translates a devices pane entry ("Reference In", "Free Run", "SDI In <n>") into the reference
+    // source it names, rejecting values this device cannot do. Returns false if the value is unusable.
+    bool ParseReferenceSource(std::string const& referenceValue, NTV2ReferenceSource& outSource) const;
+    // Inverse of ParseReferenceSource: the devices pane wording for a reference source.
+    std::string ReferenceSourceToString(NTV2ReferenceSource source) const;
+    // Writes the reference selected in the devices pane onto the card. Returns false if the value could
+    // not be parsed or the card refused it, in which case nothing is written to the settings entry.
+    bool UpdateReferenceSource(std::string referenceValue, bool updateSettingsEntry);
     void UpdateReferenceStringList();
     void RegisterSettings();
     static nosResult UpdateSettingsCallback(const char* entryName, nosBuffer itemValue);
@@ -192,6 +200,10 @@ private:
         uint32_t NextID = 0;
         std::recursive_mutex Mutex;
     } ReferenceListeners;
+
+    // Last reference selected in the devices pane. ClearState() re-applies it so that resetting the
+    // card does not silently drop the user's selection.
+    std::atomic<NTV2ReferenceSource> SelectedReference = NTV2_REFERENCE_EXTERNAL;
 
     std::shared_mutex RegisteredNodesMutex;
     std::unordered_set<nos::uuid> RegisteredNodes;
