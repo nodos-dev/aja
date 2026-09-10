@@ -694,7 +694,7 @@
 						"type_name": "uint",
 						"show_as": "PROPERTY",
 						"can_show_as": "INPUT_PIN_OR_PROPERTY",
-						"data": 2,
+						"data": 6,
 						"min": 1,
 						"max": 120,
 						"def": 2,
@@ -1327,7 +1327,7 @@
 									"type_name": "uint",
 									"show_as": "PROPERTY",
 									"can_show_as": "INPUT_PIN_OR_PROPERTY",
-									"data": 2,
+									"data": 6,
 									"min": 1,
 									"max": 120,
 									"def": 2,
@@ -1773,7 +1773,7 @@
 												"type_name": "uint",
 												"show_as": "INPUT_PIN",
 												"can_show_as": "INPUT_PIN_OR_PROPERTY",
-												"data": 2,
+												"data": 6,
 												"referred_by": [
 													"f163d05c-4ffa-4bda-a813-90509b344951",
 													"af7232ee-9d39-4208-9557-2e57782f1997"
